@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".", // Define la raíz como base para las rutas
+    "paths": {
+      "@/*": ["src/*"] // Configura el alias @ para apuntar a src
+    }
+  },
+  "include": ["src/**/*"] // Asegura que todas las rutas dentro de src sean reconocidas
+}
