@@ -2,28 +2,45 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
-    <nav className="bg-primary text-white p-4 flex items-center justify-between">
-      {/* Primera Parte: Logo */}
-      <div className="flex items-center">
-        <span className="font-bold text-xl">HotelLogo</span>
-      </div>
+    <nav className="bg-primary-500 text-white p-4">
+      <div className="container mx-auto flex justify-between items-center">
+        {/* Logo */}
+        <div className="font-bold text-2xl">
+          <Link to="/" aria-label="Logo del Hotel">
+            HotelLogo
+          </Link>
+        </div>
 
-      {/* Segunda Parte: Opciones */}
-      <div className="flex space-x-4">
-        <Link to="/" className="hover:text-accent">
-          Inicio
-        </Link>
-        <Link to="/hoteles" className="hover:text-accent">
-          Hoteles
-        </Link>
-        <Link to="/contacto" className="hover:text-accent">
-          Contacto
-        </Link>
-      </div>
+        {/* Menú de navegación */}
+        <ul className="hidden md:flex space-x-8 font-medium">
+          <li>
+            <Link to="/" className="hover:text-accent-500">
+              Inicio
+            </Link>
+          </li>
+          <li>
+            <Link to="/hoteles" className="hover:text-accent-500">
+              Hoteles
+            </Link>
+          </li>
+          <li>
+            <Link to="/contacto" className="hover:text-accent-500">
+              Contacto
+            </Link>
+          </li>
+        </ul>
 
-      {/* Tercera Parte: Usuario */}
-      <div className="flex items-center">
-        <span className="cursor-pointer hover:text-accent">Usuario</span>
+        {/* Usuario */}
+        <div className="hidden md:block">
+          <Link to="/perfil" className="hover:text-accent-500">
+            Usuario
+          </Link>
+        </div>
+
+        {/* Menú móvil */}
+        <div className="md:hidden">
+          <button className="hover:text-accent-500">☰</button>
+        </div>
       </div>
     </nav>
   );

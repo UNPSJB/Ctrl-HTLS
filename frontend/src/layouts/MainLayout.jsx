@@ -9,7 +9,7 @@ const MainLayout = () => {
       <Navbar />
 
       {/* Contenido principal */}
-      <main className="flex-1 container mx-auto p-8">
+      <main className="flex-1 container mx-auto px-6 lg:px-16 py-8">
         <Outlet /> {/* Aquí se renderizan las rutas hijas */}
       </main>
 
