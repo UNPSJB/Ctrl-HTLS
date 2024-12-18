@@ -1,23 +1,40 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
   return (
-    <nav className="bg-gray-800 text-white p-4 shadow-md">
+    <nav className="bg-gray-800 text-white py-4">
       <div className="container mx-auto flex justify-between items-center">
-        {/* Logo */}
-        <h1 className="text-xl font-bold">Mi App</h1>
-
-        {/* Enlaces de navegación */}
-        <ul className="flex space-x-6">
+        <h1 className="text-lg font-bold">Hoteles App</h1>
+        <ul className="flex space-x-4">
           <li>
-            <Link to="/" className="hover:text-gray-300">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                isActive ? 'text-blue-400' : 'hover:text-blue-300'
+              }
+            >
               Inicio
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/about" className="hover:text-gray-300">
-              Acerca de
-            </Link>
+            <NavLink
+              to="/about"
+              className={({ isActive }) =>
+                isActive ? 'text-blue-400' : 'hover:text-blue-300'
+              }
+            >
+              Sobre Nosotros
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/hotels"
+              className={({ isActive }) =>
+                isActive ? 'text-blue-400' : 'hover:text-blue-300'
+              }
+            >
+              Hoteles
+            </NavLink>
           </li>
         </ul>
       </div>
