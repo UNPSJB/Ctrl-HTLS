@@ -4,6 +4,8 @@ import AboutPage from '@/pages/AboutPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import MainLayout from '@/layouts/MainLayout';
 import HotelsPage from '@/pages/HotelsPage';
+import CreateHotelPage from '@/pages/CreateHotelPage';
+import ListHotelsPage from '@/pages/ListHotelsPage';
 
 const AppRouter = () => {
   return (
@@ -13,6 +15,8 @@ const AppRouter = () => {
           <Route index element={<HomePage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="hoteles" element={<HotelsPage />} />
+          <Route path="hoteles/crear" element={<CreateHotelPage />} />
+          <Route path="hoteles/listar" element={<ListHotelsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
