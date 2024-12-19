@@ -1,3 +1,5 @@
+import { FaGavel, FaLock, FaFileContract } from 'react-icons/fa';
+
 const Footer = () => {
   return (
     <footer className="bg-primary-700 text-white py-6">
@@ -9,14 +11,26 @@ const Footer = () => {
 
         {/* Enlaces Adicionales */}
         <div className="flex justify-center space-x-6 text-accent-100">
-          <a href="#" className="hover:text-accent-500">
-            Aviso Legal
+          <a
+            href="#"
+            className="flex items-center space-x-2 hover:text-accent-500"
+          >
+            <FaGavel size={16} />
+            <span>Aviso Legal</span>
           </a>
-          <a href="#" className="hover:text-accent-500">
-            Política de Privacidad
+          <a
+            href="#"
+            className="flex items-center space-x-2 hover:text-accent-500"
+          >
+            <FaLock size={16} />
+            <span>Política de Privacidad</span>
           </a>
-          <a href="#" className="hover:text-accent-500">
-            Términos y Condiciones
+          <a
+            href="#"
+            className="flex items-center space-x-2 hover:text-accent-500"
+          >
+            <FaFileContract size={16} />
+            <span>Términos y Condiciones</span>
           </a>
         </div>
       </div>
