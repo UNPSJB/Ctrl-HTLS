@@ -25,7 +25,7 @@ Thumbs.db
 
 # IDEs and Editors
 .idea/
-.vscode/
+
 
 # ESLint and Prettier cache
 .eslintcache
