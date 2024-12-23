@@ -5,6 +5,8 @@ const sequelize = require('./config/database');
 const Pais = require('./models/core/Pais');
 const Provincia = require('./models/core/Provincia');
 const Ciudad = require('./models/core/Ciudad');
+const Cliente = require('./models/core/Cliente');
+const Direccion = require('./models/core/Direccion');
 const associations = require('./models/associations');
 
 async function initializeServer() {
