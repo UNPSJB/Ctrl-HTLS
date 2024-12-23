@@ -18,11 +18,11 @@ El Centro Hotelero Buena Vista es una organización que centraliza la venta de e
 
 ### Backend
 
-- Lenguaje de Programación: [Python](https://www.python.org/) (Versión X.X)
-- Framework: [Django](https://www.djangoproject.com/) (Versión 4.2.4)
-- Framework Adicional: [Django Rest Framework](https://www.django-rest-framework.org/) (Versión X.X)
-- Middleware: [Corsheaders](https://github.com/adamchainz/django-cors-headers) (Versión X.X)
-- Base de Datos: [PostgreSQL](https://www.postgresql.org/docs/15/index.html) (Versión 15.4)
+- Lenguaje de Programación: [JavaScript](https://developer.mozilla.org/es/docs/Web/JavaScript)
+- Entorno de ejecución: [Node.js](https://nodejs.org/docs/latest/api/) (Versión 22.12.0)
+- Framework Principal: [Express](https://expressjs.com/en/4x/api.html) (Versión 4.21.2)
+- ORM: [Sequelize](https://sequelize.org/api/v6/identifiers) (Versión 6.37.5)
+- Base de Datos: [PostgreSQL](https://www.postgresql.org/docs/17/index.html) (Versión 17.2)
 
 ### Frontend
 
