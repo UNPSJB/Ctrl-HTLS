@@ -47,13 +47,13 @@ const HotelSort = ({ onSortChange, onViewModeChange }) => {
           onClick={() => onViewModeChange('list')}
           className="flex items-center p-2 border rounded text-sm"
         >
-          <FaList className="mr-1" />
+          <FaList />
         </button>
         <button
           onClick={() => onViewModeChange('grid')}
           className="flex items-center p-2 border rounded text-sm"
         >
-          <FaTh className="mr-1" />
+          <FaTh />
         </button>
       </div>
     </div>
