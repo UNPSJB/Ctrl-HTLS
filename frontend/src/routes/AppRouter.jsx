@@ -1,3 +1,4 @@
+// AppRouter.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import AboutPage from '@/pages/AboutPage';
@@ -6,6 +7,7 @@ import MainLayout from '@/layouts/MainLayout';
 import HotelsPage from '@/pages/HotelsPage';
 import CreateHotelPage from '@/pages/CreateHotelPage';
 import ListHotelsPage from '@/pages/ListHotelsPage';
+import HotelPage from '@/pages/HotelPage';
 
 const AppRouter = () => {
   return (
@@ -17,6 +19,7 @@ const AppRouter = () => {
           <Route path="hoteles" element={<HotelsPage />} />
           <Route path="hoteles/crear" element={<CreateHotelPage />} />
           <Route path="hoteles/listar" element={<ListHotelsPage />} />
+          <Route path="hoteles/:hotelId" element={<HotelPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
