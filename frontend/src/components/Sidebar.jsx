@@ -7,7 +7,7 @@ import {
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import SidebarButton from './ui/SidebarButton';
-import UserProfile from './ui/UserProfile'; // Importamos el componente UserProfile
+import UserProfile from './ui/UserProfile';
 
 const Sidebar = () => {
   const menuItems = [
@@ -16,15 +16,16 @@ const Sidebar = () => {
     { icon: FaEnvelope, label: 'Contacto', href: '/contacto' },
   ];
 
+  // Ejemplo de usuario autenticado
   const user = {
     name: 'Juan Pérez',
-    userType: 'Admin', // Aquí puedes ajustar el tipo de usuario
+    userType: 'Admin',
   };
 
   return (
-    <div className="w-64 min-h-screen bg-white text-black flex flex-col border-r border-gray-200">
+    <div className="w-64 min-h-screen flex flex-col border-r">
       {/* Logo */}
-      <div className="h-20 flex items-center px-4 border-b border-gray-200">
+      <div className="h-20 flex items-center px-4 border-b text-text-900 border-primary-200">
         <Link to="/" className="flex items-center gap-2">
           <HotelIcon className="text-2xl" />
           <span className="font-bold text-xl">CTRL-HTLS</span>
@@ -45,13 +46,9 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Información de usuario */}
-      <div className="p-4">
-        <UserProfile name={user.name} userType={user.userType} />
-      </div>
-
       {/* Botón de cerrar sesión */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="flex flex-col gap-2 p-4 border-t border-primary-200">
+        <UserProfile name={user.name} userType={user.userType} />
         <SidebarButton to="/salir" icon={FaSignOutAlt} label="Cerrar Sesión" />
       </div>
     </div>
