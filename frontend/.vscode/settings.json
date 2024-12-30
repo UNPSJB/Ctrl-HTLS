@@ -1,6 +1,10 @@
 {
+  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
-  "eslint.validate": ["javascript", "javascriptreact", "json"]
+  "eslint.validate": ["javascript", "javascriptreact", "json"],
+  "prettier.requireConfig": true,
+  "files.eol": "\n",
+  "files.autoSave": "onFocusChange"
 }
