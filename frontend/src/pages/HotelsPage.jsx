@@ -1,31 +1,29 @@
 import { useState, useEffect } from 'react';
-import HotelCard from '@/components/ui/HotelCard';
-import hotelsData from '@/data/hotels.json';
+import HotelFilter from '@/components/ui/filters/HotelFilter';
+import HotelList from '@/components/HotelList';
+import hotelsData from '../data/hotels.json';
 
 const HotelsPage = () => {
   const [hotels, setHotels] = useState([]);
+  const [filteredHotels, setFilteredHotels] = useState([]);
 
   useEffect(() => {
-    // Cargamos los hoteles desde el archivo JSON
     setHotels(hotelsData);
+    setFilteredHotels(hotelsData);
   }, []);
 
+  const handleFilterChange = (filter) => {
+    setFilteredHotels(
+      hotels.filter((hotel) =>
+        hotel.name.toLowerCase().includes(filter.toLowerCase())
+      )
+    );
+  };
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-7 p-4">
-      {hotels.map((hotel) => (
-        <div key={hotel.id} className="w-full">
-          <HotelCard
-            id={hotel.id}
-            image={hotel.image}
-            stars={hotel.stars}
-            name={hotel.name}
-            price={hotel.price}
-            location={hotel.location}
-            priceLabel={hotel.priceLabel}
-            description={hotel.description}
-          />
-        </div>
-      ))}
+    <div className="p-4">
+      <HotelFilter onFilterChange={handleFilterChange} />
+      <HotelList hotels={filteredHotels} />
     </div>
   );
 };
