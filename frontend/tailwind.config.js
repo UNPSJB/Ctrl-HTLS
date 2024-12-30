@@ -5,25 +5,36 @@ export default {
     extend: {
       colors: {
         primary: {
-          100: '#EDE7F6', // Muy claro
-          300: '#B39DDB', // Claro
-          500: '#7E57C2', // Principal (60%)
-          700: '#512DA8', // Oscuro
-          900: '#311B92', // Más oscuro
+          100: '#F9FAFB', // Muy claro (casi blanco)
+          200: '#E5E7EB', // Claro (gris claro)
+          500: '#6B7280', // Principal (gris medio)
+          700: '#374151', // Gris oscuro
+          900: '#111827', // Más oscuro (negro)
         },
         secondary: {
-          100: '#F3E5F5', // Muy claro
-          300: '#CE93D8', // Claro
-          500: '#AB47BC', // Principal (30%)
-          700: '#8E24AA', // Oscuro
-          900: '#6A1B9A', // Más oscuro
+          100: '#F3F4F6', // Muy claro (gris muy suave)
+          200: '#D1D5DB', // Claro (gris suave)
+          500: '#4B5563', // Gris oscuro (más oscuro)
+          700: '#1F2937', // Más oscuro (casi negro)
+          900: '#0F172A', // Negro intenso
         },
         accent: {
-          100: '#FFF3E0', // Muy claro
-          300: '#FFB74D', // Claro
-          500: '#FF9800', // Principal (10%)
-          700: '#F57C00', // Oscuro
-          900: '#E65100', // Más oscuro
+          100: '#FFFFFF', // Blanco
+          200: '#F3F4F6', // Gris muy claro
+          500: '#D1D5DB', // Gris claro
+          700: '#9CA3AF', // Gris medio
+          900: '#6B7280', // Gris oscuro
+        },
+        text: {
+          100: '#F9FAFB', // Muy claro
+          200: '#E5E7EB', // Claro
+          300: '#D1D5DB', // Gris suave
+          400: '#9CA3AF', // Gris medio claro
+          500: '#6B7280', // Gris medio
+          600: '#4B5563', // Gris oscuro
+          700: '#374151', // Muy oscuro
+          800: '#1F2937', // Más oscuro
+          900: '#111827', // Negro
         },
       },
       fontFamily: {
