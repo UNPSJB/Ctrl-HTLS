@@ -49,11 +49,11 @@ const HotelsPage = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-      {/* Iterar sobre el array para renderizar cada tarjeta */}
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-7 p-4">
       {hotels.map((hotel) => (
         <div key={hotel.id} className="w-full">
           <HotelCard
+            id={hotel.id} // Pasamos el ID
             image={hotel.image}
             stars={hotel.stars}
             name={hotel.name}

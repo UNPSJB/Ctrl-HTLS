@@ -1,7 +1,9 @@
 import PropTypes from 'prop-types';
 import { FaStar } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const HotelCard = ({
+  id,
   image,
   stars,
   name,
@@ -10,6 +12,12 @@ const HotelCard = ({
   priceLabel,
   description,
 }) => {
+  const navigate = useNavigate();
+
+  const handleDetailsClick = () => {
+    navigate(`/hoteles/${id}`);
+  };
+
   return (
     <div className="max-w-sm h-full bg-primary-100 border border-primary-200 rounded-lg shadow-md overflow-hidden flex flex-col">
       {/* Imagen con estrellas en la esquina superior derecha */}
@@ -39,7 +47,10 @@ const HotelCard = ({
 
       {/* Botón siempre al fondo */}
       <div className="mt-auto p-4">
-        <button className="w-full bg-primary-700 text-accent-100 px-4 py-2 rounded hover:bg-primary-900">
+        <button
+          onClick={handleDetailsClick}
+          className="w-full bg-primary-700 text-accent-100 px-4 py-2 rounded hover:bg-primary-900"
+        >
           Ver Detalles
         </button>
       </div>
@@ -48,6 +59,7 @@ const HotelCard = ({
 };
 
 HotelCard.propTypes = {
+  id: PropTypes.number.isRequired,
   image: PropTypes.string.isRequired,
   stars: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,

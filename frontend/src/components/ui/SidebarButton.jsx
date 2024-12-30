@@ -5,7 +5,7 @@ const SidebarButton = ({ to, icon: Icon, label, onClick }) => {
   return to ? (
     <Link
       to={to}
-      className="flex items-center gap-3 py-4 px-4 text-base rounded-md hover:bg-primary-300 transition-colors text-text-800"
+      className="flex items-center gap-3 py-4 px-4 text-base rounded-md hover:bg-primary-200 transition-colors text-text-800"
     >
       {Icon && <Icon className="h-5 w-5" />}
       <span>{label}</span>
@@ -13,7 +13,7 @@ const SidebarButton = ({ to, icon: Icon, label, onClick }) => {
   ) : (
     <button
       onClick={onClick}
-      className="flex items-center gap-3 py-4 px-4 text-base rounded-md hover:bg-primary-300 transition-colors text-text-800"
+      className="flex items-center gap-3 py-4 px-4 text-base rounded-md hover:bg-primary-200 transition-colors text-text-800"
     >
       {Icon && <Icon className="h-5 w-5" />}
       <span>{label}</span>
