@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
 import HotelFilter from '@/components/ui/filters/HotelFilter';
-import HotelSort from '@/components/HotelSort';
 import HotelList from '@/components/HotelList';
 import hotelsData from '../data/hotels.json';
+import HotelSort from '@/components/HotelSort';
 
 const HotelsPage = () => {
   const [hotels, setHotels] = useState([]);
   const [filteredHotels, setFilteredHotels] = useState([]);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' o 'list'
 
   useEffect(() => {
+    // Cargar hoteles y filtrados
     setHotels(hotelsData);
     setFilteredHotels(hotelsData);
+
+    // Intentar recuperar el modo de vista desde localStorage
+    const savedViewMode = localStorage.getItem('viewMode');
+    if (savedViewMode) {
+      setViewMode(savedViewMode);
+    }
   }, []);
 
   const handleFilterChange = (filter) => {
@@ -22,33 +30,42 @@ const HotelsPage = () => {
   };
 
   const handleSortChange = (sortOption) => {
-    let sortedHotels = [...filteredHotels];
+    setFilteredHotels(
+      [...filteredHotels].sort((a, b) => {
+        switch (sortOption) {
+          case 'price-asc':
+            return a.price - b.price;
+          case 'price-desc':
+            return b.price - a.price;
+          case 'stars-asc':
+            return a.stars - b.stars;
+          case 'stars-desc':
+            return b.stars - a.stars;
+          default:
+            return 0;
+        }
+      })
+    );
+  };
 
-    switch (sortOption) {
-      case 'price-asc':
-        sortedHotels = sortedHotels.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        sortedHotels = sortedHotels.sort((a, b) => b.price - a.price);
-        break;
-      case 'stars-asc':
-        sortedHotels = sortedHotels.sort((a, b) => a.stars - b.stars);
-        break;
-      case 'stars-desc':
-        sortedHotels = sortedHotels.sort((a, b) => b.stars - a.stars);
-        break;
-      default:
-        break;
-    }
-
-    setFilteredHotels(sortedHotels);
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode); // Cambiar entre 'list' y 'grid'
+    localStorage.setItem('viewMode', mode); // Guardar el modo en localStorage
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4">
+    <div className="p-4 space-y-6">
+      {/* Filtro */}
       <HotelFilter onFilterChange={handleFilterChange} />
-      <HotelSort onSortChange={handleSortChange} />
-      <HotelList hotels={filteredHotels} />
+
+      {/* Orden y Vista */}
+      <HotelSort
+        onSortChange={handleSortChange}
+        onViewModeChange={handleViewModeChange}
+      />
+
+      {/* Listado de Hoteles */}
+      <HotelList hotels={filteredHotels} viewMode={viewMode} />
     </div>
   );
 };
