@@ -11,24 +11,19 @@ const HotelFilter = ({ onFilterChange }) => {
   };
 
   return (
-    <div className="mb-6">
-      <label
-        htmlFor="hotel-name"
-        className="block text-sm font-medium text-gray-700"
-      >
-        Filtrar por nombre
-      </label>
+    <div>
       <input
         type="text"
         id="hotel-name"
         value={nameFilter}
         onChange={handleNameChange}
         placeholder="Buscar hotel..."
-        className="mt-1 p-2 border rounded w-full"
+        className="p-2 border rounded w-full"
       />
     </div>
   );
 };
+
 HotelFilter.propTypes = {
   onFilterChange: PropTypes.func.isRequired,
 };
