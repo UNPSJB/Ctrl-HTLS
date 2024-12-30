@@ -2,7 +2,9 @@ const Pais = require('./core/Pais');
 const Provincia = require('./core/Provincia');
 const Ciudad = require('./core/Ciudad');
 const Cliente = require('./core/Cliente');
-const Direccion = require('./core/Direccion');
+const Hotel = require('./hotel/Hotel');
+const TipoHabitacion = require('./hotel/TipoHabitacion');
+const HotelTipoHabitacion = require('./hotel/HotelTipoHabitacion');
 
 // Relación uno a muchos (Pais -> Provincia)
 Provincia.belongsTo(Pais, {
@@ -26,24 +28,41 @@ Provincia.hasMany(Ciudad, {
   as: 'ciudades', // Alias para acceder a las ciudades de una provincia
 });
 
-//Relacion uno a muchos (Ciudad -> Direccion)
-Direccion.belongsTo(Ciudad, {
-  foreignKey: 'ciudadId', // Especificamos la clave foránea
-  as: 'ciudad', // Alias para la relación inversa
+// Relación uno a muchos (Ciudad -> Cliente)
+Cliente.belongsTo(Ciudad, {
+  foreignKey: 'ciudadId', // Clave foránea en Cliente que apunta a Ciudad
+  as: 'ciudad', // Alias para acceder a la ciudad de un cliente
 });
 
-Ciudad.hasMany(Direccion, {
+Ciudad.hasMany(Cliente, {
   foreignKey: 'ciudadId', // Aseguramos que la clave coincida
-  as: 'direcciones', // Alias para acceder a las direcciones de una ciudad
+  as: 'clientes', // Alias para acceder a los clientes de una ciudad
 });
 
-// Relación uno a uno (Cliente -> Dirección)
-Cliente.belongsTo(Direccion, {
-  foreignKey: 'direccionId', // Clave foránea en Cliente que apunta a Dirección
-  as: 'direccion', // Alias para acceder a la dirección de un cliente
+/*******ASOCIACIONES DE HOTEL*******/
+
+// Relación muchos a muchos (Hotel -> TipoHabitacion)
+Hotel.belongsToMany(TipoHabitacion, {
+  through: HotelTipoHabitacion,
+  foreignKey: 'hotelId',
+  otherKey: 'tipoHabitacionId',
+  as: 'tiposHabitacion',
 });
 
-Direccion.hasOne(Cliente, {
-  foreignKey: 'direccionId', // Clave foránea que coincide
-  as: 'cliente', // Alias para acceder al cliente asociado con una dirección
+TipoHabitacion.belongsToMany(Hotel, {
+  through: HotelTipoHabitacion,
+  foreignKey: 'tipoHabitacionId',
+  otherKey: 'hotelId',
+  as: 'hoteles',
+});
+
+// Relación uno a muchos (Ciudad -> Hotel)
+Hotel.belongsTo(Ciudad, {
+  foreignKey: 'ciudadId',
+  as: 'ciudad',
+});
+
+Ciudad.hasMany(Hotel, {
+  foreignKey: 'ciudadId',
+  as: 'hoteles',
 });
