@@ -5,6 +5,9 @@ const Cliente = require('./core/Cliente');
 const Hotel = require('./hotel/Hotel');
 const TipoHabitacion = require('./hotel/TipoHabitacion');
 const HotelTipoHabitacion = require('./hotel/HotelTipoHabitacion');
+const Habitacion = require('./hotel/Habitacion');
+const PaquetePromocional = require('./hotel/PaquetePromocional');
+const PaquetePromocionalHabitacion = require('./hotel/PaquetePromocionalHabitacion');
 
 // Relación uno a muchos (Pais -> Provincia)
 Provincia.belongsTo(Pais, {
@@ -65,4 +68,52 @@ Hotel.belongsTo(Ciudad, {
 Ciudad.hasMany(Hotel, {
   foreignKey: 'ciudadId',
   as: 'hoteles',
+});
+
+// Relación uno a muchos (Habitacion -> TipoHabitacion)
+Habitacion.belongsTo(TipoHabitacion, {
+  foreignKey: 'tipoHabitacionId',
+  as: 'tipoHabitacion',
+});
+
+TipoHabitacion.hasMany(Habitacion, {
+  foreignKey: 'tipoHabitacionId',
+  as: 'habitaciones',
+});
+
+// Relación uno a muchos (Habitacion -> Hotel)
+Habitacion.belongsTo(Hotel, {
+  foreignKey: 'hotelId',
+  as: 'hotel',
+});
+
+Hotel.hasMany(Habitacion, {
+  foreignKey: 'hotelId',
+  as: 'habitaciones',
+});
+
+// Relación uno a muchos (Hotel -> PaquetePromocional)
+PaquetePromocional.belongsTo(Hotel, {
+  foreignKey: 'hotelId',
+  as: 'hotel',
+});
+
+Hotel.hasMany(PaquetePromocional, {
+  foreignKey: 'hotelId',
+  as: 'paquetesPromocionales',
+});
+
+// Relación muchos a muchos (PaquetePromocional -> Habitacion)
+PaquetePromocional.belongsToMany(Habitacion, {
+  through: PaquetePromocionalHabitacion,
+  foreignKey: 'paquetePromocionalId',
+  otherKey: 'habitacionId',
+  as: 'habitaciones',
+});
+
+Habitacion.belongsToMany(PaquetePromocional, {
+  through: PaquetePromocionalHabitacion,
+  foreignKey: 'habitacionId',
+  otherKey: 'paquetePromocionalId',
+  as: 'paquetesPromocionales',
 });
