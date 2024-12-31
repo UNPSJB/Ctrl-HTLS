@@ -34,6 +34,7 @@ const PaquetePromocionalHabitacion = sequelize.define(
       {
         unique: true,
         fields: ['habitacionId', 'fechaInicio', 'fechaFin'],
+        name: 'unique_habitacion_fecha', // Cambia el nombre del índice
       },
     ],
   },

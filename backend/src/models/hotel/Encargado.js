@@ -1,31 +1,31 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 
-const Hotel = sequelize.define(
-  'Hotel',
+const Encargado = sequelize.define(
+  'Encargado',
   {
     nombre: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    direccion: {
+    apellido: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    telefono: {
+    dni: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
-    email: {
-      type: DataTypes.STRING,
+    tipoDocumento: {
+      type: DataTypes.ENUM('DNI', 'LI', 'LE', 'Pasaporte'),
       allowNull: false,
-      isEmail: true,
     },
   },
   {
-    tableName: 'hoteles',
+    tableName: 'encargados',
     timestamps: false,
   },
 );
 
-module.exports = Hotel;
+module.exports = Encargado;
