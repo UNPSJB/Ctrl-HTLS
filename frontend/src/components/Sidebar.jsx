@@ -14,6 +14,7 @@ const Sidebar = () => {
     { icon: FaHome, label: 'Inicio', href: '/' },
     { icon: FaHotel, label: 'Hoteles', href: '/hoteles' },
     { icon: FaEnvelope, label: 'Contacto', href: '/contacto' },
+    { icon: FaHotel, label: 'Cargar Hotel', href: '/hoteles/formulario' },
   ];
 
   // Ejemplo de usuario autenticado
