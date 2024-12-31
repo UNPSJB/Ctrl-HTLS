@@ -5,41 +5,52 @@ export default {
     extend: {
       colors: {
         primary: {
-          100: '#F9FAFB', // Muy claro (casi blanco)
-          200: '#E5E7EB', // Claro (gris claro)
-          500: '#6B7280', // Principal (gris medio)
-          700: '#374151', // Gris oscuro
-          900: '#111827', // Más oscuro (negro)
+          100: '#F9FAFB',
+          200: '#E5E7EB',
+          500: '#6B7280',
+          700: '#374151',
+          900: '#111827',
         },
         secondary: {
-          100: '#F3F4F6', // Muy claro (gris muy suave)
-          200: '#D1D5DB', // Claro (gris suave)
-          500: '#4B5563', // Gris oscuro (más oscuro)
-          700: '#1F2937', // Más oscuro (casi negro)
-          900: '#0F172A', // Negro intenso
+          100: '#F3F4F6',
+          200: '#D1D5DB',
+          500: '#4B5563',
+          700: '#1F2937',
+          900: '#0F172A',
         },
         accent: {
-          100: '#FFFFFF', // Blanco
-          200: '#F3F4F6', // Gris muy claro
-          500: '#D1D5DB', // Gris claro
-          700: '#9CA3AF', // Gris medio
-          900: '#6B7280', // Gris oscuro
+          100: '#FFFFFF',
+          200: '#F3F4F6',
+          500: '#D1D5DB',
+          700: '#9CA3AF',
+          900: '#6B7280',
         },
         text: {
-          100: '#F9FAFB', // Muy claro
-          200: '#E5E7EB', // Claro
-          300: '#D1D5DB', // Gris suave
-          400: '#9CA3AF', // Gris medio claro
-          500: '#6B7280', // Gris medio
-          600: '#4B5563', // Gris oscuro
-          700: '#374151', // Muy oscuro
-          800: '#1F2937', // Más oscuro
-          900: '#111827', // Negro
+          100: '#F9FAFB',
+          200: '#E5E7EB',
+          300: '#D1D5DB',
+          400: '#9CA3AF',
+          500: '#6B7280',
+          600: '#4B5563',
+          700: '#374151',
+          800: '#1F2937',
+          900: '#111827',
         },
       },
       fontFamily: {
         sans: ['Roboto', 'Arial', 'sans-serif'],
         serif: ['Merriweather', 'serif'],
+      },
+      fontSize: {
+        xs: ['0.75rem', '1rem'], // Pequeño
+        sm: ['0.875rem', '1.25rem'], // Texto base pequeño
+        base: ['1rem', '1.5rem'], // Texto base
+        lg: ['1.125rem', '1.75rem'], // Título pequeño
+        xl: ['1.25rem', '1.75rem'], // Título mediano
+        '2xl': ['1.5rem', '2rem'], // Título grande
+        '3xl': ['1.875rem', '2.25rem'], // Muy grande
+        '4xl': ['2.25rem', '2.5rem'], // Extra grande
+        '5xl': ['3rem', '1'], // Hero
       },
     },
   },
