@@ -46,7 +46,7 @@ const HotelPage = () => {
     <div className="min-h-screen flex flex-col gap-6">
       {/* Fila 1: Imagen de fondo con nombre, ubicación y estrellas */}
       <div
-        className="relative bg-cover bg-center h-64 flex items-end text-white"
+        className="relative bg-cover bg-center h-64 flex items-end text-white rounded-t-lg"
         style={{ backgroundImage: `url(${hotel.image})` }}
       >
         <div className="bg-gradient-to-t from-black/70 to-transparent w-full p-4">
