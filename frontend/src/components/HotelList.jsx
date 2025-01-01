@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import HotelCardGrid from './ui/cards/HotelCardGrid';
-import HotelCardList from './ui/cards/HotelCardList';
+import HotelVerticalCard from './ui/cards/HotelVerticalCard';
+import HotelCardHorizontal from './ui/cards/HotelHorizontalCard';
 
 const HotelList = ({ hotels, viewMode }) => {
   return (
@@ -13,7 +13,7 @@ const HotelList = ({ hotels, viewMode }) => {
     >
       {hotels.map((hotel) =>
         viewMode === 'grid' ? (
-          <HotelCardGrid
+          <HotelVerticalCard
             key={hotel.id}
             id={hotel.id}
             image={hotel.image}
@@ -25,7 +25,7 @@ const HotelList = ({ hotels, viewMode }) => {
             description={hotel.description}
           />
         ) : (
-          <HotelCardList
+          <HotelCardHorizontal
             key={hotel.id}
             id={hotel.id}
             image={hotel.image}
