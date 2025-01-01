@@ -11,6 +11,11 @@ const PaquetePromocionalHabitacion = require('./hotel/PaquetePromocionalHabitaci
 const Encargado = require('./hotel/Encargado');
 const Categoria = require('./hotel/Categoria');
 const Temporada = require('./hotel/Temporada');
+const Descuento = require('./hotel/Descuento');
+const Vendedor = require('./core/Vendedor');
+const HotelVendedor = require('./hotel/HotelVendedor');
+const Factura = require('./ventas/Factura');
+const DetalleFactura = require('./ventas/DetalleFactura');
 
 //#region ASOCIACIONES DE LOCALIDADES
 
@@ -34,6 +39,28 @@ Ciudad.belongsTo(Provincia, {
 Provincia.hasMany(Ciudad, {
   foreignKey: 'provinciaId', // Aseguramos que la clave coincida
   as: 'ciudades', // Alias para acceder a las ciudades de una provincia
+});
+
+// Relación uno a muchos (Ciudad -> Vendedor)
+Vendedor.belongsTo(Ciudad, {
+  foreignKey: 'ciudadId',
+  as: 'ciudad',
+});
+
+Ciudad.hasMany(Vendedor, {
+  foreignKey: 'ciudadId',
+  as: 'vendedores',
+});
+
+// Relación uno a muchos (Ciudad -> Cliente)
+Cliente.belongsTo(Ciudad, {
+  foreignKey: 'ciudadId', // Clave foránea en Cliente que apunta a Ciudad
+  as: 'ciudad', // Alias para acceder a la ciudad de un cliente
+});
+
+Ciudad.hasMany(Cliente, {
+  foreignKey: 'ciudadId', // Aseguramos que la clave coincida
+  as: 'clientes', // Alias para acceder a los clientes de una ciudad
 });
 
 //#endregion
@@ -124,6 +151,32 @@ Temporada.belongsTo(Hotel, {
   as: 'hotel',
 });
 
+// Relación uno a muchos (Descuento -> Hotel)
+Hotel.hasMany(Descuento, {
+  foreignKey: 'hotelId',
+  as: 'descuentos',
+});
+
+Descuento.belongsTo(Hotel, {
+  foreignKey: 'hotelId',
+  as: 'hotel',
+});
+
+// Relación muchos a muchos (Hotel -> Vendedor)
+Hotel.belongsToMany(Vendedor, {
+  through: HotelVendedor,
+  foreignKey: 'hotelId',
+  otherKey: 'vendedorId',
+  as: 'vendedores',
+});
+
+Vendedor.belongsToMany(Hotel, {
+  through: HotelVendedor,
+  foreignKey: 'vendedorId',
+  otherKey: 'hotelId',
+  as: 'hoteles',
+});
+
 //#endregion
 
 //#region ASOCIACIONES DE HABITACION
@@ -156,13 +209,18 @@ Habitacion.belongsToMany(PaquetePromocional, {
 
 //#endregion
 
-// Relación uno a muchos (Ciudad -> Cliente)
-Cliente.belongsTo(Ciudad, {
-  foreignKey: 'ciudadId', // Clave foránea en Cliente que apunta a Ciudad
-  as: 'ciudad', // Alias para acceder a la ciudad de un cliente
+//#region ASOCIACIONES DE VENTAS
+
+// Relación uno a muchos (Factura -> DetalleFactura)
+Factura.hasMany(DetalleFactura, {
+  foreignKey: 'facturaId',
+  as: 'detalles',
+  onDelete: 'CASCADE', // Si se elimina la factura, también se eliminan los detalles
 });
 
-Ciudad.hasMany(Cliente, {
-  foreignKey: 'ciudadId', // Aseguramos que la clave coincida
-  as: 'clientes', // Alias para acceder a los clientes de una ciudad
+DetalleFactura.belongsTo(Factura, {
+  foreignKey: 'facturaId',
+  as: 'factura',
 });
+
+//#endregion
