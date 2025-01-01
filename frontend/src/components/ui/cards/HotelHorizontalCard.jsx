@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { FaStar } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const HotelCardList = ({
+const HotelHorizontalCard = ({
   id,
   image,
   stars,
@@ -62,7 +62,7 @@ const HotelCardList = ({
   );
 };
 
-HotelCardList.propTypes = {
+HotelHorizontalCard.propTypes = {
   id: PropTypes.number.isRequired,
   image: PropTypes.string.isRequired,
   stars: PropTypes.number.isRequired,
@@ -73,4 +73,4 @@ HotelCardList.propTypes = {
   description: PropTypes.string.isRequired,
 };
 
-export default HotelCardList;
+export default HotelHorizontalCard;
