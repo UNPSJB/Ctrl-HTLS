@@ -16,6 +16,9 @@ const Vendedor = require('./core/Vendedor');
 const HotelVendedor = require('./hotel/HotelVendedor');
 const Factura = require('./ventas/Factura');
 const DetalleFactura = require('./ventas/DetalleFactura');
+const Liquidacion = require('./ventas/Liquidacion');
+const Servicio = require('./hotel/Servicio');
+const CategoriaServicio = require('./hotel/CategoriaServicio');
 
 //#region ASOCIACIONES DE LOCALIDADES
 
@@ -177,6 +180,21 @@ Vendedor.belongsToMany(Hotel, {
   as: 'hoteles',
 });
 
+// Relación muchos a muchos (Categoria -> Servicio)
+Categoria.belongsToMany(Servicio, {
+  through: CategoriaServicio,
+  foreignKey: 'categoriaId',
+  otherKey: 'servicioId',
+  as: 'servicios',
+});
+
+Servicio.belongsToMany(Categoria, {
+  through: CategoriaServicio,
+  foreignKey: 'servicioId',
+  otherKey: 'categoriaId',
+  as: 'categorias',
+});
+
 //#endregion
 
 //#region ASOCIACIONES DE HABITACION
@@ -221,6 +239,31 @@ Factura.hasMany(DetalleFactura, {
 DetalleFactura.belongsTo(Factura, {
   foreignKey: 'facturaId',
   as: 'factura',
+});
+
+// Relación uno a muchos (Liquidacion -> DetalleFactura)
+Liquidacion.hasMany(DetalleFactura, {
+  foreignKey: 'liquidacionId',
+  as: 'detallesFactura',
+});
+
+DetalleFactura.belongsTo(Liquidacion, {
+  foreignKey: {
+    name: 'liquidacionId',
+    allowNull: true,
+  },
+  as: 'liquidacion',
+});
+
+// Relación uno a muchos (Vendedor -> Liquidacion)
+Vendedor.hasMany(Liquidacion, {
+  foreignKey: 'vendedorId',
+  as: 'liquidaciones',
+});
+
+Liquidacion.belongsTo(Vendedor, {
+  foreignKey: 'vendedorId',
+  as: 'vendedor',
 });
 
 //#endregion
