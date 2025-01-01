@@ -2,8 +2,8 @@ import { useParams } from 'react-router-dom';
 import hotelsData from '@/data/hotels.json';
 import roomsData from '@/data/rooms.json'; // Importa el archivo de habitaciones
 import managersData from '@/data/encargados.json';
-import RoomCard from '@/components/ui/RoomCard';
-import ManagerCard from '@/components/ui/ManagerCard';
+import RoomCard from '@/components/ui/cards/RoomCard';
+import ManagerCard from '@/components/ui/cards/ManagerCard';
 import { FaMapMarkerAlt, FaStar, FaStarHalfAlt } from 'react-icons/fa'; // Iconos de ubicación y estrellas
 
 const HotelPage = () => {

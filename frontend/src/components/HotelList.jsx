@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import HotelCardGrid from './ui/HotelCardGrid';
-import HotelCardList from './ui/HotelCardList';
+import HotelCardGrid from './ui/cards/HotelCardGrid';
+import HotelCardList from './ui/cards/HotelCardList';
 
 const HotelList = ({ hotels, viewMode }) => {
   return (
