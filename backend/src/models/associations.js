@@ -21,6 +21,7 @@ const Servicio = require('./hotel/Servicio');
 const CategoriaServicio = require('./hotel/CategoriaServicio');
 const Alquiler = require('./ventas/Alquiler');
 const AlquilerHabitacion = require('./ventas/AlquilerHabitacion');
+const Pago = require('./ventas/Pago');
 
 //#region ASOCIACIONES DE LOCALIDADES
 
@@ -195,6 +196,20 @@ Servicio.belongsToMany(Categoria, {
   foreignKey: 'servicioId',
   otherKey: 'categoriaId',
   as: 'categorias',
+});
+
+// Relación uno a uno (Factura -> Pago)
+Factura.belongsTo(Pago, {
+  foreignKey: {
+    name: 'pagoId',
+    allowNull: false,
+  },
+  as: 'pago',
+});
+
+Pago.hasOne(Factura, {
+  foreignKey: 'pagoId',
+  as: 'factura',
 });
 
 //#endregion
