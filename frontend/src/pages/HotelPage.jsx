@@ -1,7 +1,9 @@
 import { useParams } from 'react-router-dom';
 import hotelsData from '@/data/hotels.json';
 import roomsData from '@/data/rooms.json'; // Importa el archivo de habitaciones
+import managersData from '@/data/encargados.json';
 import RoomCard from '@/components/ui/RoomCard';
+import ManagerCard from '@/components/ui/ManagerCard';
 import { FaMapMarkerAlt, FaStar, FaStarHalfAlt } from 'react-icons/fa'; // Iconos de ubicación y estrellas
 
 const HotelPage = () => {
@@ -9,6 +11,9 @@ const HotelPage = () => {
 
   // Buscar el hotel correspondiente en el array de datos
   const hotel = hotelsData.find((h) => h.id === parseInt(hotelId));
+
+  // Recuperamos el único encargado del archivo
+  const manager = managersData[0];
 
   if (!hotel) {
     return (
@@ -81,8 +86,12 @@ const HotelPage = () => {
 
       {/* Fila 4: Información del encargado */}
       <div className="text-secondary-500 flex-grow">
-        <h3 className="text-xl font-bold">Encargado</h3>
-        <p className="text-body-md">Próximamente...</p>
+        <h3 className="text-xl font-bold mb-4">Encargado</h3>
+        {manager ? (
+          <ManagerCard {...manager} />
+        ) : (
+          <p className="text-body-md">Próximamente...</p>
+        )}
       </div>
     </div>
   );
