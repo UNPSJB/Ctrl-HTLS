@@ -19,6 +19,8 @@ const DetalleFactura = require('./ventas/DetalleFactura');
 const Liquidacion = require('./ventas/Liquidacion');
 const Servicio = require('./hotel/Servicio');
 const CategoriaServicio = require('./hotel/CategoriaServicio');
+const Alquiler = require('./ventas/Alquiler');
+const AlquilerHabitacion = require('./ventas/AlquilerHabitacion');
 
 //#region ASOCIACIONES DE LOCALIDADES
 
@@ -264,6 +266,60 @@ Vendedor.hasMany(Liquidacion, {
 Liquidacion.belongsTo(Vendedor, {
   foreignKey: 'vendedorId',
   as: 'vendedor',
+});
+
+// Relación muchos a muchos (Alquiler -> Habitacion)
+Alquiler.belongsToMany(Habitacion, {
+  through: AlquilerHabitacion,
+  foreignKey: 'alquilerId',
+  otherKey: 'habitacionId',
+  as: 'habitaciones',
+});
+
+Habitacion.belongsToMany(Alquiler, {
+  through: AlquilerHabitacion,
+  foreignKey: 'habitacionId',
+  otherKey: 'alquilerId',
+  as: 'alquileres',
+});
+
+// Relación uno a muchos (Alquiler -> PaquetePromocional)
+Alquiler.hasMany(PaquetePromocional, {
+  foreignKey: {
+    name: 'alquilerId',
+    allowNull: true,
+  },
+  as: 'paquetesPromocionales',
+});
+
+PaquetePromocional.belongsTo(Alquiler, {
+  foreignKey: {
+    name: 'alquilerId',
+    allowNull: true,
+  },
+  as: 'alquiler',
+});
+
+// Relación uno a muchos (Cliente -> Alquiler)
+Cliente.hasMany(Alquiler, {
+  foreignKey: 'clienteId',
+  as: 'alquileres',
+});
+
+Alquiler.belongsTo(Cliente, {
+  foreignKey: 'clienteId',
+  as: 'cliente',
+});
+
+// Relación uno a uno (Alquiler -> DetalleFactura)
+Alquiler.hasOne(DetalleFactura, {
+  foreignKey: 'alquilerId',
+  as: 'detalleFactura',
+});
+
+DetalleFactura.belongsTo(Alquiler, {
+  foreignKey: 'alquilerId',
+  as: 'alquiler',
 });
 
 //#endregion
