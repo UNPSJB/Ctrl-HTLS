@@ -2,9 +2,15 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const sequelize = require('./config/database');
+const coreRoutes = require('./routes/core/CoreRoutes');
 
 // Importar todos los modelos y asociaciones
 require('./models/associations');
+
+app.use(express.json());
+
+// Usar las rutas de core
+app.use('/api', coreRoutes);
 
 // Sincronizar la base de datos
 sequelize
