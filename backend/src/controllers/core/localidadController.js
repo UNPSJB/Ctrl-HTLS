@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 const localidadService = require('../../services/core/localidadServices');
 
 const createLocalidad = async (req, res) => {
+  console.log(req);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -50,4 +51,13 @@ const createLocalidad = async (req, res) => {
   }
 };
 
-module.exports = { createLocalidad };
+const getPaises = async (req, res) => {
+  try {
+    const paises = await localidadService.obtenerPaises();
+    res.status(200).json(paises);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { createLocalidad, getPaises };

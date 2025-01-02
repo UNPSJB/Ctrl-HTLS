@@ -36,8 +36,13 @@ const createCiudad = async (nombre, provinciaId, codigoPostal) => {
   return await Ciudad.create({ nombre, provinciaId, codigoPostal });
 };
 
+const obtenerPaises = async () => {
+  return await Pais.findAll();
+};
+
 module.exports = {
   createPais,
   createProvincia,
   createCiudad,
+  obtenerPaises,
 };
