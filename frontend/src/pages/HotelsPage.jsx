@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import HotelFilter from '@/components/ui/filters/HotelFilter';
+import HotelNameFilter from '@/components/ui/filters/HotelNameFilter';
 import HotelList from '@/components/HotelList';
 import hotelsData from '../data/hotels.json';
 import HotelSort from '@/components/HotelSort';
@@ -56,7 +56,7 @@ const HotelsPage = () => {
   return (
     <div className="p-4 space-y-6">
       {/* Filtro */}
-      <HotelFilter onFilterChange={handleFilterChange} />
+      <HotelNameFilter onFilterChange={handleFilterChange} />
 
       {/* Orden y Vista */}
       <HotelSort

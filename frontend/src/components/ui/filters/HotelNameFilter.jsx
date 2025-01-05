@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const HotelFilter = ({ onFilterChange }) => {
+const HotelNameFilter = ({ onFilterChange }) => {
   const [nameFilter, setNameFilter] = useState('');
 
   const handleNameChange = (e) => {
@@ -24,8 +24,8 @@ const HotelFilter = ({ onFilterChange }) => {
   );
 };
 
-HotelFilter.propTypes = {
+HotelNameFilter.propTypes = {
   onFilterChange: PropTypes.func.isRequired,
 };
 
-export default HotelFilter;
+export default HotelNameFilter;
