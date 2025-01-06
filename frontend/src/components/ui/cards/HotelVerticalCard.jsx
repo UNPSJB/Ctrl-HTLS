@@ -19,8 +19,7 @@ const HotelVerticalCard = ({
   };
 
   return (
-    <div className="max-w-sm flex flex-col bg-primary-100 border border-primary-200 rounded-lg shadow-md overflow-hidden">
-      {/* Imagen con estrellas */}
+    <div className="flex flex-col bg-primary-100 border border-primary-200 rounded-lg shadow-md overflow-hidden">
       <div className="relative">
         <img src={image} alt={name} className="w-full h-48 object-cover" />
         <div className="absolute top-2 right-2 bg-primary-100 flex items-center text-sm font-bold px-2 py-1 rounded">
@@ -29,7 +28,6 @@ const HotelVerticalCard = ({
         </div>
       </div>
 
-      {/* Contenido */}
       <div className="flex flex-col p-4 space-y-6 flex-grow">
         <div className="grid grid-cols-2 gap-y-2 text-sm">
           <div className="text-left font-semibold text-text-900">{name}</div>
@@ -37,11 +35,9 @@ const HotelVerticalCard = ({
           <div className="text-left text-text-500">{location}</div>
           <div className="text-right italic text-text-400">{priceLabel}</div>
         </div>
-
         <p className="text-sm text-text-600">{description}</p>
       </div>
 
-      {/* Botón al fondo */}
       <div className="mt-auto p-4">
         <button
           onClick={handleDetailsClick}

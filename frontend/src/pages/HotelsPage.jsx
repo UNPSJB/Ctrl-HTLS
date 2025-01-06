@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import HotelNameFilter from '@/components/ui/filters/HotelNameFilter';
+import HotelFilters from '@/components/ui/filters/HotelFilters';
+import HotelSort from '@/components/HotelSort';
 import HotelList from '@/components/HotelList';
 import hotelsData from '../data/hotels.json';
-import HotelSort from '@/components/HotelSort';
 
 const HotelsPage = () => {
   const [hotels, setHotels] = useState([]);
@@ -10,11 +11,9 @@ const HotelsPage = () => {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' o 'list'
 
   useEffect(() => {
-    // Cargar hoteles y filtrados
     setHotels(hotelsData);
     setFilteredHotels(hotelsData);
 
-    // Intentar recuperar el modo de vista desde localStorage
     const savedViewMode = localStorage.getItem('viewMode');
     if (savedViewMode) {
       setViewMode(savedViewMode);
@@ -48,6 +47,21 @@ const HotelsPage = () => {
     );
   };
 
+  const handleStarFilterChange = (stars) => {
+    setFilteredHotels(
+      hotels.filter(
+        (hotel) =>
+          stars === 0 || (hotel.stars >= stars && hotel.stars < stars + 1)
+      )
+    );
+  };
+
+  const handlePriceFilterChange = ([min, max]) => {
+    setFilteredHotels(
+      hotels.filter((hotel) => hotel.price >= min && hotel.price <= max)
+    );
+  };
+
   const handleViewModeChange = (mode) => {
     setViewMode(mode); // Cambiar entre 'list' y 'grid'
     localStorage.setItem('viewMode', mode); // Guardar el modo en localStorage
@@ -55,17 +69,34 @@ const HotelsPage = () => {
 
   return (
     <div className="p-4 space-y-6">
-      {/* Filtro */}
-      <HotelNameFilter onFilterChange={handleFilterChange} />
+      {/* Filtro por nombre */}
+      <div>
+        <HotelNameFilter onFilterChange={handleFilterChange} />
+      </div>
 
       {/* Orden y Vista */}
-      <HotelSort
-        onSortChange={handleSortChange}
-        onViewModeChange={handleViewModeChange}
-      />
+      <div>
+        <HotelSort
+          onSortChange={handleSortChange}
+          onViewModeChange={handleViewModeChange}
+        />
+      </div>
 
-      {/* Listado de Hoteles */}
-      <HotelList hotels={filteredHotels} viewMode={viewMode} />
+      {/* Contenedor principal */}
+      <div className="grid grid-cols-12 gap-6">
+        {/* Columna 1: Filtros */}
+        <div className="col-span-12 lg:col-span-3">
+          <HotelFilters
+            onStarFilterChange={handleStarFilterChange}
+            onPriceFilterChange={handlePriceFilterChange}
+          />
+        </div>
+
+        {/* Columna 2: Listado de Hoteles */}
+        <div className="col-span-12 lg:col-span-9">
+          <HotelList hotels={filteredHotels} viewMode={viewMode} />
+        </div>
+      </div>
     </div>
   );
 };

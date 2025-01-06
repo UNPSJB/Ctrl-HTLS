@@ -5,11 +5,11 @@ import HotelCardHorizontal from './ui/cards/HotelHorizontalCard';
 const HotelList = ({ hotels, viewMode }) => {
   return (
     <div
-      className={
+      className={`${
         viewMode === 'grid'
-          ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-7'
-          : 'flex flex-col gap-7'
-      }
+          ? 'grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]'
+          : 'flex flex-col gap-6'
+      }`}
     >
       {hotels.map((hotel) =>
         viewMode === 'grid' ? (
