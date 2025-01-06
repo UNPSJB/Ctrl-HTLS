@@ -54,7 +54,7 @@ const HotelFilters = ({ onStarFilterChange, onPriceFilterChange }) => {
                 className={`flex items-center space-x-2 text-sm font-medium ${
                   stars === star
                     ? 'text-primary-500 font-bold'
-                    : 'text-secondary-700'
+                    : 'text-secondary-900'
                 }`}
               >
                 <span>Estrellas</span>
@@ -79,7 +79,7 @@ const HotelFilters = ({ onStarFilterChange, onPriceFilterChange }) => {
               className={`flex items-center space-x-2 cursor-pointer ${
                 selectedPriceOption === option
                   ? 'text-primary-500 font-bold'
-                  : 'text-secondary-700'
+                  : 'text-secondary-900'
               }`}
               onClick={() => handlePriceOptionChange(option)}
             >

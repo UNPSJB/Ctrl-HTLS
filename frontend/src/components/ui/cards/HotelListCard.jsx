@@ -12,7 +12,7 @@ const HotelListCard = ({ id, name, stars, price }) => {
   return (
     <div
       onClick={handleDetailsClick}
-      className="grid grid-cols-3 items-center gap-4 bg-primary-100 border border-primary-200 rounded-lg shadow-md p-4 w-full cursor-pointer hover:bg-primary-200 transition-colors duration-200"
+      className="grid grid-cols-3 items-center gap-4 border border-primary-200 rounded-lg shadow-md p-4 w-full cursor-pointer hover:bg-primary-100 transition-colors duration-200"
     >
       {/* Primera columna: Icono y Nombre */}
       <div className="flex items-center gap-2">

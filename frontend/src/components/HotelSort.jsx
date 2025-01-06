@@ -12,7 +12,7 @@ const HotelSort = ({ onSortChange, onViewModeChange, currentViewMode }) => {
   };
 
   return (
-    <div className="flex justify-between items-center w-full">
+    <div className="flex justify-end items-center w-full gap-2">
       {/* Selector de Ordenación */}
       <div>
         <select

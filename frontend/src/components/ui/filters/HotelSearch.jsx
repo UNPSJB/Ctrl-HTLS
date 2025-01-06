@@ -2,7 +2,7 @@ import React from 'react';
 
 const HotelSearch = () => {
   return (
-    <div className="flex flex-col md:flex-row items-center gap-4 bg-secondary-100 p-4 rounded-lg shadow-md">
+    <div className="flex flex-col md:flex-row items-center gap-4 border p-4 rounded-lg shadow-md">
       {/* Input para ubicación/nombre del hotel */}
       <input
         type="text"

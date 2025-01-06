@@ -7,19 +7,19 @@ const ViewModeSwitcher = ({ currentViewMode, onViewModeChange }) => {
     <div className="flex items-center space-x-2">
       <button
         onClick={() => onViewModeChange('list')}
-        className={`p-2 border rounded text-sm ${currentViewMode === 'list' ? 'bg-gray-200' : ''}`}
+        className={`p-[10px] border rounded text-sm ${currentViewMode === 'list' ? 'bg-gray-200' : ''}`}
       >
         <FaList />
       </button>
       <button
         onClick={() => onViewModeChange('grid')}
-        className={`p-2 border rounded text-sm ${currentViewMode === 'grid' ? 'bg-gray-200' : ''}`}
+        className={`p-[10px] border rounded text-sm ${currentViewMode === 'grid' ? 'bg-gray-200' : ''}`}
       >
         <FaTh />
       </button>
       <button
         onClick={() => onViewModeChange('compact')}
-        className={`p-2 border rounded text-sm ${currentViewMode === 'compact' ? 'bg-gray-200' : ''}`}
+        className={`p-[10px] border rounded text-sm ${currentViewMode === 'compact' ? 'bg-gray-200' : ''}`}
       >
         <BsCardList />
       </button>
