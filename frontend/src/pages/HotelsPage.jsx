@@ -8,12 +8,13 @@ import hotelsData from '../data/hotels.json';
 const HotelsPage = () => {
   const [hotels, setHotels] = useState([]);
   const [filteredHotels, setFilteredHotels] = useState([]);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' o 'list'
+  const [viewMode, setViewMode] = useState('grid'); // 'grid', 'list', o 'compact'
 
   useEffect(() => {
     setHotels(hotelsData);
     setFilteredHotels(hotelsData);
 
+    // Cargar el modo de vista desde localStorage, si existe
     const savedViewMode = localStorage.getItem('viewMode');
     if (savedViewMode) {
       setViewMode(savedViewMode);
@@ -63,7 +64,7 @@ const HotelsPage = () => {
   };
 
   const handleViewModeChange = (mode) => {
-    setViewMode(mode); // Cambiar entre 'list' y 'grid'
+    setViewMode(mode); // Cambiar entre 'list', 'grid', y 'compact'
     localStorage.setItem('viewMode', mode); // Guardar el modo en localStorage
   };
 

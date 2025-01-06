@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import HotelVerticalCard from './ui/cards/HotelVerticalCard';
-import HotelCardHorizontal from './ui/cards/HotelHorizontalCard';
+import HotelHorizontalCard from './ui/cards/HotelHorizontalCard';
+import HotelListCard from './ui/cards/HotelListCard';
 
 const HotelList = ({ hotels, viewMode }) => {
   return (
@@ -8,7 +9,9 @@ const HotelList = ({ hotels, viewMode }) => {
       className={`${
         viewMode === 'grid'
           ? 'grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]'
-          : 'flex flex-col gap-6'
+          : viewMode === 'list'
+            ? 'flex flex-col gap-6'
+            : 'flex flex-col gap-3'
       }`}
     >
       {hotels.map((hotel) =>
@@ -24,8 +27,8 @@ const HotelList = ({ hotels, viewMode }) => {
             priceLabel={hotel.priceLabel}
             description={hotel.description}
           />
-        ) : (
-          <HotelCardHorizontal
+        ) : viewMode === 'list' ? (
+          <HotelHorizontalCard
             key={hotel.id}
             id={hotel.id}
             image={hotel.image}
@@ -36,6 +39,14 @@ const HotelList = ({ hotels, viewMode }) => {
             priceLabel={hotel.priceLabel}
             description={hotel.description}
           />
+        ) : (
+          <HotelListCard
+            key={hotel.id}
+            id={hotel.id}
+            stars={hotel.stars}
+            name={hotel.name}
+            price={hotel.price}
+          />
         )
       )}
     </div>
@@ -44,7 +55,7 @@ const HotelList = ({ hotels, viewMode }) => {
 
 HotelList.propTypes = {
   hotels: PropTypes.array.isRequired,
-  viewMode: PropTypes.oneOf(['grid', 'list']).isRequired,
+  viewMode: PropTypes.oneOf(['grid', 'list', 'compact']).isRequired,
 };
 
 export default HotelList;

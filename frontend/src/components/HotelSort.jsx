@@ -1,5 +1,6 @@
 import { FaList, FaTh } from 'react-icons/fa';
 import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
+import { BsCardList } from 'react-icons/bs'; // Icono para la vista compacta
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
@@ -43,17 +44,28 @@ const HotelSort = ({ onSortChange, onViewModeChange }) => {
 
       {/* Botones de Vista */}
       <div className="flex items-center space-x-2">
+        {/* Botón para la vista en lista */}
         <button
           onClick={() => onViewModeChange('list')}
           className="flex items-center p-2 border rounded text-sm"
         >
           <FaList />
         </button>
+
+        {/* Botón para la vista en grid */}
         <button
           onClick={() => onViewModeChange('grid')}
           className="flex items-center p-2 border rounded text-sm"
         >
           <FaTh />
+        </button>
+
+        {/* Botón para la vista compacta */}
+        <button
+          onClick={() => onViewModeChange('compact')}
+          className="flex items-center p-2 border rounded text-sm"
+        >
+          <BsCardList />
         </button>
       </div>
     </div>
