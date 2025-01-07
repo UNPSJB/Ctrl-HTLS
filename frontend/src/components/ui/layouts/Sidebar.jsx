@@ -9,8 +9,8 @@ import {
 } from 'react-icons/fa';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import SidebarButton from './ui/SidebarButton';
-import UserProfile from './ui/UserProfile';
+import SidebarButton from '../SidebarButton';
+import UserProfile from '../UserProfile';
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
