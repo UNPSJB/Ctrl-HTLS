@@ -36,6 +36,66 @@ const createCiudad = async (nombre, provinciaId, codigoPostal) => {
   return await Ciudad.create({ nombre, provinciaId, codigoPostal });
 };
 
+const updatePais = async (id, nombre) => {
+  const pais = await Pais.findByPk(id);
+  if (!pais) {
+    throw new Error('El país no existe');
+  }
+  pais.nombre = nombre;
+  await pais.save();
+  return pais;
+};
+
+const updateProvincia = async (id, nombre, paisId) => {
+  const provincia = await Provincia.findByPk(id);
+  if (!provincia) {
+    throw new Error('La provincia no existe');
+  }
+  provincia.nombre = nombre;
+  provincia.paisId = paisId;
+  await provincia.save();
+  return provincia;
+};
+
+const updateCiudad = async (id, nombre, provinciaId, codigoPostal) => {
+  const ciudad = await Ciudad.findByPk(id);
+  if (!ciudad) {
+    throw new Error('La ciudad no existe');
+  }
+  ciudad.nombre = nombre;
+  ciudad.provinciaId = provinciaId;
+  ciudad.codigoPostal = codigoPostal;
+  await ciudad.save();
+  return ciudad;
+};
+
+const deletePais = async (id) => {
+  const pais = await Pais.findByPk(id);
+  if (!pais) {
+    throw new Error('El país no existe');
+  }
+  await pais.destroy();
+  return pais;
+};
+
+const deleteProvincia = async (id) => {
+  const provincia = await Provincia.findByPk(id);
+  if (!provincia) {
+    throw new Error('La provincia no existe');
+  }
+  await provincia.destroy();
+  return provincia;
+};
+
+const deleteCiudad = async (id) => {
+  const ciudad = await Ciudad.findByPk(id);
+  if (!ciudad) {
+    throw new Error('La ciudad no existe');
+  }
+  await ciudad.destroy();
+  return ciudad;
+};
+
 const obtenerPaises = async () => {
   return await Pais.findAll();
 };
@@ -44,5 +104,11 @@ module.exports = {
   createPais,
   createProvincia,
   createCiudad,
+  updatePais,
+  updateProvincia,
+  updateCiudad,
+  deletePais,
+  deleteProvincia,
+  deleteCiudad,
   obtenerPaises,
 };
