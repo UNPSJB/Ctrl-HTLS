@@ -22,6 +22,8 @@ const CategoriaServicio = require('./hotel/CategoriaServicio');
 const Alquiler = require('./ventas/Alquiler');
 const AlquilerHabitacion = require('./ventas/AlquilerHabitacion');
 const Pago = require('./ventas/Pago');
+const Administrador = require('./core/Administrador');
+const Usuario = require('./core/Usuario');
 
 //#region ASOCIACIONES DE LOCALIDADES
 
@@ -335,6 +337,38 @@ Alquiler.hasOne(DetalleFactura, {
 DetalleFactura.belongsTo(Alquiler, {
   foreignKey: 'alquilerId',
   as: 'alquiler',
+});
+
+//#endregion
+
+//#region ASOCIACIONES DE USUARIOS
+
+// Relación uno a uno (Administrador -> Usuario)
+Administrador.belongsTo(Usuario, {
+  foreignKey: {
+    name: 'usuarioId',
+    allowNull: false,
+  },
+  as: 'usuario',
+});
+
+Usuario.hasOne(Administrador, {
+  foreignKey: 'usuarioId',
+  as: 'administrador',
+});
+
+// Relación uno a uno (Vendedor -> Usuario)
+Vendedor.belongsTo(Usuario, {
+  foreignKey: {
+    name: 'usuarioId',
+    allowNull: false,
+  },
+  as: 'usuario',
+});
+
+Usuario.hasOne(Vendedor, {
+  foreignKey: 'usuarioId',
+  as: 'vendedor',
 });
 
 //#endregion
