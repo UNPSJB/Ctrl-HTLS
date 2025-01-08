@@ -17,5 +17,5 @@ router.delete('/localidad/:id', deleteLocalidad); //Ruta para eliminar paises, p
 
 router.get('/paises', getPaises); //Ruta para obtener todos los paises
 //router.get('/provincias/:paisId', getProvincias); //Ruta para obtener todas las provincias de un pais
-
+//router.get('/ciudades/:provinciaId', getCiudades); //Ruta para obtener todas las ciudades de una provincia
 module.exports = router;
