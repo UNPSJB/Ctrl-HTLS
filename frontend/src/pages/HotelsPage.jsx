@@ -3,6 +3,7 @@ import HotelNameFilter from '@/components/ui/filters/HotelNameFilter';
 import HotelFilters from '@/components/ui/filters/HotelFilters';
 import HotelSort from '@/components/HotelSort';
 import HotelList from '@/components/HotelList';
+import Pagination from '@/components/ui/Pagination';
 import hotelsData from '../data/hotels.json';
 import useViewMode from '@/hooks/useViewMode';
 
@@ -57,6 +58,7 @@ const HotelsPage = () => {
         </div>
         <div className="col-span-12 lg:col-span-9">
           <HotelList hotels={filteredHotels} viewMode={viewMode} />
+          <Pagination currentPage={3} totalPages={10} />
         </div>
       </div>
     </div>
