@@ -11,5 +11,6 @@ const router = express.Router();
 
 router.post('/localidad', validateLocalidad, createLocalidad);
 router.get('/paises', getPaises);
+//router.put('/localidad/:id', validateLocalidad, updateLocalidad);
 
 module.exports = router;

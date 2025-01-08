@@ -14,7 +14,8 @@ app.use('/api', coreRoutes);
 
 // Sincronizar la base de datos
 sequelize
-  .sync({ alter: true })
+  // .sync({ alter: true }) // Si se crean nuevas tablas descomentar esta linea y comentar la de "autenticar"
+  .authenticate()
   .then(() => {
     console.log('Base de datos y tablas creadas');
 
