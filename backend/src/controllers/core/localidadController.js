@@ -8,7 +8,7 @@ const handleLocalidad = async (
   provinciaId,
   codigoPostal,
   operation,
-  id = null
+  id = null,
 ) => {
   let localidad;
   switch (tipo) {
@@ -24,7 +24,7 @@ const handleLocalidad = async (
     case 'provincia':
       if (!paisId && (operation === 'create' || operation === 'update')) {
         throw new Error(
-          'paisId es requerido para crear o actualizar una provincia'
+          'paisId es requerido para crear o actualizar una provincia',
         );
       }
       if (operation === 'create') {
@@ -38,26 +38,26 @@ const handleLocalidad = async (
     case 'ciudad':
       if (!provinciaId && (operation === 'create' || operation === 'update')) {
         throw new Error(
-          'provinciaId es requerido para crear o actualizar una ciudad'
+          'provinciaId es requerido para crear o actualizar una ciudad',
         );
       }
       if (!codigoPostal && (operation === 'create' || operation === 'update')) {
         throw new Error(
-          'El código postal es requerido para crear o actualizar una ciudad'
+          'El código postal es requerido para crear o actualizar una ciudad',
         );
       }
       if (operation === 'create') {
         localidad = await localidadService.createCiudad(
           nombre,
           provinciaId,
-          codigoPostal
+          codigoPostal,
         );
       } else if (operation === 'update') {
         localidad = await localidadService.updateCiudad(
           id,
           nombre,
           provinciaId,
-          codigoPostal
+          codigoPostal,
         );
       } else if (operation === 'delete') {
         localidad = await localidadService.deleteCiudad(id);
@@ -84,7 +84,7 @@ const createLocalidad = async (req, res) => {
       paisId,
       provinciaId,
       codigoPostal,
-      'create'
+      'create',
     );
     res.status(201).json(localidad);
   } catch (error) {
@@ -109,7 +109,7 @@ const updateLocalidad = async (req, res) => {
       provinciaId,
       codigoPostal,
       'update',
-      id
+      id,
     );
     res.status(200).json(localidad);
   } catch (error) {

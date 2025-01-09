@@ -11,7 +11,7 @@ const validateLocalidad = [
     .toLowerCase()
     .matches(/^[a-zA-Z0-9\s]+$/)
     .withMessage(
-      'El nombre no debe contener símbolos ni caracteres especiales'
+      'El nombre no debe contener símbolos ni caracteres especiales',
     ),
   body('paisId')
     .if(body('tipo').equals('provincia'))
@@ -27,7 +27,7 @@ const validateLocalidad = [
     .toLowerCase()
     .matches(/^[a-zA-Z0-9\s]+$/)
     .withMessage(
-      'provinciaId no debe contener símbolos ni caracteres especiales'
+      'provinciaId no debe contener símbolos ni caracteres especiales',
     ),
   body('codigoPostal')
     .if(body('tipo').equals('ciudad'))
@@ -36,7 +36,7 @@ const validateLocalidad = [
     .toLowerCase()
     .matches(/^[a-zA-Z0-9\s]+$/)
     .withMessage(
-      'El código postal no debe contener símbolos ni caracteres especiales'
+      'El código postal no debe contener símbolos ni caracteres especiales',
     ),
 ];
 
