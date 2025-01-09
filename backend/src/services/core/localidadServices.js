@@ -100,6 +100,14 @@ const obtenerPaises = async () => {
   return await Pais.findAll();
 };
 
+const obtenerProvincias = async (paisId) => {
+  const pais = await Pais.findByPk(paisId);
+  if (!pais) {
+    throw new Error('El país no existe');
+  }
+  return await Provincia.findAll({ where: { paisId } });
+};
+
 module.exports = {
   createPais,
   createProvincia,
@@ -111,4 +119,5 @@ module.exports = {
   deleteProvincia,
   deleteCiudad,
   obtenerPaises,
+  obtenerProvincias,
 };
