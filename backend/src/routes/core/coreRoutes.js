@@ -3,6 +3,8 @@ const {
   validateLocalidad,
   validateId,
 } = require('../../validators/core/localidadValidators');
+const { validatePersona } = require('../../validators/core/personaValidators');
+
 const {
   createLocalidad,
   getPaises,
@@ -31,6 +33,6 @@ router.get('/ciudades/:id', validateId, getCiudadById); //Ruta para obtener una 
 
 //#endregion
 
-router.post('/administrador');
+router.post('/administrador', validatePersona); //Ruta para crear un administrador
 
 module.exports = router;
