@@ -157,10 +157,69 @@ const getProvincias = async (req, res) => {
   }
 };
 
+const getCiudades = async (req, res) => {
+  const { provinciaId } = req.params;
+  if (!provinciaId) {
+    return res.status(400).json({ message: 'provinciaId es requerido' });
+  }
+  try {
+    const ciudades = await localidadService.obtenerCiudades(provinciaId);
+    if (ciudades.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron ciudades' });
+    }
+    res.status(200).json(ciudades);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getPaisById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pais = await localidadService.obtenerPaisPorId(id);
+    if (!pais) {
+      return res.status(404).json({ message: 'No se encontró el país' });
+    }
+    res.status(200).json(pais);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getProvinciaById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const provincia = await localidadService.obtenerProvinciaPorId(id);
+    if (!provincia) {
+      return res.status(404).json({ message: 'No se encontró la provincia' });
+    }
+    res.status(200).json(provincia);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getCiudadById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const ciudad = await localidadService.obtenerCiudadPorId(id);
+    if (!ciudad) {
+      return res.status(404).json({ message: 'No se encontró la ciudad' });
+    }
+    res.status(200).json(ciudad);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createLocalidad,
   updateLocalidad,
   deleteLocalidad,
   getPaises,
   getProvincias,
+  getCiudades,
+  getPaisById,
+  getProvinciaById,
+  getCiudadById,
 };

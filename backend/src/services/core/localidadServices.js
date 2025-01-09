@@ -21,6 +21,13 @@ const createProvincia = async (nombre, paisId) => {
 };
 
 const createCiudad = async (nombre, provinciaId, codigoPostal) => {
+  const provincia = await Provincia.findByPk(provinciaId);
+  if (!provincia) {
+    throw new Error('La provincia no existe');
+  }
+  if (!codigoPostal) {
+    throw new Error('El código postal es requerido para crear una ciudad');
+  }
   const existingCiudad = await Ciudad.findOne({
     where: { nombre, provinciaId },
   });
@@ -108,6 +115,38 @@ const obtenerProvincias = async (paisId) => {
   return await Provincia.findAll({ where: { paisId } });
 };
 
+const obtenerCiudades = async (provinciaId) => {
+  const provincia = await Provincia.findByPk(provinciaId);
+  if (!provincia) {
+    throw new Error('La provincia no existe');
+  }
+  return await Ciudad.findAll({ where: { provinciaId } });
+};
+
+const obtenerPaisPorId = async (id) => {
+  const pais = await Pais.findByPk(id);
+  if (!pais) {
+    throw new Error('El país no existe');
+  }
+  return pais;
+};
+
+const obtenerProvinciaPorId = async (id) => {
+  const provincia = await Provincia.findByPk(id);
+  if (!provincia) {
+    throw new Error('La provincia no existe');
+  }
+  return provincia;
+};
+
+const obtenerCiudadPorId = async (id) => {
+  const ciudad = await Ciudad.findByPk(id);
+  if (!ciudad) {
+    throw new Error('La ciudad no existe');
+  }
+  return ciudad;
+};
+
 module.exports = {
   createPais,
   createProvincia,
@@ -120,4 +159,8 @@ module.exports = {
   deleteCiudad,
   obtenerPaises,
   obtenerProvincias,
+  obtenerCiudades,
+  obtenerPaisPorId,
+  obtenerProvinciaPorId,
+  obtenerCiudadPorId,
 };
