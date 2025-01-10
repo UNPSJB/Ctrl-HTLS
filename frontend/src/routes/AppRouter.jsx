@@ -8,6 +8,7 @@ import CreateHotelPage from '@/pages/CreateHotelPage';
 import ListHotelsPage from '@/pages/ListHotelsPage';
 import HotelPage from '@/pages/HotelPage';
 import HotelFormPage from '@/pages/HotelFormPage';
+import LocationPage from '@/pages/LocationPage';
 
 const AppRouter = () => {
   return (
@@ -21,6 +22,7 @@ const AppRouter = () => {
           <Route path="hoteles/listar" element={<ListHotelsPage />} />
           <Route path="hoteles/:hotelId" element={<HotelPage />} />
           <Route path="hoteles/formulario" element={<HotelFormPage />} />
+          <Route path="location" element={<LocationPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

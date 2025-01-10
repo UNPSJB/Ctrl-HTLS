@@ -6,6 +6,7 @@ import {
   FaHotel as HotelIcon,
   FaBars,
   FaChevronLeft,
+  FaMapMarkedAlt,
 } from 'react-icons/fa';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -20,6 +21,7 @@ const Sidebar = () => {
     { icon: FaHotel, label: 'Hoteles', href: '/hoteles' },
     { icon: FaEnvelope, label: 'Contacto', href: '/contacto' },
     { icon: FaHotel, label: 'Cargar Hotel', href: '/hoteles/formulario' },
+    { icon: FaMapMarkedAlt, label: 'Ubicacíon', href: '/location' },
   ];
 
   const user = {
