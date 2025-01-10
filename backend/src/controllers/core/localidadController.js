@@ -88,7 +88,8 @@ const createLocalidad = async (req, res) => {
     );
     res.status(201).json(localidad);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 

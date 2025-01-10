@@ -2,12 +2,16 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const sequelize = require('./config/database');
+const { swaggerUi, swaggerSpec } = require('./config/swaggerConfig');
 const coreRoutes = require('./routes/core/coreRoutes');
-
 // Importar todos los modelos y asociaciones
 require('./models/associations');
+require('./docs/swaggerDocs');
 
 app.use(express.json());
+
+// Middleware para Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Usar las rutas de core
 app.use('/api', coreRoutes);

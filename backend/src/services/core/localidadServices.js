@@ -1,11 +1,12 @@
 const Pais = require('../../models/core/Pais');
 const Provincia = require('../../models/core/Provincia');
 const Ciudad = require('../../models/core/Ciudad');
+const CustomError = require('../../utils/CustomError');
 
 const createPais = async (nombre) => {
   const existingPais = await Pais.findOne({ where: { nombre } });
   if (existingPais) {
-    throw new Error('El país ya existe');
+    throw new CustomError('El país ya existe', 409); // Conflict
   }
   return await Pais.create({ nombre });
 };
@@ -14,8 +15,12 @@ const createProvincia = async (nombre, paisId) => {
   const existingProvincia = await Provincia.findOne({
     where: { nombre, paisId },
   });
+  const pais = await Pais.findByPk(paisId);
+  if (!pais) {
+    throw new CustomError('El país es requerido para crear una provincia', 400); // Bad Request
+  }
   if (existingProvincia) {
-    throw new Error('La provincia ya existe en este país');
+    throw new CustomError('La provincia ya existe en este país', 409); // Conflict
   }
   return await Provincia.create({ nombre, paisId });
 };
@@ -23,22 +28,25 @@ const createProvincia = async (nombre, paisId) => {
 const createCiudad = async (nombre, provinciaId, codigoPostal) => {
   const provincia = await Provincia.findByPk(provinciaId);
   if (!provincia) {
-    throw new Error('La provincia no existe');
+    throw new CustomError('La provincia no existe', 404); // Not Found
   }
   if (!codigoPostal) {
-    throw new Error('El código postal es requerido para crear una ciudad');
+    throw new CustomError(
+      'El código postal es requerido para crear una ciudad',
+      400,
+    ); // Bad Request
   }
   const existingCiudad = await Ciudad.findOne({
     where: { nombre, provinciaId },
   });
   if (existingCiudad) {
-    throw new Error('La ciudad ya existe en esta provincia');
+    throw new CustomError('La ciudad ya existe en esta provincia', 409); // Conflict
   }
   const existingCodigoPostal = await Ciudad.findOne({
     where: { codigoPostal },
   });
   if (existingCodigoPostal) {
-    throw new Error('El código postal ya existe');
+    throw new CustomError('El código postal ya existe', 409); // Conflict
   }
   return await Ciudad.create({ nombre, provinciaId, codigoPostal });
 };
