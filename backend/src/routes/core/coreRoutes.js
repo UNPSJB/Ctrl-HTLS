@@ -17,9 +17,13 @@ const {
   getCiudadById,
 } = require('../../controllers/core/localidadController');
 
+const {
+  createAdministrador,
+} = require('../../controllers/core/personalController');
+
 const router = express.Router();
 
-//#region Routas de Localidades
+//#region Rutas de Localidades
 
 router.post('/localidad', validateLocalidad, createLocalidad); //Ruta para crear paises, provincias y ciudades
 router.put('/localidad/:id', validateId, validateLocalidad, updateLocalidad); //Ruta para actualizar paises, provincias y ciudades
@@ -33,6 +37,6 @@ router.get('/ciudades/:id', validateId, getCiudadById); //Ruta para obtener una 
 
 //#endregion
 
-router.post('/administrador', validatePersona); //Ruta para crear un administrador
+router.post('/administrador', validatePersona, createAdministrador); //Ruta para crear un administrador
 
 module.exports = router;

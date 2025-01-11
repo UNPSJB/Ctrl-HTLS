@@ -114,7 +114,8 @@ const updateLocalidad = async (req, res) => {
     );
     res.status(200).json(localidad);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 
@@ -126,7 +127,8 @@ const deleteLocalidad = async (req, res) => {
     await handleLocalidad(tipo, null, null, null, null, 'delete', id);
     res.status(200).json({ message: 'Localidad eliminada correctamente' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 
@@ -138,7 +140,8 @@ const getPaises = async (req, res) => {
     }
     res.status(200).json(paises);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 
@@ -154,7 +157,8 @@ const getProvincias = async (req, res) => {
     }
     res.status(200).json(provincias);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 
@@ -170,7 +174,8 @@ const getCiudades = async (req, res) => {
     }
     res.status(200).json(ciudades);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 
@@ -183,7 +188,8 @@ const getPaisById = async (req, res) => {
     }
     res.status(200).json(pais);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 
@@ -196,7 +202,8 @@ const getProvinciaById = async (req, res) => {
     }
     res.status(200).json(provincia);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 
@@ -209,7 +216,8 @@ const getCiudadById = async (req, res) => {
     }
     res.status(200).json(ciudad);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
   }
 };
 

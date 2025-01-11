@@ -15,12 +15,12 @@ const createProvincia = async (nombre, paisId) => {
   const existingProvincia = await Provincia.findOne({
     where: { nombre, paisId },
   });
-  const pais = await Pais.findByPk(paisId);
-  if (!pais) {
-    throw new CustomError('El país es requerido para crear una provincia', 400); // Bad Request
-  }
   if (existingProvincia) {
     throw new CustomError('La provincia ya existe en este país', 409); // Conflict
+  }
+  const pais = await Pais.findByPk(paisId);
+  if (!pais) {
+    throw new CustomError('El país no existe', 404); // Not Found
   }
   return await Provincia.create({ nombre, paisId });
 };
@@ -54,7 +54,7 @@ const createCiudad = async (nombre, provinciaId, codigoPostal) => {
 const updatePais = async (id, nombre) => {
   const pais = await Pais.findByPk(id);
   if (!pais) {
-    throw new Error('El país no existe');
+    throw new CustomError('El país no existe', 404); // Not Found
   }
   pais.nombre = nombre;
   await pais.save();
@@ -64,7 +64,7 @@ const updatePais = async (id, nombre) => {
 const updateProvincia = async (id, nombre, paisId) => {
   const provincia = await Provincia.findByPk(id);
   if (!provincia) {
-    throw new Error('La provincia no existe');
+    throw new CustomError('La provincia no existe', 404); // Not Found
   }
   provincia.nombre = nombre;
   provincia.paisId = paisId;
@@ -75,7 +75,7 @@ const updateProvincia = async (id, nombre, paisId) => {
 const updateCiudad = async (id, nombre, provinciaId, codigoPostal) => {
   const ciudad = await Ciudad.findByPk(id);
   if (!ciudad) {
-    throw new Error('La ciudad no existe');
+    throw new CustomError('La ciudad no existe', 404); // Not Found
   }
   ciudad.nombre = nombre;
   ciudad.provinciaId = provinciaId;
@@ -87,7 +87,7 @@ const updateCiudad = async (id, nombre, provinciaId, codigoPostal) => {
 const deletePais = async (id) => {
   const pais = await Pais.findByPk(id);
   if (!pais) {
-    throw new Error('El país no existe');
+    throw new CustomError('El país no existe', 404); // Not Found
   }
   await pais.destroy();
   return pais;
@@ -96,7 +96,7 @@ const deletePais = async (id) => {
 const deleteProvincia = async (id) => {
   const provincia = await Provincia.findByPk(id);
   if (!provincia) {
-    throw new Error('La provincia no existe');
+    throw new CustomError('La provincia no existe', 404); // Not Found
   }
   await provincia.destroy();
   return provincia;
@@ -105,7 +105,7 @@ const deleteProvincia = async (id) => {
 const deleteCiudad = async (id) => {
   const ciudad = await Ciudad.findByPk(id);
   if (!ciudad) {
-    throw new Error('La ciudad no existe');
+    throw new CustomError('La ciudad no existe', 404); // Not Found
   }
   await ciudad.destroy();
   return ciudad;
@@ -118,7 +118,7 @@ const obtenerPaises = async () => {
 const obtenerProvincias = async (paisId) => {
   const pais = await Pais.findByPk(paisId);
   if (!pais) {
-    throw new Error('El país no existe');
+    throw new CustomError('El país no existe', 404); // Not Found
   }
   return await Provincia.findAll({ where: { paisId } });
 };
@@ -126,7 +126,7 @@ const obtenerProvincias = async (paisId) => {
 const obtenerCiudades = async (provinciaId) => {
   const provincia = await Provincia.findByPk(provinciaId);
   if (!provincia) {
-    throw new Error('La provincia no existe');
+    throw new CustomError('La provincia no existe', 404); // Not Found
   }
   return await Ciudad.findAll({ where: { provinciaId } });
 };
@@ -134,7 +134,7 @@ const obtenerCiudades = async (provinciaId) => {
 const obtenerPaisPorId = async (id) => {
   const pais = await Pais.findByPk(id);
   if (!pais) {
-    throw new Error('El país no existe');
+    throw new CustomError('El país no existe', 404); // Not Found
   }
   return pais;
 };
@@ -142,7 +142,7 @@ const obtenerPaisPorId = async (id) => {
 const obtenerProvinciaPorId = async (id) => {
   const provincia = await Provincia.findByPk(id);
   if (!provincia) {
-    throw new Error('La provincia no existe');
+    throw new CustomError('La provincia no existe', 404); // Not Found
   }
   return provincia;
 };
@@ -150,7 +150,7 @@ const obtenerProvinciaPorId = async (id) => {
 const obtenerCiudadPorId = async (id) => {
   const ciudad = await Ciudad.findByPk(id);
   if (!ciudad) {
-    throw new Error('La ciudad no existe');
+    throw new CustomError('La ciudad no existe', 404); // Not Found
   }
   return ciudad;
 };

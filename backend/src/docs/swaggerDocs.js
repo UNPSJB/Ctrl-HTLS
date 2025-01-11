@@ -243,6 +243,48 @@
 
 /**
  * @swagger
+ * /paises/{id}:
+ *   get:
+ *     summary: Obtiene un país por su ID
+ *     tags: [Localidad]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del país
+ *     responses:
+ *       200:
+ *         description: País obtenido exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Pais'
+ *       404:
+ *         description: País no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "País no encontrado"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+
+/**
+ * @swagger
  * /provincias/{paisId}:
  *   get:
  *     summary: Obtiene todas las provincias de un país
