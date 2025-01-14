@@ -17,7 +17,7 @@ const {
   getCiudadById,
 } = require('../../controllers/core/localidadController');
 
-const { createEmpleado } = require('../../controllers/core/personalController');
+const { createEmpleado } = require('../../controllers/core/personaController');
 
 const router = express.Router();
 

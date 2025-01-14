@@ -18,7 +18,7 @@ const Empleado = sequelize.define(
       isEmail: true,
     },
     rol: {
-      type: DataTypes.ENUM('Administrador', 'Vendedor', 'Desarrollador'),
+      type: DataTypes.ENUM('administrador', 'vendedor', 'desarrollador'),
       allowNull: false,
     },
     password: {
@@ -30,7 +30,7 @@ const Empleado = sequelize.define(
       allowNull: true, // Opcional
     },
     tipoDocumento: {
-      type: DataTypes.ENUM('DNI', 'LI', 'LE', 'Pasaporte'),
+      type: DataTypes.ENUM('dni', 'li', 'le', 'pasaporte'),
       allowNull: false,
     },
     numeroDocumento: {

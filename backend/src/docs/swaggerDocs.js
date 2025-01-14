@@ -50,6 +50,44 @@
  *         provinciaId:
  *           type: integer
  *           example: 1
+ *     Empleado:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           example: 1
+ *         nombre:
+ *           type: string
+ *           example: "Juan"
+ *         apellido:
+ *           type: string
+ *           example: "Pérez"
+ *         email:
+ *           type: string
+ *           example: "juan.perez@example.com"
+ *         rol:
+ *           type: string
+ *           enum: [administrador, vendedor, desarrollador]
+ *           example: "administrador"
+ *         password:
+ *           type: string
+ *           example: "password123"
+ *         telefono:
+ *           type: string
+ *           example: "123456789"
+ *         tipoDocumento:
+ *           type: string
+ *           enum: [dni, li, le, pasaporte]
+ *           example: "dni"
+ *         numeroDocumento:
+ *           type: string
+ *           example: "12345678"
+ *         direccion:
+ *           type: string
+ *           example: "Calle Falsa 123"
+ *         ciudadId:
+ *           type: integer
+ *           example: 1
  */
 
 /**
@@ -329,4 +367,129 @@
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Ciudad'
+ */
+
+/**
+ * @swagger
+ * /empleado:
+ *   post:
+ *     summary: Crea un nuevo empleado
+ *     tags: [Empleado]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 example: "Juan"
+ *               apellido:
+ *                 type: string
+ *                 example: "Pérez"
+ *               email:
+ *                 type: string
+ *                 example: "juan.perez@example.com"
+ *               rol:
+ *                 type: string
+ *                 enum: [administrador, vendedor, desarrollador]
+ *                 example: "administrador"
+ *               password:
+ *                 type: string
+ *                 example: "password123"
+ *               telefono:
+ *                 type: string
+ *                 example: "123456789"
+ *               tipoDocumento:
+ *                 type: string
+ *                 enum: [dni, li, le, pasaporte]
+ *                 example: "dni"
+ *               numeroDocumento:
+ *                 type: string
+ *                 example: "12345678"
+ *               direccion:
+ *                 type: string
+ *                 example: "Calle Falsa 123"
+ *               ciudadId:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Empleado creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *                 nombre:
+ *                   type: string
+ *                   example: "Juan"
+ *                 apellido:
+ *                   type: string
+ *                   example: "Pérez"
+ *                 email:
+ *                   type: string
+ *                   example: "juan.perez@example.com"
+ *                 rol:
+ *                   type: string
+ *                   example: "administrador"
+ *                 telefono:
+ *                   type: string
+ *                   example: "123456789"
+ *                 tipoDocumento:
+ *                   type: string
+ *                   example: "dni"
+ *                 numeroDocumento:
+ *                   type: string
+ *                   example: "12345678"
+ *                 direccion:
+ *                   type: string
+ *                   example: "Calle Falsa 123"
+ *                 ciudadId:
+ *                   type: integer
+ *                   example: 1
+ *       400:
+ *         description: Error en la solicitud
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "El email es requerido"
+ *       409:
+ *         description: Conflicto en la solicitud
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "El email ya está registrado"
+ *       404:
+ *         description: Ciudad no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "La ciudad no existe"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Error interno del servidor"
  */

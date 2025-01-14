@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
-const crearEmpleado = require('../../services/core/personalServices');
+
+const personaServices = require('../../services/core/personaServices');
 
 const createEmpleado = async (req, res) => {
   const errors = validationResult(req);
@@ -7,7 +8,7 @@ const createEmpleado = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    const empleado = await crearEmpleado(req.body);
+    const empleado = await personaServices.crearEmpleado(req.body);
     return res.status(201).json(empleado);
   } catch (error) {
     const statusCode = error.statusCode || 500;

@@ -22,7 +22,7 @@ const validatePersona = [
   body('rol')
     .notEmpty()
     .withMessage('El rol es requerido')
-    .isIn(['Administrador', 'Vendedor', 'Desarrollador'])
+    .isIn(['administrador', 'vendedor', 'desarrollador'])
     .withMessage(
       'El rol debe ser uno de los siguientes: Administrador, Vendedor, Desarrollador',
     )
