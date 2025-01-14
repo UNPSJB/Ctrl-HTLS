@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 
-const HotelVendedor = sequelize.define(
-  'HotelVendedor',
+const HotelEmpleado = sequelize.define(
+  'HotelEmpleado',
   {
     hotelId: {
       type: DataTypes.INTEGER,
@@ -11,18 +11,18 @@ const HotelVendedor = sequelize.define(
         key: 'id',
       },
     },
-    vendedorId: {
+    empleadoId: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'Vendedor',
+        model: 'HotelEmpleado',
         key: 'id',
       },
     },
   },
   {
-    tableName: 'hotel_vendedor',
+    tableName: 'hotel_empleado',
     timestamps: false,
   },
 );
 
-module.exports = HotelVendedor;
+module.exports = HotelEmpleado;

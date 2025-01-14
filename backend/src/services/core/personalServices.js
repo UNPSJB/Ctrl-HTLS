@@ -1,45 +1,56 @@
-const Administrador = require('../../models/Administrador');
-const Cliente = require('../../models/Cliente');
-const Vendedor = require('../../models/Vendedor');
-const Usuario = require('../../models/Usuario');
+const Empleado = require('../../models/core/Empleado');
+const Ciudad = require('../../models/core/Ciudad');
 const CustomError = require('../../utils/CustomError');
 
-const crearAdministrador = async (data) => {
+const crearEmpleado = async (empleado) => {
   const {
     nombre,
     apellido,
+    email,
+    rol,
+    password,
+    telefono,
     tipoDocumento,
     numeroDocumento,
     direccion,
-    email,
-    telefono = null,
-  } = data;
+    ciudadId,
+  } = empleado;
+
   // Verificar si el email ya existe
-  const existingEmail = await Administrador.findOne({ where: { email } });
+  const existingEmail = await Empleado.findOne({ where: { email } });
   if (existingEmail) {
     throw new CustomError('El email ya está registrado', 409); // Conflict
   }
 
   // Verificar si el número de documento ya existe
-  const existingDocumento = await Administrador.findOne({
+  const existingDocumento = await Empleado.findOne({
     where: { numeroDocumento },
   });
   if (existingDocumento) {
     throw new CustomError('El número de documento ya está registrado', 409); // Conflict
   }
 
-  // Crear el nuevo administrador
-  const administrador = await Administrador.create({
+  // Verificar si la ciudad existe
+  const ciudad = await Ciudad.findByPk(ciudadId);
+  if (!ciudad) {
+    throw new CustomError('La ciudad no existe', 404); // Not Found
+  }
+
+  // Crear el nuevo empleado
+  const nuevoEmpleado = await Empleado.create({
     nombre,
     apellido,
+    email,
+    rol,
+    password,
+    telefono,
     tipoDocumento,
     numeroDocumento,
     direccion,
-    email,
-    telefono,
+    ciudadId,
   });
 
-  return administrador;
+  return nuevoEmpleado;
 };
 
-module.exports = { crearAdministrador };
+module.exports = { crearEmpleado };

@@ -17,9 +17,7 @@ const {
   getCiudadById,
 } = require('../../controllers/core/localidadController');
 
-const {
-  createAdministrador,
-} = require('../../controllers/core/personalController');
+const { createEmpleado } = require('../../controllers/core/personalController');
 
 const router = express.Router();
 
@@ -37,6 +35,6 @@ router.get('/ciudades/:id', validateId, getCiudadById); //Ruta para obtener una 
 
 //#endregion
 
-router.post('/administrador', validatePersona, createAdministrador); //Ruta para crear un administrador
-
+router.post('/empleado', validatePersona, createEmpleado); //Ruta para crear un administrador
+router.post('/cliente');
 module.exports = router;

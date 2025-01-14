@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 
-const Vendedor = sequelize.define(
-  'Vendedor',
+const Empleado = sequelize.define(
+  'Empleado',
   {
     nombre: {
       type: DataTypes.STRING,
@@ -16,6 +16,14 @@ const Vendedor = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       isEmail: true,
+    },
+    rol: {
+      type: DataTypes.ENUM('Administrador', 'Vendedor', 'Desarrollador'),
+      allowNull: false,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     telefono: {
       type: DataTypes.STRING,
@@ -36,9 +44,9 @@ const Vendedor = sequelize.define(
     },
   },
   {
-    tableName: 'vendedores',
+    tableName: 'empleados',
     timestamps: false,
   },
 );
 
-module.exports = Vendedor;
+module.exports = Empleado;

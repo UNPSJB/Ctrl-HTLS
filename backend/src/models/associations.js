@@ -12,8 +12,8 @@ const Encargado = require('./hotel/Encargado');
 const Categoria = require('./hotel/Categoria');
 const Temporada = require('./hotel/Temporada');
 const Descuento = require('./hotel/Descuento');
-const Vendedor = require('./core/Vendedor');
-const HotelVendedor = require('./hotel/HotelVendedor');
+const Empleado = require('./core/Empleado');
+const HotelEmpleado = require('./hotel/HotelEmpleado');
 const Factura = require('./ventas/Factura');
 const DetalleFactura = require('./ventas/DetalleFactura');
 const Liquidacion = require('./ventas/Liquidacion');
@@ -22,8 +22,8 @@ const CategoriaServicio = require('./hotel/CategoriaServicio');
 const Alquiler = require('./ventas/Alquiler');
 const AlquilerHabitacion = require('./ventas/AlquilerHabitacion');
 const Pago = require('./ventas/Pago');
-const Administrador = require('./core/Administrador');
-const Usuario = require('./core/Usuario');
+// const Administrador = require('./core/Administrador');
+// const Usuario = require('./core/Usuario');
 
 //#region ASOCIACIONES DE LOCALIDADES
 
@@ -49,15 +49,15 @@ Provincia.hasMany(Ciudad, {
   as: 'ciudades', // Alias para acceder a las ciudades de una provincia
 });
 
-// Relación uno a muchos (Ciudad -> Vendedor)
-Vendedor.belongsTo(Ciudad, {
+// Relación uno a muchos (Ciudad -> Empleado)
+Empleado.belongsTo(Ciudad, {
   foreignKey: 'ciudadId',
   as: 'ciudad',
 });
 
-Ciudad.hasMany(Vendedor, {
+Ciudad.hasMany(Empleado, {
   foreignKey: 'ciudadId',
-  as: 'vendedores',
+  as: 'empleados',
 });
 
 // Relación uno a muchos (Ciudad -> Cliente)
@@ -170,17 +170,17 @@ Descuento.belongsTo(Hotel, {
   as: 'hotel',
 });
 
-// Relación muchos a muchos (Hotel -> Vendedor)
-Hotel.belongsToMany(Vendedor, {
-  through: HotelVendedor,
+// Relación muchos a muchos (Hotel -> Empleado)
+Hotel.belongsToMany(Empleado, {
+  through: HotelEmpleado,
   foreignKey: 'hotelId',
-  otherKey: 'vendedorId',
-  as: 'vendedores',
+  otherKey: 'empleadoId',
+  as: 'empleados',
 });
 
-Vendedor.belongsToMany(Hotel, {
-  through: HotelVendedor,
-  foreignKey: 'vendedorId',
+Empleado.belongsToMany(Hotel, {
+  through: HotelEmpleado,
+  foreignKey: 'empleadoId',
   otherKey: 'hotelId',
   as: 'hoteles',
 });
@@ -274,15 +274,15 @@ DetalleFactura.belongsTo(Liquidacion, {
   as: 'liquidacion',
 });
 
-// Relación uno a muchos (Vendedor -> Liquidacion)
-Vendedor.hasMany(Liquidacion, {
-  foreignKey: 'vendedorId',
+// Relación uno a muchos (Empleado -> Liquidacion)
+Empleado.hasMany(Liquidacion, {
+  foreignKey: 'empleadoId',
   as: 'liquidaciones',
 });
 
-Liquidacion.belongsTo(Vendedor, {
-  foreignKey: 'vendedorId',
-  as: 'vendedor',
+Liquidacion.belongsTo(Empleado, {
+  foreignKey: 'empleadoId',
+  as: 'empleado',
 });
 
 // Relación muchos a muchos (Alquiler -> Habitacion)
@@ -339,36 +339,15 @@ DetalleFactura.belongsTo(Alquiler, {
   as: 'alquiler',
 });
 
-//#endregion
-
-//#region ASOCIACIONES DE USUARIOS
-
-// Relación uno a uno (Administrador -> Usuario)
-Administrador.belongsTo(Usuario, {
-  foreignKey: {
-    name: 'usuarioId',
-    allowNull: false,
-  },
-  as: 'usuario',
+// Relación uno a muchos (Empleado -> DetalleFactura)
+Empleado.hasMany(DetalleFactura, {
+  foreignKey: 'empleadoId',
+  as: 'detallesFactura',
 });
 
-Usuario.hasOne(Administrador, {
-  foreignKey: 'usuarioId',
-  as: 'administrador',
-});
-
-// Relación uno a uno (Vendedor -> Usuario)
-Vendedor.belongsTo(Usuario, {
-  foreignKey: {
-    name: 'usuarioId',
-    allowNull: false,
-  },
-  as: 'usuario',
-});
-
-Usuario.hasOne(Vendedor, {
-  foreignKey: 'usuarioId',
-  as: 'vendedor',
+DetalleFactura.belongsTo(Empleado, {
+  foreignKey: 'empleadoId',
+  as: 'empleado',
 });
 
 //#endregion
