@@ -1,6 +1,7 @@
 const { body, param } = require('express-validator');
 
-const validatePersona = [
+// Validaciones comunes para todas las personas
+const commonValidations = [
   body('nombre')
     .notEmpty()
     .withMessage('El nombre es requerido')
@@ -19,19 +20,6 @@ const validatePersona = [
     .isEmail()
     .withMessage('Debe ser un email válido')
     .toLowerCase(),
-  body('rol')
-    .notEmpty()
-    .withMessage('El rol es requerido')
-    .isIn(['administrador', 'vendedor', 'desarrollador'])
-    .withMessage(
-      'El rol debe ser uno de los siguientes: Administrador, Vendedor, Desarrollador',
-    )
-    .toLowerCase(),
-  body('password')
-    .notEmpty()
-    .withMessage('La contraseña es requerida')
-    .isString()
-    .withMessage('La contraseña debe ser una cadena de caracteres'),
   body('telefono')
     .optional()
     .isString()
@@ -53,6 +41,24 @@ const validatePersona = [
     .isLength({ min: 7, max: 15 })
     .withMessage('El número de documento debe tener entre 7 y 15 caracteres')
     .toLowerCase(),
+];
+
+// Validaciones específicas para Empleado
+const validateEmpleado = [
+  ...commonValidations,
+  body('rol')
+    .notEmpty()
+    .withMessage('El rol es requerido')
+    .isIn(['administrador', 'vendedor', 'desarrollador'])
+    .withMessage(
+      'El rol debe ser uno de los siguientes: Administrador, Vendedor, Desarrollador',
+    )
+    .toLowerCase(),
+  body('password')
+    .notEmpty()
+    .withMessage('La contraseña es requerida')
+    .isString()
+    .withMessage('La contraseña debe ser una cadena de caracteres'),
   body('direccion')
     .notEmpty()
     .withMessage('La dirección es requerida')
@@ -61,8 +67,11 @@ const validatePersona = [
     .toLowerCase(),
 ];
 
+// Validaciones específicas para Cliente
+const validateCliente = [...commonValidations];
+
 const validateId = [
   param('id').isInt().withMessage('El id debe ser un número entero'),
 ];
 
-module.exports = { validatePersona, validateId };
+module.exports = { validateEmpleado, validateCliente, validateId };

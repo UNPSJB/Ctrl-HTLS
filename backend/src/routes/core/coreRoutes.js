@@ -3,7 +3,10 @@ const {
   validateLocalidad,
   validateId,
 } = require('../../validators/core/localidadValidators');
-const { validatePersona } = require('../../validators/core/personaValidators');
+const {
+  validateEmpleado,
+  validateCliente,
+} = require('../../validators/core/personaValidators');
 
 const {
   createLocalidad,
@@ -17,7 +20,13 @@ const {
   getCiudadById,
 } = require('../../controllers/core/localidadController');
 
-const { createEmpleado } = require('../../controllers/core/personaController');
+const {
+  createEmpleado,
+  createCliente,
+  getClientes,
+  getClienteById,
+  updateCliente,
+} = require('../../controllers/core/personaController');
 
 const router = express.Router();
 
@@ -35,6 +44,10 @@ router.get('/ciudades/:id', validateId, getCiudadById); //Ruta para obtener una 
 
 //#endregion
 
-router.post('/empleado', validatePersona, createEmpleado); //Ruta para crear un administrador
-router.post('/cliente');
+router.post('/empleado', validateEmpleado, createEmpleado); //Ruta para crear un administrador
+router.post('/cliente', validateCliente, createCliente); //Ruta para crear un cliente
+router.get('/clientes', getClientes); //Ruta para obtener todos los clientes
+router.get('/cliente/:id', validateId, getClienteById); //Ruta para obtener un cliente por su ID
+router.put('/cliente/:id', validateId, validateCliente, updateCliente); //Ruta para actualizar un cliente
+
 module.exports = router;

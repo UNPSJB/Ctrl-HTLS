@@ -60,17 +60,6 @@ Ciudad.hasMany(Empleado, {
   as: 'empleados',
 });
 
-// Relación uno a muchos (Ciudad -> Cliente)
-Cliente.belongsTo(Ciudad, {
-  foreignKey: 'ciudadId', // Clave foránea en Cliente que apunta a Ciudad
-  as: 'ciudad', // Alias para acceder a la ciudad de un cliente
-});
-
-Ciudad.hasMany(Cliente, {
-  foreignKey: 'ciudadId', // Aseguramos que la clave coincida
-  as: 'clientes', // Alias para acceder a los clientes de una ciudad
-});
-
 //#endregion
 
 //#region ASOCIACIONES DE HOTEL
