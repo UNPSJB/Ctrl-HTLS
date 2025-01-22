@@ -22,10 +22,15 @@ const {
 
 const {
   createEmpleado,
+  updateEmpleado,
+  deleteEmpleado,
   createCliente,
+  getVendedores,
+  getVendedor,
   getClientes,
   getClienteById,
   updateCliente,
+  deleteCliente,
 } = require('../../controllers/core/personaController');
 
 const router = express.Router();
@@ -44,10 +49,20 @@ router.get('/ciudades/:id', validateId, getCiudadById); //Ruta para obtener una 
 
 //#endregion
 
+//#region Rutas de Empleados
 router.post('/empleado', validateEmpleado, createEmpleado); //Ruta para crear un administrador
+router.put('/empleado/:id', validateId, validateEmpleado, updateEmpleado); //Ruta para actualizar un administrador
+router.delete('/empleado/:id', validateId, deleteEmpleado); //Ruta para eliminar un administrador
+router.get('/vendedores', getVendedores); //Ruta para obtener todos los vendedores
+router.get('vendedor/:id', validateId, getVendedor); //Ruta para obtener un vendedor por su ID
+//#endregion
+
+//#region Rutas de Clientes
 router.post('/cliente', validateCliente, createCliente); //Ruta para crear un cliente
 router.get('/clientes', getClientes); //Ruta para obtener todos los clientes
 router.get('/cliente/:id', validateId, getClienteById); //Ruta para obtener un cliente por su ID
 router.put('/cliente/:id', validateId, validateCliente, updateCliente); //Ruta para actualizar un cliente
+router.delete('/cliente/:id', validateId, deleteCliente); //Ruta para eliminar un cliente
+//#endregion
 
 module.exports = router;

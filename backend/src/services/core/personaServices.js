@@ -1,12 +1,28 @@
 const Empleado = require('../../models/core/Empleado');
 const Cliente = require('../../models/core/Cliente');
-const Ciudad = require('../../models/core/Ciudad');
+const Encargado = require('../../models/hotel/Encargado');
 const { Op } = require('sequelize');
 const CustomError = require('../../utils/CustomError');
 const bcrypt = require('bcrypt');
-const { where } = require('sequelize');
 const { verificarCiudad } = require('../../utils/helpers');
 
+/**
+ * Crea un nuevo empleado.
+ *
+ * @param {Object} empleado - Los datos del empleado a crear.
+ * @param {string} empleado.nombre - El nombre del empleado.
+ * @param {string} empleado.apellido - El apellido del empleado.
+ * @param {string} empleado.email - El email del empleado.
+ * @param {string} empleado.rol - El rol del empleado (administrador, vendedor, desarrollador).
+ * @param {string} empleado.password - La contraseña del empleado.
+ * @param {string} [empleado.telefono] - El teléfono del empleado (opcional).
+ * @param {string} empleado.tipoDocumento - El tipo de documento del empleado (dni, li, le, pasaporte).
+ * @param {string} empleado.numeroDocumento - El número de documento del empleado.
+ * @param {string} empleado.direccion - La dirección del empleado.
+ * @param {number} empleado.ciudadId - El ID de la ciudad del empleado.
+ * @returns {Promise<Object>} El empleado creado.
+ * @throws {CustomError} Si el email o el número de documento ya están registrados, o si la ciudad no existe.
+ */
 const crearEmpleado = async (empleado) => {
   const {
     nombre,
@@ -43,6 +59,87 @@ const crearEmpleado = async (empleado) => {
   });
 
   return nuevoEmpleado;
+};
+
+const actualizarEmpleado = async (id, empleado) => {
+  const {
+    nombre,
+    apellido,
+    email,
+    rol,
+    password,
+    telefono,
+    tipoDocumento,
+    numeroDocumento,
+    direccion,
+    ciudadId,
+  } = empleado;
+
+  // Verificar si el empleado existe
+  const empleadoExistente = await Empleado.findByPk(id);
+  if (!empleadoExistente) {
+    throw new CustomError('Empleado no encontrado', 404);
+  }
+
+  // Verificar datos
+  await verificarUpdate(numeroDocumento, email, telefono, id);
+  await verificarCiudad(ciudadId);
+
+  // Hash la contraseña
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Actualizar el empleado
+  await empleadoExistente.update({
+    nombre,
+    apellido,
+    email,
+    rol,
+    password: hashedPassword,
+    telefono,
+    tipoDocumento,
+    numeroDocumento,
+    direccion,
+    ciudadId,
+  });
+
+  return empleadoExistente;
+};
+
+const eliminarEmpleado = async (id) => {
+  const empleado = await Empleado.findByPk(id);
+  if (!empleado) {
+    throw new CustomError('Empleado no encontrado', 404);
+  }
+
+  // Verificar el rol del empleado
+  if (empleado.rol !== 'vendedor') {
+    throw new CustomError(
+      'Solo se pueden eliminar empleados con rol de vendedor',
+      403,
+    ); // Forbidden
+  }
+
+  await empleado.destroy();
+};
+
+const obtenerVendedores = async () => {
+  const vendedores = await Empleado.findAll({
+    where: { rol: 'vendedor' },
+  });
+  return vendedores;
+};
+
+const obtenerVendedorPorId = async (id) => {
+  const vendedor = await Empleado.findByPk(id);
+  if (!vendedor) {
+    throw new CustomError('Vendedor no encontrado', 404);
+  }
+
+  if (vendedor.rol !== 'vendedor') {
+    throw new CustomError('El empleado no es un vendedor', 404);
+  }
+
+  return vendedor;
 };
 
 const crearCliente = async (cliente) => {
@@ -100,6 +197,15 @@ const actualizarCliente = async (id, cliente) => {
   return clienteExistente;
 };
 
+const eliminarCliente = async (id) => {
+  const cliente = await Cliente.findByPk(id);
+  if (!cliente) {
+    throw new CustomError('Cliente no encontrado', 404);
+  }
+
+  await cliente.destroy();
+};
+
 const obtenerClientes = async () => {
   const clientes = await Cliente.findAll();
   return clientes;
@@ -121,7 +227,12 @@ const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
   const emailEmpleado = await Empleado.findOne({
     where: { email, id: { [Op.ne]: id } },
   });
-  const emailExistente = emailCliente || emailEmpleado;
+
+  const emailEncargado = await Encargado.findOne({
+    where: { email, id: { [Op.ne]: id } },
+  });
+
+  const emailExistente = emailCliente || emailEmpleado || emailEncargado;
 
   if (emailExistente) {
     throw new CustomError('El email ya está registrado', 409); // Conflict
@@ -134,7 +245,13 @@ const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
   const documentoEmpleado = await Empleado.findOne({
     where: { numeroDocumento, id: { [Op.ne]: id } },
   });
-  const documentoExistente = documentoCliente || documentoEmpleado;
+
+  const documentoEncargado = await Encargado.findOne({
+    where: { numeroDocumento, id: { [Op.ne]: id } },
+  });
+
+  const documentoExistente =
+    documentoCliente || documentoEmpleado || documentoEncargado;
 
   if (documentoExistente) {
     throw new CustomError('El número de documento ya está registrado', 409); // Conflict
@@ -158,7 +275,10 @@ const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
 const verificarExistente = async (numeroDocumento, email, telefono) => {
   const emailEmpleado = await Empleado.findOne({ where: { email } });
   const emailCliente = await Cliente.findOne({ where: { email } });
-  const existingEmail = emailEmpleado || emailCliente;
+
+  const emailEncargado = await Encargado.findOne({ where: { email } });
+
+  const existingEmail = emailEmpleado || emailCliente || emailEncargado;
   if (existingEmail) {
     throw new CustomError('El email ya está registrado', 409); // Conflict
   }
@@ -170,7 +290,13 @@ const verificarExistente = async (numeroDocumento, email, telefono) => {
   const documentoCliente = await Cliente.findOne({
     where: { numeroDocumento },
   });
-  const existingDocumento = documentoEmpleado || documentoCliente;
+
+  const documentoEncargado = await Encargado.findOne({
+    where: { numeroDocumento },
+  });
+
+  const existingDocumento =
+    documentoEmpleado || documentoCliente || documentoEncargado;
   if (existingDocumento) {
     throw new CustomError('El número de documento ya está registrado', 409); // Conflict
   }
@@ -178,8 +304,10 @@ const verificarExistente = async (numeroDocumento, email, telefono) => {
   // Verificar si el teléfono ya existe
   const telefonoEmpleado = await Empleado.findOne({ where: { telefono } });
   const telefonoCliente = await Cliente.findOne({ where: { telefono } });
-  const existingTelefono = telefonoEmpleado || telefonoCliente;
+  const telefonoEncargado = await Encargado.findOne({ where: { telefono } });
 
+  const existingTelefono =
+    telefonoEmpleado || telefonoCliente || telefonoEncargado;
   if (existingTelefono) {
     throw new CustomError('El teléfono ya está registrado', 409); // Conflict
   }
@@ -187,8 +315,13 @@ const verificarExistente = async (numeroDocumento, email, telefono) => {
 
 module.exports = {
   crearEmpleado,
+  actualizarEmpleado,
+  eliminarEmpleado,
+  obtenerVendedores,
+  obtenerVendedorPorId,
   crearCliente,
   actualizarCliente,
+  eliminarCliente,
   obtenerClientes,
   obtenerClientePorId,
 };
