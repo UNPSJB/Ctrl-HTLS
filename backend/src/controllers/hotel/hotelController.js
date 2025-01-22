@@ -1,0 +1,37 @@
+const { validationResult } = require('express-validator');
+const hotelServices = require('../../services/hotel/hotelServices');
+
+const createHotel = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const {
+    nombre,
+    direccion,
+    telefono,
+    email,
+    ciudadId,
+    encargadoId,
+    categoriaId,
+  } = req.body;
+
+  try {
+    const hotel = await hotelServices.crearHotel(
+      nombre,
+      direccion,
+      telefono,
+      email,
+      ciudadId,
+      encargadoId,
+      categoriaId,
+    );
+    res.status(201).json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+module.exports = { createHotel };

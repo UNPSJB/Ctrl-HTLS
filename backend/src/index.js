@@ -4,6 +4,8 @@ const port = 3000;
 const sequelize = require('./config/database');
 const { swaggerUi, swaggerSpec } = require('./config/swaggerConfig');
 const coreRoutes = require('./routes/core/coreRoutes');
+const hotelRoutes = require('./routes/hotel/hotelRoutes');
+
 // Importar todos los modelos y asociaciones
 require('./models/associations');
 require('./docs/swaggerDocs');
@@ -15,6 +17,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Usar las rutas de core
 app.use('/api', coreRoutes);
+app.use('/api', hotelRoutes);
 
 // Sincronizar la base de datos
 sequelize
