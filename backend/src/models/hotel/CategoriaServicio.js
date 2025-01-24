@@ -4,14 +4,14 @@ const sequelize = require('../../config/database');
 const CategoriaServicio = sequelize.define(
   'CategoriaServicio',
   {
-    categoriaId: {
+    categoriaid: {
       type: DataTypes.INTEGER,
       references: {
         model: 'Categoria',
         key: 'id',
       },
     },
-    servicioId: {
+    servicioid: {
       type: DataTypes.INTEGER,
       references: {
         model: 'Servicio',

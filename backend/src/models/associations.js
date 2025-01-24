@@ -177,15 +177,15 @@ Empleado.belongsToMany(Hotel, {
 // Relación muchos a muchos (Categoria -> Servicio)
 Categoria.belongsToMany(Servicio, {
   through: CategoriaServicio,
-  foreignKey: 'categoriaId',
-  otherKey: 'servicioId',
+  foreignKey: 'categoriaid',
+  otherKey: 'servicioid',
   as: 'servicios',
 });
 
 Servicio.belongsToMany(Categoria, {
   through: CategoriaServicio,
-  foreignKey: 'servicioId',
-  otherKey: 'categoriaId',
+  foreignKey: 'servicioid',
+  otherKey: 'categoriaid',
   as: 'categorias',
 });
 
