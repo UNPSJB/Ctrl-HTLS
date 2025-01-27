@@ -64,12 +64,13 @@ Ciudad.hasMany(Empleado, {
 
 //#region ASOCIACIONES DE HOTEL
 
-// Relación muchos a muchos (Hotel -> TipoHabitacion)
+// Relación muchos a muchos (Hotel <-> TipoHabitacion)
 Hotel.belongsToMany(TipoHabitacion, {
   through: HotelTipoHabitacion,
   foreignKey: 'hotelId',
   otherKey: 'tipoHabitacionId',
   as: 'tiposHabitacion',
+  onDelete: 'CASCADE',
 });
 
 TipoHabitacion.belongsToMany(Hotel, {

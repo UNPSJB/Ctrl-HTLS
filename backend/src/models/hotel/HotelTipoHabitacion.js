@@ -18,6 +18,10 @@ const HotelTipoHabitacion = sequelize.define(
         key: 'id',
       },
     },
+    precio: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
   },
   {
     tableName: 'hotel_tipo_habitacion',

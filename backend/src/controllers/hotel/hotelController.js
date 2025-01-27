@@ -12,6 +12,7 @@ const createHotel = async (req, res) => {
     direccion,
     telefono,
     email,
+    tipoHabitaciones,
     ciudadId,
     encargadoId,
     categoriaId,
@@ -23,6 +24,7 @@ const createHotel = async (req, res) => {
       direccion,
       telefono,
       email,
+      tipoHabitaciones,
       ciudadId,
       encargadoId,
       categoriaId,
@@ -79,4 +81,6 @@ const getCategorias = async (req, res) => {
   }
 };
 
-module.exports = { createHotel, updateHotel, getCategorias };
+const setHabitaciones = async (req, res) => {};
+
+module.exports = { createHotel, updateHotel, getCategorias, setHabitaciones };
