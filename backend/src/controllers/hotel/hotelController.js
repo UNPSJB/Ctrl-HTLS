@@ -81,6 +81,22 @@ const getCategorias = async (req, res) => {
   }
 };
 
-const setHabitaciones = async (req, res) => {};
+const setHabitaciones = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+  const habitaciones = req.body;
+
+  try {
+    const hotel = await hotelServices.agregarHabitaciones(id, habitaciones);
+    res.json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
 
 module.exports = { createHotel, updateHotel, getCategorias, setHabitaciones };
