@@ -14,20 +14,17 @@ const HotelSort = ({ onSortChange, onViewModeChange, currentViewMode }) => {
   return (
     <div className="flex justify-end items-center w-full gap-2">
       {/* Selector de Ordenación */}
-      <div>
-        <select
-          id="sort"
-          value={sortOption}
-          onChange={handleSortChange}
-          className="p-2 border rounded text-sm"
-        >
-          <option value="price-asc">Precio: Menor a Mayor</option>
-          <option value="price-desc">Precio: Mayor a Menor</option>
-          <option value="stars-asc">Estrellas: Menor a Mayor</option>
-          <option value="stars-desc">Estrellas: Mayor a Menor</option>
-        </select>
-      </div>
-
+      <select
+        id="sort"
+        value={sortOption}
+        onChange={handleSortChange}
+        className="p-2 border rounded"
+      >
+        <option value="price-asc">Precio: Menor a Mayor</option>
+        <option value="price-desc">Precio: Mayor a Menor</option>
+        <option value="stars-asc">Estrellas: Menor a Mayor</option>
+        <option value="stars-desc">Estrellas: Mayor a Menor</option>
+      </select>
       {/* Cambiador de Modo de Vista */}
       <ViewModeSwitcher
         currentViewMode={currentViewMode}
