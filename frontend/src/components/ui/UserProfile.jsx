@@ -3,19 +3,16 @@ import { FaUserCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 const UserProfile = ({ name, userType, collapsed }) => {
-  return (
-    <Link
-      to="/perfil"
-      className={`flex items-center ${
-        collapsed ? 'justify-center' : 'gap-4'
-      } py-3 px-4 text-black bg-gray-100 rounded-md hover:bg-gray-200 transition-colors`}
-    >
-      {/* Icono de usuario */}
-      <div className="flex-shrink-0">
-        <FaUserCircle className="text-2xl text-gray-600" />
-      </div>
+  const baseClasses =
+    'flex items-center rounded-md transition-colors text-slate-900 bg-slate-200';
+  const sizeClasses = collapsed ? 'justify-center size-12' : 'gap-4 p-4';
+  const colorClasses = collapsed ? 'hover:bg-slate-300' : 'hover:bg-slate-200';
+  const combinedClasses = `${baseClasses} ${sizeClasses} ${colorClasses}`;
 
-      {/* Información del usuario (visible solo si no está colapsado) */}
+  return (
+    <Link to="/perfil" className={combinedClasses}>
+      <FaUserCircle className="size-5 text-gray-600" />
+
       {!collapsed && (
         <div className="flex flex-col">
           <span className="font-bold text-base">{name}</span>
@@ -29,11 +26,11 @@ const UserProfile = ({ name, userType, collapsed }) => {
 UserProfile.propTypes = {
   name: PropTypes.string.isRequired,
   userType: PropTypes.string.isRequired,
-  collapsed: PropTypes.bool, // Nueva propiedad
+  collapsed: PropTypes.bool,
 };
 
 UserProfile.defaultProps = {
-  collapsed: false, // Valor predeterminado
+  collapsed: false,
 };
 
 export default UserProfile;

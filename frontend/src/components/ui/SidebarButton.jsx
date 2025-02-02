@@ -2,24 +2,21 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 const SidebarButton = ({ to, icon: Icon, label, onClick, collapsed }) => {
+  const baseClasses =
+    'flex items-center rounded-md transition-colors text-slate-900';
+  const sizeClasses = collapsed ? 'justify-center w-12 h-12' : 'gap-4 p-4';
+  const colorClasses = collapsed ? 'hover:bg-slate-300' : 'hover:bg-slate-200';
+
+  const combinedClasses = `${baseClasses} ${sizeClasses} ${colorClasses}`;
+
   return to ? (
-    <Link
-      to={to}
-      className={`flex items-center ${
-        collapsed ? 'justify-center w-12 h-12' : 'gap-3 py-4 px-4'
-      } rounded-md hover:bg-primary-200 transition-colors text-text-800`}
-    >
-      {Icon && <Icon className="h-5 w-5" />}
+    <Link to={to} className={combinedClasses}>
+      {Icon && <Icon className="size-5" />}
       {!collapsed && <span>{label}</span>}
     </Link>
   ) : (
-    <button
-      onClick={onClick}
-      className={`flex items-center ${
-        collapsed ? 'justify-center w-12 h-12' : 'gap-3 py-4 px-4'
-      } rounded-md hover:bg-primary-200 transition-colors text-text-800`}
-    >
-      {Icon && <Icon className="h-5 w-5" />}
+    <button onClick={onClick} className={combinedClasses}>
+      {Icon && <Icon className="size-5" />}
       {!collapsed && <span>{label}</span>}
     </button>
   );

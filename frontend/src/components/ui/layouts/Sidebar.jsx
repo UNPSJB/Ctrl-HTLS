@@ -36,9 +36,11 @@ const Sidebar = () => {
       } min-h-screen flex flex-col border-r transition-all duration-300 ease-in-out`}
     >
       {/* Contenedor del logo y botón de minimizar */}
-      <div className="h-20 flex items-center border-b text-text-900 border-primary-200 px-4">
+      <div
+        className={`h-20 flex items-center border-b text-slate-900 border-slate-200 ${isCollapsed ? 'justify-center' : 'px-4'}`}
+      >
         <button
-          className="flex items-center justify-center w-10 h-10 rounded-md hover:bg-primary-200 transition-colors text-gray-600"
+          className="flex items-center justify-center w-10 h-10 rounded-md hover:bg-slate-200 transition-colors text-gray-600"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           {isCollapsed ? <FaBars /> : <FaChevronLeft />}
@@ -68,7 +70,7 @@ const Sidebar = () => {
 
       {/* Botón de cerrar sesión */}
       <div
-        className={`flex flex-col gap-2 p-4 border-t border-primary-200 transition-all duration-300 ease-in-out ${
+        className={`flex flex-col gap-2 p-4 border-t border-slate-200 transition-all duration-300 ease-in-out ${
           isCollapsed ? 'items-center' : ''
         }`}
       >
