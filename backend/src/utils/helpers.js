@@ -2,6 +2,7 @@ const Ciudad = require('../models/core/Ciudad');
 const Cliente = require('../models/core/Cliente');
 const Empleado = require('../models/core/Empleado');
 const Hotel = require('../models/hotel/Hotel');
+const TipoHabitacion = require('../models/hotel/TipoHabitacion');
 
 const CustomError = require('./CustomError');
 
@@ -74,9 +75,36 @@ const verificarDireccion = async (direccion, ciudadId) => {
   }
 };
 
+const verificarTiposHabitacion = async (tipoHabitaciones) => {
+  const idsTipoHabitacion = tipoHabitaciones.map((th) => th.idTipoHabitacion);
+
+  // Verificar si hay IDs duplicados
+  const idsUnicos = new Set(idsTipoHabitacion);
+  if (idsUnicos.size !== idsTipoHabitacion.length) {
+    throw new CustomError(
+      'No puedes asignar tipos de habitacion repetidos.',
+      400,
+    ); // Bad Request
+  }
+
+  // Verificar si todos los tipos de habitación existen
+  const tiposHabitacionExistentes = await TipoHabitacion.findAll({
+    where: { id: idsTipoHabitacion },
+    attributes: ['id'],
+  });
+
+  if (tiposHabitacionExistentes.length !== idsTipoHabitacion.length) {
+    throw new CustomError(
+      'Uno o más IDs de tipos de habitación no existen',
+      404,
+    ); // Not Found
+  }
+};
+
 module.exports = {
   verificarCiudad,
   verificarEmail,
   verificarTelefono,
   verificarDireccion,
+  verificarTiposHabitacion,
 };

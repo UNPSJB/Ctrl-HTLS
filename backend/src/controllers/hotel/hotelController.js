@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const hotelServices = require('../../services/hotel/hotelServices');
+const habitacionServices = require('../../services/hotel/habitacionServices');
 
 const createHotel = async (req, res) => {
   const errors = validationResult(req);
@@ -91,7 +92,10 @@ const setHabitaciones = async (req, res) => {
   const habitaciones = req.body;
 
   try {
-    const hotel = await hotelServices.agregarHabitaciones(id, habitaciones);
+    const hotel = await habitacionServices.agregarHabitaciones(
+      id,
+      habitaciones,
+    );
     res.json(hotel);
   } catch (error) {
     const statusCode = error.statusCode || 500;
@@ -99,4 +103,63 @@ const setHabitaciones = async (req, res) => {
   }
 };
 
-module.exports = { createHotel, updateHotel, getCategorias, setHabitaciones };
+const updateHabitacion = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id, idHabitacion } = req.params;
+  const habitacion = req.body;
+
+  try {
+    const hotel = await habitacionServices.modificarHabitacion(
+      id,
+      idHabitacion,
+      habitacion,
+    );
+    res.json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const deleteHabitacion = async (req, res) => {
+  const { id, idHabitacion } = req.params;
+
+  try {
+    await habitacionServices.eliminarHabitacion(id, idHabitacion);
+    res.json({ message: 'La habitación fue eliminada exitosamente' });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const setPaquetePromocional = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { id } = req.params;
+  const paquete = req.body;
+
+  try {
+    const hotel = await hotelServices.agregarPaquetePromocional(id, paquete);
+    res.json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  createHotel,
+  updateHotel,
+  getCategorias,
+  setHabitaciones,
+  updateHabitacion,
+  deleteHabitacion,
+  setPaquetePromocional,
+};
