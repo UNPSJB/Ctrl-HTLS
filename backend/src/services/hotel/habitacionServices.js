@@ -268,17 +268,68 @@ const verificarOcupada = async (idHabitacion) => {
   }
 };
 
-// Verificar si la habitación está asociada a uno o más paquetes promocionales
-const verificarPaquetePromocional = async (idHabitacion) => {
-  const paquetes = await PaquetePromocionalHabitacion.findAll({
-    where: { habitacionId: idHabitacion },
-  });
+const verificarHabitacionesHotel = async (idHotel, habitaciones) => {
+  for (const idHabitacion of habitaciones) {
+    const habitacion = await Habitacion.findOne({
+      where: {
+        hotelId: idHotel,
+        id: idHabitacion,
+      },
+    });
+    if (!habitacion) {
+      throw new CustomError(
+        `La habitación con ID ${idHabitacion} no existe o no pertenece al hotel`,
+        404,
+      ); // Not Found
+    }
+  }
+};
 
-  if (paquetes.length > 0) {
-    throw new CustomError(
-      'La habitación está asociada a uno o más paquetes promocionales y no se puede modificar',
-      409,
-    ); // Conflict
+// Verificar si la habitación está asociada a uno o más paquetes promocionales
+const verificarHabitacionesPaquetePromocional = async (
+  habitaciones,
+  inicio,
+  fin,
+) => {
+  for (const idHabitacion of habitaciones) {
+    const paquetes = await PaquetePromocionalHabitacion.findAll({
+      where: {
+        habitacionId: idHabitacion,
+        [Op.or]: [
+          {
+            fechaInicio: {
+              [Op.between]: [inicio, fin],
+            },
+          },
+          {
+            fechaFin: {
+              [Op.between]: [inicio, fin],
+            },
+          },
+          {
+            [Op.and]: [
+              {
+                fechaInicio: {
+                  [Op.lte]: inicio,
+                },
+              },
+              {
+                fechaFin: {
+                  [Op.gte]: fin,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (paquetes.length > 0) {
+      throw new CustomError(
+        `La habitación con ID ${idHabitacion} ya está asignada a un paquete promocional en ese rango de fechas`,
+        409,
+      ); // Conflict
+    }
   }
 };
 
@@ -287,4 +338,6 @@ module.exports = {
   obtenerHabitaciones,
   modificarHabitacion,
   eliminarHabitacion,
+  verificarHabitacionesHotel,
+  verificarHabitacionesPaquetePromocional,
 };

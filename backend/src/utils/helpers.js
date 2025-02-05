@@ -101,9 +101,37 @@ const verificarTiposHabitacion = async (tipoHabitaciones) => {
   }
 };
 
+const verificarFechas = (fechaInicio, fechaFin) => {
+  const fechaInicioDate = new Date(fechaInicio);
+  const fechaFinDate = new Date(fechaFin);
+  const fechaActual = new Date();
+
+  if (fechaInicioDate < fechaActual) {
+    throw new CustomError(
+      'La fecha de inicio debe ser mayor a la fecha actual',
+      400,
+    ); // Bad Request
+  }
+  if (fechaInicioDate >= fechaFinDate) {
+    throw new CustomError(
+      'La fecha de inicio debe ser menor a la fecha de fin',
+      400,
+    ); // Bad Request
+  }
+};
+
+const verificarIdHotel = async (hotelId) => {
+  const hotelExistente = await Hotel.findByPk(hotelId);
+  if (!hotelExistente) {
+    throw new CustomError('El hotel no existe', 404); // Not Found
+  }
+};
+
 module.exports = {
   verificarCiudad,
   verificarEmail,
+  verificarIdHotel,
+  verificarFechas,
   verificarTelefono,
   verificarDireccion,
   verificarTiposHabitacion,

@@ -5,6 +5,8 @@ const {
   verificarEmail,
   verificarTelefono,
   verificarTiposHabitacion,
+  verificarIdHotel,
+  verificarFechas,
 } = require('../../utils/helpers');
 const { Op } = require('sequelize');
 const CustomError = require('../../utils/CustomError');
@@ -20,6 +22,8 @@ const Alquiler = require('../../models/ventas/Alquiler');
 const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
 const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
+const paquetePromocionalServices = require('./paquetePromocionalServices');
+const { verificarHabitacionesHotel } = require('./habitacionServices');
 
 const crearHotel = async (
   nombre,
@@ -268,82 +272,78 @@ const verificarHotel = async (
 //TERMINAR
 const agregarPaquetePromocional = async (idHotel, paquete) => {
   // Verificar si el hotel existe
-  const hotel = await Hotel.findByPk(idHotel);
-  if (!hotel) {
-    throw new CustomError('El hotel no existe', 404); // Not Found
-  }
 
-  for (const idHabitacion of paquete.habitaciones) {
-    const habitacion = await Habitacion.findOne({
-      where: {
-        hotelId: idHotel,
-        id: idHabitacion,
-      },
-    });
-    if (!habitacion) {
-      throw new CustomError(
-        `La habitación con ID ${idHabitacion} no existe o no pertenece al hotel`,
-        404,
-      ); // Not Found
-    }
-
-    // Verificar si la habitación ya está asociada al paquete promocional
-    const paqueteExistente = await PaquetePromocionalHabitacion.findOne({
-      where: {
-        habitacionId: idHabitacion,
-        paquetePromocionalId: paquete.idPaquetePromocional,
-      },
-    });
-    if (paqueteExistente) {
-      throw new CustomError(
-        `La habitación con ID ${idHabitacion} ya está asociada a este paquete promocional`,
-        409,
-      ); // Conflict
-    }
-  }
-  //IMPLEMENTAR
+  await verificarIdHotel(idHotel);
+  await verificarHabitacionesHotel(idHotel, paquete.habitaciones);
+  await verificarFechas(paquete.fecha_inicio, paquete.fecha_fin);
   await verificarAlquilada(
-    idHotel,
     paquete.habitaciones,
     paquete.fechaInicio,
     paquete.fechaFin,
   );
 
-  // Verificar si el paquete promocional existe
-  const paquetePromocional = await PaquetePromocional.findByPk(
-    paquete.idPaquetePromocional,
+  const paqueteCreado = await paquetePromocionalServices.crearPaquete(
+    idHotel,
+    paquete,
   );
-  if (!paquetePromocional) {
-    throw new CustomError('El paquete promocional no existe', 404); // Not Found
-  }
-
-  // Verificar si la habitación ya está asociada al paquete promocional
-  const paqueteExistente = await PaquetePromocionalHabitacion.findOne({
-    where: {
-      habitacionId: paquete.idHabitacion,
-      paquetePromocionalId: paquete.idPaquetePromocional,
-    },
-  });
-  if (paqueteExistente) {
-    throw new CustomError(
-      'La habitación ya está asociada a este paquete promocional',
-      409,
-    ); // Conflict
-  }
 
   // Crear la relación en la tabla intermedia
-  await PaquetePromocionalHabitacion.create({
-    habitacionId: paquete.idHabitacion,
-    paquetePromocionalId: paquete.idPaquetePromocional,
-    fechaInicio: paquete.fechaInicio,
-    fechaFin: paquete.fechaFin,
-  });
+  const paqueteCompleto =
+    await paquetePromocionalServices.asignarHabitacionAPaquete(
+      paqueteCreado,
+      paquete,
+    );
 
-  return obtenerPaquetesPromocionales(idHotel);
+  return paqueteCompleto;
+  // return obtenerPaquetesPromocionales(idHotel);
+};
+
+const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
+  for (const idHabitacion of habitaciones) {
+    const alquileres = await AlquilerHabitacion.findAll({
+      where: {
+        habitacionId: idHabitacion,
+        [Op.or]: [
+          {
+            fechaInicio: {
+              [Op.between]: [fechaInicio, fechaFin],
+            },
+          },
+          {
+            fechaFin: {
+              [Op.between]: [fechaInicio, fechaFin],
+            },
+          },
+          {
+            [Op.and]: [
+              {
+                fechaInicio: {
+                  [Op.lte]: fechaInicio,
+                },
+              },
+              {
+                fechaFin: {
+                  [Op.gte]: fechaFin,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (alquileres.length > 0) {
+      throw new CustomError(
+        `La habitación con ID ${idHabitacion} ya está alquilada en ese rango de fechas`,
+        409,
+      ); // Conflict
+    }
+  }
 };
 
 module.exports = {
   crearHotel,
   modificarHotel,
   obtenerCategorias,
+  agregarPaquetePromocional,
 };
