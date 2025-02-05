@@ -7,6 +7,7 @@ const {
   verificarTiposHabitacion,
   verificarIdHotel,
   verificarFechas,
+  verificarPorcentaje,
 } = require('../../utils/helpers');
 const { Op } = require('sequelize');
 const CustomError = require('../../utils/CustomError');
@@ -24,6 +25,8 @@ const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocio
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const paquetePromocionalServices = require('./paquetePromocionalServices');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
+const temporadaServices = require('./temporadaServices');
+const descuentoServices = require('./descuentoServices');
 
 const crearHotel = async (
   nombre,
@@ -298,6 +301,42 @@ const agregarPaquetePromocional = async (idHotel, paquete) => {
   // return obtenerPaquetesPromocionales(idHotel);
 };
 
+const agregarTemporada = async (idHotel, temporada) => {
+  // Verificar si el hotel existe
+  await verificarIdHotel(idHotel);
+  // Verificar si las fechas son correctas
+  await verificarFechas(temporada.fechaInicio, temporada.fechaFin);
+  await temporadaServices.verificarTemporadas(
+    idHotel,
+    temporada.fechaInicio,
+    temporada.fechaFin,
+  );
+
+  await verificarPorcentaje(temporada.porcentaje);
+
+  // Crear la relación en la tabla intermedia
+  const temporadaNueva = temporadaServices.crearTemporada(idHotel, temporada);
+
+  return temporadaNueva;
+};
+
+const agregarDescuentos = async (idHotel, descuento) => {
+  // Verificar si el hotel existe
+  await verificarIdHotel(idHotel);
+
+  await verificarPorcentaje(descuento.porcentaje);
+  // Verificar si las fechas son correctas
+  await descuentoServices.verificarDescuentoExistente(idHotel, descuento);
+
+  // Crear la relación en la tabla intermedia
+  const descuentoNuevo = await descuentoServices.crearDescuento(
+    idHotel,
+    descuento,
+  );
+
+  return descuentoNuevo;
+};
+
 const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
   for (const idHabitacion of habitaciones) {
     const alquileres = await AlquilerHabitacion.findAll({
@@ -341,9 +380,100 @@ const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
   }
 };
 
+/**
+ * VERIFICAR QUE EXISTAN HOTELES EN LA CIUDAD
+ * QUE TENGA HABITACIONES
+ * QUE TENGA HABITACIONES DISPOBIBLES
+ * BUSCAR PAQUETES QUE COINCIDAN CON LAS FECHAS
+ */
+const getHabitacionesDisponibles = async (
+  ubicacion,
+  fechaInicio,
+  fechaFin,
+  pasajeros,
+) => {
+  //Hoteles de una ciudad
+  const hotelesCiudad = await Hotel.findAll({
+    where: { ciudadId: ubicacion },
+  });
+
+  const idsHoteles = hotelesCiudad.map((h) => h.id);
+
+  //Habitaciones de los hoteles de una ciudad
+  let habitaciones = [];
+
+  // Recorrer cada hotel para obtener las habitaciones disponibles
+  for (const idHotel of idsHoteles) {
+    const habitacionesHotel = await Habitacion.findAll({
+      where: { hotelId: idHotel },
+      include: [
+        {
+          model: TipoHabitacion,
+          as: 'tipoHabitacion',
+          where: {
+            capacidad: {
+              [Op.gte]: pasajeros,
+            },
+          },
+          attributes: ['nombre', 'capacidad'],
+        },
+      ],
+    });
+    habitaciones.push(...habitacionesHotel); // Agregar sin sobrescribir
+    // Filtrar las habitaciones que no están ocupadas en el rango de fechas especificado
+    // for (const habitacion of habitaciones) {
+    //   const ocupada = await verificarOcupada(habitacion.id, fechaInicio, fechaFin);
+    //   if (!ocupada) {
+    //     habitacionesDisponibles.push(habitacion);
+    //   }
+    // }
+  }
+
+  return habitaciones;
+};
+
+const verificarOcupada = async (idHabitacion, fechaInicio, fechaFin) => {
+  const alquileres = await AlquilerHabitacion.findAll({
+    where: {
+      habitacionId: idHabitacion,
+      [Op.or]: [
+        {
+          fechaInicio: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          fechaFin: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          [Op.and]: [
+            {
+              fechaInicio: {
+                [Op.lte]: fechaInicio,
+              },
+            },
+            {
+              fechaFin: {
+                [Op.gte]: fechaFin,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  return alquileres.length > 0;
+};
+
 module.exports = {
   crearHotel,
   modificarHotel,
   obtenerCategorias,
   agregarPaquetePromocional,
+  agregarTemporada,
+  agregarDescuentos,
+  getHabitacionesDisponibles,
 };

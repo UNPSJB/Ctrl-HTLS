@@ -127,12 +127,26 @@ const verificarIdHotel = async (hotelId) => {
   }
 };
 
+const convertirFechas = (fecha) => {
+  const fechaFormateada = new Date(fecha);
+
+  return fechaFormateada;
+};
+
+const verificarPorcentaje = (porcentaje) => {
+  if (porcentaje <= 0 || porcentaje > 100) {
+    throw new CustomError('El porcentaje debe estar entre 1 y 100', 400); // Bad Request
+  }
+};
+
 module.exports = {
+  convertirFechas,
   verificarCiudad,
   verificarEmail,
   verificarIdHotel,
   verificarFechas,
   verificarTelefono,
   verificarDireccion,
+  verificarPorcentaje,
   verificarTiposHabitacion,
 };

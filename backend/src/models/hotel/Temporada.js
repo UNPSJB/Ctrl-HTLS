@@ -5,7 +5,7 @@ const Temporada = sequelize.define(
   'Temporada',
   {
     tipo: {
-      type: DataTypes.ENUM('ALTA', 'BAJA'),
+      type: DataTypes.ENUM('alta', 'baja'),
       allowNull: false,
     },
     fechaInicio: {
@@ -14,6 +14,10 @@ const Temporada = sequelize.define(
     },
     fechaFin: {
       type: DataTypes.DATE,
+      allowNull: false,
+    },
+    porcentaje: {
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
   },

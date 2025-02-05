@@ -8,7 +8,9 @@ const {
 const {
   createHotel,
   updateHotel,
+  setTemporada,
   getCategorias,
+  setDescuento,
   setHabitaciones,
   updateHabitacion,
   deleteHabitacion,
@@ -34,4 +36,14 @@ router.post(
   setPaquetePromocional,
 ); //Ruta para crear un paquete promocional en un hotel
 
+//IMPLEMENTAR
+// router.put('/hotel/:id/paquete-promocional/:idPaquete', validateId, updatePaquetePromocional); //Ruta para modificar un paquete promocional en un hotel
+// router.delete('/hotel/:id/paquete-promocional/:idPaquete', validateId, deletePaquetePromocional); //Ruta para eliminar un paquete promocional en un hotel
+
+router.post('/hotel/:id/temporada', validateId, setTemporada); //Ruta para crear una temporada en un hotel
+//IMPLEMENTAR
+// router.put('/hotel/:id/temporada/:idTemporada', validateId, updateTemporada); //Ruta para modificar una temporada en un hotel
+// router.delete('/hotel/:id/temporada/:idTemporada', validateId, deleteTemporada); //Ruta para eliminar una temporada en un hotel
+
+router.post('/hotel/:id/descuentos', validateId, setDescuento); //Ruta para crear una habitacion en un hotel
 module.exports = router;

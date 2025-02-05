@@ -5,7 +5,7 @@ const Descuento = sequelize.define(
   'Descuento',
   {
     porcentaje: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
     cantidad_de_habitaciones: {

@@ -154,11 +154,43 @@ const setPaquetePromocional = async (req, res) => {
   }
 };
 
+const setTemporada = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { id } = req.params;
+  const temporada = req.body;
+
+  try {
+    const temporadaNueva = await hotelServices.agregarTemporada(id, temporada);
+    res.json(temporadaNueva);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const setDescuento = async (req, res) => {
+  const { id } = req.params;
+  const descuento = req.body;
+
+  try {
+    const descuentoNuevo = await hotelServices.agregarDescuentos(id, descuento);
+    res.json(descuentoNuevo);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createHotel,
   updateHotel,
   getCategorias,
+  setTemporada,
   setHabitaciones,
+  setDescuento,
   updateHabitacion,
   deleteHabitacion,
   setPaquetePromocional,

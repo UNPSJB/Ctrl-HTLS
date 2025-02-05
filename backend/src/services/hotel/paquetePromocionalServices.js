@@ -6,6 +6,7 @@ const Habitacion = require('../../models/hotel/Habitacion');
 const {
   verificarHabitacionesPaquetePromocional,
 } = require('./habitacionServices');
+const { verificarPorcentaje } = require('../../utils/helpers');
 
 const crearPaquete = async (idHotel, paquete) => {
   // Verificar si el hotel existe
@@ -13,6 +14,8 @@ const crearPaquete = async (idHotel, paquete) => {
   if (!hotel) {
     throw new CustomError('El hotel no existe', 404); // Not Found
   }
+
+  await verificarPorcentaje(paquete.coeficiente_descuento);
 
   // Verificar si el paquete promocional ya existe
   const paquetePromocionalExistente = await PaquetePromocional.findOne({
