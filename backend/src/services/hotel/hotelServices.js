@@ -27,6 +27,7 @@ const paquetePromocionalServices = require('./paquetePromocionalServices');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
 const temporadaServices = require('./temporadaServices');
 const descuentoServices = require('./descuentoServices');
+const { get } = require('../../routes/ventas/alquilerRoutes');
 
 const crearHotel = async (
   nombre,
@@ -397,11 +398,15 @@ const getHabitacionesDisponibles = async (
     where: { ciudadId: ubicacion },
   });
 
+  if (hotelesCiudad.length === 0) {
+    throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
+  }
+
   const idsHoteles = hotelesCiudad.map((h) => h.id);
 
   //Habitaciones de los hoteles de una ciudad
   let habitaciones = [];
-
+  let habitacionesDisponibles = [];
   // Recorrer cada hotel para obtener las habitaciones disponibles
   for (const idHotel of idsHoteles) {
     const habitacionesHotel = await Habitacion.findAll({
@@ -420,16 +425,21 @@ const getHabitacionesDisponibles = async (
       ],
     });
     habitaciones.push(...habitacionesHotel); // Agregar sin sobrescribir
-    // Filtrar las habitaciones que no están ocupadas en el rango de fechas especificado
-    // for (const habitacion of habitaciones) {
-    //   const ocupada = await verificarOcupada(habitacion.id, fechaInicio, fechaFin);
-    //   if (!ocupada) {
-    //     habitacionesDisponibles.push(habitacion);
-    //   }
-    // }
   }
 
-  return habitaciones;
+  //Filtrar las habitaciones que no están ocupadas en el rango de fechas especificado
+  for (const habitacion of habitaciones) {
+    const ocupada = await verificarOcupada(
+      habitacion.id,
+      fechaInicio,
+      fechaFin,
+    );
+    if (!ocupada) {
+      habitacionesDisponibles.push(habitacion);
+    }
+  }
+
+  return habitacionesDisponibles;
 };
 
 const verificarOcupada = async (idHabitacion, fechaInicio, fechaFin) => {
@@ -464,8 +474,137 @@ const verificarOcupada = async (idHabitacion, fechaInicio, fechaFin) => {
       ],
     },
   });
+  const paquetes = await PaquetePromocionalHabitacion.findAll({
+    where: {
+      habitacionId: idHabitacion,
+      [Op.or]: [
+        {
+          fechaInicio: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          fechaFin: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          [Op.and]: [
+            {
+              fechaInicio: {
+                [Op.lte]: fechaInicio,
+              },
+            },
+            {
+              fechaFin: {
+                [Op.gte]: fechaFin,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
 
-  return alquileres.length > 0;
+  return alquileres.length > 0 || paquetes.length > 0;
+};
+
+const getPaquetesDisponibles = async (
+  ubicacion,
+  fechaInicio,
+  fechaFin,
+  pasajeros,
+) => {
+  // Obtener los hoteles en la ubicación especificada
+  const hotelesCiudad = await Hotel.findAll({
+    where: { ciudadId: ubicacion },
+  });
+
+  if (hotelesCiudad.length === 0) {
+    throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
+  }
+
+  const idsHoteles = hotelesCiudad.map((h) => h.id);
+
+  // Inicializar un array para almacenar los paquetes disponibles
+  let paquetesDisponibles = [];
+
+  // Recorrer cada hotel para obtener los paquetes disponibles
+  for (const idHotel of idsHoteles) {
+    const paquetesHotel = await PaquetePromocional.findAll({
+      where: { hotelId: idHotel },
+      include: [
+        {
+          model: Habitacion,
+          as: 'habitaciones',
+          include: [
+            {
+              model: TipoHabitacion,
+              as: 'tipoHabitacion',
+              attributes: ['nombre', 'capacidad'],
+            },
+          ],
+        },
+      ],
+    });
+
+    // Filtrar los paquetes que no están ocupados en el rango de fechas especificado
+    for (const paquete of paquetesHotel) {
+      const habitaciones = paquete.habitaciones;
+      const capacidadTotal = habitaciones.reduce((total, habitacion) => {
+        return total + habitacion.tipoHabitacion.capacidad;
+      }, 0);
+
+      if (capacidadTotal >= pasajeros) {
+        const ocupada = await verificarOcupadaPaquete(
+          paquete.id,
+          fechaInicio,
+          fechaFin,
+        );
+        if (!ocupada) {
+          paquetesDisponibles.push(paquete);
+        }
+      }
+    }
+  }
+
+  return paquetesDisponibles;
+};
+
+const verificarOcupadaPaquete = async (idPaquete, fechaInicio, fechaFin) => {
+  const habitacionesPaquete = await PaquetePromocionalHabitacion.findAll({
+    where: {
+      paquetePromocionalId: idPaquete,
+      [Op.or]: [
+        {
+          fechaInicio: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          fechaFin: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          [Op.and]: [
+            {
+              fechaInicio: {
+                [Op.lte]: fechaInicio,
+              },
+            },
+            {
+              fechaFin: {
+                [Op.gte]: fechaFin,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  return habitacionesPaquete.length > 0;
 };
 
 module.exports = {
@@ -476,4 +615,5 @@ module.exports = {
   agregarTemporada,
   agregarDescuentos,
   getHabitacionesDisponibles,
+  getPaquetesDisponibles,
 };

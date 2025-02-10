@@ -8,25 +8,35 @@ const {
 
 const obtenerDisponibilidad = async (consultaAlquiler) => {
   const { ubicacion, fechaInicio, fechaFin, pasajeros } = consultaAlquiler;
-
+  let disponibilidad = [];
   await verificarCiudad(ubicacion);
-  await verificarFechas(fechaInicio, fechaFin);
   const desde = convertirFechas(fechaInicio);
   const hasta = convertirFechas(fechaFin);
+  await verificarFechas(desde, hasta);
 
   if (pasajeros < 0) {
     throw new CustomError('La cantidad de pasajeros debe ser mayor a 0', 400); // Bad Request
   }
 
-  const habitacionesDisponibles =
-    await hotelServices.getHabitacionesDisponibles(
-      ubicacion,
-      desde,
-      hasta,
-      pasajeros,
-    );
+  // const habitacionesDisponibles =
+  //   await hotelServices.getHabitacionesDisponibles(
+  //     ubicacion,
+  //     desde,
+  //     hasta,
+  //     pasajeros,
+  //   );
 
-  return habitacionesDisponibles;
+  const paquetesDisponibles = await hotelServices.getPaquetesDisponibles(
+    ubicacion,
+    desde,
+    hasta,
+    pasajeros,
+  );
+
+  //disponibilidad = [...habitacionesDisponibles, ...paquetesDisponibles];
+
+  //return disponibilidad;
+  return paquetesDisponibles;
 };
 
 module.exports = { obtenerDisponibilidad };
