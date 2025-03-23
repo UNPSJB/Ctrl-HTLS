@@ -20,6 +20,10 @@ const PaquetePromocional = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    capacidad_maxima: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     tableName: 'paquetes_promocionales',

@@ -22,6 +22,7 @@ const CategoriaServicio = require('./hotel/CategoriaServicio');
 const Alquiler = require('./ventas/Alquiler');
 const AlquilerHabitacion = require('./ventas/AlquilerHabitacion');
 const Pago = require('./ventas/Pago');
+const AlquilerPaquetePromocional = require('./ventas/AlquilerPaquetePromocional');
 // const Administrador = require('./core/Administrador');
 // const Usuario = require('./core/Usuario');
 
@@ -290,21 +291,19 @@ Habitacion.belongsToMany(Alquiler, {
   as: 'alquileres',
 });
 
-// Relación uno a muchos (Alquiler -> PaquetePromocional)
-Alquiler.hasMany(PaquetePromocional, {
-  foreignKey: {
-    name: 'alquilerId',
-    allowNull: true,
-  },
+// Relación muchos a muchos (Alquiler -> PaquetePromocional)
+Alquiler.belongsToMany(PaquetePromocional, {
+  through: 'AlquilerPaquetePromocional',
+  foreignKey: 'alquilerId',
+  otherKey: 'paquetePromocionalId',
   as: 'paquetesPromocionales',
 });
 
-PaquetePromocional.belongsTo(Alquiler, {
-  foreignKey: {
-    name: 'alquilerId',
-    allowNull: true,
-  },
-  as: 'alquiler',
+PaquetePromocional.belongsToMany(Alquiler, {
+  through: 'AlquilerPaquetePromocional',
+  foreignKey: 'paquetePromocionalId',
+  otherKey: 'alquilerId',
+  as: 'alquileres',
 });
 
 // Relación uno a muchos (Cliente -> Alquiler)
