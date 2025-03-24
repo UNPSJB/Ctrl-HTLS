@@ -3,6 +3,7 @@ const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocio
 const Hotel = require('../../models/hotel/Hotel');
 const CustomError = require('../../utils/CustomError');
 const Habitacion = require('../../models/hotel/Habitacion');
+const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const {
   verificarHabitacionesPaquetePromocional,
 } = require('./habitacionServices');
@@ -25,7 +26,7 @@ const crearPaquete = async (idHotel, paquete) => {
     throw new CustomError(
       'Ya existe un paquete promocional con el mismo nombre',
       409,
-    ); // Conflict
+    );
   }
 
   // Verificar si las habitaciones ya estan asignadas a otro paquete en la misma fecha
@@ -35,10 +36,28 @@ const crearPaquete = async (idHotel, paquete) => {
     paquete.fecha_fin,
   );
 
+  // Calcular la capacidad máxima del paquete
+  let capacidadMaxima = 0;
+  for (const idHabitacion of paquete.habitaciones) {
+    const habitacion = await Habitacion.findByPk(idHabitacion, {
+      include: [
+        {
+          model: TipoHabitacion,
+          as: 'tipoHabitacion',
+          attributes: ['capacidad'],
+        },
+      ],
+    });
+    if (habitacion && habitacion.tipoHabitacion) {
+      capacidadMaxima += habitacion.tipoHabitacion.capacidad;
+    }
+  }
+
   // Crear el paquete promocional
   const nuevoPaquetePromocional = await PaquetePromocional.create({
     ...paquete,
     hotelId: idHotel,
+    capacidad_maxima: capacidadMaxima, // Agregar la capacidad máxima calculada
   });
   return nuevoPaquetePromocional;
 };

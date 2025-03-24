@@ -5,7 +5,7 @@ const getDisponibilidad = async (req, res) => {
   try {
     const disponibilidad =
       await alquilerServices.obtenerDisponibilidad(consultaAlquiler);
-    res.json(disponibilidad);
+    res.status(200).json(disponibilidad);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });

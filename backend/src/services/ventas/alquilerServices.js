@@ -27,96 +27,86 @@ const Alquiler = require('../../models/ventas/Alquiler');
 //     throw new CustomError('La cantidad de pasajeros debe ser mayor a 0', 400); // Bad Request
 //   }
 
-// const habitacionesDisponibles =
-//   await hotelServices.getHabitacionesDisponibles(
+//   const habitacionesDisponibles =
+//     await hotelServices.getHabitacionesDisponibles(
+//       ubicacion,
+//       desde,
+//       hasta,
+//       pasajeros,
+//     );
+
+//   const paquetesDisponibles = await hotelServices.getPaquetesDisponibles(
 //     ubicacion,
 //     desde,
 //     hasta,
 //     pasajeros,
 //   );
 
-// const paquetesDisponibles = await hotelServices.getPaquetesDisponibles(
-//   ubicacion,
-//   desde,
-//   hasta,
-//   pasajeros,
-// );
+//   disponibilidad = [...habitacionesDisponibles, ...paquetesDisponibles];
 
-//disponibilidad = [...habitacionesDisponibles, ...paquetesDisponibles];
-
-//return disponibilidad;
-//   return paquetesDisponibles;
+//   return disponibilidad;
+//   //return paquetesDisponibles;
 // };
 
 const obtenerDisponibilidad = async (consultaAlquiler) => {
   const { ubicacion, fechaInicio, fechaFin, pasajeros } = consultaAlquiler;
 
-  // Convertir strings a objetos Date
-  const fechaInicioDate = new Date(fechaInicio);
-  const fechaFinDate = new Date(fechaFin);
+  // Verificar la ciudad
+  await verificarCiudad(ubicacion);
 
-  const hoteles = await Hotel.findAll({
-    where: { ciudadId: ubicacion },
-    include: [
-      {
-        model: Habitacion,
-        as: 'habitaciones',
-        include: [
-          {
-            model: TipoHabitacion,
-            as: 'tipoHabitacion',
-            where: { capacidad: { [Op.gte]: pasajeros } },
-          },
-          {
-            model: Alquiler,
-            as: 'alquileres',
-            required: false,
-            where: {
-              [Op.or]: [
-                { fecha_fin: { [Op.lt]: fechaInicioDate } }, // Usamos Date
-                { fecha_inicio: { [Op.gt]: fechaFinDate } }, // Usamos Date
-              ],
-            },
-          },
-        ],
-      },
-      {
-        model: PaquetePromocional,
-        as: 'paquetesPromocionales',
-        required: false,
-        where: {
-          fecha_inicio: { [Op.lte]: fechaInicioDate },
-          fecha_fin: { [Op.gte]: fechaFinDate },
-        },
-        include: [
-          {
-            model: Habitacion,
-            as: 'habitaciones',
-            include: [
-              {
-                model: TipoHabitacion,
-                as: 'tipoHabitacion',
-                where: { capacidad: { [Op.gte]: pasajeros } },
-              },
-              {
-                model: Alquiler,
-                as: 'alquileres',
-                required: false,
-                where: {
-                  [Op.or]: [
-                    { fecha_fin: { [Op.lt]: fechaInicioDate } },
-                    { fecha_inicio: { [Op.gt]: fechaFinDate } },
-                  ],
-                },
-              },
-            ],
-          },
-        ],
-      },
-    ],
+  // Convertir strings a objetos Date
+  const desde = convertirFechas(fechaInicio);
+  const hasta = convertirFechas(fechaFin);
+
+  if (pasajeros < 0) {
+    throw new CustomError('La cantidad de pasajeros debe ser mayor a 0', 400); // Bad Request
+  }
+
+  // Obtener las habitaciones disponibles
+  const habitacionesDisponibles =
+    await hotelServices.getHabitacionesDisponibles(
+      ubicacion,
+      desde,
+      hasta,
+      pasajeros,
+    );
+
+  // Obtener los paquetes promocionales disponibles
+  const paquetesDisponibles = await hotelServices.getPaquetesDisponibles(
+    ubicacion,
+    desde,
+    hasta,
+    pasajeros,
+  );
+
+  // Organizar la disponibilidad por hotel
+  const disponibilidadPorHotel = {};
+
+  habitacionesDisponibles.forEach((habitacion) => {
+    const hotelId = habitacion.hotelId;
+    if (!disponibilidadPorHotel[hotelId]) {
+      disponibilidadPorHotel[hotelId] = {
+        hotelId,
+        habitaciones: [],
+        paquetes: [],
+      };
+    }
+    disponibilidadPorHotel[hotelId].habitaciones.push(habitacion);
   });
 
-  return hoteles;
+  paquetesDisponibles.forEach((paquete) => {
+    const hotelId = paquete.hotelId;
+    if (!disponibilidadPorHotel[hotelId]) {
+      disponibilidadPorHotel[hotelId] = {
+        hotelId,
+        habitaciones: [],
+        paquetes: [],
+      };
+    }
+    disponibilidadPorHotel[hotelId].paquetes.push(paquete);
+  });
+
+  return Object.values(disponibilidadPorHotel);
 };
 
 module.exports = { obtenerDisponibilidad };

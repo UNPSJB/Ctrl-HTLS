@@ -19,7 +19,6 @@ const Ciudad = require('../../models/core/Ciudad');
 const Provincia = require('../../models/core/Provincia');
 const Pais = require('../../models/core/Pais');
 const Habitacion = require('../../models/hotel/Habitacion');
-const Alquiler = require('../../models/ventas/Alquiler');
 const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
 const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
@@ -27,7 +26,6 @@ const paquetePromocionalServices = require('./paquetePromocionalServices');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
 const temporadaServices = require('./temporadaServices');
 const descuentoServices = require('./descuentoServices');
-const { get } = require('../../routes/ventas/alquilerRoutes');
 
 const crearHotel = async (
   nombre,
@@ -393,7 +391,7 @@ const getHabitacionesDisponibles = async (
   fechaFin,
   pasajeros,
 ) => {
-  //Hoteles de una ciudad
+  // Obtener los hoteles en la ubicación especificada
   const hotelesCiudad = await Hotel.findAll({
     where: { ciudadId: ubicacion },
   });
@@ -404,42 +402,47 @@ const getHabitacionesDisponibles = async (
 
   const idsHoteles = hotelesCiudad.map((h) => h.id);
 
-  //Habitaciones de los hoteles de una ciudad
-  let habitaciones = [];
+  // Inicializar un array para almacenar las habitaciones disponibles
   let habitacionesDisponibles = [];
+
   // Recorrer cada hotel para obtener las habitaciones disponibles
   for (const idHotel of idsHoteles) {
-    const habitacionesHotel = await Habitacion.findAll({
+    const habitaciones = await Habitacion.findAll({
       where: { hotelId: idHotel },
       include: [
         {
           model: TipoHabitacion,
           as: 'tipoHabitacion',
-          where: {
-            capacidad: {
-              [Op.gte]: pasajeros,
-            },
-          },
           attributes: ['nombre', 'capacidad'],
         },
       ],
     });
-    habitaciones.push(...habitacionesHotel); // Agregar sin sobrescribir
-  }
 
-  //Filtrar las habitaciones que no están ocupadas en el rango de fechas especificado
-  for (const habitacion of habitaciones) {
-    const ocupada = await verificarOcupada(
-      habitacion.id,
-      fechaInicio,
-      fechaFin,
-    );
-    if (!ocupada) {
-      habitacionesDisponibles.push(habitacion);
+    // Filtrar las habitaciones que no están ocupadas en el rango de fechas especificado
+    for (const habitacion of habitaciones) {
+      const ocupada = await verificarOcupada(
+        habitacion.id,
+        fechaInicio,
+        fechaFin,
+      );
+      if (!ocupada) {
+        habitacionesDisponibles.push(habitacion);
+      }
     }
   }
 
-  return habitacionesDisponibles;
+  // Si la cantidad de pasajeros supera la capacidad máxima de una habitación, devolver todas las habitaciones disponibles
+  const capacidadMaxima = Math.max(
+    ...habitacionesDisponibles.map((h) => h.tipoHabitacion.capacidad),
+  );
+  if (pasajeros > capacidadMaxima) {
+    return habitacionesDisponibles;
+  }
+
+  // Filtrar habitaciones que cumplen con la capacidad requerida
+  return habitacionesDisponibles.filter(
+    (h) => h.tipoHabitacion.capacidad >= pasajeros,
+  );
 };
 
 const verificarOcupada = async (idHabitacion, fechaInicio, fechaFin) => {
@@ -474,39 +477,8 @@ const verificarOcupada = async (idHabitacion, fechaInicio, fechaFin) => {
       ],
     },
   });
-  const paquetes = await PaquetePromocionalHabitacion.findAll({
-    where: {
-      habitacionId: idHabitacion,
-      [Op.or]: [
-        {
-          fechaInicio: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          fechaFin: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          [Op.and]: [
-            {
-              fechaInicio: {
-                [Op.lte]: fechaInicio,
-              },
-            },
-            {
-              fechaFin: {
-                [Op.gte]: fechaFin,
-              },
-            },
-          ],
-        },
-      ],
-    },
-  });
 
-  return alquileres.length > 0 || paquetes.length > 0;
+  return alquileres.length > 0;
 };
 
 const getPaquetesDisponibles = async (
