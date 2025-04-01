@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Empleado = require('../../models/core/Empleado');
 
 // Generar Access Token
 const generarAccessToken = (usuario) => {
@@ -18,8 +19,10 @@ const generarRefreshToken = (usuario) => {
 };
 
 // Función de login
-const login = async (cuit, password) => {
-  const usuario = await Usuario.findOne({ where: { cuit } });
+const login = async (numeroDocumento, password) => {
+  const usuario = await Empleado.findOne({
+    where: { numeroDocumento },
+  });
   if (!usuario) {
     throw new Error('CUIT o contraseña incorrectos');
   }
