@@ -19,7 +19,7 @@ const HabitacionItem = ({ habitacion, isSelected, onSelect }) => {
         </p>
       </div>
 
-      {/* Tercera Columna: Precio y Botón */}
+      {/* Tercera Columna: Precio y Botón (sin funcionalidad aún) */}
       <div className="text-right flex flex-col items-end">
         {/* Fila 1: Precio */}
         <p className="text-md font-bold text-gray-800">

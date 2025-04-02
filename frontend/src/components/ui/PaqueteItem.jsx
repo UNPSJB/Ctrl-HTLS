@@ -1,7 +1,7 @@
 const PaqueteItem = ({ paquete, isSelected, onSelect }) => {
   if (!paquete) return null;
 
-  // Calcular precios
+  // Calcular el precio original y el precio con descuento
   const precioOriginal = paquete.habitaciones.reduce(
     (acc, hab) => acc + hab.precio,
     0
@@ -25,7 +25,7 @@ const PaqueteItem = ({ paquete, isSelected, onSelect }) => {
         <p className="text-sm text-gray-600">{paquete.descripcion}</p>
       </div>
 
-      {/* Tercera Columna: Precios y Botón */}
+      {/* Tercera Columna: Precio y Botón (sin funcionalidad aún) */}
       <div className="text-right flex flex-col items-end">
         {/* Fila 1: Precio con descuento y precio original en una sola línea */}
         <div className="flex items-center gap-2">
@@ -36,8 +36,7 @@ const PaqueteItem = ({ paquete, isSelected, onSelect }) => {
             ${precioOriginal.toFixed(2)}
           </p>
         </div>
-
-        {/* Fila 2: Botón (sin funcionalidad) */}
+        {/* Fila 2: Botón */}
         <button className="text-blue-600 text-sm font-semibold hover:underline mt-2">
           Más Detalles
         </button>
