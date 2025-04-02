@@ -42,8 +42,7 @@ const HotelList = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Hotel List</h1>
-      <HotelCard hotel={hotelData} /> {/* ✅ Pasamos el hotel como prop */}
+      <HotelCard hotel={hotelData} />
     </div>
   );
 };
