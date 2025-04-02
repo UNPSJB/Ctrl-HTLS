@@ -1,5 +1,7 @@
+import HotelList from '@/components/HotelList';
+
 const HomePage = () => {
-  return <></>;
+  return <HotelList />;
 };
 
 export default HomePage;
