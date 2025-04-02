@@ -37,6 +37,7 @@ export default [
     },
     rules: {
       'react/react-in-jsx-scope': 'off', // Desactiva la regla que requiere importar React en JSX
+      'react/prop-types': 'off', // Desactiva la regla que requiere definir propTypes
     },
   },
 ];
