@@ -6,7 +6,7 @@ const MainLayout = () => {
   return (
     <>
       {/* Contenedor principal con clases de fondo para modo claro y oscuro */}
-      <main className="containerlg:px-10 flex-grow bg-white dark:bg-gray-900">
+      <main className="containerlg:px-10 flex-grow bg-gray-50 dark:bg-gray-900">
         <ThemeToggle />
         <Outlet />
       </main>
