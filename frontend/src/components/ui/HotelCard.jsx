@@ -8,15 +8,11 @@ const HotelCard = ({ hotel }) => {
   if (!hotel) return null;
 
   const [isExpanded, setIsExpanded] = useState(false);
-  // Estado de habitaciones seleccionadas
   const [selectedRooms, setSelectedRooms] = useState([]);
-  // Estado de paquetes seleccionados
   const [selectedPackages, setSelectedPackages] = useState([]);
 
-  // Ruta de la imagen
   const imagePath = `/src/assets/${encodeURIComponent(hotel.nombre)}.webp`;
 
-  // Alternar selección de habitaciones
   const toggleRoomSelection = (roomName) => {
     setSelectedRooms((prevSelected) =>
       prevSelected.includes(roomName)
@@ -25,7 +21,6 @@ const HotelCard = ({ hotel }) => {
     );
   };
 
-  // Alternar selección de paquetes
   const togglePackageSelection = (packageName) => {
     setSelectedPackages((prevSelected) =>
       prevSelected.includes(packageName)
@@ -34,14 +29,12 @@ const HotelCard = ({ hotel }) => {
     );
   };
 
-  // Función para calcular el total de las habitaciones seleccionadas
   const calculateRoomsTotal = () => {
     return hotel.habitaciones
       .filter((hab) => selectedRooms.includes(hab.nombre))
       .reduce((acc, hab) => acc + hab.precio, 0);
   };
 
-  // Función para calcular el total de los paquetes seleccionados (precio con descuento)
   const calculatePackagesTotal = () => {
     return hotel.paquetes
       .filter((paq) => selectedPackages.includes(paq.nombre))
@@ -56,12 +49,10 @@ const HotelCard = ({ hotel }) => {
       }, 0);
   };
 
-  // Total final de todo lo seleccionado
   const totalPrice = calculateRoomsTotal() + calculatePackagesTotal();
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-      {/* Encabezado principal (click para expandir/contraer) */}
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
       <div
         className="flex cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -72,21 +63,23 @@ const HotelCard = ({ hotel }) => {
           alt={hotel.nombre}
         />
         <div className="flex-1 p-4">
-          <h2 className="text-xl font-bold text-gray-800">{hotel.nombre}</h2>
-          <p className="text-gray-600 text-sm">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+            {hotel.nombre}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
             📍 {hotel.ubicacion.ciudad}, {hotel.ubicacion.provincia},{' '}
             {hotel.ubicacion.pais}
           </p>
-          <p className="text-gray-700 mt-2 text-sm">{hotel.descripcion}</p>
+          <p className="text-gray-700 dark:text-gray-300 mt-2 text-sm">
+            {hotel.descripcion}
+          </p>
         </div>
       </div>
 
-      {/* Sección expandible */}
       {isExpanded && (
-        <div className="p-4 border-t border-gray-200">
-          {/* Habitaciones Disponibles */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="py-2">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
+            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-200">
               <Bed className="w-5 h-5" /> Habitaciones Disponibles
             </h3>
             <div className="mt-2 space-y-2">
@@ -101,9 +94,8 @@ const HotelCard = ({ hotel }) => {
             </div>
           </div>
 
-          {/* Paquetes Turísticos */}
           <div className="py-2">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
+            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-200">
               <Package className="w-5 h-5" /> Paquetes Turísticos
             </h3>
             <div className="mt-2 space-y-2">
@@ -118,7 +110,6 @@ const HotelCard = ({ hotel }) => {
             </div>
           </div>
 
-          {/* Resumen de la Selección */}
           <SelectionSummary
             selectedRoomsCount={selectedRooms.length}
             selectedPackagesCount={selectedPackages.length}
