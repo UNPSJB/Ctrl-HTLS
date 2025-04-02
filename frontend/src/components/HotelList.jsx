@@ -10,8 +10,25 @@ const HotelList = () => {
       provincia: 'Buenos Aires',
       ciudad: 'Mar del Plata',
     },
-    descripcion: 'Un hotel de lujo con vista al mar y excelentes servicios.',
-    imagen: 'https://source.unsplash.com/400x300/?hotel',
+    descripcion:
+      'Disfruta de una experiencia única en nuestro hotel de lujo frente al mar con vistas panorámicas al océano, múltiples restaurantes y un spa de clase mundial.',
+    habitaciones: [
+      {
+        nombre: 'Suite Ejecutiva',
+        capacidad: 2,
+        precio: 200,
+      },
+      {
+        nombre: 'Habitación Doble',
+        capacidad: 4,
+        precio: 150,
+      },
+      {
+        nombre: 'Habitación Individual',
+        capacidad: 1,
+        precio: 100,
+      },
+    ],
   };
 
   return (
