@@ -10,23 +10,29 @@ const HotelList = () => {
       provincia: 'Buenos Aires',
       ciudad: 'Mar del Plata',
     },
-    descripcion:
-      'Disfruta de una experiencia única en nuestro hotel de lujo frente al mar con vistas panorámicas al océano, múltiples restaurantes y un spa de clase mundial.',
+    descripcion: 'Un hotel de lujo con vista al mar y excelentes servicios.',
+    imagen: 'Hotel Paraíso.webp',
     habitaciones: [
+      { nombre: 'Habitación Deluxe', capacidad: 2, precio: 200 },
+      { nombre: 'Suite Ejecutiva', capacidad: 3, precio: 300 },
+    ],
+    paquetes: [
       {
-        nombre: 'Suite Ejecutiva',
-        capacidad: 2,
-        precio: 200,
+        nombre: 'Escapada Romántica',
+        habitaciones: [
+          { nombre: 'Habitación Deluxe', capacidad: 2, precio: 200 },
+        ],
+        descuento: 10, // %
+        noches: 3,
       },
       {
-        nombre: 'Habitación Doble',
-        capacidad: 4,
-        precio: 150,
-      },
-      {
-        nombre: 'Habitación Individual',
-        capacidad: 1,
-        precio: 100,
+        nombre: 'Aventura Familiar',
+        habitaciones: [
+          { nombre: 'Suite Ejecutiva', capacidad: 3, precio: 300 },
+          { nombre: 'Habitación Deluxe', capacidad: 2, precio: 200 },
+        ],
+        descuento: 15,
+        noches: 5,
       },
     ],
   };
