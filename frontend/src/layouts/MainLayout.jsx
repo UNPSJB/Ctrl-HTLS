@@ -1,13 +1,12 @@
 import { Outlet } from 'react-router-dom';
-import Sidebar from '@/components/ui/layouts/Sidebar';
-import Footer from '@/components/ui/layouts/Footer';
+import Footer from '@/layouts/Footer';
 
 const MainLayout = () => {
   return (
     <div className="flex min-h-screen">
       {' '}
       {/* Sidebar: altura fija igual a la de la pantalla */}
-      <Sidebar className="w-64 h-screen bg-gray-800 text-white" />
+      {/* <Sidebar className="w-64 h-screen bg-gray-800 text-white" /> */}
       {/* Contenedor principal que incluye el contenido y el footer */}
       <div className="flex-1 flex flex-col h-screen">
         {/* Contenedor que incluye el main y el footer, esta área es la que se desplaza */}
