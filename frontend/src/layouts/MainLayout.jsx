@@ -5,7 +5,8 @@ import ThemeToggle from '@/components/ui/ThemeToggle';
 const MainLayout = () => {
   return (
     <>
-      <main className="container mx-auto px-2 lg:px-10 py-6 flex-grow">
+      {/* Contenedor principal con clases de fondo para modo claro y oscuro */}
+      <main className="containerlg:px-10 flex-grow bg-white dark:bg-gray-900">
         <ThemeToggle />
         <Outlet />
       </main>

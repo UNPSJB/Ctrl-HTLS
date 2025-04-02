@@ -79,8 +79,9 @@ const HotelCard = ({ hotel }) => {
       {isExpanded && (
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="py-2">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-200">
-              <Bed className="w-5 h-5" /> Habitaciones Disponibles
+            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-3">
+              <Bed className="w-5 h-5" />
+              Habitaciones Disponibles
             </h3>
             <div className="mt-2 space-y-2">
               {hotel.habitaciones.map((habitacion) => (
@@ -95,8 +96,9 @@ const HotelCard = ({ hotel }) => {
           </div>
 
           <div className="py-2">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-200">
-              <Package className="w-5 h-5" /> Paquetes Turísticos
+            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-3">
+              <Package className="w-5 h-5" />
+              Paquetes Turísticos
             </h3>
             <div className="mt-2 space-y-2">
               {hotel.paquetes.map((paquete) => (
