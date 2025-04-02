@@ -24,6 +24,8 @@ const HotelList = () => {
         ],
         descuento: 10, // %
         noches: 3,
+        descripcion:
+          'Una escapada romántica para dos personas con cena incluida.',
       },
       {
         nombre: 'Aventura Familiar',
@@ -33,6 +35,7 @@ const HotelList = () => {
         ],
         descuento: 15,
         noches: 5,
+        descripcion: 'Paquete familiar con actividades para niños y adultos.',
       },
     ],
   };
