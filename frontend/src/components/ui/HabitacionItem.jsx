@@ -65,6 +65,7 @@ const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
       {showModal && (
         <RoomDetailsModal
           habitacion={habitacion}
+          coeficiente={coeficiente}
           onClose={() => setShowModal(false)}
           onReserve={(id) => console.log('Reservando habitación con ID:', id)}
         />
