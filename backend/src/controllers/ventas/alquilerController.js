@@ -2,6 +2,7 @@ const alquilerServices = require('../../services/ventas/alquilerServices');
 
 const getDisponibilidad = async (req, res) => {
   const consultaAlquiler = req.query;
+
   try {
     const disponibilidad =
       await alquilerServices.obtenerDisponibilidad(consultaAlquiler);

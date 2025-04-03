@@ -293,14 +293,14 @@ Habitacion.belongsToMany(Alquiler, {
 
 // Relación muchos a muchos (Alquiler -> PaquetePromocional)
 Alquiler.belongsToMany(PaquetePromocional, {
-  through: 'AlquilerPaquetePromocional',
+  through: AlquilerPaquetePromocional,
   foreignKey: 'alquilerId',
   otherKey: 'paquetePromocionalId',
   as: 'paquetesPromocionales',
 });
 
 PaquetePromocional.belongsToMany(Alquiler, {
-  through: 'AlquilerPaquetePromocional',
+  through: AlquilerPaquetePromocional,
   foreignKey: 'paquetePromocionalId',
   otherKey: 'alquilerId',
   as: 'alquileres',

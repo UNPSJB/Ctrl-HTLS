@@ -26,6 +26,7 @@ const paquetePromocionalServices = require('./paquetePromocionalServices');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
 const temporadaServices = require('./temporadaServices');
 const descuentoServices = require('./descuentoServices');
+const habitacionServices = require('./habitacionServices');
 
 const crearHotel = async (
   nombre,
@@ -385,6 +386,7 @@ const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
  * QUE TENGA HABITACIONES DISPOBIBLES
  * BUSCAR PAQUETES QUE COINCIDAN CON LAS FECHAS
  */
+
 const getHabitacionesDisponibles = async (
   ubicacion,
   fechaInicio,
@@ -405,179 +407,128 @@ const getHabitacionesDisponibles = async (
   // Inicializar un array para almacenar las habitaciones disponibles
   let habitacionesDisponibles = [];
 
-  // Recorrer cada hotel para obtener las habitaciones disponibles
+  // Recorrer cada hotel y delegar la lógica de filtrado a habitacionServices
   for (const idHotel of idsHoteles) {
-    const habitaciones = await Habitacion.findAll({
-      where: { hotelId: idHotel },
-      include: [
-        {
-          model: TipoHabitacion,
-          as: 'tipoHabitacion',
-          attributes: ['nombre', 'capacidad'],
-        },
-      ],
-    });
+    const habitaciones =
+      await habitacionServices.obtenerHabitacionesPorCapacidad(
+        idHotel,
+        pasajeros,
+      );
+    let habitacionesSinAlquilar = await habitacionServices.verificarAlquilada(
+      habitaciones.map((h) => h.id),
+      fechaInicio,
+      fechaFin,
+    );
 
-    // Filtrar las habitaciones que no están ocupadas en el rango de fechas especificado
-    for (const habitacion of habitaciones) {
-      const ocupada = await verificarOcupada(
-        habitacion.id,
+    let habitacionesSinPaquete =
+      await habitacionServices.verificarHabitacionEnPaquete(
+        habitacionesSinAlquilar,
         fechaInicio,
         fechaFin,
       );
-      if (!ocupada) {
-        habitacionesDisponibles.push(habitacion);
-      }
-    }
+    habitacionesDisponibles.push(...habitacionesSinPaquete);
   }
 
-  // Si la cantidad de pasajeros supera la capacidad máxima de una habitación, devolver todas las habitaciones disponibles
-  const capacidadMaxima = Math.max(
-    ...habitacionesDisponibles.map((h) => h.tipoHabitacion.capacidad),
-  );
-  if (pasajeros > capacidadMaxima) {
-    return habitacionesDisponibles;
-  }
-
-  // Filtrar habitaciones que cumplen con la capacidad requerida
-  return habitacionesDisponibles.filter(
-    (h) => h.tipoHabitacion.capacidad >= pasajeros,
-  );
+  return habitacionesDisponibles;
 };
 
-const verificarOcupada = async (idHabitacion, fechaInicio, fechaFin) => {
-  const alquileres = await AlquilerHabitacion.findAll({
-    where: {
-      habitacionId: idHabitacion,
-      [Op.or]: [
-        {
-          fechaInicio: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          fechaFin: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          [Op.and]: [
-            {
-              fechaInicio: {
-                [Op.lte]: fechaInicio,
-              },
-            },
-            {
-              fechaFin: {
-                [Op.gte]: fechaFin,
-              },
-            },
-          ],
-        },
-      ],
-    },
-  });
+// const getPaquetesDisponibles = async (
+//   ubicacion,
+//   fechaInicio,
+//   fechaFin,
+//   pasajeros,
+// ) => {
+//   // Obtener los hoteles en la ubicación especificada
+//   const hotelesCiudad = await Hotel.findAll({
+//     where: { ciudadId: ubicacion },
+//   });
 
-  return alquileres.length > 0;
-};
+//   if (hotelesCiudad.length === 0) {
+//     throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
+//   }
 
-const getPaquetesDisponibles = async (
-  ubicacion,
-  fechaInicio,
-  fechaFin,
-  pasajeros,
-) => {
-  // Obtener los hoteles en la ubicación especificada
-  const hotelesCiudad = await Hotel.findAll({
-    where: { ciudadId: ubicacion },
-  });
+//   const idsHoteles = hotelesCiudad.map((h) => h.id);
 
-  if (hotelesCiudad.length === 0) {
-    throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
-  }
+//   // Inicializar un array para almacenar los paquetes disponibles
+//   let paquetesDisponibles = [];
 
-  const idsHoteles = hotelesCiudad.map((h) => h.id);
+//   // Recorrer cada hotel para obtener los paquetes disponibles
+//   for (const idHotel of idsHoteles) {
+//     const paquetesHotel = await PaquetePromocional.findAll({
+//       where: { hotelId: idHotel },
+//       include: [
+//         {
+//           model: Habitacion,
+//           as: 'habitaciones',
+//           include: [
+//             {
+//               model: TipoHabitacion,
+//               as: 'tipoHabitacion',
+//               attributes: ['nombre', 'capacidad'],
+//             },
+//           ],
+//         },
+//       ],
+//     });
 
-  // Inicializar un array para almacenar los paquetes disponibles
-  let paquetesDisponibles = [];
+//     // Filtrar los paquetes que no están ocupados en el rango de fechas especificado
+//     for (const paquete of paquetesHotel) {
+//       const habitaciones = paquete.habitaciones;
+//       const capacidadTotal = habitaciones.reduce((total, habitacion) => {
+//         return total + habitacion.tipoHabitacion.capacidad;
+//       }, 0);
 
-  // Recorrer cada hotel para obtener los paquetes disponibles
-  for (const idHotel of idsHoteles) {
-    const paquetesHotel = await PaquetePromocional.findAll({
-      where: { hotelId: idHotel },
-      include: [
-        {
-          model: Habitacion,
-          as: 'habitaciones',
-          include: [
-            {
-              model: TipoHabitacion,
-              as: 'tipoHabitacion',
-              attributes: ['nombre', 'capacidad'],
-            },
-          ],
-        },
-      ],
-    });
+//       if (capacidadTotal >= pasajeros) {
+//         const ocupada = await verificarOcupadaPaquete(
+//           paquete.id,
+//           fechaInicio,
+//           fechaFin,
+//         );
+//         if (!ocupada) {
+//           paquetesDisponibles.push(paquete);
+//         }
+//       }
+//     }
+//   }
 
-    // Filtrar los paquetes que no están ocupados en el rango de fechas especificado
-    for (const paquete of paquetesHotel) {
-      const habitaciones = paquete.habitaciones;
-      const capacidadTotal = habitaciones.reduce((total, habitacion) => {
-        return total + habitacion.tipoHabitacion.capacidad;
-      }, 0);
+//   return paquetesDisponibles;
+// };
 
-      if (capacidadTotal >= pasajeros) {
-        const ocupada = await verificarOcupadaPaquete(
-          paquete.id,
-          fechaInicio,
-          fechaFin,
-        );
-        if (!ocupada) {
-          paquetesDisponibles.push(paquete);
-        }
-      }
-    }
-  }
+// const verificarOcupadaPaquete = async (idPaquete, fechaInicio, fechaFin) => {
+//   const habitacionesPaquete = await PaquetePromocionalHabitacion.findAll({
+//     where: {
+//       paquetePromocionalId: idPaquete,
+//       [Op.or]: [
+//         {
+//           fechaInicio: {
+//             [Op.between]: [fechaInicio, fechaFin],
+//           },
+//         },
+//         {
+//           fechaFin: {
+//             [Op.between]: [fechaInicio, fechaFin],
+//           },
+//         },
+//         {
+//           [Op.and]: [
+//             {
+//               fechaInicio: {
+//                 [Op.lte]: fechaInicio,
+//               },
+//             },
+//             {
+//               fechaFin: {
+//                 [Op.gte]: fechaFin,
+//               },
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//   });
 
-  return paquetesDisponibles;
-};
-
-const verificarOcupadaPaquete = async (idPaquete, fechaInicio, fechaFin) => {
-  const habitacionesPaquete = await PaquetePromocionalHabitacion.findAll({
-    where: {
-      paquetePromocionalId: idPaquete,
-      [Op.or]: [
-        {
-          fechaInicio: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          fechaFin: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          [Op.and]: [
-            {
-              fechaInicio: {
-                [Op.lte]: fechaInicio,
-              },
-            },
-            {
-              fechaFin: {
-                [Op.gte]: fechaFin,
-              },
-            },
-          ],
-        },
-      ],
-    },
-  });
-
-  return habitacionesPaquete.length > 0;
-};
+//   return habitacionesPaquete.length > 0;
+// };
 
 module.exports = {
   crearHotel,
@@ -587,5 +538,5 @@ module.exports = {
   agregarTemporada,
   agregarDescuentos,
   getHabitacionesDisponibles,
-  getPaquetesDisponibles,
+  // getPaquetesDisponibles,
 };

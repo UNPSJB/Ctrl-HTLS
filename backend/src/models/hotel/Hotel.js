@@ -21,6 +21,10 @@ const Hotel = sequelize.define(
       allowNull: false,
       isEmail: true,
     },
+    descripcion: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     tableName: 'hoteles',

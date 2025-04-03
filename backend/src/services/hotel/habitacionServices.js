@@ -247,25 +247,50 @@ const verificarLimitesHabitaciones = async (idHotel, habitaciones) => {
   }
 };
 
-const verificarOcupada = async (idHabitacion) => {
-  const fechaActual = new Date();
+const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
+  // Obtener las habitaciones que no están alquiladas en el rango de fechas
+  const habitacionesDisponibles = [];
 
-  // Verificar si la habitación está alquilada actualmente o en el futuro
-  const alquileres = await AlquilerHabitacion.findAll({
-    where: {
-      habitacionId: idHabitacion,
-      fechaFin: {
-        [Op.gte]: fechaActual,
+  for (const idHabitacion of habitaciones) {
+    const alquileres = await AlquilerHabitacion.findAll({
+      where: {
+        habitacionId: idHabitacion,
+        [Op.or]: [
+          {
+            fechaInicio: {
+              [Op.between]: [fechaInicio, fechaFin],
+            },
+          },
+          {
+            fechaFin: {
+              [Op.between]: [fechaInicio, fechaFin],
+            },
+          },
+          {
+            [Op.and]: [
+              {
+                fechaInicio: {
+                  [Op.lte]: fechaInicio,
+                },
+              },
+              {
+                fechaFin: {
+                  [Op.gte]: fechaFin,
+                },
+              },
+            ],
+          },
+        ],
       },
-    },
-  });
+    });
 
-  if (alquileres.length > 0) {
-    throw new CustomError(
-      'La habitación está alquilada actualmente o en el futuro',
-      409,
-    ); // Conflict
+    // Si no hay alquileres en el rango de fechas, agregar la habitación a la lista de disponibles
+    if (alquileres.length === 0) {
+      habitacionesDisponibles.push(idHabitacion);
+    }
   }
+
+  return habitacionesDisponibles;
 };
 
 const verificarHabitacionesHotel = async (idHotel, habitaciones) => {
@@ -286,11 +311,9 @@ const verificarHabitacionesHotel = async (idHotel, habitaciones) => {
 };
 
 // Verificar si la habitación está asociada a uno o más paquetes promocionales
-const verificarHabitacionesPaquetePromocional = async (
-  habitaciones,
-  inicio,
-  fin,
-) => {
+const verificarHabitacionEnPaquete = async (habitaciones, inicio, fin) => {
+  const habitacionesDisponibles = [];
+
   for (const idHabitacion of habitaciones) {
     const paquetes = await PaquetePromocionalHabitacion.findAll({
       where: {
@@ -324,13 +347,47 @@ const verificarHabitacionesPaquetePromocional = async (
       },
     });
 
-    if (paquetes.length > 0) {
-      throw new CustomError(
-        `La habitación con ID ${idHabitacion} ya está asignada a un paquete promocional en ese rango de fechas`,
-        409,
-      ); // Conflict
+    if (paquetes.length === 0) {
+      habitacionesDisponibles.push(idHabitacion);
     }
   }
+  return habitacionesDisponibles;
+};
+
+const obtenerHabitacionesPorCapacidad = async (idHotel, pasajeros) => {
+  // Obtener las habitaciones del hotel con su tipo de habitación
+  //let habitacionesFiltradas = [];
+  const habitaciones = await Habitacion.findAll({
+    where: { hotelId: idHotel },
+    include: [
+      {
+        model: TipoHabitacion,
+        as: 'tipoHabitacion',
+        attributes: ['nombre', 'capacidad'],
+      },
+    ],
+  });
+
+  if (habitaciones.length === 0) {
+    return []; // Si no hay habitaciones, devolver un array vacío
+  }
+
+  // Calcular la capacidad máxima de las habitaciones
+  const capacidadMaxima = Math.max(
+    ...habitaciones.map((h) => h.tipoHabitacion.capacidad),
+  );
+
+  // Si la cantidad de pasajeros supera la capacidad máxima, devolver todas las habitaciones
+  if (pasajeros > capacidadMaxima) {
+    return habitaciones;
+  }
+
+  // Filtrar habitaciones que cumplen con la capacidad requerida
+  const habitacionesFiltradas = habitaciones.filter(
+    (h) => h.tipoHabitacion.capacidad <= pasajeros,
+  );
+
+  return habitacionesFiltradas;
 };
 
 module.exports = {
@@ -338,6 +395,8 @@ module.exports = {
   obtenerHabitaciones,
   modificarHabitacion,
   eliminarHabitacion,
+  verificarAlquilada,
   verificarHabitacionesHotel,
-  verificarHabitacionesPaquetePromocional,
+  verificarHabitacionEnPaquete,
+  obtenerHabitacionesPorCapacidad,
 };

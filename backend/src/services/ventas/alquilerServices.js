@@ -46,34 +46,35 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
     pasajeros,
   );
 
-  // Organizar la disponibilidad por hotel
-  const disponibilidadPorHotel = {};
+  // // Organizar la disponibilidad por hotel
+  // const disponibilidadPorHotel = {};
 
-  habitacionesDisponibles.forEach((habitacion) => {
-    const hotelId = habitacion.hotelId;
-    if (!disponibilidadPorHotel[hotelId]) {
-      disponibilidadPorHotel[hotelId] = {
-        hotelId,
-        habitaciones: [],
-        paquetes: [],
-      };
-    }
-    disponibilidadPorHotel[hotelId].habitaciones.push(habitacion);
-  });
+  // habitacionesDisponibles.forEach((habitacion) => {
+  //   const hotelId = habitacion.hotelId;
+  //   if (!disponibilidadPorHotel[hotelId]) {
+  //     disponibilidadPorHotel[hotelId] = {
+  //       hotelId,
+  //       habitaciones: [],
+  //       paquetes: [],
+  //     };
+  //   }
+  //   disponibilidadPorHotel[hotelId].habitaciones.push(habitacion);
+  // });
 
-  paquetesDisponibles.forEach((paquete) => {
-    const hotelId = paquete.hotelId;
-    if (!disponibilidadPorHotel[hotelId]) {
-      disponibilidadPorHotel[hotelId] = {
-        hotelId,
-        habitaciones: [],
-        paquetes: [],
-      };
-    }
-    disponibilidadPorHotel[hotelId].paquetes.push(paquete);
-  });
+  // paquetesDisponibles.forEach((paquete) => {
+  //   const hotelId = paquete.hotelId;
+  //   if (!disponibilidadPorHotel[hotelId]) {
+  //     disponibilidadPorHotel[hotelId] = {
+  //       hotelId,
+  //       habitaciones: [],
+  //       paquetes: [],
+  //     };
+  //   }
+  //   disponibilidadPorHotel[hotelId].paquetes.push(paquete);
+  // });
 
-  return Object.values(disponibilidadPorHotel);
+  //return Object.values(disponibilidadPorHotel);
+  return habitacionesDisponibles;
 };
 
 module.exports = { obtenerDisponibilidad };
