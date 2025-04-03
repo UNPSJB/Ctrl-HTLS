@@ -25,6 +25,7 @@ const HotelList = () => {
           nombre: 'Escapada Romántica',
           habitaciones: [
             { nombre: 'Habitación Deluxe', capacidad: 2, precio: 200 },
+            { nombre: 'Habitación Estándar', capacidad: 2, precio: 150 },
           ],
           descuento: 10, // %
           noches: 3,
