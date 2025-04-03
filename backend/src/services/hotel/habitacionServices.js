@@ -248,47 +248,49 @@ const verificarLimitesHabitaciones = async (idHotel, habitaciones) => {
 };
 
 const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
-  // Obtener las habitaciones que no están alquiladas en el rango de fechas
-  const habitacionesDisponibles = [];
-
-  for (const idHabitacion of habitaciones) {
-    const alquileres = await AlquilerHabitacion.findAll({
-      where: {
-        habitacionId: idHabitacion,
-        [Op.or]: [
-          {
-            fechaInicio: {
-              [Op.between]: [fechaInicio, fechaFin],
-            },
+  // Obtener todas las habitaciones alquiladas en el rango de fechas
+  const alquileres = await AlquilerHabitacion.findAll({
+    where: {
+      habitacionId: { [Op.in]: habitaciones },
+      [Op.or]: [
+        {
+          fechaInicio: {
+            [Op.between]: [fechaInicio, fechaFin],
           },
-          {
-            fechaFin: {
-              [Op.between]: [fechaInicio, fechaFin],
-            },
+        },
+        {
+          fechaFin: {
+            [Op.between]: [fechaInicio, fechaFin],
           },
-          {
-            [Op.and]: [
-              {
-                fechaInicio: {
-                  [Op.lte]: fechaInicio,
-                },
+        },
+        {
+          [Op.and]: [
+            {
+              fechaInicio: {
+                [Op.lte]: fechaInicio,
               },
-              {
-                fechaFin: {
-                  [Op.gte]: fechaFin,
-                },
+            },
+            {
+              fechaFin: {
+                [Op.gte]: fechaFin,
               },
-            ],
-          },
-        ],
-      },
-    });
+            },
+          ],
+        },
+      ],
+    },
+    attributes: ['habitacionId'], // Solo necesitamos los IDs de las habitaciones alquiladas
+  });
 
-    // Si no hay alquileres en el rango de fechas, agregar la habitación a la lista de disponibles
-    if (alquileres.length === 0) {
-      habitacionesDisponibles.push(idHabitacion);
-    }
-  }
+  // Extraer los IDs de las habitaciones alquiladas
+  const habitacionesAlquiladas = alquileres.map(
+    (alquiler) => alquiler.habitacionId,
+  );
+
+  // Filtrar las habitaciones que no están alquiladas
+  const habitacionesDisponibles = habitaciones.filter(
+    (idHabitacion) => !habitacionesAlquiladas.includes(idHabitacion),
+  );
 
   return habitacionesDisponibles;
 };
@@ -390,12 +392,88 @@ const obtenerHabitacionesPorCapacidad = async (idHotel, pasajeros) => {
   return habitacionesFiltradas;
 };
 
+const obtenerHabitacionesDisponiblesPorTipo = async (
+  idHotel,
+  fechaInicio,
+  fechaFin,
+  pasajeros,
+) => {
+  // Obtener todas las habitaciones del hotel con su tipo de habitación
+  const habitaciones = await Habitacion.findAll({
+    where: { hotelId: idHotel },
+    include: [
+      {
+        model: TipoHabitacion,
+        as: 'tipoHabitacion',
+        attributes: ['nombre', 'capacidad'],
+        include: [
+          {
+            model: HotelTipoHabitacion,
+            as: 'hotelTipoHabitacion',
+            where: { hotelId: idHotel },
+            attributes: ['precio'],
+          },
+        ],
+      },
+    ],
+  });
+
+  // Extraer los IDs de las habitaciones
+  const idsHabitaciones = habitaciones.map((habitacion) => habitacion.id);
+
+  // Verificar cuáles habitaciones no están alquiladas
+  const habitacionesNoAlquiladas = await verificarAlquilada(
+    idsHabitaciones,
+    fechaInicio,
+    fechaFin,
+  );
+
+  // Filtrar las habitaciones que no están alquiladas
+  const habitacionesDisponibles = habitaciones.filter((habitacion) =>
+    habitacionesNoAlquiladas.includes(habitacion.id),
+  );
+
+  // Agrupar habitaciones por tipo
+  const habitacionesPorTipo = habitacionesDisponibles.reduce(
+    (resultado, habitacion) => {
+      const tipo = habitacion.tipoHabitacion.nombre;
+
+      // Acceder al precio desde el arreglo hotelTipoHabitacion
+      const precio =
+        habitacion.tipoHabitacion.hotelTipoHabitacion &&
+        habitacion.tipoHabitacion.hotelTipoHabitacion[0] &&
+        habitacion.tipoHabitacion.hotelTipoHabitacion[0].precio;
+
+      if (!resultado[tipo]) {
+        resultado[tipo] = {
+          habitaciones: [],
+          precio: precio || 0, // Asegurarse de que el precio esté presente
+          capacidad: habitacion.tipoHabitacion.capacidad,
+        };
+      }
+      resultado[tipo].habitaciones.push({
+        id: habitacion.id,
+        numero: habitacion.numero,
+        piso: habitacion.piso,
+      });
+      return resultado;
+    },
+    {},
+  );
+
+  return Object.entries(habitacionesPorTipo).map(([tipo, datos]) => ({
+    [tipo]: datos.habitaciones,
+    precio: datos.precio,
+    capacidad: datos.capacidad,
+  }));
+};
 module.exports = {
   agregarHabitaciones,
   obtenerHabitaciones,
   modificarHabitacion,
   eliminarHabitacion,
-  verificarAlquilada,
+  obtenerHabitacionesDisponiblesPorTipo,
+  //verificarAlquilada,
   verificarHabitacionesHotel,
   verificarHabitacionEnPaquete,
   obtenerHabitacionesPorCapacidad,

@@ -81,6 +81,30 @@ TipoHabitacion.belongsToMany(Hotel, {
   as: 'hoteles',
 });
 
+// HotelTipoHabitacion pertenece a TipoHabitacion
+HotelTipoHabitacion.belongsTo(TipoHabitacion, {
+  foreignKey: 'tipoHabitacionId',
+  as: 'tipoHabitacion',
+});
+
+// TipoHabitacion tiene muchas relaciones con HotelTipoHabitacion
+TipoHabitacion.hasMany(HotelTipoHabitacion, {
+  foreignKey: 'tipoHabitacionId',
+  as: 'hotelTipoHabitacion',
+});
+
+// Hotel tiene muchas relaciones con HotelTipoHabitacion
+Hotel.hasMany(HotelTipoHabitacion, {
+  foreignKey: 'hotelId',
+  as: 'hotelTipoHabitaciones',
+});
+
+// HotelTipoHabitacion pertenece a Hotel
+HotelTipoHabitacion.belongsTo(Hotel, {
+  foreignKey: 'hotelId',
+  as: 'hotel',
+});
+
 // Relación uno a muchos (Ciudad -> Hotel)
 Hotel.belongsTo(Ciudad, {
   foreignKey: 'ciudadId',

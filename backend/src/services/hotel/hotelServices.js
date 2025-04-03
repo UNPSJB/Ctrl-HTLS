@@ -387,7 +387,7 @@ const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
  * BUSCAR PAQUETES QUE COINCIDAN CON LAS FECHAS
  */
 
-const getHabitacionesDisponibles = async (
+const getDisponibilidadPorHotel = async (
   ubicacion,
   fechaInicio,
   fechaFin,
@@ -396,40 +396,70 @@ const getHabitacionesDisponibles = async (
   // Obtener los hoteles en la ubicación especificada
   const hotelesCiudad = await Hotel.findAll({
     where: { ciudadId: ubicacion },
+    include: [
+      {
+        model: Ciudad,
+        as: 'ciudad',
+        include: [
+          {
+            model: Provincia,
+            as: 'provincia',
+            include: [
+              {
+                model: Pais,
+                as: 'pais',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        model: Categoria,
+        as: 'categoria',
+        attributes: ['nombre'],
+      },
+    ],
   });
 
   if (hotelesCiudad.length === 0) {
     throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
   }
 
-  const idsHoteles = hotelesCiudad.map((h) => h.id);
+  const disponibilidad = [];
 
-  // Inicializar un array para almacenar las habitaciones disponibles
-  let habitacionesDisponibles = [];
-
-  // Recorrer cada hotel y delegar la lógica de filtrado a habitacionServices
-  for (const idHotel of idsHoteles) {
-    const habitaciones =
-      await habitacionServices.obtenerHabitacionesPorCapacidad(
-        idHotel,
-        pasajeros,
-      );
-    let habitacionesSinAlquilar = await habitacionServices.verificarAlquilada(
-      habitaciones.map((h) => h.id),
+  for (const hotel of hotelesCiudad) {
+    // Obtener la temporada actual del hotel
+    const temporada = await temporadaServices.obtenerTemporadaActual(
+      hotel.id,
       fechaInicio,
       fechaFin,
     );
 
-    let habitacionesSinPaquete =
-      await habitacionServices.verificarHabitacionEnPaquete(
-        habitacionesSinAlquilar,
+    // Obtener las habitaciones disponibles agrupadas por tipo
+    const habitaciones =
+      await habitacionServices.obtenerHabitacionesDisponiblesPorTipo(
+        hotel.id,
         fechaInicio,
         fechaFin,
+        pasajeros,
       );
-    habitacionesDisponibles.push(...habitacionesSinPaquete);
+    // Estructurar el objeto del hotel
+    disponibilidad.push({
+      hotelId: hotel.id,
+      nombre: hotel.nombre,
+      estrellas: hotel.categoria.nombre,
+      descripcion: hotel.descripcion,
+      temporada: temporada,
+      ubicacion: {
+        pais: hotel.ciudad.provincia.pais.nombre,
+        provincia: hotel.ciudad.provincia.nombre,
+        ciudad: hotel.ciudad.nombre,
+      },
+      habitaciones: habitaciones,
+    });
   }
 
-  return habitacionesDisponibles;
+  return disponibilidad;
 };
 
 // const getPaquetesDisponibles = async (
@@ -537,6 +567,7 @@ module.exports = {
   agregarPaquetePromocional,
   agregarTemporada,
   agregarDescuentos,
-  getHabitacionesDisponibles,
+  getDisponibilidadPorHotel,
+  //getHabitacionesDisponibles,
   // getPaquetesDisponibles,
 };

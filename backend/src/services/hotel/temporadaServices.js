@@ -53,4 +53,53 @@ const verificarTemporadas = async (idHotel, inicio, fin) => {
   }
 };
 
-module.exports = { crearTemporada, verificarTemporadas };
+const obtenerTemporadaActual = async (idHotel, fechaInicio, fechaFin) => {
+  const temporada = await Temporada.findOne({
+    where: {
+      hotelId: idHotel,
+      [Op.or]: [
+        {
+          fechaInicio: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          fechaFin: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          [Op.and]: [
+            {
+              fechaInicio: {
+                [Op.lte]: fechaInicio,
+              },
+            },
+            {
+              fechaFin: {
+                [Op.gte]: fechaFin,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  if (!temporada) {
+    return null;
+  }
+
+  return {
+    tipo: temporada.tipo,
+    fechaInicio: temporada.fechaInicio,
+    fechaFin: temporada.fechaFin,
+    porcentaje: temporada.porcentaje,
+  };
+};
+
+module.exports = {
+  crearTemporada,
+  verificarTemporadas,
+  obtenerTemporadaActual,
+};

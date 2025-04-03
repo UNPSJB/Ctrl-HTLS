@@ -29,22 +29,22 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
     throw new CustomError('La cantidad de pasajeros debe ser mayor a 0', 400); // Bad Request
   }
 
-  // Obtener las habitaciones disponibles
-  const habitacionesDisponibles =
-    await hotelServices.getHabitacionesDisponibles(
-      ubicacion,
-      desde,
-      hasta,
-      pasajeros,
-    );
+  // // Obtener las habitaciones disponibles
+  // const habitacionesDisponibles =
+  //   await hotelServices.getHabitacionesDisponibles(
+  //     ubicacion,
+  //     desde,
+  //     hasta,
+  //     pasajeros,
+  //   );
 
-  // Obtener los paquetes promocionales disponibles
-  const paquetesDisponibles = await hotelServices.getPaquetesDisponibles(
-    ubicacion,
-    desde,
-    hasta,
-    pasajeros,
-  );
+  // // Obtener los paquetes promocionales disponibles
+  // const paquetesDisponibles = await hotelServices.getPaquetesDisponibles(
+  //   ubicacion,
+  //   desde,
+  //   hasta,
+  //   pasajeros,
+  // );
 
   // // Organizar la disponibilidad por hotel
   // const disponibilidadPorHotel = {};
@@ -74,7 +74,12 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
   // });
 
   //return Object.values(disponibilidadPorHotel);
-  return habitacionesDisponibles;
+  return await hotelServices.getDisponibilidadPorHotel(
+    ubicacion,
+    desde,
+    hasta,
+    pasajeros,
+  );
 };
 
 module.exports = { obtenerDisponibilidad };
