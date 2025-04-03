@@ -4,13 +4,9 @@ import { RoomDetailsModal } from '../RoomDetailsModal';
 const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
   if (!habitacion) return null;
 
-  // Estado para controlar el modal
   const [showModal, setShowModal] = useState(false);
 
-  // Precio original de la habitación
   const originalPrice = habitacion.precio;
-  // Calcular el precio con descuento solo si el coeficiente es distinto a 1.
-  // Si coeficiente es 1, no se aplica descuento y se muestra el precio original.
   const discountPrice =
     coeficiente !== 1
       ? originalPrice - originalPrice * coeficiente
@@ -35,9 +31,6 @@ const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
         </div>
         <div className="text-right flex flex-col items-end">
           {coeficiente !== 1 ? (
-            // Si se aplica descuento, se muestran ambos precios:
-            // - El precio con descuento en verde.
-            // - El precio original tachado.
             <div className="flex items-center gap-2">
               <p className="text-md font-bold text-green-600 dark:text-green-400">
                 ${discountPrice.toFixed(2)}
@@ -47,27 +40,28 @@ const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
               </p>
             </div>
           ) : (
-            // Si no hay descuento, se muestra el precio normal.
             <p className="text-md font-bold text-gray-800 dark:text-gray-200">
               ${originalPrice.toFixed(2)}
             </p>
           )}
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline mt-2"
-            onClick={() => setShowModal(true)} // Activa el modal al hacer clic
+            onClick={() => setShowModal(true)}
           >
             Más Detalles
           </button>
         </div>
       </div>
 
-      {/* Renderiza el modal si está activo */}
       {showModal && (
         <RoomDetailsModal
           habitacion={habitacion}
           coeficiente={coeficiente}
           onClose={() => setShowModal(false)}
-          onReserve={(id) => console.log('Reservando habitación con ID:', id)}
+          onReserve={() => {
+            onSelect(habitacion.nombre); // Selecciona la habitación al reservar
+            setShowModal(false); // Cierra el modal después de seleccionar
+          }}
         />
       )}
     </>

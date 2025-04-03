@@ -10,8 +10,8 @@ const PaqueteItem = ({ paquete, coeficiente, isSelected, onSelect }) => {
   // Precio del paquete con descuento aplicado
   const packagePrice =
     paquete.habitaciones.reduce((acc, hab) => acc + hab.precio, 0) *
-    (1 - paquete.descuento / 100) * // Aplicar el descuento
-    paquete.noches; // Multiplicar por el número de noches
+    (1 - paquete.descuento / 100) *
+    paquete.noches;
 
   // Aplicar coeficiente de descuento solo si es distinto de 1
   const finalPrice =
@@ -20,6 +20,7 @@ const PaqueteItem = ({ paquete, coeficiente, isSelected, onSelect }) => {
   return (
     <>
       <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-900 shadow-sm flex items-center gap-4 border-gray-200 dark:border-gray-700">
+        {/* Checkbox de selección */}
         <input
           type="checkbox"
           checked={isSelected}
@@ -64,7 +65,10 @@ const PaqueteItem = ({ paquete, coeficiente, isSelected, onSelect }) => {
           paquete={paquete}
           coeficiente={coeficiente}
           onClose={() => setShowModal(false)} // Cierra el modal
-          onReserve={(nombre) => console.log('Reservando paquete:', nombre)}
+          onReserve={() => {
+            onSelect(paquete.nombre);
+            setShowModal(false); // Cierra el modal después de seleccionar
+          }} // Selecciona al reservar
         />
       )}
     </>
