@@ -10,10 +10,14 @@ export default [
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
   pluginReact.configs.flat.recommended,
+  // Registra el plugin de Prettier
   {
     plugins: {
       prettier: pluginPrettier,
     },
+  },
+  // Configura las reglas de Prettier
+  {
     rules: {
       'prettier/prettier': [
         'error',
@@ -21,13 +25,19 @@ export default [
           singleQuote: true, // Prettier usa comillas simples
         },
       ],
-      'react/react-in-jsx-scope': 'off', // Desactiva la regla que requiere importar React en JSX
     },
+  },
+  // Desactiva las reglas de formato de ESLint que podrían entrar en conflicto con Prettier
+  configPrettier,
+  {
     settings: {
       react: {
         version: 'detect', // Detecta automáticamente la versión de React
       },
     },
+    rules: {
+      'react/react-in-jsx-scope': 'off', // Desactiva la regla que requiere importar React en JSX
+      'react/prop-types': 'off', // Desactiva la regla que requiere definir propTypes
+    },
   },
-  configPrettier,
 ];

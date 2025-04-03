@@ -1,14 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
-import AboutPage from '@/pages/AboutPage';
-import NotFoundPage from '@/pages/NotFoundPage';
 import MainLayout from '@/layouts/MainLayout';
-import HotelsPage from '@/pages/HotelsPage';
-import CreateHotelPage from '@/pages/CreateHotelPage';
-import ListHotelsPage from '@/pages/ListHotelsPage';
-import HotelPage from '@/pages/HotelPage';
-import HotelFormPage from '@/pages/HotelFormPage';
-import LocationPage from '@/pages/LocationPage';
 
 const AppRouter = () => {
   return (
@@ -16,14 +8,14 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
-          <Route path="about" element={<AboutPage />} />
+          {/* <Route path="about" element={<AboutPage />} />
           <Route path="hoteles" element={<HotelsPage />} />
           <Route path="hoteles/crear" element={<CreateHotelPage />} />
           <Route path="hoteles/listar" element={<ListHotelsPage />} />
           <Route path="hoteles/:hotelId" element={<HotelPage />} />
           <Route path="hoteles/formulario" element={<HotelFormPage />} />
           <Route path="location" element={<LocationPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="*" element={<NotFoundPage />} /> */}
         </Route>
       </Routes>
     </BrowserRouter>
