@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { RoomDetailsModal } from '../RoomDetailsModal';
+import PriceTag from '../PriceTag';
 
 const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
   if (!habitacion) return null;
 
   const [showModal, setShowModal] = useState(false);
-
   const originalPrice = habitacion.precio;
-  const discountPrice =
-    coeficiente !== 1
-      ? originalPrice - originalPrice * coeficiente
-      : originalPrice;
 
   return (
     <>
@@ -30,20 +26,7 @@ const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
           </p>
         </div>
         <div className="text-right flex flex-col items-end">
-          {coeficiente !== 1 ? (
-            <div className="flex items-center gap-2">
-              <p className="text-md font-bold text-green-600 dark:text-green-400">
-                ${discountPrice.toFixed(2)}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 line-through">
-                ${originalPrice.toFixed(2)}
-              </p>
-            </div>
-          ) : (
-            <p className="text-md font-bold text-gray-800 dark:text-gray-200">
-              ${originalPrice.toFixed(2)}
-            </p>
-          )}
+          <PriceTag precio={originalPrice} coeficiente={coeficiente} />
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline mt-2"
             onClick={() => setShowModal(true)}
@@ -56,7 +39,7 @@ const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
       {showModal && (
         <RoomDetailsModal
           habitacion={habitacion}
-          coeficiente={coeficiente}
+          discountCoefficient={coeficiente}
           onClose={() => setShowModal(false)}
           onReserve={() => {
             onSelect(habitacion.nombre); // Selecciona la habitación al reservar
