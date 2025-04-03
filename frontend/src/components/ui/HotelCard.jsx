@@ -153,6 +153,9 @@ const HotelCard = ({ hotel }) => {
                 <PaqueteItem
                   key={paquete.nombre}
                   paquete={paquete}
+                  coeficiente={
+                    hotel.temporada == 'alta' ? hotel.coeficiente : 1
+                  }
                   isSelected={selectedPackages.includes(paquete.nombre)}
                   onSelect={togglePackageSelection}
                 />
