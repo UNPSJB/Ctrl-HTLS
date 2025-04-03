@@ -14,6 +14,10 @@ const HotelCard = ({ hotel }) => {
 
   const imagePath = `/src/assets/${encodeURIComponent(hotel.nombre)}.webp`;
 
+  // Determinamos el coeficiente según la temporada
+  const discountCoefficient =
+    hotel.temporada === 'alta' ? hotel.coeficiente : 1;
+
   // Función para renderizar estrellas
   const renderStars = (count) => (
     <div className="flex gap-1">
@@ -43,23 +47,35 @@ const HotelCard = ({ hotel }) => {
     );
   };
 
+  // Calcula el total de las habitaciones seleccionadas aplicando el coeficiente si es necesario
   const calculateRoomsTotal = () => {
     return hotel.habitaciones
       .filter((hab) => selectedRooms.includes(hab.nombre))
-      .reduce((acc, hab) => acc + hab.precio, 0);
+      .reduce((acc, hab) => {
+        // Si el coeficiente es distinto de 1, se aplica el descuento adicional
+        const effectivePrice =
+          discountCoefficient !== 1
+            ? hab.precio - hab.precio * discountCoefficient
+            : hab.precio;
+        return acc + effectivePrice;
+      }, 0);
   };
 
+  // Calcula el total de los paquetes seleccionados aplicando el coeficiente si es necesario
   const calculatePackagesTotal = () => {
     return hotel.paquetes
       .filter((paq) => selectedPackages.includes(paq.nombre))
       .reduce((acc, paquete) => {
-        const precioOriginal = paquete.habitaciones.reduce(
-          (sum, hab) => sum + hab.precio,
-          0
-        );
-        const precioConDescuento =
-          precioOriginal - (precioOriginal * paquete.descuento) / 100;
-        return acc + precioConDescuento;
+        // Precio base del paquete ya con su descuento aplicado
+        const packageBasePrice =
+          paquete.habitaciones.reduce((sum, hab) => sum + hab.precio, 0) *
+          (1 - paquete.descuento / 100);
+        // Se aplica el coeficiente adicional si corresponde
+        const effectivePrice =
+          discountCoefficient !== 1
+            ? packageBasePrice - packageBasePrice * discountCoefficient
+            : packageBasePrice;
+        return acc + effectivePrice;
       }, 0);
   };
 
@@ -92,7 +108,7 @@ const HotelCard = ({ hotel }) => {
             {hotel.nombre}
           </h2>
 
-          {hotel.temporada == 'alta' && (
+          {hotel.temporada === 'alta' && (
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4 text-green-500" />
               <span className="text-sm font-medium text-green-500">
@@ -132,9 +148,7 @@ const HotelCard = ({ hotel }) => {
                 <HabitacionItem
                   key={habitacion.nombre}
                   habitacion={habitacion}
-                  coeficiente={
-                    hotel.temporada == 'alta' ? hotel.coeficiente : 1
-                  }
+                  coeficiente={discountCoefficient}
                   isSelected={selectedRooms.includes(habitacion.nombre)}
                   onSelect={toggleRoomSelection}
                 />
@@ -153,9 +167,7 @@ const HotelCard = ({ hotel }) => {
                 <PaqueteItem
                   key={paquete.nombre}
                   paquete={paquete}
-                  coeficiente={
-                    hotel.temporada == 'alta' ? hotel.coeficiente : 1
-                  }
+                  coeficiente={discountCoefficient}
                   isSelected={selectedPackages.includes(paquete.nombre)}
                   onSelect={togglePackageSelection}
                 />
