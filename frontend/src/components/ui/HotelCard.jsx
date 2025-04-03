@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bed, Package, MapPin, ImageOff, Star } from 'lucide-react';
+import { Bed, Package, MapPin, ImageOff, Star, Tag } from 'lucide-react';
 import HabitacionItem from './HabitacionItem';
 import PaqueteItem from './PaqueteItem';
 import SelectionSummary from './SelectionSummary';
@@ -92,6 +92,15 @@ const HotelCard = ({ hotel }) => {
             {hotel.nombre}
           </h2>
 
+          {hotel.temporada == 'alta' && (
+            <div className="flex items-center gap-2">
+              <Tag className="w-4 h-4 text-green-500" />
+              <span className="text-sm font-medium text-green-500">
+                {hotel.coeficiente * 100}% descuento en temporada alta
+              </span>
+            </div>
+          )}
+
           {/* Estrellas */}
           <div>{renderStars(hotel.estrellas)}</div>
 
@@ -123,6 +132,9 @@ const HotelCard = ({ hotel }) => {
                 <HabitacionItem
                   key={habitacion.nombre}
                   habitacion={habitacion}
+                  coeficiente={
+                    hotel.temporada == 'alta' ? hotel.coeficiente : 1
+                  }
                   isSelected={selectedRooms.includes(habitacion.nombre)}
                   onSelect={toggleRoomSelection}
                 />

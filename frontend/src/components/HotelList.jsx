@@ -6,6 +6,8 @@ const HotelList = () => {
     {
       nombre: 'Hotel Paraíso',
       estrellas: 5,
+      temporada: 'alta',
+      coeficiente: 0.15,
       ubicacion: {
         pais: 'Argentina',
         provincia: 'Buenos Aires',
