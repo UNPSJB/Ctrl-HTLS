@@ -1,143 +1,38 @@
 import { useState } from 'react';
-import { Bed, Package, MapPin, ImageOff, Star, Tag } from 'lucide-react';
+import { Bed, Package } from 'lucide-react';
+import useHotelSelection from '../../hooks/useHotelSelection';
 import HabitacionItem from './HabitacionItem';
 import PaqueteItem from './PaqueteItem';
 import SelectionSummary from './SelectionSummary';
+import HotelHeader from '../HotelHeader';
 
 const HotelCard = ({ hotel }) => {
   if (!hotel) return null;
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedRooms, setSelectedRooms] = useState([]);
-  const [selectedPackages, setSelectedPackages] = useState([]);
   const [imageError, setImageError] = useState(false);
 
-  const imagePath = `/src/assets/${encodeURIComponent(hotel.nombre)}.webp`;
-
-  // Determinamos el coeficiente según la temporada
-  const discountCoefficient =
-    hotel.temporada === 'alta' ? hotel.coeficiente : 1;
-
-  // Función para renderizar estrellas
-  const renderStars = (count) => (
-    <div className="flex gap-1">
-      {Array.from({ length: count }, (_, index) => (
-        <Star
-          key={index}
-          className="w-5 h-5 text-yellow-500"
-          fill="currentColor"
-        />
-      ))}
-    </div>
-  );
-
-  const toggleRoomSelection = (roomName) => {
-    setSelectedRooms((prevSelected) =>
-      prevSelected.includes(roomName)
-        ? prevSelected.filter((name) => name !== roomName)
-        : [...prevSelected, roomName]
-    );
-  };
-
-  const togglePackageSelection = (packageName) => {
-    setSelectedPackages((prevSelected) =>
-      prevSelected.includes(packageName)
-        ? prevSelected.filter((name) => name !== packageName)
-        : [...prevSelected, packageName]
-    );
-  };
-
-  // Calcula el total de las habitaciones seleccionadas aplicando el coeficiente si es necesario
-  const calculateRoomsTotal = () => {
-    return hotel.habitaciones
-      .filter((hab) => selectedRooms.includes(hab.nombre))
-      .reduce((acc, hab) => {
-        // Si el coeficiente es distinto de 1, se aplica el descuento adicional
-        const effectivePrice =
-          discountCoefficient !== 1
-            ? hab.precio - hab.precio * discountCoefficient
-            : hab.precio;
-        return acc + effectivePrice;
-      }, 0);
-  };
-
-  // Calcula el total de los paquetes seleccionados aplicando el coeficiente si es necesario
-  const calculatePackagesTotal = () => {
-    return hotel.paquetes
-      .filter((paq) => selectedPackages.includes(paq.nombre))
-      .reduce((acc, paquete) => {
-        // Precio base del paquete ya con su descuento aplicado
-        const packageBasePrice =
-          paquete.habitaciones.reduce((sum, hab) => sum + hab.precio, 0) *
-          (1 - paquete.descuento / 100);
-        // Se aplica el coeficiente adicional si corresponde
-        const effectivePrice =
-          discountCoefficient !== 1
-            ? packageBasePrice - packageBasePrice * discountCoefficient
-            : packageBasePrice;
-        return acc + effectivePrice;
-      }, 0);
-  };
-
-  const totalPrice = calculateRoomsTotal() + calculatePackagesTotal();
+  const {
+    selectedRooms,
+    selectedPackages,
+    toggleRoomSelection,
+    togglePackageSelection,
+    totalPrice,
+    discountCoefficient,
+  } = useHotelSelection(hotel);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-      {/* Encabezado */}
-      <div
-        className="flex cursor-pointer gap-4"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        {/* Imagen del hotel */}
-        {imageError ? (
-          <div className="w-52 h-52 flex items-center justify-center bg-gray-200 dark:bg-gray-700 ">
-            <ImageOff className="w-12 h-12 text-gray-500" />
-          </div>
-        ) : (
-          <img
-            className="w-52 h-52 object-cover "
-            src={imagePath}
-            alt={hotel.nombre}
-            onError={() => setImageError(true)}
-          />
-        )}
+      <HotelHeader
+        hotel={hotel}
+        isExpanded={isExpanded}
+        setIsExpanded={setIsExpanded}
+        imageError={imageError}
+        setImageError={setImageError}
+      />
 
-        {/* Información del hotel */}
-        <div className="flex flex-col flex-1 py-2 gap-2">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-            {hotel.nombre}
-          </h2>
-
-          {hotel.temporada === 'alta' && (
-            <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-green-500" />
-              <span className="text-sm font-medium text-green-500">
-                {hotel.coeficiente * 100}% descuento en temporada alta
-              </span>
-            </div>
-          )}
-
-          {/* Estrellas */}
-          <div>{renderStars(hotel.estrellas)}</div>
-
-          {/* Ubicación */}
-          <p className="text-gray-600 dark:text-gray-400 text-base flex items-center gap-1">
-            <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-            {hotel.ubicacion.ciudad}, {hotel.ubicacion.provincia},{' '}
-            {hotel.ubicacion.pais}
-          </p>
-
-          {/* Descripción */}
-          <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
-            {hotel.descripcion}
-          </p>
-        </div>
-      </div>
-
-      {/* Contenido Expandible */}
       {isExpanded && (
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          {/* Habitaciones */}
           <div className="py-4">
             <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4">
               <Bed className="w-5 h-5" />
@@ -156,7 +51,6 @@ const HotelCard = ({ hotel }) => {
             </div>
           </div>
 
-          {/* Paquetes */}
           <div className="py-4">
             <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4">
               <Package className="w-5 h-5" />
@@ -175,7 +69,6 @@ const HotelCard = ({ hotel }) => {
             </div>
           </div>
 
-          {/* Resumen de selección */}
           <SelectionSummary
             selectedRoomsCount={selectedRooms.length}
             selectedPackagesCount={selectedPackages.length}
