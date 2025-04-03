@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bed, Package } from 'lucide-react';
+import { Bed, Package, MapPin, ImageOff, Star } from 'lucide-react';
 import HabitacionItem from './HabitacionItem';
 import PaqueteItem from './PaqueteItem';
 import SelectionSummary from './SelectionSummary';
@@ -10,8 +10,22 @@ const HotelCard = ({ hotel }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedRooms, setSelectedRooms] = useState([]);
   const [selectedPackages, setSelectedPackages] = useState([]);
+  const [imageError, setImageError] = useState(false);
 
   const imagePath = `/src/assets/${encodeURIComponent(hotel.nombre)}.webp`;
+
+  // Función para renderizar estrellas
+  const renderStars = (count) => (
+    <div className="flex gap-1">
+      {Array.from({ length: count }, (_, index) => (
+        <Star
+          key={index}
+          className="w-5 h-5 text-yellow-500"
+          fill="currentColor"
+        />
+      ))}
+    </div>
+  );
 
   const toggleRoomSelection = (roomName) => {
     setSelectedRooms((prevSelected) =>
@@ -53,37 +67,58 @@ const HotelCard = ({ hotel }) => {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+      {/* Encabezado */}
       <div
-        className="flex cursor-pointer"
+        className="flex cursor-pointer gap-4"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <img
-          className="w-48 h-48 object-cover"
-          src={imagePath}
-          alt={hotel.nombre}
-        />
-        <div className="flex-1 p-4">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+        {/* Imagen del hotel */}
+        {imageError ? (
+          <div className="w-52 h-52 flex items-center justify-center bg-gray-200 dark:bg-gray-700 ">
+            <ImageOff className="w-12 h-12 text-gray-500" />
+          </div>
+        ) : (
+          <img
+            className="w-52 h-52 object-cover "
+            src={imagePath}
+            alt={hotel.nombre}
+            onError={() => setImageError(true)}
+          />
+        )}
+
+        {/* Información del hotel */}
+        <div className="flex flex-col flex-1 py-2 gap-2">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
             {hotel.nombre}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            📍 {hotel.ubicacion.ciudad}, {hotel.ubicacion.provincia},{' '}
+
+          {/* Estrellas */}
+          <div>{renderStars(hotel.estrellas)}</div>
+
+          {/* Ubicación */}
+          <p className="text-gray-600 dark:text-gray-400 text-base flex items-center gap-1">
+            <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            {hotel.ubicacion.ciudad}, {hotel.ubicacion.provincia},{' '}
             {hotel.ubicacion.pais}
           </p>
-          <p className="text-gray-700 dark:text-gray-300 mt-2 text-sm">
+
+          {/* Descripción */}
+          <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
             {hotel.descripcion}
           </p>
         </div>
       </div>
 
+      {/* Contenido Expandible */}
       {isExpanded && (
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="py-2">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-3">
+          {/* Habitaciones */}
+          <div className="py-4">
+            <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4">
               <Bed className="w-5 h-5" />
               Habitaciones Disponibles
             </h3>
-            <div className="mt-2 space-y-2">
+            <div className="space-y-3">
               {hotel.habitaciones.map((habitacion) => (
                 <HabitacionItem
                   key={habitacion.nombre}
@@ -95,12 +130,13 @@ const HotelCard = ({ hotel }) => {
             </div>
           </div>
 
-          <div className="py-2">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-3">
+          {/* Paquetes */}
+          <div className="py-4">
+            <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4">
               <Package className="w-5 h-5" />
               Paquetes Turísticos
             </h3>
-            <div className="mt-2 space-y-2">
+            <div className="space-y-3">
               {hotel.paquetes.map((paquete) => (
                 <PaqueteItem
                   key={paquete.nombre}
@@ -112,6 +148,7 @@ const HotelCard = ({ hotel }) => {
             </div>
           </div>
 
+          {/* Resumen de selección */}
           <SelectionSummary
             selectedRoomsCount={selectedRooms.length}
             selectedPackagesCount={selectedPackages.length}
