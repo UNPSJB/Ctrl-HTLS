@@ -41,7 +41,7 @@ const HotelList = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="">
       <HotelCard hotel={hotelData} />
     </div>
   );
