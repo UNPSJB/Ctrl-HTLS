@@ -23,7 +23,7 @@ const PaqueteItem = ({ paquete, coeficiente, isSelected, onSelect }) => {
           type="checkbox"
           checked={isSelected}
           onChange={() => onSelect(paquete.nombre)}
-          className="w-5 h-5"
+          className="w-5 h-5 cursor-pointer"
         />
         <div className="flex-1">
           <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
