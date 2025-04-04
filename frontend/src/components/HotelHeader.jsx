@@ -7,7 +7,7 @@ const HotelHeader = ({
   imageError,
   setImageError,
 }) => {
-  const imagePath = `/src/assets/${encodeURIComponent(hotel.nombre)}.webp`;
+  const imagePath = `/src/assets/hoteles/${encodeURIComponent(hotel.nombre)}.webp`;
 
   return (
     <div
