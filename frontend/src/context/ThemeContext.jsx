@@ -4,8 +4,8 @@ import { createContext, useState, useEffect } from 'react';
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Establecemos el tema por defecto en "light" (ya no usamos la opción del sistema)
-  const [theme, setTheme] = useState('light');
+  // Establecemos el tema por defecto en "dark" (ya no usamos la opción del sistema)
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
     // Agregar o remover la clase 'dark' en el elemento raíz del documento según el tema
