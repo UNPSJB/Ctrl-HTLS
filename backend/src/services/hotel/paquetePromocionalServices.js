@@ -1,4 +1,5 @@
 const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
+const { Op } = require('sequelize');
 const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
 const Hotel = require('../../models/hotel/Hotel');
 const CustomError = require('../../utils/CustomError');
@@ -8,6 +9,8 @@ const {
   verificarHabitacionesPaquetePromocional,
 } = require('./habitacionServices');
 const { verificarPorcentaje } = require('../../utils/helpers');
+const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
+const HotelTipoHabitacion = require('../../models/hotel/HotelTipoHabitacion');
 
 const crearPaquete = async (idHotel, paquete) => {
   // Verificar si el hotel existe
@@ -102,4 +105,119 @@ const getPaqueteCompleto = async (idPaquete) => {
   return paquete;
 };
 
-module.exports = { crearPaquete, asignarHabitacionAPaquete };
+const obtenerPaquetesTuristicos = async (idHotel, fechaInicio, fechaFin) => {
+  // Obtener los paquetes promocionales del hotel que coincidan con las fechas
+  const paquetes = await PaquetePromocional.findAll({
+    where: {
+      hotelId: idHotel,
+      [Op.and]: [
+        {
+          fecha_inicio: {
+            [Op.lte]: fechaFin, // El paquete debe comenzar antes o durante la fecha de fin
+          },
+        },
+        {
+          fecha_fin: {
+            [Op.gte]: fechaInicio, // El paquete debe terminar después o durante la fecha de inicio
+          },
+        },
+      ],
+    },
+    include: [
+      {
+        model: Habitacion,
+        as: 'habitaciones',
+        include: [
+          {
+            model: TipoHabitacion,
+            as: 'tipoHabitacion',
+            attributes: ['nombre', 'capacidad'],
+            include: [
+              {
+                model: HotelTipoHabitacion,
+                as: 'hotelTipoHabitacion',
+                where: { hotelId: idHotel },
+                attributes: ['precio'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  // Filtrar los paquetes que no están alquilados en el rango de fechas
+  const paquetesDisponibles = [];
+  for (const paquete of paquetes) {
+    // Verificar si el paquete está alquilado
+    const alquileres = await AlquilerPaquetePromocional.findAll({
+      where: {
+        paquetePromocionalId: paquete.id,
+        [Op.or]: [
+          {
+            fechaInicio: {
+              [Op.between]: [fechaInicio, fechaFin],
+            },
+          },
+          {
+            fechaFin: {
+              [Op.between]: [fechaInicio, fechaFin],
+            },
+          },
+          {
+            [Op.and]: [
+              {
+                fechaInicio: {
+                  [Op.lte]: fechaInicio,
+                },
+              },
+              {
+                fechaFin: {
+                  [Op.gte]: fechaFin,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (alquileres.length > 0) {
+      continue; // Si el paquete está alquilado, lo excluimos
+    }
+
+    // Calcular la cantidad de noches
+    const fechaInicioPaquete = new Date(paquete.fecha_inicio);
+    const fechaFinPaquete = new Date(paquete.fecha_fin);
+    const cantidadNoches = Math.ceil(
+      (fechaFinPaquete - fechaInicioPaquete) / (1000 * 60 * 60 * 24),
+    );
+
+    // Estructurar las habitaciones asignadas al paquete
+    const habitaciones = paquete.habitaciones.map((habitacion) => ({
+      nombre: habitacion.tipoHabitacion.nombre,
+      capacidad: habitacion.tipoHabitacion.capacidad,
+      precio:
+        habitacion.tipoHabitacion.hotelTipoHabitacion &&
+        habitacion.tipoHabitacion.hotelTipoHabitacion[0] &&
+        habitacion.tipoHabitacion.hotelTipoHabitacion[0].precio,
+    }));
+
+    paquetesDisponibles.push({
+      id: paquete.id,
+      nombre: paquete.nombre,
+      noches: cantidadNoches,
+      descuento: paquete.coeficiente_descuento,
+      capacidad_maxima: paquete.capacidad_maxima,
+      habitaciones: habitaciones,
+    });
+  }
+
+  return paquetesDisponibles;
+};
+
+module.exports = {
+  crearPaquete,
+  asignarHabitacionAPaquete,
+  obtenerPaquetesTuristicos,
+};

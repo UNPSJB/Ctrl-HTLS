@@ -386,7 +386,6 @@ const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
  * QUE TENGA HABITACIONES DISPOBIBLES
  * BUSCAR PAQUETES QUE COINCIDAN CON LAS FECHAS
  */
-
 const getDisponibilidadPorHotel = async (
   ubicacion,
   fechaInicio,
@@ -443,6 +442,14 @@ const getDisponibilidadPorHotel = async (
         fechaFin,
         pasajeros,
       );
+
+    // Obtener los paquetes turísticos disponibles
+    const paquetes = await paquetePromocionalServices.obtenerPaquetesTuristicos(
+      hotel.id,
+      fechaInicio,
+      fechaFin,
+    );
+
     // Estructurar el objeto del hotel
     disponibilidad.push({
       hotelId: hotel.id,
@@ -456,6 +463,7 @@ const getDisponibilidadPorHotel = async (
         ciudad: hotel.ciudad.nombre,
       },
       habitaciones: habitaciones,
+      paquetes: paquetes,
     });
   }
 
