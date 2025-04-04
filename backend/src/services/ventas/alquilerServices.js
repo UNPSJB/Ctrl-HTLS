@@ -29,51 +29,6 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
     throw new CustomError('La cantidad de pasajeros debe ser mayor a 0', 400); // Bad Request
   }
 
-  // // Obtener las habitaciones disponibles
-  // const habitacionesDisponibles =
-  //   await hotelServices.getHabitacionesDisponibles(
-  //     ubicacion,
-  //     desde,
-  //     hasta,
-  //     pasajeros,
-  //   );
-
-  // // Obtener los paquetes promocionales disponibles
-  // const paquetesDisponibles = await hotelServices.getPaquetesDisponibles(
-  //   ubicacion,
-  //   desde,
-  //   hasta,
-  //   pasajeros,
-  // );
-
-  // // Organizar la disponibilidad por hotel
-  // const disponibilidadPorHotel = {};
-
-  // habitacionesDisponibles.forEach((habitacion) => {
-  //   const hotelId = habitacion.hotelId;
-  //   if (!disponibilidadPorHotel[hotelId]) {
-  //     disponibilidadPorHotel[hotelId] = {
-  //       hotelId,
-  //       habitaciones: [],
-  //       paquetes: [],
-  //     };
-  //   }
-  //   disponibilidadPorHotel[hotelId].habitaciones.push(habitacion);
-  // });
-
-  // paquetesDisponibles.forEach((paquete) => {
-  //   const hotelId = paquete.hotelId;
-  //   if (!disponibilidadPorHotel[hotelId]) {
-  //     disponibilidadPorHotel[hotelId] = {
-  //       hotelId,
-  //       habitaciones: [],
-  //       paquetes: [],
-  //     };
-  //   }
-  //   disponibilidadPorHotel[hotelId].paquetes.push(paquete);
-  // });
-
-  //return Object.values(disponibilidadPorHotel);
   return await hotelServices.getDisponibilidadPorHotel(
     ubicacion,
     desde,
