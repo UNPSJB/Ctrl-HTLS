@@ -19,7 +19,7 @@ const Header = () => {
     <header className={`${headerClass} p-4`}>
       <div className="container mx-auto flex justify-between items-center">
         {/* Renderizamos el logo correspondiente */}
-        <img src={logo} alt="Logo" className="w-40" />
+        <img src={logo} alt="Logo" className="w-52" />
         <nav></nav>
         <div className="flex items-center space-x-4">
           <ThemeToggle />
