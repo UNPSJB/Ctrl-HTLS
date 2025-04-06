@@ -2,10 +2,10 @@ import { useContext, useState } from 'react';
 import { ThemeContext } from '@/context/ThemeContext';
 import Avatar from '@/components/Avatar';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import CartToggleButton from '@/components/ui/CartToggleButton';
 import Carrito from '@/components/Carrito';
 import logoLight from '../assets/logo.svg';
 import logoDark from '../assets/logo-dark.svg';
-import { ShoppingCart } from 'lucide-react';
 
 const Header = () => {
   const { theme } = useContext(ThemeContext);
@@ -27,14 +27,7 @@ const Header = () => {
           <img src={logo} alt="Logo" className="w-52" />
           <nav></nav>
           <div className="flex items-center space-x-4">
-            {/* Estilo igual al ThemeToggle */}
-            <button
-              onClick={toggleCart}
-              className="group p-2 flex items-center justify-center"
-            >
-              <ShoppingCart className="w-6 h-6 text-gray-600 dark:text-gray-400 group-hover:text-green-500" />
-            </button>
-
+            <CartToggleButton onClick={toggleCart} />
             <ThemeToggle />
             <Avatar />
           </div>

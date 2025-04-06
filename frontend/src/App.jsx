@@ -1,10 +1,13 @@
 import { ThemeProvider } from './context/ThemeContext';
+import { CartProvider } from './context/CartContext';
 import AppRouter from './routes/AppRouter';
 
 function App() {
   return (
     <ThemeProvider>
-      <AppRouter />
+      <CartProvider>
+        <AppRouter />
+      </CartProvider>
     </ThemeProvider>
   );
 }
