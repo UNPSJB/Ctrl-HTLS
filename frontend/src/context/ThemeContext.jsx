@@ -4,10 +4,15 @@ import { createContext, useState, useEffect } from 'react';
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Establecemos el tema por defecto en "dark" (ya no usamos la opción del sistema)
-  const [theme, setTheme] = useState('dark');
+  // Leer el tema inicial desde el localStorage o establecerlo en "dark" por defecto
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'dark';
+  });
 
   useEffect(() => {
+    // Guardar el tema en el localStorage cada vez que cambie
+    localStorage.setItem('theme', theme);
+
     // Agregar o remover la clase 'dark' en el elemento raíz del documento según el tema
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
