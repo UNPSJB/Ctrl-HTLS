@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Search, MapPin, Calendar, Users, Star } from 'lucide-react';
 
-// Componente HotelSearch convertido a .jsx
-export function HotelSearch({ onSearch }) {
+const HotelSearch = ({ onSearch }) => {
   // Estado local para los filtros de búsqueda
   const [filters, setFilters] = useState({
     name: '',
@@ -20,7 +19,8 @@ export function HotelSearch({ onSearch }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+    // Se agregó borde para lograr consistencia con otros componentes
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg transition-all duration-300 p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Primera fila */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -155,4 +155,6 @@ export function HotelSearch({ onSearch }) {
       </form>
     </div>
   );
-}
+};
+
+export default HotelSearch;

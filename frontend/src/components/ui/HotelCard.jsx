@@ -22,7 +22,7 @@ const HotelCard = ({ hotel }) => {
   } = useHotelSelection(hotel);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
       <HotelHeader
         hotel={hotel}
         isExpanded={isExpanded}

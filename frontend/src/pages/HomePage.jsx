@@ -1,5 +1,5 @@
 import HotelList from '@/components/HotelList';
-import { HotelSearch } from '@/components/HotelSearch';
+import HotelSearch from '@/components/HotelSearch';
 
 const HomePage = () => {
   return (
