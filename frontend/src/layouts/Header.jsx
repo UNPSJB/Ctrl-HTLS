@@ -1,34 +1,48 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { ThemeContext } from '@/context/ThemeContext';
 import Avatar from '@/components/Avatar';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import Carrito from '@/components/Carrito';
 import logoLight from '../assets/logo.svg';
 import logoDark from '../assets/logo-dark.svg';
+import { ShoppingCart } from 'lucide-react';
 
 const Header = () => {
   const { theme } = useContext(ThemeContext);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Seleccionamos el logo según el tema actual
+  const toggleCart = () => setIsCartOpen((prev) => !prev);
+
   const logo = theme === 'dark' ? logoDark : logoLight;
 
-  // Definimos las clases del header de forma similar al footer
   const headerClass =
     theme === 'dark'
       ? 'bg-gray-800 text-white border-b border-gray-700'
       : 'bg-white text-gray-900 border-b border-gray-200';
 
   return (
-    <header className={`${headerClass} p-4`}>
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Renderizamos el logo correspondiente */}
-        <img src={logo} alt="Logo" className="w-52" />
-        <nav></nav>
-        <div className="flex items-center space-x-4">
-          <ThemeToggle />
-          <Avatar />
+    <>
+      <header className={`${headerClass} p-4`}>
+        <div className="container mx-auto flex justify-between items-center">
+          <img src={logo} alt="Logo" className="w-52" />
+          <nav></nav>
+          <div className="flex items-center space-x-4">
+            {/* Estilo igual al ThemeToggle */}
+            <button
+              onClick={toggleCart}
+              className="group p-2 flex items-center justify-center"
+            >
+              <ShoppingCart className="w-6 h-6 text-gray-600 dark:text-gray-400 group-hover:text-green-500" />
+            </button>
+
+            <ThemeToggle />
+            <Avatar />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <Carrito isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+    </>
   );
 };
 
