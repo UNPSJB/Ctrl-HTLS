@@ -10,7 +10,7 @@ export function RoomDetailsModal({
 }) {
   const [imgError, setImgError] = useState(false);
 
-  // Precio base y cálculo de descuento en temporada
+  // Cálculo de precios
   const precioBase = habitacion.precio;
   const descuentoTemporada =
     discountCoefficient < 1 ? precioBase * discountCoefficient : 0;
@@ -18,7 +18,7 @@ export function RoomDetailsModal({
 
   return (
     <Modal onClose={onClose}>
-      {/* Sección de imagen */}
+      {/* Imagen principal */}
       <div className="relative">
         {!imgError ? (
           <img
@@ -34,14 +34,15 @@ export function RoomDetailsModal({
         )}
       </div>
 
-      {/* Contenido principal del modal */}
+      {/* Contenido del modal */}
       <div className="p-6 overflow-y-auto flex flex-col flex-1 gap-2 custom-scrollbar">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           {habitacion.nombre}
         </h2>
 
+        {/* Descuento de temporada */}
         {discountCoefficient < 1 && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-2">
             <Tag className="w-4 h-4 text-green-500" />
             <span className="text-sm font-medium text-green-500">
               {(discountCoefficient * 100).toFixed(0)}% de descuento en
@@ -50,6 +51,7 @@ export function RoomDetailsModal({
           </div>
         )}
 
+        {/* Info habitación */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <Users className="w-5 h-5" />
@@ -61,6 +63,7 @@ export function RoomDetailsModal({
           </div>
         </div>
 
+        {/* Precios */}
         <div className="border border-gray-300 dark:border-gray-700 rounded-md p-4">
           <div className="flex justify-between border-b pb-2 mb-2 text-gray-600 dark:text-gray-400">
             <span className="font-semibold">Precio base por noche</span>
@@ -83,7 +86,7 @@ export function RoomDetailsModal({
         </div>
       </div>
 
-      {/* Sección fija: botón de reservar */}
+      {/* Botón de acción */}
       <div className="bg-white dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0">
         <button
           onClick={onReserve}

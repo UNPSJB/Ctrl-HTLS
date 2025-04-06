@@ -4,10 +4,9 @@ import Modal from './Modal';
 
 const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
   const [imgError, setImgError] = useState(false);
-
   if (!paquete) return null;
 
-  // Cálculos para precios del paquete
+  // Cálculos de precio
   const precioTotal =
     paquete.habitaciones.reduce((acc, hab) => acc + hab.precio, 0) *
     paquete.noches;
@@ -20,7 +19,7 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
 
   return (
     <Modal onClose={onClose}>
-      {/* Sección de imagen */}
+      {/* Imagen principal */}
       <div className="relative">
         {!imgError ? (
           <img
@@ -36,12 +35,13 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
         )}
       </div>
 
-      {/* Contenido principal del modal */}
+      {/* Contenido del modal */}
       <div className="p-6 overflow-y-auto flex flex-col flex-1 gap-2 custom-scrollbar">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           {paquete.nombre}
         </h2>
 
+        {/* Descuento por temporada */}
         {coeficiente < 1 && (
           <div className="flex items-center gap-2">
             <Tag className="w-4 h-4 text-green-500" />
@@ -51,6 +51,7 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
           </div>
         )}
 
+        {/* Descripción */}
         <p className="text-gray-600 dark:text-gray-300 mb-6">
           {paquete.descripcion}
         </p>
@@ -75,7 +76,7 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
           </div>
         </div>
 
-        {/* Información adicional */}
+        {/* Info adicional */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <Calendar className="w-5 h-5" />
@@ -97,6 +98,7 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
               <span className="font-semibold">Habitación</span>
               <span className="font-semibold">Precio</span>
             </div>
+
             <div className="space-y-2">
               {paquete.habitaciones.map((hab, index) => (
                 <div
@@ -115,14 +117,17 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
                 </div>
               ))}
             </div>
+
             <div className="flex justify-between border-t pt-2 mt-2 text-gray-600 dark:text-gray-400">
               <span>Subtotal</span>
               <span>${precioTotal.toFixed(2)}</span>
             </div>
+
             <div className="flex justify-between text-red-600 dark:text-red-400">
               <span>Descuento Paquete ({paquete.descuento}%)</span>
               <span>- ${descuentoAplicado.toFixed(2)}</span>
             </div>
+
             <div className="flex justify-between border-t pt-2 mt-2 text-gray-800 dark:text-gray-100 font-bold text-lg">
               <span>Total Final</span>
               {coeficiente !== 1 ? (
@@ -144,7 +149,7 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
         </div>
       </div>
 
-      {/* Sección fija: botón de reservar */}
+      {/* Botón de reserva */}
       <div className="bg-white dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0">
         <button
           onClick={() => onReserve(paquete.nombre)}
