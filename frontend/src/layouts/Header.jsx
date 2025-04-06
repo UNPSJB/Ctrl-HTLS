@@ -2,8 +2,8 @@ import { useContext } from 'react';
 import { ThemeContext } from '@/context/ThemeContext';
 import Avatar from '@/components/Avatar';
 import ThemeToggle from '@/components/ui/ThemeToggle';
-import logoLight from '../assets/logo.svg'; // Logo para tema claro
-import logoDark from '../assets/logo-dark.svg'; // Logo para tema oscuro
+import logoLight from '../assets/logo.svg';
+import logoDark from '../assets/logo-dark.svg';
 
 const Header = () => {
   const { theme } = useContext(ThemeContext);
@@ -11,9 +11,11 @@ const Header = () => {
   // Seleccionamos el logo según el tema actual
   const logo = theme === 'dark' ? logoDark : logoLight;
 
-  // Definimos las clases según el tema
+  // Definimos las clases del header de forma similar al footer
   const headerClass =
-    theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-900';
+    theme === 'dark'
+      ? 'bg-gray-800 text-white border-b border-gray-700'
+      : 'bg-white text-gray-900 border-b border-gray-200';
 
   return (
     <header className={`${headerClass} p-4`}>
