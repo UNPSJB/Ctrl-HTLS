@@ -6,8 +6,8 @@ const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 gap-6">
       <Header />
-      {/* Contenedor principal con clases de fondo para modo claro y oscuro */}
-      <main className="container mx-auto items-center bg-gray-50 dark:bg-gray-900 px-6">
+      {/* Contenedor principal con flex-1 para que ocupe el espacio restante */}
+      <main className="flex-1 container mx-auto items-center bg-gray-50 dark:bg-gray-900 px-6">
         <Outlet />
       </main>
       <Footer />
