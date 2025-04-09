@@ -226,6 +226,37 @@ const getCiudadCompleta = async (ciudadId) => {
   return ciudad;
 };
 
+const getHotelesPorCiudad = async (ciudadId) => {
+  // Obtener los hoteles de la ciudad especificada
+  const hoteles = await Hotel.findAll({
+    where: { ciudadId },
+    include: [
+      {
+        model: Categoria,
+        as: 'categoria',
+      },
+      {
+        model: Ciudad,
+        as: 'ciudad',
+        include: [
+          {
+            model: Provincia,
+            as: 'provincia',
+            include: [
+              {
+                model: Pais,
+                as: 'pais',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  return hoteles;
+};
+
 const obtenerCategorias = async () => {
   // Obtener todas las categorías de los hoteles
   const categorias = await Categoria.findAll();
@@ -392,33 +423,11 @@ const getDisponibilidadPorHotel = async (
   fechaFin,
   pasajeros,
 ) => {
+  const hotelesCiudad = await getHotelesPorCiudad(ubicacion);
+  if (!hotelesCiudad) {
+    throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
+  }
   // Obtener los hoteles en la ubicación especificada
-  const hotelesCiudad = await Hotel.findAll({
-    where: { ciudadId: ubicacion },
-    include: [
-      {
-        model: Ciudad,
-        as: 'ciudad',
-        include: [
-          {
-            model: Provincia,
-            as: 'provincia',
-            include: [
-              {
-                model: Pais,
-                as: 'pais',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        model: Categoria,
-        as: 'categoria',
-        attributes: ['nombre'],
-      },
-    ],
-  });
 
   if (hotelesCiudad.length === 0) {
     throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found

@@ -29,6 +29,7 @@ const {
   getVendedor,
   getClientes,
   getClienteById,
+  getClienteByDocumento,
   updateCliente,
   deleteCliente,
 } = require('../../controllers/core/personaController');
@@ -60,6 +61,7 @@ router.get('vendedor/:id', validateId, getVendedor); //Ruta para obtener un vend
 //#region Rutas de Clientes
 router.post('/cliente', validateCliente, createCliente); //Ruta para crear un cliente
 router.get('/clientes', getClientes); //Ruta para obtener todos los clientes
+router.get('/cliente/documento/:documento', getClienteByDocumento); // Ruta para obtener un cliente por su número de documento
 router.get('/cliente/:id', validateId, getClienteById); //Ruta para obtener un cliente por su ID
 router.put('/cliente/:id', validateId, validateCliente, updateCliente); //Ruta para actualizar un cliente
 router.delete('/cliente/:id', validateId, deleteCliente); //Ruta para eliminar un cliente

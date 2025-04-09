@@ -428,9 +428,11 @@ const obtenerHabitacionesDisponiblesPorTipo = async (
     fechaFin,
   );
 
-  // Filtrar las habitaciones que no están alquiladas
-  const habitacionesDisponibles = habitaciones.filter((habitacion) =>
-    habitacionesNoAlquiladas.includes(habitacion.id),
+  // Filtrar las habitaciones que no están alquiladas y cuya capacidad sea menor o igual a "pasajeros"
+  const habitacionesDisponibles = habitaciones.filter(
+    (habitacion) =>
+      habitacionesNoAlquiladas.includes(habitacion.id) &&
+      habitacion.tipoHabitacion.capacidad <= pasajeros,
   );
 
   // Agrupar habitaciones por tipo
@@ -467,6 +469,7 @@ const obtenerHabitacionesDisponiblesPorTipo = async (
     capacidad: datos.capacidad,
   }));
 };
+
 module.exports = {
   agregarHabitaciones,
   obtenerHabitaciones,

@@ -219,6 +219,16 @@ const obtenerClientePorId = async (id) => {
   return cliente;
 };
 
+const obtenerClientePorDocumento = async (numeroDocumento) => {
+  const cliente = await Cliente.findOne({
+    where: { numeroDocumento },
+  });
+  if (!cliente) {
+    throw new CustomError('Cliente no encontrado', 404);
+  }
+  return cliente;
+};
+
 const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
   // Verificar si el email ya existe
   const emailCliente = await Cliente.findOne({
@@ -324,4 +334,5 @@ module.exports = {
   eliminarCliente,
   obtenerClientes,
   obtenerClientePorId,
+  obtenerClientePorDocumento,
 };
