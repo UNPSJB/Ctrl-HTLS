@@ -1,6 +1,7 @@
-import { X, Trash2, CreditCard, Tag } from 'lucide-react';
+import { X, Trash2, CreditCard, House, Package } from 'lucide-react';
 import { useCarrito } from '@context/CarritoContext';
 import hotelesData from '@/data/hotels.json';
+import Temporada from './Temporada';
 
 const Carrito = ({ isOpen, onClose }) => {
   const { carrito, removerHabitacion, removerPaquete } = useCarrito();
@@ -107,13 +108,7 @@ const Carrito = ({ isOpen, onClose }) => {
                     <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-4">
                       {item.nombreHotel}
                       {item.enTemporadaAlta && (
-                        <div className="flex items-center gap-2">
-                          <Tag className="w-4 h-4 text-green-500" />
-                          <span className="text-sm font-medium text-green-500">
-                            {item.descuentoExtra * 100}% descuento en temporada
-                            alta
-                          </span>
-                        </div>
+                        <Temporada porcentaje={item.descuentoExtra} />
                       )}
                     </h3>
                   </div>
@@ -125,7 +120,8 @@ const Carrito = ({ isOpen, onClose }) => {
                       className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
                     >
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                        <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100 ">
+                          <House className="size-5 inline-block mr-1" />
                           {hab.nombre}
                         </h4>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -137,7 +133,7 @@ const Carrito = ({ isOpen, onClose }) => {
                         className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                         aria-label="Eliminar habitación"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="size-4" />
                       </button>
                     </div>
                   ))}
@@ -149,7 +145,8 @@ const Carrito = ({ isOpen, onClose }) => {
                       className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
                     >
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                        <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100 ">
+                          <Package className="size-5 inline-block mr-1" />
                           {pack.nombre}
                         </h4>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -161,7 +158,7 @@ const Carrito = ({ isOpen, onClose }) => {
                         className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                         aria-label="Eliminar paquete"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="size-4" />
                       </button>
                     </div>
                   ))}
@@ -179,7 +176,7 @@ const Carrito = ({ isOpen, onClose }) => {
                   ${total.toFixed(2)}
                 </span>
               </div>
-              <button className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-full font-medium hover:from-blue-700 hover:to-blue-600 transition-colors flex items-center justify-center gap-2">
+              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
                 <CreditCard className="w-5 h-5" />
                 Proceder al Pago
               </button>

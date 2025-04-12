@@ -1,4 +1,5 @@
 import { ImageOff, Star, Tag, MapPin } from 'lucide-react';
+import Temporada from './Temporada';
 
 const HotelHeader = ({
   hotel,
@@ -33,12 +34,7 @@ const HotelHeader = ({
         </h2>
 
         {hotel.temporada === 'alta' && (
-          <div className="flex items-center gap-2">
-            <Tag className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium text-green-500">
-              {hotel.coeficiente * 100}% descuento en temporada alta
-            </span>
-          </div>
+          <Temporada porcentaje={hotel.coeficiente} />
         )}
 
         <div className="flex gap-1">
