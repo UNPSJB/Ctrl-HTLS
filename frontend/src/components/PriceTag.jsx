@@ -1,4 +1,4 @@
-import { applySeasonDiscount } from '../utils/price';
+import { applySeasonDiscount } from '@utils/price';
 
 const PriceTag = ({ precio, coeficiente }) => {
   // Se usa la función para calcular el precio final con descuento

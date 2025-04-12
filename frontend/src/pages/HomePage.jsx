@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import HotelSearch from '@/components/HotelSearch';
-import HotelList from '@/components/HotelList';
+import HotelSearch from '@components/HotelSearch';
+import HotelList from '@components/HotelList';
 
 const HomePage = () => {
   // Estado para almacenar los filtros de búsqueda. Inicialmente es null.

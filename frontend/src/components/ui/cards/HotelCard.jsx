@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Bed, Package } from 'lucide-react';
-import useHotelSelection from '../../hooks/useHotelSelection';
-import HabitacionItem from './HabitacionItem';
-import PaqueteItem from './PaqueteItem';
-import SelectionSummary from './SelectionSummary';
-import HotelHeader from '../HotelHeader';
+import useHotelSelection from '@hooks/useHotelSelection';
+import HabitacionItem from '../HabitacionItem';
+import PaqueteItem from '../PaqueteItem';
+import SelectionSummary from '../SelectionSummary';
+import HotelHeader from '@components/HotelHeader';
 
 const HotelCard = ({ hotel }) => {
   if (!hotel) return null;

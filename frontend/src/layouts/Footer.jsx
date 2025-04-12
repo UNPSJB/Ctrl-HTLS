@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
-import { ThemeContext } from '@/context/ThemeContext';
-import logoLight from '../assets/logo.svg'; // Logo para tema claro
-import logoDark from '../assets/logo-dark.svg'; // Logo para tema oscuro
+import { ThemeContext } from '@context/ThemeContext';
+import logoLight from '@assets/logo.svg'; // Logo para tema claro
+import logoDark from '@assets/logo-dark.svg'; // Logo para tema oscuro
 
 const Footer = () => {
   const { theme } = useContext(ThemeContext);

@@ -1,9 +1,9 @@
 import { Bed, Package } from 'lucide-react';
-import { useCarrito } from '../context/CarritoContext';
-import HabitacionCard from '../components/ui/HabitacionCard';
-import PaqueteCard from '../components/ui/PaqueteCard';
-import Resumen from '../components/ui/Resumen';
-import Cliente from '../components/Cliente';
+import { useCarrito } from '@context/CarritoContext';
+import HabitacionCard from '@ui/cards/HabitacionCard';
+import PaqueteCard from '@ui/cards/PaqueteCard';
+import Resumen from '@ui/Resumen';
+import Cliente from '@components/Cliente';
 
 const ReservaPage = () => {
   const { carrito } = useCarrito();

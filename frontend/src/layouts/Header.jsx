@@ -1,11 +1,11 @@
 import { useContext, useState } from 'react';
-import { ThemeContext } from '@/context/ThemeContext';
-import Avatar from '@/components/Avatar';
-import ThemeToggle from '@/components/ui/ThemeToggle';
-import CartToggleButton from '@/components/ui/CartToggleButton';
-import Carrito from '@/components/Carrito';
-import logoLight from '../assets/logo.svg';
-import logoDark from '../assets/logo-dark.svg';
+import { ThemeContext } from '@context/ThemeContext';
+import Avatar from '@components/Avatar';
+import ThemeToggle from '@ui/ThemeToggle';
+import CartToggleButton from '@ui/CartToggleButton';
+import Carrito from '@components/Carrito';
+import logoLight from '@assets/logo.svg';
+import logoDark from '@assets/logo-dark.svg';
 
 const Header = () => {
   const { theme } = useContext(ThemeContext);

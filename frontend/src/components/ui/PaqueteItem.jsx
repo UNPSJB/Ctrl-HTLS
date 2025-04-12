@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PaqueteDetailsModal from '../modals/PaqueteDetailsModal';
-import Contador from '../ui/Contador';
-import PriceTag from '../PriceTag';
+import Contador from '@ui/Contador';
+import PriceTag from '@components/PriceTag';
 import { useCarrito } from '../../context/CarritoContext';
 
 const PaqueteItem = ({

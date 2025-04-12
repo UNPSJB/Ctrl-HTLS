@@ -12,6 +12,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'), // Configura el alias para la carpeta src
+      '@components': resolve(__dirname, './src/components'), // Alias para componentes
+      '@hooks': resolve(__dirname, './src/hooks'), // Alias para hooks
+      '@context': resolve(__dirname, './src/context'), // Alias para contextos
+      '@utils': resolve(__dirname, './src/utils'), // Alias para utilidades
+      '@assets': resolve(__dirname, './src/assets'), // Alias para assets
+      '@ui': resolve(__dirname, './src/components/ui'), // Alias para componentes UI
+      '@layouts': resolve(__dirname, './src/layouts'), // Alias para layouts
+      '@pages': resolve(__dirname, './src/pages'), // Alias para páginas
+      '@routes': resolve(__dirname, './src/routes'), // Alias para rutas
     },
   },
 });

@@ -1,4 +1,4 @@
-import HotelCard from './ui/HotelCard';
+import HotelCard from '@ui/cards/HotelCard';
 import hotelsData from '@/data/hotels.json';
 
 const HotelList = ({ filters }) => {
