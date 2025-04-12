@@ -1,12 +1,33 @@
 import { useState } from 'react';
 import { RoomDetailsModal } from '../RoomDetailsModal';
 import PriceTag from '../PriceTag';
+import { useCarrito } from '../../context/CartContext';
 
-const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
+const HabitacionItem = ({
+  idHotel,
+  habitacion,
+  coeficiente,
+  temporada,
+  coeficienteHotel,
+  isSelected,
+  onSelect,
+}) => {
   if (!habitacion) return null;
 
-  const [showModal, setShowModal] = useState(false);
-  const originalPrice = habitacion.precio;
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const { agregarHabitacion, removerHabitacion } = useCarrito();
+
+  const manejarSeleccion = () => {
+    onSelect(habitacion.id);
+    if (isSelected) {
+      removerHabitacion(idHotel, habitacion.id);
+    } else {
+      // Al agregar, pasamos además la información de temporada y coeficiente
+      agregarHabitacion(idHotel, habitacion.id, temporada, coeficienteHotel);
+    }
+  };
+
+  const precioOriginal = habitacion.precio;
 
   return (
     <>
@@ -14,7 +35,7 @@ const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={() => onSelect(habitacion.nombre)}
+          onChange={manejarSeleccion}
           className="w-5 h-5 cursor-pointer"
         />
         <div className="flex-1">
@@ -26,24 +47,24 @@ const HabitacionItem = ({ habitacion, coeficiente, isSelected, onSelect }) => {
           </p>
         </div>
         <div className="text-right flex flex-col items-end">
-          <PriceTag precio={originalPrice} coeficiente={coeficiente} />
+          <PriceTag precio={precioOriginal} coeficiente={coeficiente} />
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline mt-2"
-            onClick={() => setShowModal(true)}
+            onClick={() => setMostrarModal(true)}
           >
             Más Detalles
           </button>
         </div>
       </div>
 
-      {showModal && (
+      {mostrarModal && (
         <RoomDetailsModal
           habitacion={habitacion}
           discountCoefficient={coeficiente}
-          onClose={() => setShowModal(false)}
+          onClose={() => setMostrarModal(false)}
           onReserve={() => {
-            onSelect(habitacion.nombre); // Selecciona la habitación al reservar
-            setShowModal(false); // Cierra el modal después de seleccionar
+            manejarSeleccion();
+            setMostrarModal(false);
           }}
         />
       )}

@@ -1,20 +1,36 @@
 import { useState } from 'react';
 import PaqueteDetailsModal from '../PaqueteDetailsModal';
 import PriceTag from '../PriceTag';
+import { useCarrito } from '../../context/CartContext';
 
-const PaqueteItem = ({ paquete, coeficiente, isSelected, onSelect }) => {
+const PaqueteItem = ({
+  idHotel,
+  paquete,
+  coeficiente,
+  temporada,
+  coeficienteHotel,
+  isSelected,
+  onSelect,
+}) => {
   if (!paquete) return null;
 
-  const [showModal, setShowModal] = useState(false);
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const { agregarPaquete, removerPaquete } = useCarrito();
 
-  // Calcula el precio base del paquete considerando:
-  // - Suma de los precios de las habitaciones
-  // - Descuento propio del paquete (paquete.descuento)
-  // - Número de noches (paquete.noches)
-  const packagePrice =
-    paquete.habitaciones.reduce((acc, hab) => acc + hab.precio, 0) *
+  // Cálculo del precio base del paquete
+  const precioBase =
+    paquete.habitaciones.reduce((acum, hab) => acum + hab.precio, 0) *
     (1 - paquete.descuento / 100) *
     paquete.noches;
+
+  const manejarSeleccion = () => {
+    onSelect(paquete.id);
+    if (isSelected) {
+      removerPaquete(idHotel, paquete.id);
+    } else {
+      agregarPaquete(idHotel, paquete.id, temporada, coeficienteHotel);
+    }
+  };
 
   return (
     <>
@@ -22,7 +38,7 @@ const PaqueteItem = ({ paquete, coeficiente, isSelected, onSelect }) => {
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={() => onSelect(paquete.nombre)}
+          onChange={manejarSeleccion}
           className="w-5 h-5 cursor-pointer"
         />
         <div className="flex-1">
@@ -34,24 +50,24 @@ const PaqueteItem = ({ paquete, coeficiente, isSelected, onSelect }) => {
           </p>
         </div>
         <div className="text-right flex flex-col items-end">
-          <PriceTag precio={packagePrice} coeficiente={coeficiente} />
+          <PriceTag precio={precioBase} coeficiente={coeficiente} />
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline mt-2"
-            onClick={() => setShowModal(true)}
+            onClick={() => setMostrarModal(true)}
           >
             Más Detalles
           </button>
         </div>
       </div>
 
-      {showModal && (
+      {mostrarModal && (
         <PaqueteDetailsModal
           paquete={paquete}
           coeficiente={coeficiente}
-          onClose={() => setShowModal(false)}
+          onClose={() => setMostrarModal(false)}
           onReserve={() => {
-            onSelect(paquete.nombre); // Selecciona el paquete al reservar
-            setShowModal(false); // Cierra el modal después de seleccionar
+            manejarSeleccion();
+            setMostrarModal(false);
           }}
         />
       )}

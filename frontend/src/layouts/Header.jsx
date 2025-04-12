@@ -22,7 +22,7 @@ const Header = () => {
 
   return (
     <>
-      <header className={`${headerClass} p-4`}>
+      <header className={`${headerClass} p-4 sticky top-0 z-50`}>
         <div className="container mx-auto flex justify-between items-center">
           <img src={logo} alt="Logo" className="w-52" />
           <nav></nav>

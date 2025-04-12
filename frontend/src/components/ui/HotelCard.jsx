@@ -41,10 +41,13 @@ const HotelCard = ({ hotel }) => {
             <div className="space-y-3">
               {hotel.habitaciones.map((habitacion) => (
                 <HabitacionItem
-                  key={habitacion.nombre}
+                  key={habitacion.id} // Usamos id en lugar de nombre
+                  idHotel={hotel.id}
                   habitacion={habitacion}
                   coeficiente={discountCoefficient}
-                  isSelected={selectedRooms.includes(habitacion.nombre)}
+                  temporada={hotel.temporada}
+                  coeficienteHotel={hotel.coeficiente}
+                  isSelected={selectedRooms.includes(habitacion.id)} // Comprobamos con id
                   onSelect={toggleRoomSelection}
                 />
               ))}
@@ -59,10 +62,13 @@ const HotelCard = ({ hotel }) => {
             <div className="space-y-3">
               {hotel.paquetes.map((paquete) => (
                 <PaqueteItem
-                  key={paquete.nombre}
+                  key={paquete.id} // Usamos id en lugar de nombre
+                  idHotel={hotel.id}
                   paquete={paquete}
                   coeficiente={discountCoefficient}
-                  isSelected={selectedPackages.includes(paquete.nombre)}
+                  temporada={hotel.temporada}
+                  coeficienteHotel={hotel.coeficiente}
+                  isSelected={selectedPackages.includes(paquete.id)} // Comprobamos con id
                   onSelect={togglePackageSelection}
                 />
               ))}

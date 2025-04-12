@@ -1,131 +1,58 @@
 import HotelCard from './ui/HotelCard';
+import hotelsData from '@/data/hotels.json';
 
-const HotelList = () => {
-  // Datos de ejemplo de los hoteles
-  const hoteles = [
-    {
-      nombre: 'Hotel Paraíso',
-      estrellas: 5,
-      temporada: 'alta',
-      coeficiente: 0.15,
-      ubicacion: {
-        pais: 'Argentina',
-        provincia: 'Buenos Aires',
-        ciudad: 'Mar del Plata',
-      },
-      descripcion:
-        'Ubicado en el corazón de Mar del Plata, el Hotel Paraíso ofrece una experiencia de lujo inigualable. Con vistas panorámicas al mar, este hotel combina elegancia y confort. Sus instalaciones incluyen un spa de clase mundial, piscinas climatizadas y una variedad de restaurantes gourmet que deleitarán su paladar. Además, su cercanía a las principales atracciones turísticas lo convierte en el lugar ideal para quienes buscan explorar la ciudad sin renunciar al confort.',
-      imagen: 'Hotel Paraíso.webp',
-      habitaciones: [
-        { nombre: 'Habitación Deluxe', capacidad: 2, precio: 200 },
-        { nombre: 'Suite Ejecutiva', capacidad: 3, precio: 300 },
-      ],
-      paquetes: [
-        {
-          nombre: 'Escapada Romántica',
-          habitaciones: [
-            { nombre: 'Habitación Deluxe', capacidad: 2, precio: 200 },
-            { nombre: 'Habitación Estándar', capacidad: 2, precio: 150 },
-          ],
-          descuento: 10, // %
-          noches: 3,
-          descripcion:
-            'Disfrute de una escapada romántica de tres noches con su ser querido, que incluye alojamiento en una Habitación Deluxe, cenas a la luz de las velas y acceso al spa.',
-        },
-        {
-          nombre: 'Aventura Familiar',
-          habitaciones: [
-            { nombre: 'Suite Ejecutiva', capacidad: 3, precio: 300 },
-            { nombre: 'Habitación Deluxe', capacidad: 2, precio: 200 },
-          ],
-          descuento: 15,
-          noches: 5,
-          descripcion:
-            'Paquete de cinco noches ideal para familias, que incluye alojamiento en nuestras espaciosas suites, actividades recreativas para niños y adultos, y excursiones guiadas por la ciudad.',
-        },
-      ],
-    },
-    {
-      nombre: 'Gran Hotel Mar del Plata',
-      estrellas: 4,
-      ubicacion: {
-        pais: 'Argentina',
-        provincia: 'Buenos Aires',
-        ciudad: 'Mar del Plata',
-      },
-      descripcion:
-        'El Gran Hotel Mar del Plata se destaca por su arquitectura clásica y su ambiente acogedor. Situado a pocos pasos de la playa, ofrece habitaciones con vistas al océano y un servicio al cliente excepcional. Los huéspedes pueden disfrutar de un desayuno buffet variado cada mañana y relajarse en el bar del hotel por la noche. Su ubicación céntrica facilita el acceso a tiendas, teatros y otros puntos de interés de la ciudad.',
-      imagen: 'Gran Hotel Mar del Plata.webp',
-      habitaciones: [
-        { nombre: 'Habitación Estándar', capacidad: 2, precio: 150 },
-        { nombre: 'Suite Familiar', capacidad: 4, precio: 250 },
-      ],
-      paquetes: [
-        {
-          nombre: 'Fin de Semana Relax',
-          habitaciones: [
-            { nombre: 'Habitación Estándar', capacidad: 2, precio: 150 },
-          ],
-          descuento: 5,
-          noches: 2,
-          descripcion:
-            'Escápese durante un fin de semana y disfrute de nuestras cómodas habitaciones estándar, desayuno incluido y acceso al gimnasio.',
-        },
-        {
-          nombre: 'Vacaciones en Familia',
-          habitaciones: [
-            { nombre: 'Suite Familiar', capacidad: 4, precio: 250 },
-          ],
-          descuento: 10,
-          noches: 7,
-          descripcion:
-            'Paquete de una semana para familias, que incluye alojamiento en nuestras amplias suites familiares, actividades para niños y cenas temáticas.',
-        },
-      ],
-    },
-    {
-      nombre: 'Hotel Boutique Playa Grande',
-      estrellas: 3,
-      ubicacion: {
-        pais: 'Argentina',
-        provincia: 'Buenos Aires',
-        ciudad: 'Mar del Plata',
-      },
-      descripcion:
-        'El Hotel Boutique Playa Grande es una joya escondida en Mar del Plata. Con un diseño moderno y elegante, este hotel ofrece una experiencia íntima y personalizada. A solo una cuadra de la famosa Playa Grande, es perfecto para quienes buscan disfrutar del sol y el mar. Además, su café en la azotea ofrece vistas impresionantes de la ciudad y el océano, ideales para relajarse al atardecer.',
-      imagen: 'Hotel Boutique Playa Grande.webp',
-      habitaciones: [
-        { nombre: 'Habitación Simple', capacidad: 1, precio: 100 },
-        { nombre: 'Habitación Doble', capacidad: 2, precio: 180 },
-      ],
-      paquetes: [
-        {
-          nombre: 'Aventura Surfista',
-          habitaciones: [
-            { nombre: 'Habitación Simple', capacidad: 1, precio: 100 },
-          ],
-          descuento: 8,
-          noches: 4,
-          descripcion:
-            'Paquete de cuatro noches diseñado para amantes del surf, que incluye alojamiento, clases de surf diarias y alquiler de equipo.',
-        },
-        {
-          nombre: 'Escapada Gastronómica',
-          habitaciones: [
-            { nombre: 'Habitación Doble', capacidad: 2, precio: 180 },
-          ],
-          descuento: 12,
-          noches: 3,
-          descripcion:
-            'Disfrute de una escapada culinaria de tres noches, que incluye alojamiento, cenas en restaurantes locales seleccionados y una clase de cocina regional.',
-        },
-      ],
-    },
-  ];
+const HotelList = ({ filters }) => {
+  // Si no se han ingresado filtros, se muestra un mensaje inicial con estilos consistentes
+  if (!filters) {
+    return (
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6 text-center">
+        <p className="text-gray-500">
+          Ingrese datos para poder obtener hoteles.
+        </p>
+      </div>
+    );
+  }
+
+  // Filtrado de hoteles basado en los filtros
+  const filteredHotels = hotelsData.filter((hotel) => {
+    // Filtro por nombre
+    const matchName = filters.name
+      ? hotel.nombre.toLowerCase().includes(filters.name.toLowerCase())
+      : true;
+
+    // Filtro por ubicación (se verifica en ciudad, provincia y país)
+    const locationString =
+      `${hotel.ubicacion.ciudad} ${hotel.ubicacion.provincia} ${hotel.ubicacion.pais}`.toLowerCase();
+    const matchLocation = filters.location
+      ? locationString.includes(filters.location.toLowerCase())
+      : true;
+
+    // Filtro por calificación (estrellas)
+    const matchRating =
+      filters.rating > 0 ? hotel.estrellas >= filters.rating : true;
+
+    // Filtro por capacidad: se verifica si alguna habitación tiene capacidad mayor o igual
+    const matchCapacity = filters.capacity
+      ? hotel.habitaciones.some((room) => room.capacidad >= filters.capacity)
+      : true;
+
+    return matchName && matchLocation && matchRating && matchCapacity;
+  });
+
+  // Si no se encontraron hoteles, se muestra un mensaje con estilos similares
+  if (filteredHotels.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6 text-center">
+        <p className="text-gray-500">
+          No se encontraron hoteles con los datos seleccionados.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-5">
-      {hoteles.map((hotel, index) => (
+      {filteredHotels.map((hotel, index) => (
         <HotelCard key={index} hotel={hotel} />
       ))}
     </div>

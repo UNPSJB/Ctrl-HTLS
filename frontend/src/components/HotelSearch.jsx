@@ -12,17 +12,29 @@ const HotelSearch = ({ onSearch }) => {
     rating: 0,
   });
 
-  // Maneja el envío del formulario y ejecuta la función onSearch con los filtros actuales
+  // Función para validar el rango de fechas (opcional)
+  const validateDates = () => {
+    if (filters.startDate && filters.endDate) {
+      // Validación para que la fecha de entrada sea menor o igual a la fecha de salida
+      return new Date(filters.startDate) <= new Date(filters.endDate);
+    }
+    return true;
+  };
+
+  // Maneja el envío del formulario y ejecuta onSearch pasando los filtros
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validateDates()) {
+      alert('La fecha de entrada debe ser menor o igual a la fecha de salida');
+      return;
+    }
     onSearch(filters);
   };
 
   return (
-    // Se agregó borde para lograr consistencia con otros componentes
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg transition-all duration-300 p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Primera fila */}
+        {/* Primera fila: Nombre, Ubicación y Calificación */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -84,7 +96,7 @@ const HotelSearch = ({ onSearch }) => {
           </div>
         </div>
 
-        {/* Segunda fila */}
+        {/* Segunda fila: Fechas y Capacidad */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
