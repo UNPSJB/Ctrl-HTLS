@@ -10,7 +10,6 @@ const HotelCard = ({ hotel }) => {
   if (!hotel) return null;
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [imageError, setImageError] = useState(false);
 
   const {
     selectedRooms,
@@ -27,8 +26,6 @@ const HotelCard = ({ hotel }) => {
         hotel={hotel}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
-        imageError={imageError}
-        setImageError={setImageError}
       />
 
       {isExpanded && (
