@@ -1,4 +1,4 @@
-import { ImageOff, Star, Tag, MapPin } from 'lucide-react';
+import { ImageOff, Star, MapPin } from 'lucide-react';
 import Temporada from './Temporada';
 
 const HotelHeader = ({
