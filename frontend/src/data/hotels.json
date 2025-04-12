@@ -33,13 +33,13 @@
                 "habitaciones": [
                     {
                         "id": 1,
-                        "nombre": "Habitación Deluxe",
+                        "nombre": "Deluxe",
                         "capacidad": 2,
                         "precio": 200
                     },
                     {
                         "id": 2,
-                        "nombre": "Habitación Estándar",
+                        "nombre": "Estándar",
                         "capacidad": 2,
                         "precio": 150
                     }
@@ -64,7 +64,7 @@
         "habitaciones": [
             {
                 "id": 1,
-                "nombre": "Habitación Estándar",
+                "nombre": "Estándar",
                 "capacidad": 2,
                 "precio": 150
             },
@@ -82,7 +82,7 @@
                 "habitaciones": [
                     {
                         "id": 1,
-                        "nombre": "Habitación Estándar",
+                        "nombre": "Estándar",
                         "capacidad": 2,
                         "precio": 150
                     }

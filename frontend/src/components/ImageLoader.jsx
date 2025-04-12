@@ -6,18 +6,18 @@ const ImageLoader = ({ name, folder, cuadrado = true }) => {
 
   const imagePath = `/src/assets/${folder}/${encodeURIComponent(name)}.webp`;
 
-  // Clases dinámicas para el ancho
   const widthClass = cuadrado ? 'w-52' : 'w-full';
+  const heightClass = cuadrado ? 'h-52' : 'h-48';
 
   return imageError ? (
     <div
-      className={`${widthClass} h-52 flex items-center justify-center bg-gray-200 dark:bg-gray-700`}
+      className={`${widthClass} ${heightClass} flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-lg`}
     >
       <ImageOff className="w-12 h-12 text-gray-500" />
     </div>
   ) : (
     <img
-      className={`${widthClass} h-52 object-cover`}
+      className={`${widthClass} ${heightClass} object-cover rounded-lg`}
       src={imagePath}
       alt={name}
       onError={() => setImageError(true)}

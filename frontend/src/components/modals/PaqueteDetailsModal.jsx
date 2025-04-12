@@ -1,12 +1,10 @@
-import { useState } from 'react';
-import { ImageOff, Bed, Calendar, Percent, Tag } from 'lucide-react';
+import { Bed, Calendar, Percent, Tag } from 'lucide-react';
 import Modal from './Modal';
+import ImageLoader from '../ImageLoader';
 
 const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
-  const [imgError, setImgError] = useState(false);
   if (!paquete) return null;
 
-  // Cálculos de precio
   const precioTotal =
     paquete.habitaciones.reduce((acc, hab) => acc + hab.precio, 0) *
     paquete.noches;
@@ -19,20 +17,17 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
 
   return (
     <Modal onClose={onClose}>
-      {/* Imagen principal */}
-      <div className="relative">
-        {!imgError ? (
-          <img
-            src={`assets/${paquete.nombre}.jpg`}
-            alt={paquete.nombre}
-            onError={() => setImgError(true)}
-            className="w-full h-48 object-cover"
-          />
-        ) : (
-          <div className="w-full h-48 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-            <ImageOff className="w-12 h-12 text-gray-500" />
+      {/* Galería de imágenes de habitaciones */}
+      <div className="flex gap-4 overflow-x-auto scroll-smooth custom-scrollbar-x p-4 h-80">
+        {paquete.habitaciones.map((hab, index) => (
+          <div key={index} className="w-full flex-shrink-0">
+            <ImageLoader
+              name={hab.nombre}
+              folder="habitaciones"
+              cuadrado={false}
+            />
           </div>
-        )}
+        ))}
       </div>
 
       {/* Contenido del modal */}
