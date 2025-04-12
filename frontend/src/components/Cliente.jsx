@@ -99,17 +99,24 @@ export default function Cliente() {
 
           {/* Mensaje de sin resultados y botón para agregar cliente */}
           {searchResult === null && hasSearched && !isSearching && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="text-red-700 dark:text-red-300">
-                No se encontró ningún cliente con el documento {documentNumber}
+            <div className="flex items-center justify-between gap-4">
+              {/* Mensaje sin resultados */}
+              <div>
+                <p className="text-red-600 dark:text-red-400 font-medium pl-1">
+                  No se encontró ningún cliente con el documento{' '}
+                  <span className="font-bold">{documentNumber}</span>
+                </p>
               </div>
-              <button
-                onClick={handleAddClient}
-                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2 whitespace-nowrap"
-              >
-                <UserPlus className="w-5 h-5" />
-                Ingresar Cliente
-              </button>
+              {/* Botón para agregar cliente */}
+              <div>
+                <button
+                  onClick={handleAddClient}
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  Ingresar Cliente
+                </button>
+              </div>
             </div>
           )}
         </div>
