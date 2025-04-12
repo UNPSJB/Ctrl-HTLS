@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Users, Bath, ImageOff, Tag } from 'lucide-react';
+import { Users, Bath, Tag } from 'lucide-react';
 import Modal from './Modal';
+import ImageLoader from '../ImageLoader';
 
 const RoomDetailsModal = ({
   habitacion,
@@ -8,8 +8,6 @@ const RoomDetailsModal = ({
   onClose,
   onReserve,
 }) => {
-  const [imgError, setImgError] = useState(false);
-
   // Cálculo de precios
   const precioBase = habitacion.precio;
   const descuentoTemporada =
@@ -18,20 +16,13 @@ const RoomDetailsModal = ({
 
   return (
     <Modal onClose={onClose}>
-      {/* Imagen principal */}
-      <div className="relative">
-        {!imgError ? (
-          <img
-            src={`assets/${habitacion.nombre}.jpg`}
-            alt={habitacion.nombre}
-            onError={() => setImgError(true)}
-            className="w-full h-48 object-cover"
-          />
-        ) : (
-          <div className="w-full h-48 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-            <ImageOff className="w-12 h-12 text-gray-500" />
-          </div>
-        )}
+      {/* Imagen principal de la habitación */}
+      <div className="relative w-full h-48">
+        <ImageLoader
+          name={habitacion.nombre}
+          folder="habitaciones"
+          cuadrado={false}
+        />
       </div>
 
       {/* Contenido del modal */}
