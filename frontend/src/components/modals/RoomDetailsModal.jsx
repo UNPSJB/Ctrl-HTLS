@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Users, Bath, ImageOff, Tag } from 'lucide-react';
 import Modal from './Modal';
 
-export function RoomDetailsModal({
+const RoomDetailsModal = ({
   habitacion,
   discountCoefficient,
   onClose,
   onReserve,
-}) {
+}) => {
   const [imgError, setImgError] = useState(false);
 
   // Cálculo de precios
@@ -97,4 +97,6 @@ export function RoomDetailsModal({
       </div>
     </Modal>
   );
-}
+};
+
+export default RoomDetailsModal;

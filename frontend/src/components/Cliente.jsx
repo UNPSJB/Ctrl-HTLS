@@ -3,7 +3,7 @@ import { Search, User, UserPlus } from 'lucide-react';
 import ClienteDetailsModal from './modals/ClienteDetailsModal';
 import clientesData from '../data/clientes.json';
 
-export default function Cliente() {
+const Cliente = () => {
   const [documentNumber, setDocumentNumber] = useState('');
   const [searchResult, setSearchResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -131,4 +131,6 @@ export default function Cliente() {
       )}
     </>
   );
-}
+};
+
+export default Cliente;
