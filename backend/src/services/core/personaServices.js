@@ -323,6 +323,16 @@ const verificarExistente = async (numeroDocumento, email, telefono) => {
   }
 };
 
+const actualizarPuntosCliente = async (clienteId, puntos, transaction) => {
+  const cliente = await Cliente.findByPk(clienteId, { transaction });
+  if (!cliente) {
+    throw new Error('Cliente no encontrado.');
+  }
+
+  cliente.puntos += puntos;
+  await cliente.save({ transaction });
+};
+
 module.exports = {
   crearEmpleado,
   actualizarEmpleado,
@@ -335,4 +345,5 @@ module.exports = {
   obtenerClientes,
   obtenerClientePorId,
   obtenerClientePorDocumento,
+  actualizarPuntosCliente,
 };

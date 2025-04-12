@@ -1,3 +1,4 @@
+const sequelize = require('../../config/database');
 const CustomError = require('../../utils/CustomError');
 const hotelServices = require('../hotel/hotelServices');
 const {
@@ -5,13 +6,14 @@ const {
   verificarFechas,
   convertirFechas,
 } = require('../../utils/helpers');
-const { Op } = require('sequelize');
+const {
+  verificarDisponibilidadHabitaciones,
+  verificarDisponibilidadPaquetes,
+} = require('./verificarDisponibilidad');
 
-const Hotel = require('../../models/hotel/Hotel');
-
-const Habitacion = require('../../models/hotel/Habitacion');
-const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
-const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
+const habitacionServices = require('../hotel/habitacionServices');
+const paquetePromocionalServices = require('../hotel/paquetePromocionalServices');
+const personaServices = require('../core/personaServices');
 
 const Alquiler = require('../../models/ventas/Alquiler');
 
@@ -37,4 +39,96 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
   );
 };
 
-module.exports = { obtenerDisponibilidad };
+const crearReserva = async (reserva) => {
+  const { hoteles, clienteId, puntos } = reserva;
+  // Iniciar una transacción
+  const transaction = await sequelize.transaction();
+
+  try {
+    for (const hotel of hoteles) {
+      const { alquileres } = hotel;
+
+      for (const alquiler of alquileres) {
+        const {
+          habitaciones,
+          paquetesPromocionales,
+          fechaInicio,
+          fechaFin,
+          pasajeros,
+          importe_total,
+        } = alquiler;
+
+        // Verificar disponibilidad
+        await verificarDisponibilidadHabitaciones(
+          habitaciones,
+          fechaInicio,
+          fechaFin,
+        );
+        await verificarDisponibilidadPaquetes(
+          paquetesPromocionales,
+          fechaInicio,
+          fechaFin,
+        );
+
+        // Guardar alquiler
+        const nuevoAlquiler = await guardarAlquiler(
+          clienteId,
+          {
+            fechaInicio,
+            fechaFin,
+            pasajeros,
+            importe_total,
+          },
+          transaction, // Pasar la transacción
+        );
+
+        // Guardar habitaciones y paquetes
+        await habitacionServices.guardarHabitaciones(
+          nuevoAlquiler.id,
+          habitaciones,
+          fechaInicio,
+          fechaFin,
+          transaction, // Pasar la transacción
+        );
+        await paquetePromocionalServices.guardarPaquetes(
+          nuevoAlquiler.id,
+          paquetesPromocionales,
+          fechaInicio,
+          fechaFin,
+          transaction, // Pasar la transacción
+        );
+      }
+    }
+
+    // Actualizar puntos del cliente
+    await personaServices.actualizarPuntosCliente(
+      clienteId,
+      puntos,
+      transaction,
+    );
+
+    // Confirmar la transacción
+    await transaction.commit();
+  } catch (error) {
+    // Revertir la transacción si algo falla
+    await transaction.rollback();
+    throw new CustomError(`Error al crear la reserva: ${error.message}`, 500);
+  }
+};
+
+const guardarAlquiler = async (clienteId, alquiler, transaction) => {
+  const { fechaInicio, fechaFin, pasajeros, importe_total } = alquiler;
+
+  return await Alquiler.create(
+    {
+      clienteId,
+      fecha_inicio: new Date(fechaInicio),
+      fecha_fin: new Date(fechaFin),
+      pasajeros,
+      importe_total,
+    },
+    { transaction }, // Pasar la transacción
+  );
+};
+
+module.exports = { obtenerDisponibilidad, crearReserva, guardarAlquiler };

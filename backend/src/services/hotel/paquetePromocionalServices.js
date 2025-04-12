@@ -216,8 +216,28 @@ const obtenerPaquetesTuristicos = async (idHotel, fechaInicio, fechaFin) => {
   return paquetesDisponibles;
 };
 
+const guardarPaquetes = async (
+  alquilerId,
+  paquetes,
+  fechaInicio,
+  fechaFin,
+  transaction,
+) => {
+  if (!paquetes || paquetes.length === 0) return;
+
+  const paquetesData = paquetes.map((paqueteId) => ({
+    alquilerId,
+    paquetePromocionalId: paqueteId,
+    fechaInicio,
+    fechaFin,
+  }));
+
+  await AlquilerPaquetePromocional.bulkCreate(paquetesData, { transaction });
+};
+
 module.exports = {
   crearPaquete,
   asignarHabitacionAPaquete,
   obtenerPaquetesTuristicos,
+  guardarPaquetes,
 };

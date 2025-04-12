@@ -470,6 +470,25 @@ const obtenerHabitacionesDisponiblesPorTipo = async (
   }));
 };
 
+const guardarHabitaciones = async (
+  alquilerId,
+  habitaciones,
+  fechaInicio,
+  fechaFin,
+  transaction,
+) => {
+  if (!habitaciones || habitaciones.length === 0) return;
+
+  const habitacionesData = habitaciones.map((habitacionId) => ({
+    alquilerId,
+    habitacionId,
+    fechaInicio,
+    fechaFin,
+  }));
+
+  await AlquilerHabitacion.bulkCreate(habitacionesData, { transaction });
+};
+
 module.exports = {
   agregarHabitaciones,
   obtenerHabitaciones,
@@ -480,4 +499,5 @@ module.exports = {
   verificarHabitacionesHotel,
   verificarHabitacionEnPaquete,
   obtenerHabitacionesPorCapacidad,
+  guardarHabitaciones,
 };

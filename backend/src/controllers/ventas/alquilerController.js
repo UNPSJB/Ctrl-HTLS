@@ -13,4 +13,17 @@ const getDisponibilidad = async (req, res) => {
   }
 };
 
-module.exports = { getDisponibilidad };
+const setReserva = async (req, res) => {
+  const reserva = req.body;
+
+  try {
+    //const resultado = await alquilerServices.crearReserva(reserva);
+    await alquilerServices.crearReserva(reserva);
+    res.status(201).json({ message: 'Reserva creada con éxito' });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+module.exports = { getDisponibilidad, setReserva };
