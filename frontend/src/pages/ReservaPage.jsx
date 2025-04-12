@@ -1,5 +1,6 @@
 import { Bed, Package, Users } from 'lucide-react';
-import { useCarrito } from '../context/CarritoContext'; // Ajusta la ruta según tu estructura
+import { useCarrito } from '../context/CarritoContext';
+import Cliente from '@/components/Cliente';
 
 const ReservaPage = () => {
   const { carrito } = useCarrito();
@@ -172,6 +173,10 @@ const ReservaPage = () => {
             </div>
           </div>
         </div>
+      </div>
+      {/* Información del Cliente */}
+      <div className="mt-6">
+        <Cliente />
       </div>
     </div>
   );
