@@ -1,5 +1,5 @@
 import { X, Trash2, CreditCard, Tag } from 'lucide-react';
-import { useCarrito } from '@/context/CartContext';
+import { useCarrito } from '@/context/CarritoContext';
 import hotelesData from '@/data/hotels.json';
 
 const Carrito = ({ isOpen, onClose }) => {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { RoomDetailsModal } from '../RoomDetailsModal';
 import Contador from '../ui/Contador';
 import PriceTag from '../PriceTag';
-import { useCarrito } from '../../context/CartContext';
+import { useCarrito } from '../../context/CarritoContext';
 
 const HabitacionItem = ({
   idHotel,

@@ -1,5 +1,5 @@
 import { ThemeProvider } from './context/ThemeContext';
-import { CarritoProvider } from './context/CartContext';
+import { CarritoProvider } from './context/CarritoContext';
 import AppRouter from './routes/AppRouter';
 
 function App() {

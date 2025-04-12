@@ -1,5 +1,5 @@
 import { ShoppingCart } from 'lucide-react';
-import { useCarrito } from '@/context/CartContext';
+import { useCarrito } from '@/context/CarritoContext';
 
 const CartToggleButton = ({ onClick }) => {
   const { totalElementos } = useCarrito();
