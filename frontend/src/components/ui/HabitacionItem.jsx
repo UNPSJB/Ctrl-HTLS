@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RoomDetailsModal } from '../modals/RoomDetailsModal';
+import RoomDetailsModal from '@components/modals/RoomDetailsModal';
 import Contador from '@ui/Contador';
 import PriceTag from '@components/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
