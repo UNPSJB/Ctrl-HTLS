@@ -19,21 +19,27 @@ const PaqueteItem = ({
   const [cantidad, setCantidad] = useState(0);
   const { agregarPaquete, removerPaquete } = useCarrito();
 
+  // Si se deselecciona el paquete, reiniciamos la cantidad
   useEffect(() => {
     if (!isSelected) setCantidad(0);
   }, [isSelected]);
 
-  const manejarSeleccion = () => {
+  // Función para manejar la selección a través del checkbox
+  const manejarSeleccion = (e) => {
+    const checked = e.target.checked;
     onSelect(paquete.id);
-    if (isSelected) {
-      removerPaquete(idHotel, paquete.id);
-      setCantidad(0);
-    } else {
+    if (checked) {
+      // Si se marca el checkbox, se agrega el paquete al contexto y se establece la cantidad en 1
       agregarPaquete(idHotel, paquete.id, temporada, coeficienteHotel);
       setCantidad(1);
+    } else {
+      // Si se desmarca, se remueve el paquete del contexto y se reinicia la cantidad
+      removerPaquete(idHotel, paquete.id);
+      setCantidad(0);
     }
   };
 
+  // Calcular el precio base del paquete según las habitaciones, descuento y noches
   const precioBase =
     paquete.habitaciones.reduce((acum, hab) => acum + hab.precio, 0) *
     (1 - paquete.descuento / 100) *
@@ -71,12 +77,14 @@ const PaqueteItem = ({
           max={5}
           onChange={(nuevaCantidad) => {
             setCantidad(nuevaCantidad);
-            if (nuevaCantidad === 0) {
-              manejarSeleccion();
-            } else {
-              if (!isSelected) manejarSeleccion();
-              // lógica para agregar o quitar del carrito si ya estaba seleccionado
+            if (nuevaCantidad === 0 && isSelected) {
+              // Si el contador llega a 0 y el paquete estaba seleccionado, se remueve del contexto
+              removerPaquete(idHotel, paquete.id);
+            } else if (nuevaCantidad > 0 && !isSelected) {
+              // Si se incrementa la cantidad y el paquete no está seleccionado, se agrega al contexto
+              agregarPaquete(idHotel, paquete.id, temporada, coeficienteHotel);
             }
+            // Puedes extender la lógica para actualizar la cantidad en el contexto si es necesario
           }}
         />
 
@@ -98,7 +106,10 @@ const PaqueteItem = ({
           coeficiente={coeficiente}
           onClose={() => setMostrarModal(false)}
           onReserve={() => {
-            manejarSeleccion();
+            // Al reservar desde el modal se asegura la selección
+            if (!isSelected) {
+              agregarPaquete(idHotel, paquete.id, temporada, coeficienteHotel);
+            }
             setMostrarModal(false);
           }}
         />
