@@ -4,6 +4,7 @@ import HabitacionCard from '@ui/cards/HabitacionCard';
 import PaqueteCard from '@ui/cards/PaqueteCard';
 import Resumen from '@ui/Resumen';
 import Cliente from '@components/Cliente';
+import hotelesData from '@/data/hotels.json';
 
 const ReservaPage = () => {
   const { carrito } = useCarrito();
@@ -11,7 +12,7 @@ const ReservaPage = () => {
   // Para este ejemplo usaremos el primer hotel del carrito
   const hotelReserva = carrito.hoteles[0];
 
-  // Validación si no hay datos aún
+  // Validación si no hay reservas en el carrito
   if (!hotelReserva) {
     return (
       <div className="flex justify-center items-center text-gray-600 dark:text-gray-300">
@@ -20,21 +21,34 @@ const ReservaPage = () => {
     );
   }
 
-  // Se extraen habitaciones, paquetes y datos adicionales del hotel seleccionado
-  const { habitaciones = [], paquetes = [], datos = {} } = hotelReserva;
+  // Si el hotel en el carrito no tiene datos completos en la propiedad "datos",
+  // se buscan en el JSON de hoteles
+  const datosHotel =
+    hotelReserva.datos && Object.keys(hotelReserva.datos).length > 0
+      ? hotelReserva.datos
+      : hotelesData.find((h) => h.id === hotelReserva.idHotel);
 
-  // Calcular el subtotal de habitaciones
-  const subtotalHabitaciones = habitaciones.reduce((acc, id) => {
-    const hab = datos.habitaciones?.find((h) => h.id === id);
-    return acc + (hab?.precio || 0);
-  }, 0);
+  // Extraer las ids de las habitaciones y paquetes seleccionados
+  const { habitaciones = [], paquetes = [] } = hotelReserva;
 
-  // Calcular el subtotal de paquetes
-  const subtotalPaquetes = paquetes.reduce((acc, id) => {
-    const pack = datos.paquetes?.find((p) => p.id === id);
-    if (!pack) return acc;
+  // Obtener la información completa de las habitaciones y paquetes seleccionados
+  const habitacionesSeleccionadas = datosHotel.habitaciones.filter((hab) =>
+    habitaciones.includes(hab.id)
+  );
+  const paquetesSeleccionados = datosHotel.paquetes.filter((pack) =>
+    paquetes.includes(pack.id)
+  );
+
+  // Calcular el subtotal de las habitaciones
+  const subtotalHabitaciones = habitacionesSeleccionadas.reduce(
+    (acc, hab) => acc + (hab.precio || 0),
+    0
+  );
+
+  // Calcular el subtotal de los paquetes
+  const subtotalPaquetes = paquetesSeleccionados.reduce((acc, pack) => {
     const precioHabitaciones = pack.habitaciones.reduce(
-      (suma, h) => suma + h.precio,
+      (suma, hab) => suma + hab.precio,
       0
     );
     const totalConDescuento =
@@ -42,7 +56,7 @@ const ReservaPage = () => {
     return acc + totalConDescuento;
   }, 0);
 
-  // Calcular el total general
+  // Total general
   const total = subtotalHabitaciones + subtotalPaquetes;
 
   return (
@@ -53,35 +67,31 @@ const ReservaPage = () => {
         </h1>
 
         {/* Sección de Habitaciones Seleccionadas */}
-        {habitaciones.length > 0 && (
+        {habitacionesSeleccionadas.length > 0 && (
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100">
               <Bed className="w-5 h-5" />
               Habitaciones Seleccionadas
             </h2>
             <div className="space-y-4">
-              {habitaciones.map((id) => {
-                const hab = datos.habitaciones?.find((h) => h.id === id);
-                return hab ? (
-                  <HabitacionCard key={id} habitacion={hab} />
-                ) : null;
-              })}
+              {habitacionesSeleccionadas.map((hab) => (
+                <HabitacionCard key={hab.id} habitacion={hab} />
+              ))}
             </div>
           </section>
         )}
 
         {/* Sección de Paquetes Seleccionados */}
-        {paquetes.length > 0 && (
+        {paquetesSeleccionados.length > 0 && (
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100">
               <Package className="w-5 h-5" />
               Paquetes Seleccionados
             </h2>
             <div className="space-y-4">
-              {paquetes.map((id) => {
-                const pack = datos.paquetes?.find((p) => p.id === id);
-                return pack ? <PaqueteCard key={id} paquete={pack} /> : null;
-              })}
+              {paquetesSeleccionados.map((pack) => (
+                <PaqueteCard key={pack.id} paquete={pack} />
+              ))}
             </div>
           </section>
         )}
