@@ -40,11 +40,12 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
 };
 
 const crearReserva = async (reserva) => {
-  const { hoteles, clienteId, puntos } = reserva;
+  const { hoteles, numeroDocumento, puntos } = reserva;
   // Iniciar una transacción
   const transaction = await sequelize.transaction();
-
   try {
+    const cliente =
+      await personaServices.obtenerClientePorDocumento(numeroDocumento);
     for (const hotel of hoteles) {
       const { alquileres } = hotel;
 
@@ -72,7 +73,7 @@ const crearReserva = async (reserva) => {
 
         // Guardar alquiler
         const nuevoAlquiler = await guardarAlquiler(
-          clienteId,
+          cliente.id,
           {
             fechaInicio,
             fechaFin,
@@ -102,7 +103,7 @@ const crearReserva = async (reserva) => {
 
     // Actualizar puntos del cliente
     await personaServices.actualizarPuntosCliente(
-      clienteId,
+      cliente.id,
       puntos,
       transaction,
     );
