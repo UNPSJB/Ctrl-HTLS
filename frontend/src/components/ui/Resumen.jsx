@@ -1,24 +1,20 @@
-const Resumen = ({ subtotalHabitaciones, subtotalPaquetes, total }) => (
+const Resumen = ({ totalOriginal, totalDiscount, totalFinal }) => (
   <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
     <div className="flex justify-between items-center mb-4">
-      <span className="text-gray-600 dark:text-gray-400">
-        Subtotal Habitaciones:
-      </span>
+      <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
       <span className="font-medium text-gray-800 dark:text-gray-100">
-        ${subtotalHabitaciones.toFixed(2)}
+        ${totalOriginal.toFixed(2)}
       </span>
     </div>
     <div className="flex justify-between items-center mb-4">
-      <span className="text-gray-600 dark:text-gray-400">
-        Subtotal Paquetes:
-      </span>
+      <span className="text-gray-600 dark:text-gray-400">Descuento:</span>
       <span className="font-medium text-gray-800 dark:text-gray-100">
-        ${subtotalPaquetes.toFixed(2)}
+        -${totalDiscount.toFixed(2)}
       </span>
     </div>
     <div className="flex justify-between items-center text-lg font-bold text-gray-800 dark:text-gray-100">
-      <span>Total:</span>
-      <span>${total.toFixed(2)}</span>
+      <span>Total a Pagar:</span>
+      <span>${totalFinal.toFixed(2)}</span>
     </div>
   </div>
 );
