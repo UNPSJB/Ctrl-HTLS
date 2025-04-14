@@ -5,12 +5,10 @@ const Hotel = require('../../models/hotel/Hotel');
 const CustomError = require('../../utils/CustomError');
 const Habitacion = require('../../models/hotel/Habitacion');
 const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
-const {
-  verificarHabitacionesPaquetePromocional,
-} = require('./habitacionServices');
 const { verificarPorcentaje } = require('../../utils/helpers');
 const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
 const HotelTipoHabitacion = require('../../models/hotel/HotelTipoHabitacion');
+const verificarDisponibilidad = require('../ventas/verificarDisponibilidad');
 
 const crearPaquete = async (idHotel, paquete) => {
   // Verificar si el hotel existe
@@ -31,14 +29,33 @@ const crearPaquete = async (idHotel, paquete) => {
       409,
     );
   }
+  console.log(paquete.habitaciones);
 
   // Verificar si las habitaciones ya estan asignadas a otro paquete en la misma fecha
-  await verificarHabitacionesPaquetePromocional(
+  const resp = await verificarHabitacionesPaquetePromocional(
     paquete.habitaciones,
     paquete.fecha_inicio,
     paquete.fecha_fin,
   );
 
+  if (resp) {
+    throw new CustomError(
+      'Las habitaciones ya están asignadas a otro paquete en la misma fecha',
+      409,
+    );
+  }
+  const resp2 =
+    await verificarDisponibilidad.verificarDisponibilidadHabitaciones(
+      paquete.habitaciones,
+      paquete.fecha_inicio,
+      paquete.fecha_fin,
+    );
+  if (resp2) {
+    throw new CustomError(
+      'Las habitaciones ya están alquiladas en el rango de fechas especificado',
+      409,
+    );
+  }
   // Calcular la capacidad máxima del paquete
   let capacidadMaxima = 0;
   for (const idHabitacion of paquete.habitaciones) {
@@ -214,6 +231,30 @@ const obtenerPaquetesTuristicos = async (idHotel, fechaInicio, fechaFin) => {
   }
 
   return paquetesDisponibles;
+};
+
+const verificarHabitacionesPaquetePromocional = async (
+  habitaciones,
+  fechaInicio,
+  fechaFin,
+) => {
+  const habitacionesAlquiladas = await PaquetePromocionalHabitacion.findAll({
+    where: {
+      habitacionId: { [Op.in]: habitaciones },
+      [Op.or]: [
+        { fechaInicio: { [Op.between]: [fechaInicio, fechaFin] } },
+        { fechaFin: { [Op.between]: [fechaInicio, fechaFin] } },
+        {
+          [Op.and]: [
+            { fechaInicio: { [Op.lte]: fechaInicio } },
+            { fechaFin: { [Op.gte]: fechaFin } },
+          ],
+        },
+      ],
+    },
+  });
+
+  return habitacionesAlquiladas;
 };
 
 const guardarPaquetes = async (

@@ -23,6 +23,7 @@ const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
 const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const paquetePromocionalServices = require('./paquetePromocionalServices');
+const verificarDisponibilidad = require('../ventas/verificarDisponibilidad');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
 const temporadaServices = require('./temporadaServices');
 const descuentoServices = require('./descuentoServices');
@@ -306,16 +307,21 @@ const verificarHotel = async (
 //TERMINAR
 const agregarPaquetePromocional = async (idHotel, paquete) => {
   // Verificar si el hotel existe
-
   await verificarIdHotel(idHotel);
   await verificarHabitacionesHotel(idHotel, paquete.habitaciones);
   await verificarFechas(paquete.fecha_inicio, paquete.fecha_fin);
-  await verificarAlquilada(
-    paquete.habitaciones,
-    paquete.fechaInicio,
-    paquete.fechaFin,
-  );
-
+  const habitacionesDiponibles =
+    await verificarDisponibilidad.verificarDisponibilidadHabitaciones(
+      paquete.habitaciones,
+      paquete.fechaInicio,
+      paquete.fechaFin,
+    );
+  if (habitacionesDiponibles) {
+    throw new CustomError(
+      'Algunas habitaciones no están disponibles en las fechas seleccionadas',
+      400,
+    );
+  }
   const paqueteCreado = await paquetePromocionalServices.crearPaquete(
     idHotel,
     paquete,
@@ -368,48 +374,49 @@ const agregarDescuentos = async (idHotel, descuento) => {
   return descuentoNuevo;
 };
 
-const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
-  for (const idHabitacion of habitaciones) {
-    const alquileres = await AlquilerHabitacion.findAll({
-      where: {
-        habitacionId: idHabitacion,
-        [Op.or]: [
-          {
-            fechaInicio: {
-              [Op.between]: [fechaInicio, fechaFin],
-            },
-          },
-          {
-            fechaFin: {
-              [Op.between]: [fechaInicio, fechaFin],
-            },
-          },
-          {
-            [Op.and]: [
-              {
-                fechaInicio: {
-                  [Op.lte]: fechaInicio,
-                },
-              },
-              {
-                fechaFin: {
-                  [Op.gte]: fechaFin,
-                },
-              },
-            ],
-          },
-        ],
-      },
-    });
+//Verifica si las habitaciones están disponibles para crear un paquete promocional
+// const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
+//   for (const idHabitacion of habitaciones) {
+//     const alquileres = await AlquilerHabitacion.findAll({
+//       where: {
+//         habitacionId: idHabitacion,
+//         [Op.or]: [
+//           {
+//             fechaInicio: {
+//               [Op.between]: [fechaInicio, fechaFin],
+//             },
+//           },
+//           {
+//             fechaFin: {
+//               [Op.between]: [fechaInicio, fechaFin],
+//             },
+//           },
+//           {
+//             [Op.and]: [
+//               {
+//                 fechaInicio: {
+//                   [Op.lte]: fechaInicio,
+//                 },
+//               },
+//               {
+//                 fechaFin: {
+//                   [Op.gte]: fechaFin,
+//                 },
+//               },
+//             ],
+//           },
+//         ],
+//       },
+//     });
 
-    if (alquileres.length > 0) {
-      throw new CustomError(
-        `La habitación con ID ${idHabitacion} ya está alquilada en ese rango de fechas`,
-        409,
-      ); // Conflict
-    }
-  }
-};
+//     if (alquileres.length > 0) {
+//       throw new CustomError(
+//         `La habitación con ID ${idHabitacion} ya está alquilada en ese rango de fechas`,
+//         409,
+//       ); // Conflict
+//     }
+//   }
+// };
 
 /**
  * VERIFICAR QUE EXISTAN HOTELES EN LA CIUDAD
@@ -488,5 +495,5 @@ module.exports = {
   agregarDescuentos,
   getDisponibilidadPorHotel,
   //getHabitacionesDisponibles,
-  // getPaquetesDisponibles,
+  //getPaquetesDisponibles,
 };

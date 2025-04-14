@@ -7,8 +7,6 @@ const verificarDisponibilidadHabitaciones = async (
   fechaInicio,
   fechaFin,
 ) => {
-  if (!habitaciones || habitaciones.length === 0) return;
-
   const habitacionesAlquiladas = await AlquilerHabitacion.findAll({
     where: {
       habitacionId: { [Op.in]: habitaciones },
@@ -25,11 +23,7 @@ const verificarDisponibilidadHabitaciones = async (
     },
   });
 
-  if (habitacionesAlquiladas.length > 0) {
-    throw new Error(
-      'Algunas habitaciones ya están alquiladas en el rango de fechas especificado.',
-    );
-  }
+  return habitacionesAlquiladas;
 };
 
 const verificarDisponibilidadPaquetes = async (

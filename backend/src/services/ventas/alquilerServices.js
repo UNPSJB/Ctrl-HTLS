@@ -41,11 +41,15 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
 
 const crearReserva = async (reserva) => {
   const { hoteles, numeroDocumento, puntos } = reserva;
+
   // Iniciar una transacción
   const transaction = await sequelize.transaction();
+  const alquileresCreados = []; // Arreglo para almacenar los alquileres creados
+
   try {
     const cliente =
       await personaServices.obtenerClientePorDocumento(numeroDocumento);
+
     for (const hotel of hoteles) {
       const { alquileres } = hotel;
 
@@ -60,11 +64,18 @@ const crearReserva = async (reserva) => {
         } = alquiler;
 
         // Verificar disponibilidad
-        await verificarDisponibilidadHabitaciones(
-          habitaciones,
-          fechaInicio,
-          fechaFin,
-        );
+        const habitacionesDisponibles =
+          await verificarDisponibilidadHabitaciones(
+            habitaciones,
+            fechaInicio,
+            fechaFin,
+          );
+        if (!habitacionesDisponibles) {
+          throw new CustomError(
+            'Algunas habitaciones no están disponibles en las fechas seleccionadas',
+            400,
+          );
+        }
         await verificarDisponibilidadPaquetes(
           paquetesPromocionales,
           fechaInicio,
@@ -82,22 +93,37 @@ const crearReserva = async (reserva) => {
           },
           transaction, // Pasar la transacción
         );
-
         // Guardar habitaciones y paquetes
-        await habitacionServices.guardarHabitaciones(
-          nuevoAlquiler.id,
-          habitaciones,
+        if (habitaciones && habitaciones.length > 0) {
+          await habitacionServices.guardarHabitaciones(
+            nuevoAlquiler.id,
+            habitaciones,
+            fechaInicio,
+            fechaFin,
+            transaction, // Pasar la transacción
+          );
+        }
+
+        if (paquetesPromocionales && paquetesPromocionales.length > 0) {
+          await paquetePromocionalServices.guardarPaquetes(
+            nuevoAlquiler.id,
+            paquetesPromocionales,
+            fechaInicio,
+            fechaFin,
+            transaction, // Pasar la transacción
+          );
+        }
+
+        // Agregar información del alquiler creado al arreglo
+        alquileresCreados.push({
+          alquilerId: nuevoAlquiler.id,
+          hotelId: hotel.hotelId,
           fechaInicio,
           fechaFin,
-          transaction, // Pasar la transacción
-        );
-        await paquetePromocionalServices.guardarPaquetes(
-          nuevoAlquiler.id,
-          paquetesPromocionales,
-          fechaInicio,
-          fechaFin,
-          transaction, // Pasar la transacción
-        );
+          importe_total,
+          habitaciones: habitaciones || [],
+          paquetesPromocionales: paquetesPromocionales || [],
+        });
       }
     }
 
@@ -110,6 +136,9 @@ const crearReserva = async (reserva) => {
 
     // Confirmar la transacción
     await transaction.commit();
+
+    // Devolver los alquileres creados
+    return alquileresCreados;
   } catch (error) {
     // Revertir la transacción si algo falla
     await transaction.rollback();
