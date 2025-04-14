@@ -3,6 +3,7 @@ import RoomDetailsModal from '@components/modals/RoomDetailsModal';
 import Contador from '@ui/Contador';
 import PriceTag from '@components/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
+import { useBusqueda } from '@context/BusquedaContext';
 
 const HabitacionItem = ({
   idHotel,
@@ -18,22 +19,20 @@ const HabitacionItem = ({
   const [mostrarModal, setMostrarModal] = useState(false);
   const [cantidad, setCantidad] = useState(0);
   const { agregarHabitacion, removerHabitacion } = useCarrito();
+  const { filtros } = useBusqueda();
+  const { fechaInicio, fechaFin } = filtros;
 
-  // Ajustamos la cantidad a 0 cuando la habitación se deselecciona
   useEffect(() => {
     if (!isSelected) setCantidad(0);
   }, [isSelected]);
 
-  // Se modifica manejarSeleccion para que reciba el evento y determine si el checkbox está marcado
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
     onSelect(habitacion.id);
     if (checked) {
-      // Si se marca el checkbox, se agrega la habitación al contexto
-      agregarHabitacion(idHotel, habitacion.id, temporada, coeficienteHotel);
+      agregarHabitacion(idHotel, habitacion, fechaInicio, fechaFin);
       setCantidad(1);
     } else {
-      // Si se desmarca, se remueve del contexto y se reinicia la cantidad
       removerHabitacion(idHotel, habitacion.id);
       setCantidad(0);
     }
@@ -74,18 +73,17 @@ const HabitacionItem = ({
           onChange={(nuevaCantidad) => {
             setCantidad(nuevaCantidad);
             if (nuevaCantidad === 0 && isSelected) {
-              // Si el contador llega a 0, se deselecciona la habitación
               removerHabitacion(idHotel, habitacion.id);
             } else if (nuevaCantidad > 0 && !isSelected) {
-              // Si se aumenta la cantidad y la habitación no está seleccionada, se agrega al contexto
               agregarHabitacion(
                 idHotel,
                 habitacion.id,
                 temporada,
-                coeficienteHotel
+                coeficienteHotel,
+                filtros.fechaInicio,
+                filtros.fechaFin
               );
             }
-            // Puedes agregar aquí la lógica para actualizar la cantidad en el contexto si es necesario
           }}
         />
 
@@ -107,13 +105,14 @@ const HabitacionItem = ({
           discountCoefficient={coeficiente}
           onClose={() => setMostrarModal(false)}
           onReserve={() => {
-            // Al reservar desde el modal se asegura la selección
             if (!isSelected) {
               agregarHabitacion(
                 idHotel,
                 habitacion.id,
                 temporada,
-                coeficienteHotel
+                coeficienteHotel,
+                filtros.fechaInicio,
+                filtros.fechaFin
               );
             }
             setMostrarModal(false);

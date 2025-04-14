@@ -1,10 +1,10 @@
-import { useState, useContext } from 'react';
-import { BusquedaContext } from '@context/BusquedaContext';
+import { useState } from 'react';
+import { useBusqueda } from '@context/BusquedaContext';
 import { Search, MapPin, Calendar, Users, Star } from 'lucide-react';
 
 const HotelSearch = () => {
-  // Obtenemos la función para actualizar el contexto
-  const { actualizarFiltros } = useContext(BusquedaContext);
+  // Obtenemos la función para actualizar el contexto utilizando el hook personalizado
+  const { actualizarFiltros } = useBusqueda();
 
   // Estado local para almacenar los filtros del formulario
   const [localFilters, setLocalFilters] = useState({

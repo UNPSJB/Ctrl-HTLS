@@ -3,13 +3,12 @@ import PaqueteDetailsModal from '../modals/PaqueteDetailsModal';
 import Contador from '@ui/Contador';
 import PriceTag from '@components/PriceTag';
 import { useCarrito } from '../../context/CarritoContext';
+import { useBusqueda } from '../../context/BusquedaContext';
 
 const PaqueteItem = ({
   idHotel,
   paquete,
   coeficiente,
-  temporada,
-  coeficienteHotel,
   isSelected,
   onSelect,
 }) => {
@@ -18,28 +17,29 @@ const PaqueteItem = ({
   const [mostrarModal, setMostrarModal] = useState(false);
   const [cantidad, setCantidad] = useState(0);
   const { agregarPaquete, removerPaquete } = useCarrito();
+  // Obtenemos los filtros utilizando el hook personalizado
+  const { filtros } = useBusqueda();
+  const { fechaInicio, fechaFin } = filtros;
 
-  // Si se deselecciona el paquete, reiniciamos la cantidad
+  // Reinicia la cantidad si el paquete se deselecciona
   useEffect(() => {
     if (!isSelected) setCantidad(0);
   }, [isSelected]);
 
-  // Función para manejar la selección a través del checkbox
+  // Maneja la selección mediante el checkbox
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
     onSelect(paquete.id);
     if (checked) {
-      // Si se marca el checkbox, se agrega el paquete al contexto y se establece la cantidad en 1
-      agregarPaquete(idHotel, paquete.id, temporada, coeficienteHotel);
+      agregarPaquete(idHotel, paquete, fechaInicio, fechaFin);
       setCantidad(1);
     } else {
-      // Si se desmarca, se remueve el paquete del contexto y se reinicia la cantidad
       removerPaquete(idHotel, paquete.id);
       setCantidad(0);
     }
   };
 
-  // Calcular el precio base del paquete según las habitaciones, descuento y noches
+  // Se calcula el precio base (la lógica puede variar según tus requerimientos)
   const precioBase =
     paquete.habitaciones.reduce((acum, hab) => acum + hab.precio, 0) *
     (1 - paquete.descuento / 100) *
@@ -49,11 +49,9 @@ const PaqueteItem = ({
     <>
       <div
         className="grid items-center border rounded-md px-6 py-4 bg-gray-50 dark:bg-gray-900 shadow-sm border-gray-200 dark:border-gray-700 gap-10"
-        style={{
-          gridTemplateColumns: '1fr auto auto',
-        }}
+        style={{ gridTemplateColumns: '1fr auto auto' }}
       >
-        {/* Columna 1: Checkbox + Info paquete */}
+        {/* Columna 1: Checkbox + Info del paquete */}
         <div className="flex items-center gap-6">
           <input
             type="checkbox"
@@ -78,17 +76,21 @@ const PaqueteItem = ({
           onChange={(nuevaCantidad) => {
             setCantidad(nuevaCantidad);
             if (nuevaCantidad === 0 && isSelected) {
-              // Si el contador llega a 0 y el paquete estaba seleccionado, se remueve del contexto
               removerPaquete(idHotel, paquete.id);
             } else if (nuevaCantidad > 0 && !isSelected) {
-              // Si se incrementa la cantidad y el paquete no está seleccionado, se agrega al contexto
-              agregarPaquete(idHotel, paquete.id, temporada, coeficienteHotel);
+              agregarPaquete(idHotel, {
+                id: paquete.id,
+                nombre: paquete.nombre,
+                descuento: paquete.descuento,
+                noches: paquete.noches,
+                fechaInicio,
+                fechaFin,
+              });
             }
-            // Puedes extender la lógica para actualizar la cantidad en el contexto si es necesario
           }}
         />
 
-        {/* Columna 3: Precio + Detalles */}
+        {/* Columna 3: Precio y botón de detalles */}
         <div className="flex flex-col items-end gap-1">
           <PriceTag precio={precioBase} coeficiente={coeficiente} />
           <button
@@ -106,9 +108,15 @@ const PaqueteItem = ({
           coeficiente={coeficiente}
           onClose={() => setMostrarModal(false)}
           onReserve={() => {
-            // Al reservar desde el modal se asegura la selección
             if (!isSelected) {
-              agregarPaquete(idHotel, paquete.id, temporada, coeficienteHotel);
+              agregarPaquete(idHotel, {
+                id: paquete.id,
+                nombre: paquete.nombre,
+                descuento: paquete.descuento,
+                noches: paquete.noches,
+                fechaInicio,
+                fechaFin,
+              });
             }
             setMostrarModal(false);
           }}

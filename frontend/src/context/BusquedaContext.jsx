@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 // Estado inicial de los filtros
 const initialFilters = {
@@ -10,16 +10,21 @@ const initialFilters = {
   estrellas: 0,
 };
 
-export const BusquedaContext = createContext();
+// Creamos el contexto (no lo exportamos directamente)
+const BusquedaContext = createContext();
 
+// Hook personalizado para consumir el contexto
+export const useBusqueda = () => useContext(BusquedaContext);
+
+// Provider del contexto
 export const BusquedaProvider = ({ children }) => {
-  // Inicializamos el estado leyendo del localStorage si existe
+  // Inicializamos el estado de filtros utilizando datos del localStorage si existen
   const [filtros, setFiltros] = useState(() => {
     const localData = localStorage.getItem('busquedaFilters');
     return localData ? JSON.parse(localData) : initialFilters;
   });
 
-  // Cada vez que los filtros cambian, se actualiza el localStorage
+  // Guardamos los filtros en el localStorage cada vez que cambian
   useEffect(() => {
     localStorage.setItem('busquedaFilters', JSON.stringify(filtros));
   }, [filtros]);
@@ -29,6 +34,7 @@ export const BusquedaProvider = ({ children }) => {
     setFiltros(nuevosFiltros);
   };
 
+  // Retornamos el provider con los filtros y la función de actualización
   return (
     <BusquedaContext.Provider value={{ filtros, actualizarFiltros }}>
       {children}

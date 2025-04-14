@@ -15,7 +15,7 @@ const Carrito = ({ isOpen, onClose }) => {
       const datosHotel = hotelesData.find((h) => h.id === itemHotel.idHotel);
       if (!datosHotel) return null;
 
-      // Obtenemos la info de temporada desde el contexto
+      // Obtenemos la info de temporada desde el carrito
       const enTemporadaAlta = itemHotel.temporada === 'alta';
       const descuentoExtra = enTemporadaAlta ? itemHotel.coeficiente : 0;
 
@@ -24,32 +24,41 @@ const Carrito = ({ isOpen, onClose }) => {
         nombreHotel: datosHotel.nombre,
         enTemporadaAlta,
         descuentoExtra,
-        // Habitaciones sin mostrar descuento en cada una
+        // Habitaciones: ahora cada elemento es un objeto, no solo el id
         habitaciones: itemHotel.habitaciones
-          .map((idHab) => {
-            const hab = datosHotel.habitaciones.find((h) => h.id === idHab);
-            if (!hab) return null;
-            const precioFinal =
-              descuentoExtra > 0
-                ? hab.precio * (1 - descuentoExtra)
-                : hab.precio;
-            return { ...hab, precioFinal };
-          })
-          .filter(Boolean),
-        // Paquetes sin mostrar descuento en cada uno
-        paquetes: itemHotel.paquetes
-          .map((idPack) => {
-            const pack = datosHotel.paquetes.find((p) => p.id === idPack);
-            if (!pack) return null;
-            const precioBase =
-              pack.habitaciones.reduce((acum, hab) => acum + hab.precio, 0) *
-              (1 - pack.descuento / 100) *
-              pack.noches;
+          .map((hab) => {
+            // Buscamos la información de la habitación en los datos del hotel
+            const datosHab = datosHotel.habitaciones.find(
+              (h) => h.id === hab.id
+            );
+            if (!datosHab) return null;
+            // Se toma el precio almacenado en el carrito o el de los datos, según convenga
+            const precioBase = hab.precio || datosHab.precio;
             const precioFinal =
               descuentoExtra > 0
                 ? precioBase * (1 - descuentoExtra)
                 : precioBase;
-            return { ...pack, precioFinal };
+            return { ...datosHab, ...hab, precioFinal };
+          })
+          .filter(Boolean),
+        // Paquetes: cada elemento es un objeto con la info enviada desde el carrito
+        paquetes: itemHotel.paquetes
+          .map((pack) => {
+            const datosPack = datosHotel.paquetes.find((p) => p.id === pack.id);
+            if (!datosPack) return null;
+            // Se calcula el precio base del paquete según la lógica definida
+            const precioBase =
+              datosPack.habitaciones.reduce(
+                (acum, hab) => acum + hab.precio,
+                0
+              ) *
+              (1 - datosPack.descuento / 100) *
+              datosPack.noches;
+            const precioFinal =
+              descuentoExtra > 0
+                ? precioBase * (1 - descuentoExtra)
+                : precioBase;
+            return { ...datosPack, ...pack, precioFinal };
           })
           .filter(Boolean),
       };
@@ -120,7 +129,7 @@ const Carrito = ({ isOpen, onClose }) => {
                       className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
                     >
                       <div className="flex-1">
-                        <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100 ">
+                        <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100">
                           <House className="size-5 inline-block mr-1" />
                           {hab.nombre}
                         </h4>
@@ -145,7 +154,7 @@ const Carrito = ({ isOpen, onClose }) => {
                       className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
                     >
                       <div className="flex-1">
-                        <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100 ">
+                        <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100">
                           <Package className="size-5 inline-block mr-1" />
                           {pack.nombre}
                         </h4>
