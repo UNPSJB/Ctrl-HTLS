@@ -1,40 +1,48 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { BusquedaContext } from '@context/BusquedaContext';
 import { Search, MapPin, Calendar, Users, Star } from 'lucide-react';
 
-const HotelSearch = ({ onSearch }) => {
-  // Estado local para los filtros de búsqueda
-  const [filters, setFilters] = useState({
-    name: '',
-    location: '',
-    startDate: '',
-    endDate: '',
-    capacity: 1,
-    rating: 0,
+const HotelSearch = () => {
+  // Obtenemos la función para actualizar el contexto
+  const { actualizarFiltros } = useContext(BusquedaContext);
+
+  // Estado local para almacenar los filtros del formulario
+  const [localFilters, setLocalFilters] = useState({
+    nombre: '',
+    ubicacion: '',
+    fechaInicio: '',
+    fechaFin: '',
+    capacidad: 1,
+    estrellas: 0,
   });
 
-  // Función para validar el rango de fechas (opcional)
+  // Función para validar el rango de fechas
   const validateDates = () => {
-    if (filters.startDate && filters.endDate) {
-      // Validación para que la fecha de entrada sea menor o igual a la fecha de salida
-      return new Date(filters.startDate) <= new Date(filters.endDate);
+    if (localFilters.fechaInicio && localFilters.fechaFin) {
+      // Se valida que la fecha de inicio sea menor o igual a la fecha de fin
+      return (
+        new Date(localFilters.fechaInicio) <= new Date(localFilters.fechaFin)
+      );
     }
     return true;
   };
 
-  // Maneja el envío del formulario y ejecuta onSearch pasando los filtros
+  // Maneja el envío del formulario y actualiza el contexto
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateDates()) {
-      alert('La fecha de entrada debe ser menor o igual a la fecha de salida');
+      alert('La fecha de inicio debe ser menor o igual a la fecha de fin');
       return;
     }
-    onSearch(filters);
+    // Actualizamos el contexto con los filtros locales
+    actualizarFiltros(localFilters);
+    console.log('Filtros actualizados:', localFilters);
   };
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg transition-all duration-300 p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Primera fila: Nombre, Ubicación y Calificación */}
+        {/* Primera fila: Nombre, Ubicación y Estrellas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -44,9 +52,9 @@ const HotelSearch = ({ onSearch }) => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                value={filters.name}
+                value={localFilters.nombre}
                 onChange={(e) =>
-                  setFilters({ ...filters, name: e.target.value })
+                  setLocalFilters({ ...localFilters, nombre: e.target.value })
                 }
                 placeholder="Buscar hotel..."
                 className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -62,9 +70,12 @@ const HotelSearch = ({ onSearch }) => {
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                value={filters.location}
+                value={localFilters.ubicacion}
                 onChange={(e) =>
-                  setFilters({ ...filters, location: e.target.value })
+                  setLocalFilters({
+                    ...localFilters,
+                    ubicacion: e.target.value,
+                  })
                 }
                 placeholder="Ciudad, País..."
                 className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -74,21 +85,24 @@ const HotelSearch = ({ onSearch }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Calificación
+              Estrellas
             </label>
             <div className="relative">
               <Star className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-yellow-500" />
               <select
-                value={filters.rating}
+                value={localFilters.estrellas}
                 onChange={(e) =>
-                  setFilters({ ...filters, rating: Number(e.target.value) })
+                  setLocalFilters({
+                    ...localFilters,
+                    estrellas: Number(e.target.value),
+                  })
                 }
                 className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >
                 <option value={0}>Todas las estrellas</option>
-                {[5, 4, 3, 2, 1].map((stars) => (
-                  <option key={stars} value={stars}>
-                    {stars} {stars === 1 ? 'estrella' : 'estrellas'} o más
+                {[5, 4, 3, 2, 1].map((num) => (
+                  <option key={num} value={num}>
+                    {num} {num === 1 ? 'estrella' : 'estrellas'} o más
                   </option>
                 ))}
               </select>
@@ -100,15 +114,18 @@ const HotelSearch = ({ onSearch }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Fecha de Entrada
+              Fecha de Inicio
             </label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="date"
-                value={filters.startDate}
+                value={localFilters.fechaInicio}
                 onChange={(e) =>
-                  setFilters({ ...filters, startDate: e.target.value })
+                  setLocalFilters({
+                    ...localFilters,
+                    fechaInicio: e.target.value,
+                  })
                 }
                 className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -117,15 +134,15 @@ const HotelSearch = ({ onSearch }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Fecha de Salida
+              Fecha de Fin
             </label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="date"
-                value={filters.endDate}
+                value={localFilters.fechaFin}
                 onChange={(e) =>
-                  setFilters({ ...filters, endDate: e.target.value })
+                  setLocalFilters({ ...localFilters, fechaFin: e.target.value })
                 }
                 className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -139,9 +156,12 @@ const HotelSearch = ({ onSearch }) => {
             <div className="relative">
               <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <select
-                value={filters.capacity}
+                value={localFilters.capacidad}
                 onChange={(e) =>
-                  setFilters({ ...filters, capacity: Number(e.target.value) })
+                  setLocalFilters({
+                    ...localFilters,
+                    capacidad: Number(e.target.value),
+                  })
                 }
                 className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               >

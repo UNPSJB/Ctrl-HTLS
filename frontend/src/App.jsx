@@ -1,13 +1,16 @@
 import { ThemeProvider } from './context/ThemeContext';
 import { CarritoProvider } from './context/CarritoContext';
+import { BusquedaProvider } from '@context/BusquedaContext';
 import AppRouter from './routes/AppRouter';
 
 function App() {
   return (
     <ThemeProvider>
-      <CarritoProvider>
-        <AppRouter />
-      </CarritoProvider>
+      <BusquedaProvider>
+        <CarritoProvider>
+          <AppRouter />
+        </CarritoProvider>
+      </BusquedaProvider>
     </ThemeProvider>
   );
 }
