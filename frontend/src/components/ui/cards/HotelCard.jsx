@@ -5,6 +5,7 @@ import HabitacionItem from '../HabitacionItem';
 import PaqueteItem from '../PaqueteItem';
 import SelectionSummary from '../SelectionSummary';
 import HotelHeader from '@components/HotelHeader';
+import { useCarrito } from '@context/CarritoContext';
 
 const HotelCard = ({ hotel }) => {
   if (!hotel) return null;
@@ -19,6 +20,11 @@ const HotelCard = ({ hotel }) => {
     totalPrice,
     discountCoefficient,
   } = useHotelSelection(hotel);
+
+  const { carrito } = useCarrito();
+
+  // Verifica si el hotel está en el carrito
+  const hotelEnCarrito = carrito.hoteles.some((h) => h.idHotel === hotel.id);
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
@@ -38,13 +44,11 @@ const HotelCard = ({ hotel }) => {
             <div className="space-y-3">
               {hotel.habitaciones.map((habitacion) => (
                 <HabitacionItem
-                  key={habitacion.id} // Usamos id en lugar de nombre
+                  key={habitacion.id}
                   idHotel={hotel.id}
                   habitacion={habitacion}
                   coeficiente={discountCoefficient}
-                  temporada={hotel.temporada}
-                  coeficienteHotel={hotel.coeficiente}
-                  isSelected={selectedRooms.includes(habitacion.id)} // Comprobamos con id
+                  isSelected={selectedRooms.includes(habitacion.id)}
                   onSelect={toggleRoomSelection}
                 />
               ))}
@@ -59,24 +63,25 @@ const HotelCard = ({ hotel }) => {
             <div className="space-y-3">
               {hotel.paquetes.map((paquete) => (
                 <PaqueteItem
-                  key={paquete.id} // Usamos id en lugar de nombre
+                  key={paquete.id}
                   idHotel={hotel.id}
                   paquete={paquete}
                   coeficiente={discountCoefficient}
-                  temporada={hotel.temporada}
-                  coeficienteHotel={hotel.coeficiente}
-                  isSelected={selectedPackages.includes(paquete.id)} // Comprobamos con id
+                  isSelected={selectedPackages.includes(paquete.id)}
                   onSelect={togglePackageSelection}
                 />
               ))}
             </div>
           </div>
 
-          <SelectionSummary
-            selectedRoomsCount={selectedRooms.length}
-            selectedPackagesCount={selectedPackages.length}
-            totalPrice={totalPrice}
-          />
+          {/* Solo mostrar si el hotel está en el carrito */}
+          {hotelEnCarrito && (
+            <SelectionSummary
+              selectedRoomsCount={selectedRooms.length}
+              selectedPackagesCount={selectedPackages.length}
+              totalPrice={totalPrice}
+            />
+          )}
         </div>
       )}
     </div>

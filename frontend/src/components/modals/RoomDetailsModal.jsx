@@ -2,16 +2,11 @@ import { Users, Bath, Tag } from 'lucide-react';
 import Modal from './Modal';
 import ImageLoader from '../ImageLoader';
 
-const RoomDetailsModal = ({
-  habitacion,
-  discountCoefficient,
-  onClose,
-  onReserve,
-}) => {
+const RoomDetailsModal = ({ habitacion, coeficiente, onClose, onReserve }) => {
   // Cálculo de precios
   const precioBase = habitacion.precio;
   const descuentoTemporada =
-    discountCoefficient < 1 ? precioBase * discountCoefficient : 0;
+    coeficiente < 1 ? precioBase * (1 - coeficiente) : 0;
   const precioFinal = precioBase - descuentoTemporada;
 
   return (
@@ -32,12 +27,12 @@ const RoomDetailsModal = ({
         </h2>
 
         {/* Descuento de temporada */}
-        {discountCoefficient < 1 && (
+        {coeficiente < 1 && (
           <div className="flex items-center gap-2 mb-2">
             <Tag className="w-4 h-4 text-green-500" />
             <span className="text-sm font-medium text-green-500">
-              {(discountCoefficient * 100).toFixed(0)}% de descuento en
-              temporada alta
+              {((1 - coeficiente) * 100).toFixed(0)}% de descuento en temporada
+              alta
             </span>
           </div>
         )}
@@ -61,7 +56,7 @@ const RoomDetailsModal = ({
             <span>${precioBase.toFixed(2)}</span>
           </div>
 
-          {discountCoefficient < 1 && (
+          {coeficiente < 1 && (
             <div className="flex justify-between text-red-600 dark:text-red-400">
               <span>Descuento temporada alta</span>
               <span>- ${descuentoTemporada.toFixed(2)}</span>

@@ -8,8 +8,6 @@ const HabitacionItem = ({
   idHotel,
   habitacion,
   coeficiente,
-  temporada,
-  coeficienteHotel,
   isSelected,
   onSelect,
 }) => {
@@ -75,15 +73,13 @@ const HabitacionItem = ({
       {mostrarModal && (
         <RoomDetailsModal
           habitacion={habitacion}
-          discountCoefficient={coeficiente}
+          coeficiente={coeficiente}
           onClose={() => setMostrarModal(false)}
           onReserve={() => {
             if (!isSelected) {
               agregarHabitacion(
                 idHotel,
-                habitacion.id,
-                temporada,
-                coeficienteHotel,
+                habitacion,
                 filtros.fechaInicio,
                 filtros.fechaFin
               );

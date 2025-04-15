@@ -41,7 +41,8 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
           <div className="flex items-center gap-2">
             <Tag className="w-4 h-4 text-green-500" />
             <span className="text-sm font-medium text-green-500">
-              {(coeficiente * 100).toFixed(0)}% de descuento en temporada alta
+              {((1 - coeficiente) * 100).toFixed(0)}% de descuento en temporada
+              alta
             </span>
           </div>
         )}
