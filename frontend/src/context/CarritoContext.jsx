@@ -6,88 +6,90 @@ import {
   useEffect,
 } from 'react';
 
-const STORAGE_KEY = 'carritoState'; // Clave para almacenar en el localStorage
+const STORAGE_KEY = 'carritoState';
 
+// Estado inicial
 const estadoInicial = {
   hoteles: [],
 };
 
-const initializer = (initialState) => {
+// Tipos de acción
+const TIPOS = {
+  AGREGAR_HOTEL: 'AGREGAR_HOTEL',
+  AGREGAR_HABITACION: 'AGREGAR_HABITACION',
+  AGREGAR_PAQUETE: 'AGREGAR_PAQUETE',
+  REMOVER_HABITACION: 'REMOVER_HABITACION',
+  REMOVER_PAQUETE: 'REMOVER_PAQUETE',
+  REMOVER_HOTEL: 'REMOVER_HOTEL',
+};
+
+// Inicializador desde localStorage
+function initializer(initialState) {
   try {
     const localData = localStorage.getItem(STORAGE_KEY);
     return localData ? JSON.parse(localData) : initialState;
-  } catch (error) {
+  } catch {
     return initialState;
   }
-};
+}
 
-const carritoReducer = (estado, accion) => {
-  let nuevoEstado;
-
+// Reducer
+function carritoReducer(estado, accion) {
   switch (accion.type) {
-    case 'AGREGAR_HOTEL':
-      if (estado.hoteles.find((h) => h.idHotel === accion.payload.idHotel)) {
-        nuevoEstado = estado;
-      } else {
-        nuevoEstado = {
-          ...estado,
-          hoteles: [
-            ...estado.hoteles,
-            {
-              idHotel: accion.payload.idHotel,
-              temporada: accion.payload.temporada,
-              coeficiente: accion.payload.coeficiente,
-              habitaciones: [],
-              paquetes: [],
-            },
-          ],
-        };
+    case TIPOS.AGREGAR_HOTEL: {
+      if (estado.hoteles.some((h) => h.idHotel === accion.payload.idHotel)) {
+        return estado;
       }
-      break;
-
-    case 'AGREGAR_HABITACION':
-      nuevoEstado = {
+      return {
         ...estado,
-        hoteles: estado.hoteles.map((hotel) => {
-          if (hotel.idHotel === accion.payload.idHotel) {
-            if (
-              hotel.habitaciones.find(
+        hoteles: [
+          ...estado.hoteles,
+          {
+            idHotel: accion.payload.idHotel,
+            temporada: accion.payload.temporada,
+            coeficiente: accion.payload.coeficiente,
+            habitaciones: [],
+            paquetes: [],
+          },
+        ],
+      };
+    }
+    case TIPOS.AGREGAR_HABITACION: {
+      return {
+        ...estado,
+        hoteles: estado.hoteles.map((hotel) =>
+          hotel.idHotel === accion.payload.idHotel
+            ? hotel.habitaciones.some(
                 (room) => room.id === accion.payload.habitacion.id
               )
-            ) {
-              return hotel;
-            }
-            return {
-              ...hotel,
-              habitaciones: [...hotel.habitaciones, accion.payload.habitacion],
-            };
-          }
-          return hotel;
-        }),
+              ? hotel
+              : {
+                  ...hotel,
+                  habitaciones: [
+                    ...hotel.habitaciones,
+                    accion.payload.habitacion,
+                  ],
+                }
+            : hotel
+        ),
       };
-      break;
-
-    case 'AGREGAR_PAQUETE':
-      nuevoEstado = {
+    }
+    case TIPOS.AGREGAR_PAQUETE: {
+      return {
         ...estado,
-        hoteles: estado.hoteles.map((hotel) => {
-          if (hotel.idHotel === accion.payload.idHotel) {
-            if (
-              hotel.paquetes.find((pkg) => pkg.id === accion.payload.paquete.id)
-            ) {
-              return hotel;
-            }
-            return {
-              ...hotel,
-              paquetes: [...hotel.paquetes, accion.payload.paquete],
-            };
-          }
-          return hotel;
-        }),
+        hoteles: estado.hoteles.map((hotel) =>
+          hotel.idHotel === accion.payload.idHotel
+            ? hotel.paquetes.some((pkg) => pkg.id === accion.payload.paquete.id)
+              ? hotel
+              : {
+                  ...hotel,
+                  paquetes: [...hotel.paquetes, accion.payload.paquete],
+                }
+            : hotel
+        ),
       };
-      break;
-
-    case 'REMOVER_HABITACION': {
+    }
+    case TIPOS.REMOVER_HABITACION: {
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
           if (hotel.idHotel === accion.payload.idHotel) {
@@ -100,19 +102,14 @@ const carritoReducer = (estado, accion) => {
             ) {
               return null;
             }
-            return {
-              ...hotel,
-              habitaciones: updatedHabitaciones,
-            };
+            return { ...hotel, habitaciones: updatedHabitaciones };
           }
           return hotel;
         })
         .filter(Boolean);
-      nuevoEstado = { ...estado, hoteles: nuevosHoteles };
-      break;
+      return { ...estado, hoteles: nuevosHoteles };
     }
-
-    case 'REMOVER_PAQUETE': {
+    case TIPOS.REMOVER_PAQUETE: {
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
           if (hotel.idHotel === accion.payload.idHotel) {
@@ -125,65 +122,47 @@ const carritoReducer = (estado, accion) => {
             ) {
               return null;
             }
-            return {
-              ...hotel,
-              paquetes: updatedPaquetes,
-            };
+            return { ...hotel, paquetes: updatedPaquetes };
           }
           return hotel;
         })
         .filter(Boolean);
-      nuevoEstado = { ...estado, hoteles: nuevosHoteles };
-      break;
+      return { ...estado, hoteles: nuevosHoteles };
     }
-
-    case 'REMOVER_HOTEL':
-      nuevoEstado = {
+    case TIPOS.REMOVER_HOTEL:
+      return {
         ...estado,
         hoteles: estado.hoteles.filter(
           (hotel) => hotel.idHotel !== accion.payload.idHotel
         ),
       };
-      break;
-
     default:
-      nuevoEstado = estado;
+      return estado;
   }
+}
 
-  console.log(
-    `Acción: ${accion.type}`,
-    'Payload:',
-    accion.payload,
-    'Nuevo estado:',
-    nuevoEstado
-  );
+// Crear contexto
+const CarritoContext = createContext(undefined);
 
-  return nuevoEstado;
-};
-
-const CarritoContext = createContext();
-
-export const CarritoProvider = ({ children }) => {
+// Provider
+export function CarritoProvider({ children }) {
   const [estado, dispatch] = useReducer(
     carritoReducer,
     estadoInicial,
     initializer
   );
 
-  // Guardar en localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
   }, [estado]);
 
-  // 🔹 Función para agregar un hotel (se asegura de no duplicar)
-  const agregarHotel = ({ idHotel, temporada, coeficiente }) => {
+  // Acciones
+  const agregarHotel = ({ idHotel, temporada, coeficiente }) =>
     dispatch({
-      type: 'AGREGAR_HOTEL',
+      type: TIPOS.AGREGAR_HOTEL,
       payload: { idHotel, temporada, coeficiente },
     });
-  };
 
-  // 🔹 Agrega una habitación con los datos requeridos: id, nombre, fechaInicio, fechaFin, capacidad, precio
   const agregarHabitacion = (
     idHotel,
     habitacionData,
@@ -204,13 +183,11 @@ export const CarritoProvider = ({ children }) => {
       coeficiente: habitacionData.coeficiente,
     });
     dispatch({
-      type: 'AGREGAR_HABITACION',
+      type: TIPOS.AGREGAR_HABITACION,
       payload: { idHotel, habitacion },
     });
   };
 
-  // 🔹 Agrega un paquete con la siguiente firma:
-  // agregarPaquete(idHotel, paquete, fechaInicio, fechaFin);
   const agregarPaquete = (idHotel, paqueteData, fechaInicio, fechaFin) => {
     const paquete = {
       id: paqueteData.id,
@@ -226,62 +203,57 @@ export const CarritoProvider = ({ children }) => {
       coeficiente: paqueteData.coeficiente,
     });
     dispatch({
-      type: 'AGREGAR_PAQUETE',
+      type: TIPOS.AGREGAR_PAQUETE,
       payload: { idHotel, paquete },
     });
   };
 
-  const removerHabitacion = (idHotel, idHabitacion) => {
+  const removerHabitacion = (idHotel, idHabitacion) =>
     dispatch({
-      type: 'REMOVER_HABITACION',
+      type: TIPOS.REMOVER_HABITACION,
       payload: { idHotel, idHabitacion },
     });
-  };
 
-  const removerPaquete = (idHotel, idPaquete) => {
-    dispatch({
-      type: 'REMOVER_PAQUETE',
-      payload: { idHotel, idPaquete },
-    });
-  };
+  const removerPaquete = (idHotel, idPaquete) =>
+    dispatch({ type: TIPOS.REMOVER_PAQUETE, payload: { idHotel, idPaquete } });
 
-  const removerHotel = (idHotel) => {
-    dispatch({
-      type: 'REMOVER_HOTEL',
-      payload: { idHotel },
-    });
-  };
+  const removerHotel = (idHotel) =>
+    dispatch({ type: TIPOS.REMOVER_HOTEL, payload: { idHotel } });
 
-  // Total de ítems en el carrito
-  const totalElementos = useMemo(() => {
-    return estado.hoteles.reduce(
-      (acum, hotel) => acum + hotel.habitaciones.length + hotel.paquetes.length,
-      0
-    );
-  }, [estado.hoteles]);
+  const totalElementos = useMemo(
+    () =>
+      estado.hoteles.reduce(
+        (acum, hotel) =>
+          acum + hotel.habitaciones.length + hotel.paquetes.length,
+        0
+      ),
+    [estado.hoteles]
+  );
+
+  const value = useMemo(
+    () => ({
+      carrito: estado,
+      agregarHotel,
+      agregarHabitacion,
+      agregarPaquete,
+      removerHabitacion,
+      removerPaquete,
+      removerHotel,
+      totalElementos,
+    }),
+    [estado]
+  );
 
   return (
-    <CarritoContext.Provider
-      value={{
-        carrito: estado,
-        agregarHotel,
-        agregarHabitacion,
-        agregarPaquete,
-        removerHabitacion,
-        removerPaquete,
-        removerHotel,
-        totalElementos,
-      }}
-    >
-      {children}
-    </CarritoContext.Provider>
+    <CarritoContext.Provider value={value}>{children}</CarritoContext.Provider>
   );
-};
+}
 
-export const useCarrito = () => {
+// Hook para consumir el contexto
+export function useCarrito() {
   const context = useContext(CarritoContext);
   if (context === undefined) {
     throw new Error('useCarrito debe utilizarse dentro de un CarritoProvider');
   }
   return context;
-};
+}
