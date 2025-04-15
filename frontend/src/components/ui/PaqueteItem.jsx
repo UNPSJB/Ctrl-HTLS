@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PaqueteDetailsModal from '../modals/PaqueteDetailsModal';
-import Contador from '@ui/Contador';
 import PriceTag from '@components/PriceTag';
 import { useCarrito } from '../../context/CarritoContext';
 import { useBusqueda } from '../../context/BusquedaContext';
@@ -15,16 +14,10 @@ const PaqueteItem = ({
   if (!paquete) return null;
 
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [cantidad, setCantidad] = useState(0);
   const { agregarPaquete, removerPaquete } = useCarrito();
   // Obtenemos los filtros utilizando el hook personalizado
   const { filtros } = useBusqueda();
   const { fechaInicio, fechaFin } = filtros;
-
-  // Reinicia la cantidad si el paquete se deselecciona
-  useEffect(() => {
-    if (!isSelected) setCantidad(0);
-  }, [isSelected]);
 
   // Maneja la selección mediante el checkbox
   const manejarSeleccion = (e) => {
@@ -32,10 +25,8 @@ const PaqueteItem = ({
     onSelect(paquete.id);
     if (checked) {
       agregarPaquete(idHotel, paquete, fechaInicio, fechaFin);
-      setCantidad(1);
     } else {
       removerPaquete(idHotel, paquete.id);
-      setCantidad(0);
     }
   };
 
@@ -70,25 +61,6 @@ const PaqueteItem = ({
         </div>
 
         {/* Columna 2: Contador */}
-        <Contador
-          initial={cantidad}
-          max={5}
-          onChange={(nuevaCantidad) => {
-            setCantidad(nuevaCantidad);
-            if (nuevaCantidad === 0 && isSelected) {
-              removerPaquete(idHotel, paquete.id);
-            } else if (nuevaCantidad > 0 && !isSelected) {
-              agregarPaquete(idHotel, {
-                id: paquete.id,
-                nombre: paquete.nombre,
-                descuento: paquete.descuento,
-                noches: paquete.noches,
-                fechaInicio,
-                fechaFin,
-              });
-            }
-          }}
-        />
 
         {/* Columna 3: Precio y botón de detalles */}
         <div className="flex flex-col items-end gap-1">

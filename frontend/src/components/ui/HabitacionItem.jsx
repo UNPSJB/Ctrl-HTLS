@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import RoomDetailsModal from '@components/modals/RoomDetailsModal';
-import Contador from '@ui/Contador';
 import PriceTag from '@components/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
@@ -17,24 +16,17 @@ const HabitacionItem = ({
   if (!habitacion) return null;
 
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [cantidad, setCantidad] = useState(0);
   const { agregarHabitacion, removerHabitacion } = useCarrito();
   const { filtros } = useBusqueda();
   const { fechaInicio, fechaFin } = filtros;
-
-  useEffect(() => {
-    if (!isSelected) setCantidad(0);
-  }, [isSelected]);
 
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
     onSelect(habitacion.id);
     if (checked) {
       agregarHabitacion(idHotel, habitacion, fechaInicio, fechaFin);
-      setCantidad(1);
     } else {
       removerHabitacion(idHotel, habitacion.id);
-      setCantidad(0);
     }
   };
 
@@ -67,25 +59,6 @@ const HabitacionItem = ({
         </div>
 
         {/* Columna 2: Contador */}
-        <Contador
-          initial={cantidad}
-          max={5}
-          onChange={(nuevaCantidad) => {
-            setCantidad(nuevaCantidad);
-            if (nuevaCantidad === 0 && isSelected) {
-              removerHabitacion(idHotel, habitacion.id);
-            } else if (nuevaCantidad > 0 && !isSelected) {
-              agregarHabitacion(
-                idHotel,
-                habitacion.id,
-                temporada,
-                coeficienteHotel,
-                filtros.fechaInicio,
-                filtros.fechaFin
-              );
-            }
-          }}
-        />
 
         {/* Columna 3: Precio + Más detalles */}
         <div className="flex flex-col items-end gap-1">
