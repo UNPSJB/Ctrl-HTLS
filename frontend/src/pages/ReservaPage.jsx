@@ -69,7 +69,11 @@ const ReservaPage = () => {
                 </h2>
                 <div className="space-y-4">
                   {habitaciones.map((hab) => (
-                    <HabitacionCard key={hab.id} habitacion={hab} />
+                    <HabitacionCard
+                      key={hab.id}
+                      habitacion={hab}
+                      porcentaje={coeficiente}
+                    />
                   ))}
                 </div>
               </section>

@@ -1,6 +1,7 @@
+import PriceTag from '@/components/PriceTag';
 import { Users } from 'lucide-react';
 
-const HabitacionCard = ({ habitacion }) => {
+const HabitacionCard = ({ habitacion, porcentaje }) => {
   // Validación si habitacion es nula o indefinida
   if (!habitacion) return null;
   return (
@@ -16,11 +17,7 @@ const HabitacionCard = ({ habitacion }) => {
             Capacidad: {habitacion.capacidad} personas
           </p>
         </div>
-        <div className="text-right">
-          <p className="font-bold text-lg text-gray-800 dark:text-gray-100">
-            ${habitacion.precio}/noche
-          </p>
-        </div>
+        <PriceTag precio={habitacion.precio} coeficiente={porcentaje} />
       </div>
     </div>
   );
