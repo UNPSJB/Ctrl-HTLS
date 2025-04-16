@@ -61,23 +61,6 @@ const ReservaPage = () => {
               {temporada === 'alta' && <Temporada porcentaje={coeficiente} />}
             </div>
 
-            <div className="mb-6">
-              <p className="text-gray-700 dark:text-gray-200">
-                <b>Temporada:</b>{' '}
-                {temporada ?? (
-                  <span className="italic text-red-500">No disponible</span>
-                )}
-              </p>
-              <p className="text-gray-700 dark:text-gray-200">
-                <b>Coeficiente:</b>{' '}
-                {typeof coeficiente === 'number' ? (
-                  coeficiente
-                ) : (
-                  <span className="italic text-red-500">No disponible</span>
-                )}
-              </p>
-            </div>
-
             {habitaciones.length > 0 && (
               <section className="mb-8">
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100">

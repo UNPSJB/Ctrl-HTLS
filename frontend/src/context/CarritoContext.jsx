@@ -167,7 +167,9 @@ export function CarritoProvider({ children }) {
     idHotel,
     habitacionData,
     fechaInicio,
-    fechaFin
+    fechaFin,
+    temporadaHotel,
+    coeficienteHotel
   ) => {
     const habitacion = {
       id: habitacionData.id,
@@ -179,8 +181,8 @@ export function CarritoProvider({ children }) {
     };
     agregarHotel({
       idHotel,
-      temporada: habitacionData.temporada,
-      coeficiente: habitacionData.coeficiente,
+      temporada: temporadaHotel,
+      coeficiente: coeficienteHotel,
     });
     dispatch({
       type: TIPOS.AGREGAR_HABITACION,
@@ -188,7 +190,14 @@ export function CarritoProvider({ children }) {
     });
   };
 
-  const agregarPaquete = (idHotel, paqueteData, fechaInicio, fechaFin) => {
+  const agregarPaquete = (
+    idHotel,
+    paqueteData,
+    fechaInicio,
+    fechaFin,
+    temporadaHotel,
+    coeficienteHotel
+  ) => {
     const paquete = {
       id: paqueteData.id,
       nombre: paqueteData.nombre,
@@ -199,8 +208,8 @@ export function CarritoProvider({ children }) {
     };
     agregarHotel({
       idHotel,
-      temporada: paqueteData.temporada,
-      coeficiente: paqueteData.coeficiente,
+      temporada: temporadaHotel,
+      coeficiente: coeficienteHotel,
     });
     dispatch({
       type: TIPOS.AGREGAR_PAQUETE,

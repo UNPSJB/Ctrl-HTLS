@@ -8,6 +8,7 @@ const HabitacionItem = ({
   idHotel,
   habitacion,
   coeficiente,
+  temporada,
   isSelected,
   onSelect,
 }) => {
@@ -22,7 +23,14 @@ const HabitacionItem = ({
     const checked = e.target.checked;
     onSelect(habitacion.id);
     if (checked) {
-      agregarHabitacion(idHotel, habitacion, fechaInicio, fechaFin);
+      agregarHabitacion(
+        idHotel,
+        habitacion,
+        fechaInicio,
+        fechaFin,
+        temporada,
+        coeficiente
+      );
     } else {
       removerHabitacion(idHotel, habitacion.id);
     }

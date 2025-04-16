@@ -18,7 +18,6 @@ const HotelCard = ({ hotel }) => {
     toggleRoomSelection,
     togglePackageSelection,
     totalPrice,
-    discountCoefficient,
   } = useHotelSelection(hotel);
 
   const { carrito } = useCarrito();
@@ -47,7 +46,8 @@ const HotelCard = ({ hotel }) => {
                   key={habitacion.id}
                   idHotel={hotel.id}
                   habitacion={habitacion}
-                  coeficiente={discountCoefficient}
+                  coeficiente={hotel.coeficiente}
+                  temporada={hotel.temporada}
                   isSelected={selectedRooms.includes(habitacion.id)}
                   onSelect={toggleRoomSelection}
                 />
@@ -66,7 +66,8 @@ const HotelCard = ({ hotel }) => {
                   key={paquete.id}
                   idHotel={hotel.id}
                   paquete={paquete}
-                  coeficiente={discountCoefficient}
+                  coeficiente={hotel.coeficiente}
+                  temporada={hotel.temporada}
                   isSelected={selectedPackages.includes(paquete.id)}
                   onSelect={togglePackageSelection}
                 />

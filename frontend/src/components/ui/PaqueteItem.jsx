@@ -8,6 +8,7 @@ const PaqueteItem = ({
   idHotel,
   paquete,
   coeficiente,
+  temporada,
   isSelected,
   onSelect,
 }) => {
@@ -24,7 +25,14 @@ const PaqueteItem = ({
     const checked = e.target.checked;
     onSelect(paquete.id);
     if (checked) {
-      agregarPaquete(idHotel, paquete, fechaInicio, fechaFin);
+      agregarPaquete(
+        idHotel,
+        paquete,
+        fechaInicio,
+        fechaFin,
+        temporada,
+        coeficiente
+      );
     } else {
       removerPaquete(idHotel, paquete.id);
     }
