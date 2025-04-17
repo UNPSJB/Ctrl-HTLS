@@ -4,14 +4,7 @@ import PriceTag from '@components/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
 
-const HabitacionItem = ({
-  idHotel,
-  habitacion,
-  coeficiente,
-  temporada,
-  isSelected,
-  onSelect,
-}) => {
+const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
   if (!habitacion) return null;
 
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -19,20 +12,14 @@ const HabitacionItem = ({
   const { filtros } = useBusqueda();
   const { fechaInicio, fechaFin } = filtros;
 
+  // Nueva estructura: hotelData contiene todos los datos necesarios
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
     onSelect(habitacion.id);
     if (checked) {
-      agregarHabitacion(
-        idHotel,
-        habitacion,
-        fechaInicio,
-        fechaFin,
-        temporada,
-        coeficiente
-      );
+      agregarHabitacion(hotelData, habitacion, { fechaInicio, fechaFin });
     } else {
-      removerHabitacion(idHotel, habitacion.id);
+      removerHabitacion(hotelData.id, habitacion.id);
     }
   };
 
@@ -68,7 +55,10 @@ const HabitacionItem = ({
 
         {/* Columna 3: Precio + Más detalles */}
         <div className="flex flex-col items-end gap-1">
-          <PriceTag precio={precioOriginal} coeficiente={coeficiente} />
+          <PriceTag
+            precio={precioOriginal}
+            coeficiente={hotelData.coeficiente}
+          />
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
             onClick={() => setMostrarModal(true)}
@@ -81,16 +71,14 @@ const HabitacionItem = ({
       {mostrarModal && (
         <RoomDetailsModal
           habitacion={habitacion}
-          coeficiente={coeficiente}
+          coeficiente={hotelData.coeficiente}
           onClose={() => setMostrarModal(false)}
           onReserve={() => {
             if (!isSelected) {
-              agregarHabitacion(
-                idHotel,
-                habitacion,
-                filtros.fechaInicio,
-                filtros.fechaFin
-              );
+              agregarHabitacion(hotelData, habitacion, {
+                fechaInicio,
+                fechaFin,
+              });
             }
             setMostrarModal(false);
           }}

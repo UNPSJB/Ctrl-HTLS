@@ -46,6 +46,7 @@ function carritoReducer(estado, accion) {
           ...estado.hoteles,
           {
             idHotel: accion.payload.idHotel,
+            nombre: accion.payload.nombre,
             temporada: accion.payload.temporada,
             coeficiente: accion.payload.coeficiente,
             habitaciones: [],
@@ -144,6 +145,29 @@ function carritoReducer(estado, accion) {
 // Crear contexto
 const CarritoContext = createContext(undefined);
 
+// --- NUEVO: función para asegurar que el hotel existe en el carrito ---
+function asegurarHotel(dispatch, { idHotel, nombre, temporada, coeficiente }) {
+  dispatch({
+    type: TIPOS.AGREGAR_HOTEL,
+    payload: { idHotel, nombre, temporada, coeficiente },
+  });
+}
+
+// --- NUEVO: función genérica para agregar elementos ---
+function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
+  asegurarHotel(dispatch, hotelInfo);
+  dispatch({
+    type: tipo,
+    payload: {
+      idHotel: hotelInfo.idHotel,
+      [tipo === TIPOS.AGREGAR_HABITACION ? 'habitacion' : 'paquete']: {
+        ...elemento,
+        ...fechas,
+      },
+    },
+  });
+}
+
 // Provider
 export function CarritoProvider({ children }) {
   const [estado, dispatch] = useReducer(
@@ -156,66 +180,24 @@ export function CarritoProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
   }, [estado]);
 
-  // Acciones
-  const agregarHotel = ({ idHotel, temporada, coeficiente }) =>
-    dispatch({
-      type: TIPOS.AGREGAR_HOTEL,
-      payload: { idHotel, temporada, coeficiente },
-    });
+  // Acciones simplificadas
+  const agregarHabitacion = (hotelInfo, habitacion, fechas) =>
+    agregarElemento(
+      dispatch,
+      TIPOS.AGREGAR_HABITACION,
+      hotelInfo,
+      habitacion,
+      fechas
+    );
 
-  const agregarHabitacion = (
-    idHotel,
-    habitacionData,
-    fechaInicio,
-    fechaFin,
-    temporadaHotel,
-    coeficienteHotel
-  ) => {
-    const habitacion = {
-      id: habitacionData.id,
-      nombre: habitacionData.nombre,
-      capacidad: habitacionData.capacidad,
-      precio: habitacionData.precio,
-      fechaInicio,
-      fechaFin,
-    };
-    agregarHotel({
-      idHotel,
-      temporada: temporadaHotel,
-      coeficiente: coeficienteHotel,
-    });
-    dispatch({
-      type: TIPOS.AGREGAR_HABITACION,
-      payload: { idHotel, habitacion },
-    });
-  };
-
-  const agregarPaquete = (
-    idHotel,
-    paqueteData,
-    fechaInicio,
-    fechaFin,
-    temporadaHotel,
-    coeficienteHotel
-  ) => {
-    const paquete = {
-      id: paqueteData.id,
-      nombre: paqueteData.nombre,
-      descuento: paqueteData.descuento,
-      noches: paqueteData.noches,
-      fechaInicio,
-      fechaFin,
-    };
-    agregarHotel({
-      idHotel,
-      temporada: temporadaHotel,
-      coeficiente: coeficienteHotel,
-    });
-    dispatch({
-      type: TIPOS.AGREGAR_PAQUETE,
-      payload: { idHotel, paquete },
-    });
-  };
+  const agregarPaquete = (hotelInfo, paquete, fechas) =>
+    agregarElemento(
+      dispatch,
+      TIPOS.AGREGAR_PAQUETE,
+      hotelInfo,
+      paquete,
+      fechas
+    );
 
   const removerHabitacion = (idHotel, idHabitacion) =>
     dispatch({
@@ -242,7 +224,6 @@ export function CarritoProvider({ children }) {
   const value = useMemo(
     () => ({
       carrito: estado,
-      agregarHotel,
       agregarHabitacion,
       agregarPaquete,
       removerHabitacion,

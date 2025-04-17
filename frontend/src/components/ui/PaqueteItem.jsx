@@ -4,41 +4,25 @@ import PriceTag from '@components/PriceTag';
 import { useCarrito } from '../../context/CarritoContext';
 import { useBusqueda } from '../../context/BusquedaContext';
 
-const PaqueteItem = ({
-  idHotel,
-  paquete,
-  coeficiente,
-  temporada,
-  isSelected,
-  onSelect,
-}) => {
+const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
   if (!paquete) return null;
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const { agregarPaquete, removerPaquete } = useCarrito();
-  // Obtenemos los filtros utilizando el hook personalizado
   const { filtros } = useBusqueda();
   const { fechaInicio, fechaFin } = filtros;
 
-  // Maneja la selección mediante el checkbox
+  // Nueva estructura: hotelData contiene todos los datos necesarios
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
     onSelect(paquete.id);
     if (checked) {
-      agregarPaquete(
-        idHotel,
-        paquete,
-        fechaInicio,
-        fechaFin,
-        temporada,
-        coeficiente
-      );
+      agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
     } else {
-      removerPaquete(idHotel, paquete.id);
+      removerPaquete(hotelData.id, paquete.id);
     }
   };
 
-  // Se calcula el precio base (la lógica puede variar según tus requerimientos)
   const precioBase =
     paquete.habitaciones.reduce((acum, hab) => acum + hab.precio, 0) *
     (1 - paquete.descuento / 100) *
@@ -72,7 +56,7 @@ const PaqueteItem = ({
 
         {/* Columna 3: Precio y botón de detalles */}
         <div className="flex flex-col items-end gap-1">
-          <PriceTag precio={precioBase} coeficiente={coeficiente} />
+          <PriceTag precio={precioBase} coeficiente={hotelData.coeficiente} />
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
             onClick={() => setMostrarModal(true)}
@@ -85,18 +69,11 @@ const PaqueteItem = ({
       {mostrarModal && (
         <PaqueteDetailsModal
           paquete={paquete}
-          coeficiente={coeficiente}
+          coeficiente={hotelData.coeficiente}
           onClose={() => setMostrarModal(false)}
           onReserve={() => {
             if (!isSelected) {
-              agregarPaquete(idHotel, {
-                id: paquete.id,
-                nombre: paquete.nombre,
-                descuento: paquete.descuento,
-                noches: paquete.noches,
-                fechaInicio,
-                fechaFin,
-              });
+              agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
             }
             setMostrarModal(false);
           }}

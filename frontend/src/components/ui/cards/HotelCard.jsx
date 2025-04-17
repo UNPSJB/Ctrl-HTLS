@@ -22,6 +22,15 @@ const HotelCard = ({ hotel }) => {
 
   const { carrito } = useCarrito();
 
+  // Extraer datos vacicos del hotel y guardarlos en hotelData
+  const hotelData = {
+    id: hotel.id,
+    nombre: hotel.nombre,
+    descripcion: hotel.descripcion,
+    coeficiente: hotel.coeficiente,
+    temporada: hotel.temporada,
+  };
+
   // Verifica si el hotel está en el carrito
   const hotelEnCarrito = carrito.hoteles.some((h) => h.idHotel === hotel.id);
 
@@ -44,10 +53,8 @@ const HotelCard = ({ hotel }) => {
               {hotel.habitaciones.map((habitacion) => (
                 <HabitacionItem
                   key={habitacion.id}
-                  idHotel={hotel.id}
+                  hotelData={hotelData}
                   habitacion={habitacion}
-                  coeficiente={hotel.coeficiente}
-                  temporada={hotel.temporada}
                   isSelected={selectedRooms.includes(habitacion.id)}
                   onSelect={toggleRoomSelection}
                 />
@@ -64,10 +71,8 @@ const HotelCard = ({ hotel }) => {
               {hotel.paquetes.map((paquete) => (
                 <PaqueteItem
                   key={paquete.id}
-                  idHotel={hotel.id}
+                  hotelData={hotelData}
                   paquete={paquete}
-                  coeficiente={hotel.coeficiente}
-                  temporada={hotel.temporada}
                   isSelected={selectedPackages.includes(paquete.id)}
                   onSelect={togglePackageSelection}
                 />
