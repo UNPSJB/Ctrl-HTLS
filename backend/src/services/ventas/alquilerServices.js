@@ -6,16 +6,15 @@ const {
   verificarFechas,
   convertirFechas,
 } = require('../../utils/helpers');
-const {
-  verificarDisponibilidadHabitaciones,
-  verificarDisponibilidadPaquetes,
-} = require('./verificarDisponibilidad');
+const verificarDisponibilidad = require('./verificarDisponibilidad');
 
 const habitacionServices = require('../hotel/habitacionServices');
 const paquetePromocionalServices = require('../hotel/paquetePromocionalServices');
 const personaServices = require('../core/personaServices');
 
 const Alquiler = require('../../models/ventas/Alquiler');
+const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
+const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
 
 const obtenerDisponibilidad = async (consultaAlquiler) => {
   const { ubicacion, fechaInicio, fechaFin, pasajeros } = consultaAlquiler;
@@ -65,23 +64,30 @@ const crearReserva = async (reserva) => {
 
         // Verificar disponibilidad
         const habitacionesDisponibles =
-          await verificarDisponibilidadHabitaciones(
+          await verificarDisponibilidad.verificarDisponibilidadHabitaciones(
             habitaciones,
             fechaInicio,
             fechaFin,
           );
-        if (!habitacionesDisponibles) {
+        if (habitacionesDisponibles.length > 0) {
           throw new CustomError(
             'Algunas habitaciones no están disponibles en las fechas seleccionadas',
             400,
           );
         }
-        await verificarDisponibilidadPaquetes(
-          paquetesPromocionales,
-          fechaInicio,
-          fechaFin,
-        );
 
+        const paquetesDisponibles =
+          await verificarDisponibilidad.verificarDisponibilidadPaquetes(
+            paquetesPromocionales,
+            fechaInicio,
+            fechaFin,
+          );
+        if (paquetesDisponibles.length > 0) {
+          throw new CustomError(
+            'Algunos paquetes no están disponibles en las fechas seleccionadas',
+            400,
+          );
+        }
         // Guardar alquiler
         const nuevoAlquiler = await guardarAlquiler(
           cliente.id,
@@ -142,7 +148,53 @@ const crearReserva = async (reserva) => {
   } catch (error) {
     // Revertir la transacción si algo falla
     await transaction.rollback();
-    throw new CustomError(`Error al crear la reserva: ${error.message}`, 500);
+    throw new CustomError(
+      `Error al crear la reserva: ${error.message}`,
+      error.statusCode || 500,
+    ); // Internal Server Error
+  }
+};
+
+const cancelarReserva = async (alquilerIds) => {
+  // Iniciar una transacción
+  const transaction = await sequelize.transaction();
+
+  try {
+    // Verificar que el arreglo de IDs no esté vacío
+    if (!alquilerIds || alquilerIds.length === 0) {
+      throw new CustomError(
+        'No se proporcionaron IDs de alquiler para cancelar',
+        400,
+      );
+    }
+
+    // Eliminar las habitaciones asociadas a los alquileres
+    await AlquilerHabitacion.destroy({
+      where: { alquilerId: alquilerIds },
+      transaction,
+    });
+
+    // Eliminar los paquetes promocionales asociados a los alquileres
+    await AlquilerPaquetePromocional.destroy({
+      where: { alquilerId: alquilerIds },
+      transaction,
+    });
+
+    // Eliminar los alquileres
+    await Alquiler.destroy({
+      where: { id: alquilerIds },
+      transaction,
+    });
+
+    // Confirmar la transacción
+    await transaction.commit();
+  } catch (error) {
+    // Revertir la transacción si algo falla
+    await transaction.rollback();
+    throw new CustomError(
+      `Error al cancelar las reservas: ${error.message}`,
+      500,
+    );
   }
 };
 
@@ -161,4 +213,9 @@ const guardarAlquiler = async (clienteId, alquiler, transaction) => {
   );
 };
 
-module.exports = { obtenerDisponibilidad, crearReserva, guardarAlquiler };
+module.exports = {
+  obtenerDisponibilidad,
+  crearReserva,
+  guardarAlquiler,
+  cancelarReserva,
+};

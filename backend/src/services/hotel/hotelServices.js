@@ -304,24 +304,14 @@ const verificarHotel = async (
   await verificarTelefono(telefono);
 };
 
-//TERMINAR
 const agregarPaquetePromocional = async (idHotel, paquete) => {
   // Verificar si el hotel existe
   await verificarIdHotel(idHotel);
+  // Verifica si las habitaciones pertenecen al hotel
   await verificarHabitacionesHotel(idHotel, paquete.habitaciones);
+  // Verificar si la fecha inicio es menor a la fecha fin
   await verificarFechas(paquete.fecha_inicio, paquete.fecha_fin);
-  const habitacionesDiponibles =
-    await verificarDisponibilidad.verificarDisponibilidadHabitaciones(
-      paquete.habitaciones,
-      paquete.fechaInicio,
-      paquete.fechaFin,
-    );
-  if (habitacionesDiponibles) {
-    throw new CustomError(
-      'Algunas habitaciones no están disponibles en las fechas seleccionadas',
-      400,
-    );
-  }
+
   const paqueteCreado = await paquetePromocionalServices.crearPaquete(
     idHotel,
     paquete,
@@ -335,7 +325,6 @@ const agregarPaquetePromocional = async (idHotel, paquete) => {
     );
 
   return paqueteCompleto;
-  // return obtenerPaquetesPromocionales(idHotel);
 };
 
 const agregarTemporada = async (idHotel, temporada) => {

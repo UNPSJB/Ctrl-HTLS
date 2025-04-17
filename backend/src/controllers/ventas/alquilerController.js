@@ -18,12 +18,25 @@ const setReserva = async (req, res) => {
 
   try {
     //const resultado = await alquilerServices.crearReserva(reserva);
-    await alquilerServices.crearReserva(reserva);
-    res.status(201).json({ message: 'Reserva creada con éxito' });
+    const reservas = await alquilerServices.crearReserva(reserva);
+    res.status(201).json(reservas);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
   }
 };
 
-module.exports = { getDisponibilidad, setReserva };
+const deleteReserva = async (req, res) => {
+  const { alquilerIds } = req.body; // Recibe un arreglo de IDs de alquileres
+
+  try {
+    // Llamar al servicio para cancelar las reservas
+    await alquilerServices.cancelarReserva(alquilerIds);
+    res.status(200).json({ message: 'Reservas canceladas con éxito' });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+module.exports = { getDisponibilidad, setReserva, deleteReserva };

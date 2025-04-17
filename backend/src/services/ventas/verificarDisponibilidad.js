@@ -1,5 +1,6 @@
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
+const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
 const { Op } = require('sequelize');
 
 const verificarDisponibilidadHabitaciones = async (
@@ -8,6 +9,29 @@ const verificarDisponibilidadHabitaciones = async (
   fechaFin,
 ) => {
   const habitacionesAlquiladas = await AlquilerHabitacion.findAll({
+    where: {
+      habitacionId: { [Op.in]: habitaciones },
+      [Op.or]: [
+        { fechaInicio: { [Op.between]: [fechaInicio, fechaFin] } },
+        { fechaFin: { [Op.between]: [fechaInicio, fechaFin] } },
+        {
+          [Op.and]: [
+            { fechaInicio: { [Op.lte]: fechaInicio } },
+            { fechaFin: { [Op.gte]: fechaFin } },
+          ],
+        },
+      ],
+    },
+  });
+  return habitacionesAlquiladas;
+};
+
+const verificarHabitacionesPaquetePromocional = async (
+  habitaciones,
+  fechaInicio,
+  fechaFin,
+) => {
+  const habitacionesAlquiladas = await PaquetePromocionalHabitacion.findAll({
     where: {
       habitacionId: { [Op.in]: habitaciones },
       [Op.or]: [
@@ -31,8 +55,6 @@ const verificarDisponibilidadPaquetes = async (
   fechaInicio,
   fechaFin,
 ) => {
-  if (!paquetes || paquetes.length === 0) return;
-
   const paquetesAlquilados = await AlquilerPaquetePromocional.findAll({
     where: {
       paquetePromocionalId: { [Op.in]: paquetes },
@@ -49,14 +71,11 @@ const verificarDisponibilidadPaquetes = async (
     },
   });
 
-  if (paquetesAlquilados.length > 0) {
-    throw new Error(
-      'Algunos paquetes ya están alquilados en el rango de fechas especificado.',
-    );
-  }
+  return paquetesAlquilados;
 };
 
 module.exports = {
   verificarDisponibilidadHabitaciones,
+  verificarHabitacionesPaquetePromocional,
   verificarDisponibilidadPaquetes,
 };
