@@ -22,6 +22,16 @@ const HotelCard = ({ hotel }) => {
 
   const { carrito } = useCarrito();
 
+  // Obtener ids seleccionados desde el carrito global
+  const habitacionesSeleccionadas =
+    carrito.hoteles
+      .find((h) => h.idHotel === hotel.id)
+      ?.habitaciones.map((hab) => hab.id) || [];
+  const paquetesSeleccionados =
+    carrito.hoteles
+      .find((h) => h.idHotel === hotel.id)
+      ?.paquetes.map((paq) => paq.id) || [];
+
   // Extraer datos vacicos del hotel y guardarlos en hotelData
   const hotelData = {
     idHotel: hotel.id,
@@ -55,7 +65,7 @@ const HotelCard = ({ hotel }) => {
                   key={habitacion.id}
                   hotelData={hotelData}
                   habitacion={habitacion}
-                  isSelected={selectedRooms.includes(habitacion.id)}
+                  isSelected={habitacionesSeleccionadas.includes(habitacion.id)}
                   onSelect={toggleRoomSelection}
                 />
               ))}
@@ -73,7 +83,7 @@ const HotelCard = ({ hotel }) => {
                   key={paquete.id}
                   hotelData={hotelData}
                   paquete={paquete}
-                  isSelected={selectedPackages.includes(paquete.id)}
+                  isSelected={paquetesSeleccionados.includes(paquete.id)}
                   onSelect={togglePackageSelection}
                 />
               ))}
