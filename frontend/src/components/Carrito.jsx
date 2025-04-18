@@ -1,79 +1,36 @@
 import { X, Trash2, CreditCard, House, Package } from 'lucide-react';
 import { useCarrito } from '@context/CarritoContext';
-import hotelesData from '@/data/hotels.json';
 import Temporada from './Temporada';
+import { useNavigate } from 'react-router-dom';
 
 const Carrito = ({ isOpen, onClose }) => {
   const { carrito, removerHabitacion, removerPaquete } = useCarrito();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
-  // Construimos el listado de elementos agrupados por hotel
-  const elementosCarrito = carrito.hoteles
-    .map((itemHotel) => {
-      // Buscamos datos completos del hotel (de prueba) en nuestro JSON
-      const datosHotel = hotelesData.find((h) => h.id === itemHotel.idHotel);
-      if (!datosHotel) return null;
+  // Función para calcular el precio con descuento de habitación
+  const getPrecioHabitacion = (hab, hotel) => {
+    if (hotel.temporada === 'alta' && hotel.coeficiente) {
+      return hab.precio * (1 - hotel.coeficiente);
+    }
+    return hab.precio;
+  };
 
-      // Obtenemos la info de temporada desde el carrito
-      const enTemporadaAlta = itemHotel.temporada === 'alta';
-      const descuentoExtra = enTemporadaAlta ? itemHotel.coeficiente : 0;
-
-      return {
-        idHotel: itemHotel.idHotel,
-        nombreHotel: datosHotel.nombre,
-        enTemporadaAlta,
-        descuentoExtra,
-        // Habitaciones: ahora cada elemento es un objeto, no solo el id
-        habitaciones: itemHotel.habitaciones
-          .map((hab) => {
-            // Buscamos la información de la habitación en los datos del hotel
-            const datosHab = datosHotel.habitaciones.find(
-              (h) => h.id === hab.id
-            );
-            if (!datosHab) return null;
-            // Se toma el precio almacenado en el carrito o el de los datos, según convenga
-            const precioBase = hab.precio || datosHab.precio;
-            const precioFinal =
-              descuentoExtra > 0
-                ? precioBase * (1 - descuentoExtra)
-                : precioBase;
-            return { ...datosHab, ...hab, precioFinal };
-          })
-          .filter(Boolean),
-        // Paquetes: cada elemento es un objeto con la info enviada desde el carrito
-        paquetes: itemHotel.paquetes
-          .map((pack) => {
-            const datosPack = datosHotel.paquetes.find((p) => p.id === pack.id);
-            if (!datosPack) return null;
-            // Se calcula el precio base del paquete según la lógica definida
-            const precioBase =
-              datosPack.habitaciones.reduce(
-                (acum, hab) => acum + hab.precio,
-                0
-              ) *
-              (1 - datosPack.descuento / 100) *
-              datosPack.noches;
-            const precioFinal =
-              descuentoExtra > 0
-                ? precioBase * (1 - descuentoExtra)
-                : precioBase;
-            return { ...datosPack, ...pack, precioFinal };
-          })
-          .filter(Boolean),
-      };
-    })
-    .filter(Boolean);
-
-  let total = 0;
-  elementosCarrito.forEach((item) => {
-    item.habitaciones.forEach((hab) => {
-      total += hab.precioFinal;
-    });
-    item.paquetes.forEach((pack) => {
-      total += pack.precioFinal;
-    });
-  });
+  // Función para calcular el precio con descuento de paquete
+  const getPrecioPaquete = (pack, hotel) => {
+    let precioBase = 0;
+    if (pack.habitaciones && Array.isArray(pack.habitaciones)) {
+      precioBase =
+        pack.habitaciones.reduce((acum, hab) => acum + hab.precio, 0) *
+        (1 - (pack.descuento || 0) / 100) *
+        (pack.noches || 1);
+    }
+    if (hotel.temporada === 'alta' && hotel.coeficiente) {
+      return precioBase * (1 - hotel.coeficiente);
+    }
+    return precioBase;
+  };
 
   return (
     <div className="fixed inset-0 z-50">
@@ -103,91 +60,99 @@ const Carrito = ({ isOpen, onClose }) => {
 
           {/* Contenido del carrito */}
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
-            {elementosCarrito.length === 0 ? (
+            {carrito.hoteles.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400">
                   No hay reservas en el carrito
                 </p>
               </div>
             ) : (
-              elementosCarrito.map((item) => (
-                <div key={item.idHotel} className="mb-6">
-                  {/* Cabecera del hotel: nombre y, si corresponde, descuento */}
+              carrito.hoteles.map((hotel, hotelIdx) => (
+                <div key={hotel.idHotel || hotelIdx} className="mb-6">
+                  {/* Cabecera del hotel */}
                   <div className="mb-4">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-4">
-                      {item.nombreHotel}
-                      {item.enTemporadaAlta && (
-                        <Temporada porcentaje={item.descuentoExtra} />
+                      {hotel.nombre}
+                      {hotel.temporada === 'alta' && (
+                        <Temporada porcentaje={hotel.coeficiente} />
                       )}
                     </h3>
                   </div>
 
                   {/* Habitaciones */}
-                  {item.habitaciones.map((hab) => (
-                    <div
-                      key={hab.id}
-                      className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
-                    >
-                      <div className="flex-1">
-                        <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100">
-                          <House className="size-5 inline-block mr-1" />
-                          {hab.nombre}
-                        </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Precio: ${hab.precioFinal.toFixed(2)}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => removerHabitacion(item.idHotel, hab.id)}
-                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                        aria-label="Eliminar habitación"
+                  {hotel.habitaciones.map((hab, habIdx) => {
+                    const precioFinal = getPrecioHabitacion(hab, hotel);
+                    return (
+                      <div
+                        key={hab.id || habIdx}
+                        className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
                       >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
-                  ))}
+                        <div className="flex-1">
+                          <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100">
+                            <House className="size-5 inline-block mr-1" />
+                            {hab.nombre}
+                          </h4>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Precio: ${precioFinal.toFixed(2)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() =>
+                            removerHabitacion(hotel.idHotel, hab.id)
+                          }
+                          className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                          aria-label="Eliminar habitación"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
 
                   {/* Paquetes */}
-                  {item.paquetes.map((pack) => (
-                    <div
-                      key={pack.id}
-                      className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
-                    >
-                      <div className="flex-1">
-                        <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100">
-                          <Package className="size-5 inline-block mr-1" />
-                          {pack.nombre}
-                        </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Precio: ${pack.precioFinal.toFixed(2)}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => removerPaquete(item.idHotel, pack.id)}
-                        className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                        aria-label="Eliminar paquete"
+                  {hotel.paquetes.map((pack, packIdx) => {
+                    const precioFinal = getPrecioPaquete(pack, hotel);
+                    return (
+                      <div
+                        key={pack.id || packIdx}
+                        className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
                       >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
-                  ))}
+                        <div className="flex-1">
+                          <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100">
+                            <Package className="size-5 inline-block mr-1" />
+                            {pack.nombre}
+                          </h4>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Precio: ${precioFinal.toFixed(2)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removerPaquete(hotel.idHotel, pack.id)}
+                          className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                          aria-label="Eliminar paquete"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               ))
             )}
           </div>
 
-          {/* Pie del carrito */}
-          {elementosCarrito.length > 0 && (
+          {/* Botón para ir a reservar/pagar */}
+          {carrito.hoteles.length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700/50">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-gray-600 dark:text-gray-300">Total</span>
-                <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  ${total.toFixed(2)}
-                </span>
-              </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+              <button
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                onClick={() => {
+                  onClose();
+                  navigate('/reserva');
+                }}
+              >
                 <CreditCard className="w-5 h-5" />
-                Proceder al Pago
+                Reservar / Pagar
               </button>
             </div>
           )}
