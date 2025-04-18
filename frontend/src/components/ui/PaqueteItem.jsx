@@ -19,7 +19,7 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
     if (checked) {
       agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
     } else {
-      removerPaquete(hotelData.id, paquete.id);
+      removerPaquete(hotelData.idHotel, paquete.id);
     }
   };
 

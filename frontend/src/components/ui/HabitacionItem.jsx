@@ -19,7 +19,7 @@ const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
     if (checked) {
       agregarHabitacion(hotelData, habitacion, { fechaInicio, fechaFin });
     } else {
-      removerHabitacion(hotelData.id, habitacion.id);
+      removerHabitacion(hotelData.idHotel, habitacion.id);
     }
   };
 

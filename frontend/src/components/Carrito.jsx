@@ -59,7 +59,7 @@ const Carrito = ({ isOpen, onClose }) => {
           </div>
 
           {/* Contenido del carrito */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
             {carrito.hoteles.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400">
@@ -85,7 +85,7 @@ const Carrito = ({ isOpen, onClose }) => {
                     return (
                       <div
                         key={hab.id || habIdx}
-                        className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
+                        className="flex gap-4 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
                       >
                         <div className="flex-1">
                           <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100">
@@ -100,10 +100,10 @@ const Carrito = ({ isOpen, onClose }) => {
                           onClick={() =>
                             removerHabitacion(hotel.idHotel, hab.id)
                           }
-                          className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                          className="w-8 h-8 aspect-square flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                           aria-label="Eliminar habitación"
                         >
-                          <Trash2 className="size-4" />
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
                     );
@@ -115,7 +115,7 @@ const Carrito = ({ isOpen, onClose }) => {
                     return (
                       <div
                         key={pack.id || packIdx}
-                        className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
+                        className="flex gap-4 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3"
                       >
                         <div className="flex-1">
                           <h4 className="flex items-center gap-1 font-medium text-gray-900 dark:text-gray-100">
@@ -128,10 +128,10 @@ const Carrito = ({ isOpen, onClose }) => {
                         </div>
                         <button
                           onClick={() => removerPaquete(hotel.idHotel, pack.id)}
-                          className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                          className="w-8 h-8 aspect-square flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                           aria-label="Eliminar paquete"
                         >
-                          <Trash2 className="size-4" />
+                          <Trash2 className="size-5" />
                         </button>
                       </div>
                     );

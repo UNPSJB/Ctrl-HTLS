@@ -24,7 +24,7 @@ const HotelCard = ({ hotel }) => {
 
   // Extraer datos vacicos del hotel y guardarlos en hotelData
   const hotelData = {
-    id: hotel.id,
+    idHotel: hotel.id,
     nombre: hotel.nombre,
     descripcion: hotel.descripcion,
     coeficiente: hotel.coeficiente,
