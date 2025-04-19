@@ -4,7 +4,9 @@ import {
   useReducer,
   useMemo,
   useEffect,
+  useCallback,
 } from 'react';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 const STORAGE_KEY = 'carritoState';
 
@@ -22,16 +24,6 @@ const TIPOS = {
   REMOVER_PAQUETE: 'REMOVER_PAQUETE',
   REMOVER_HOTEL: 'REMOVER_HOTEL',
 };
-
-// Inicializador desde localStorage
-function initializer(initialState) {
-  try {
-    const localData = localStorage.getItem(STORAGE_KEY);
-    return localData ? JSON.parse(localData) : initialState;
-  } catch {
-    return initialState;
-  }
-}
 
 // Reducer
 function carritoReducer(estado, accion) {
@@ -170,46 +162,67 @@ function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
 
 // Provider
 export function CarritoProvider({ children }) {
-  const [estado, dispatch] = useReducer(
-    carritoReducer,
-    estadoInicial,
-    initializer
+  // Usar usePersistedState para el estado persistente
+  const [persistedState, setPersistedState] = usePersistedState(
+    STORAGE_KEY,
+    estadoInicial
   );
 
+  // useReducer con estado inicial desde localStorage
+  const [estado, dispatch] = useReducer(carritoReducer, persistedState);
+
+  // Sincronizar cambios del reducer con localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
-  }, [estado]);
+    setPersistedState(estado);
+  }, [estado, setPersistedState]);
 
-  // Acciones simplificadas
-  const agregarHabitacion = (hotelInfo, habitacion, fechas) =>
-    agregarElemento(
-      dispatch,
-      TIPOS.AGREGAR_HABITACION,
-      hotelInfo,
-      habitacion,
-      fechas
-    );
+  // Acciones memoizadas
+  const agregarHabitacion = useCallback(
+    (hotelInfo, habitacion, fechas) =>
+      agregarElemento(
+        dispatch,
+        TIPOS.AGREGAR_HABITACION,
+        hotelInfo,
+        habitacion,
+        fechas
+      ),
+    [dispatch]
+  );
 
-  const agregarPaquete = (hotelInfo, paquete, fechas) =>
-    agregarElemento(
-      dispatch,
-      TIPOS.AGREGAR_PAQUETE,
-      hotelInfo,
-      paquete,
-      fechas
-    );
+  const agregarPaquete = useCallback(
+    (hotelInfo, paquete, fechas) =>
+      agregarElemento(
+        dispatch,
+        TIPOS.AGREGAR_PAQUETE,
+        hotelInfo,
+        paquete,
+        fechas
+      ),
+    [dispatch]
+  );
 
-  const removerHabitacion = (idHotel, idHabitacion) =>
-    dispatch({
-      type: TIPOS.REMOVER_HABITACION,
-      payload: { idHotel, idHabitacion },
-    });
+  const removerHabitacion = useCallback(
+    (idHotel, idHabitacion) =>
+      dispatch({
+        type: TIPOS.REMOVER_HABITACION,
+        payload: { idHotel, idHabitacion },
+      }),
+    [dispatch]
+  );
 
-  const removerPaquete = (idHotel, idPaquete) =>
-    dispatch({ type: TIPOS.REMOVER_PAQUETE, payload: { idHotel, idPaquete } });
+  const removerPaquete = useCallback(
+    (idHotel, idPaquete) =>
+      dispatch({
+        type: TIPOS.REMOVER_PAQUETE,
+        payload: { idHotel, idPaquete },
+      }),
+    [dispatch]
+  );
 
-  const removerHotel = (idHotel) =>
-    dispatch({ type: TIPOS.REMOVER_HOTEL, payload: { idHotel } });
+  const removerHotel = useCallback(
+    (idHotel) => dispatch({ type: TIPOS.REMOVER_HOTEL, payload: { idHotel } }),
+    [dispatch]
+  );
 
   const totalElementos = useMemo(
     () =>
@@ -231,7 +244,15 @@ export function CarritoProvider({ children }) {
       removerHotel,
       totalElementos,
     }),
-    [estado]
+    [
+      estado,
+      agregarHabitacion,
+      agregarPaquete,
+      removerHabitacion,
+      removerPaquete,
+      removerHotel,
+      totalElementos,
+    ]
   );
 
   return (
