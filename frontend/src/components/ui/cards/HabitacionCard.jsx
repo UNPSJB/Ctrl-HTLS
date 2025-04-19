@@ -1,15 +1,12 @@
 import PriceTag from '@/components/PriceTag';
 import { Users } from 'lucide-react';
+import { calcularPrecioHabitacion, calcularNoches } from '@utils/pricingUtils';
 
 const HabitacionCard = ({ habitacion, porcentaje = 1 }) => {
-  // Validación si habitacion es nula o indefinida
   if (!habitacion) return null;
 
-  // Calcular fechas y noches antes del return
-  const inicio = new Date(habitacion.fechaInicio);
-  const fin = new Date(habitacion.fechaFin);
-  const diffTime = Math.abs(fin - inicio);
-  const noches = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const noches = calcularNoches(habitacion.fechaInicio, habitacion.fechaFin);
+  const precioTotal = calcularPrecioHabitacion(habitacion);
 
   // Formatear fechas a dd/mm/aaaa
   const formatFecha = (fecha) => {
@@ -43,10 +40,7 @@ const HabitacionCard = ({ habitacion, porcentaje = 1 }) => {
           {formatFecha(habitacion.fechaFin)} {' - '} ( {noches} noche
           {noches > 1 ? 's' : ''} )
         </div>
-        <PriceTag
-          precio={habitacion.precio * noches}
-          coeficiente={porcentaje}
-        />
+        <PriceTag precio={precioTotal} coeficiente={porcentaje} />
       </div>
     </div>
   );

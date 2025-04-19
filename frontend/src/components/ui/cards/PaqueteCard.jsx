@@ -1,15 +1,16 @@
 import PriceTag from '@/components/PriceTag';
 import { Users } from 'lucide-react';
+import { calcularPrecioPaquete, calcularNoches } from '@utils/pricingUtils';
 
 const PaqueteCard = ({ paquete, porcentaje = 1 }) => {
+  const noches = calcularNoches(paquete.fechaInicio, paquete.fechaFin);
+  const precioTotal = calcularPrecioPaquete(paquete);
+
   // Precio base por noche de todas las habitaciones
   const precioBase = paquete.habitaciones.reduce(
     (suma, hab) => suma + hab.precio,
     0
   );
-
-  const precioTotal =
-    precioBase * paquete.noches * (1 - paquete.descuento / 100);
 
   return (
     <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -31,7 +32,7 @@ const PaqueteCard = ({ paquete, porcentaje = 1 }) => {
       <hr className="my-4 border-gray-300 dark:border-gray-600" />
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          Noches: {paquete.noches} | Descuento: {paquete.descuento}%
+          Noches: {noches} | Descuento: {paquete.descuento}%
         </div>
         {/* Precio final con noches, descuento y coeficiente */}
         <PriceTag precio={precioTotal} coeficiente={porcentaje} />

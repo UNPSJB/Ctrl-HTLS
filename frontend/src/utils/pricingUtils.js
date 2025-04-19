@@ -12,7 +12,8 @@ export const calculateRoomFinalPrice = (
   isHighSeason,
   discountCoefficient
 ) => {
-  const original = room.precio;
+  const noches = calcularNoches(room.fechaInicio, room.fechaFin);
+  const original = room.precio * noches;
   const final = isHighSeason ? original * (1 - discountCoefficient) : original;
   return { original, final, discount: original - final };
 };
@@ -33,9 +34,17 @@ export const calculatePackageFinalPrice = (
   isHighSeason,
   discountCoefficient
 ) => {
-  // Suma los precios de las habitaciones incluidas en el paquete
-  const sumRooms = pkg.habitaciones.reduce((sum, room) => sum + room.precio, 0);
-  const packageBase = sumRooms * pkg.noches * (1 - pkg.descuento / 100);
+  const noches = calcularNoches(pkg.fechaInicio, pkg.fechaFin);
+  const sumRooms = (pkg.habitaciones || []).reduce(
+    (sum, room) => sum + room.precio * noches,
+    0
+  );
+  // Convertir descuento de paquete a decimal si es necesario
+  let descuento = pkg.descuento || 0;
+  if (descuento > 1) {
+    descuento = descuento / 100;
+  }
+  const packageBase = sumRooms * (1 - descuento);
   const original = packageBase;
   const final = isHighSeason ? original * (1 - discountCoefficient) : original;
   return { original, final, discount: original - final };
@@ -73,3 +82,32 @@ export const calculateReservationTotal = (
 
   return { totalOriginal, totalFinal, totalDiscount };
 };
+
+// Calcula la cantidad de noches entre dos fechas
+export function calcularNoches(fechaInicio, fechaFin) {
+  const inicio = new Date(fechaInicio);
+  const fin = new Date(fechaFin);
+  const diffTime = Math.abs(fin - inicio);
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+// Calcula el precio total de una habitación
+export function calcularPrecioHabitacion(habitacion) {
+  const noches = calcularNoches(habitacion.fechaInicio, habitacion.fechaFin);
+  return habitacion.precio * noches;
+}
+
+// Calcula el precio total de un paquete (puede tener varias habitaciones y descuento)
+export function calcularPrecioPaquete(paquete) {
+  const noches = calcularNoches(paquete.fechaInicio, paquete.fechaFin);
+  const totalHabitaciones = (paquete.habitaciones || []).reduce(
+    (acc, hab) => acc + hab.precio * noches,
+    0
+  );
+  // Convertir descuento de paquete a decimal si es necesario
+  let descuento = paquete.descuento || 0;
+  if (descuento > 1) {
+    descuento = descuento / 100;
+  }
+  return totalHabitaciones * (1 - descuento);
+}
