@@ -87,7 +87,11 @@ const ReservaPage = () => {
               </section>
             )}
 
-            <Resumen habitaciones={habitaciones} porcentaje={coeficiente} />
+            <Resumen
+              habitaciones={habitaciones}
+              paquetes={paquetes}
+              porcentaje={coeficiente}
+            />
           </div>
         );
       })}
