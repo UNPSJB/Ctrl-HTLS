@@ -29,23 +29,13 @@ const ReservaPage = () => {
           paquetes = [],
         } = hotelReserva;
 
-        let totalOriginal = 0,
-          totalFinal = 0,
-          totalDiscount = 0;
         if (habitaciones.length > 0 || paquetes.length > 0) {
-          const {
-            totalOriginal: tO,
-            totalFinal: tF,
-            totalDiscount: tD,
-          } = calculateReservationTotal(
+          calculateReservationTotal(
             habitaciones,
             paquetes,
             temporada === 'alta',
             coeficiente
           );
-          totalOriginal = tO;
-          totalFinal = tF;
-          totalDiscount = tD;
         }
 
         return (
@@ -87,19 +77,17 @@ const ReservaPage = () => {
                 </h2>
                 <div className="space-y-4">
                   {paquetes.map((pack) => (
-                    <PaqueteCard key={pack.id} paquete={pack} />
+                    <PaqueteCard
+                      key={pack.id}
+                      paquete={pack}
+                      porcentaje={coeficiente}
+                    />
                   ))}
                 </div>
               </section>
             )}
 
-            {(habitaciones.length > 0 || paquetes.length > 0) && (
-              <Resumen
-                totalOriginal={totalOriginal}
-                totalFinal={totalFinal}
-                totalDiscount={totalDiscount}
-              />
-            )}
+            <Resumen habitaciones={habitaciones} porcentaje={coeficiente} />
           </div>
         );
       })}
