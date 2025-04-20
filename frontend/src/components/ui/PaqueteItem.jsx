@@ -1,3 +1,4 @@
+// PaqueteItem.jsx
 import { useState } from 'react';
 import PaqueteDetailsModal from '../modals/PaqueteDetailsModal';
 import PriceTag from '@components/PriceTag';
@@ -12,7 +13,6 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
   const { filtros } = useBusqueda();
   const { fechaInicio, fechaFin } = filtros;
 
-  // Nueva estructura: hotelData contiene todos los datos necesarios
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
     onSelect(paquete.id);
@@ -23,6 +23,7 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
     }
   };
 
+  // Cálculo del precio total con descuento y noches
   const precioBase =
     paquete.habitaciones.reduce((acum, hab) => acum + hab.precio, 0) *
     (1 - paquete.descuento / 100) *
@@ -30,32 +31,42 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
 
   return (
     <>
-      <div
+      <article
+        aria-labelledby={`package-${paquete.id}-title`}
         className="grid items-center border rounded-md px-6 py-4 bg-gray-50 dark:bg-gray-900 shadow-sm border-gray-200 dark:border-gray-700 gap-10"
         style={{ gridTemplateColumns: '1fr auto auto' }}
       >
-        {/* Columna 1: Checkbox + Info del paquete */}
-        <div className="flex items-center gap-6">
+        {/* Encabezado: checkbox + información básica */}
+        <header className="flex items-center gap-6">
           <input
             type="checkbox"
+            id={`package-${paquete.id}-checkbox`}
             checked={isSelected}
             onChange={manejarSeleccion}
             className="mt-1 w-5 h-5 cursor-pointer"
+            aria-labelledby={`package-${paquete.id}-title`}
           />
           <div className="flex flex-col gap-1">
-            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
+            <h4
+              id={`package-${paquete.id}-title`}
+              className="text-md font-semibold text-gray-800 dark:text-gray-200"
+            >
               {paquete.nombre}
             </h4>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {paquete.descripcion}
             </p>
           </div>
-        </div>
+        </header>
 
-        {/* Columna 2: Contador */}
+        {/* Sección: contador */}
+        <section className="flex justify-center">
+          {/* Aquí puedes insertar tu componente reutilizable de contador */}
+          {/* <Counter max={paquete.habitaciones.length} /> */}
+        </section>
 
-        {/* Columna 3: Precio y botón de detalles */}
-        <div className="flex flex-col items-end gap-1">
+        {/* Pie: precio y botón de detalles */}
+        <footer className="flex flex-col items-end gap-1">
           <PriceTag precio={precioBase} coeficiente={hotelData.coeficiente} />
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
@@ -63,8 +74,8 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
           >
             Más Detalles
           </button>
-        </div>
-      </div>
+        </footer>
+      </article>
 
       {mostrarModal && (
         <PaqueteDetailsModal

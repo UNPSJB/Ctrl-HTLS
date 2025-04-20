@@ -11,7 +11,6 @@ const HotelCard = ({ hotel }) => {
   if (!hotel) return null;
 
   const [isExpanded, setIsExpanded] = useState(false);
-
   const {
     selectedRooms,
     selectedPackages,
@@ -19,10 +18,8 @@ const HotelCard = ({ hotel }) => {
     togglePackageSelection,
     totalPrice,
   } = useHotelSelection(hotel);
-
   const { carrito } = useCarrito();
 
-  // Obtener ids seleccionados desde el carrito global
   const habitacionesSeleccionadas =
     carrito.hoteles
       .find((h) => h.idHotel === hotel.id)
@@ -32,7 +29,6 @@ const HotelCard = ({ hotel }) => {
       .find((h) => h.idHotel === hotel.id)
       ?.paquetes.map((paq) => paq.id) || [];
 
-  // Extraer datos vacicos del hotel y guardarlos en hotelData
   const hotelData = {
     idHotel: hotel.id,
     nombre: hotel.nombre,
@@ -41,11 +37,10 @@ const HotelCard = ({ hotel }) => {
     temporada: hotel.temporada,
   };
 
-  // Verifica si el hotel está en el carrito
   const hotelEnCarrito = carrito.hoteles.some((h) => h.idHotel === hotel.id);
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+    <article className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
       <HotelHeader
         hotel={hotel}
         isExpanded={isExpanded}
@@ -53,44 +48,62 @@ const HotelCard = ({ hotel }) => {
       />
 
       {isExpanded && (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="py-4">
-            <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4">
+        <>
+          {/* Sección de Habitaciones Disponibles */}
+          <section
+            aria-labelledby={`rooms-${hotel.id}-title`}
+            className="p-4 border-t border-gray-200 dark:border-gray-700"
+          >
+            <h3
+              id={`rooms-${hotel.id}-title`}
+              className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4"
+            >
               <Bed className="w-5 h-5" />
               Habitaciones Disponibles
             </h3>
-            <div className="space-y-3">
+            <ul className="space-y-3">
               {hotel.habitaciones.map((habitacion) => (
-                <HabitacionItem
-                  key={habitacion.id}
-                  hotelData={hotelData}
-                  habitacion={habitacion}
-                  isSelected={habitacionesSeleccionadas.includes(habitacion.id)}
-                  onSelect={toggleRoomSelection}
-                />
+                <li key={habitacion.id}>
+                  <HabitacionItem
+                    hotelData={hotelData}
+                    habitacion={habitacion}
+                    isSelected={habitacionesSeleccionadas.includes(
+                      habitacion.id
+                    )}
+                    onSelect={toggleRoomSelection}
+                  />
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </section>
 
-          <div className="py-4">
-            <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4">
+          {/* Sección de Paquetes Turísticos */}
+          <section
+            aria-labelledby={`packages-${hotel.id}-title`}
+            className="p-4 border-t border-gray-200 dark:border-gray-700"
+          >
+            <h3
+              id={`packages-${hotel.id}-title`}
+              className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4"
+            >
               <Package className="w-5 h-5" />
               Paquetes Turísticos
             </h3>
-            <div className="space-y-3">
+            <ul className="space-y-3">
               {hotel.paquetes.map((paquete) => (
-                <PaqueteItem
-                  key={paquete.id}
-                  hotelData={hotelData}
-                  paquete={paquete}
-                  isSelected={paquetesSeleccionados.includes(paquete.id)}
-                  onSelect={togglePackageSelection}
-                />
+                <li key={paquete.id}>
+                  <PaqueteItem
+                    hotelData={hotelData}
+                    paquete={paquete}
+                    isSelected={paquetesSeleccionados.includes(paquete.id)}
+                    onSelect={togglePackageSelection}
+                  />
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </section>
 
-          {/* Solo mostrar si el hotel está en el carrito */}
+          {/* Resumen de selección */}
           {hotelEnCarrito && (
             <SelectionSummary
               selectedRoomsCount={selectedRooms.length}
@@ -98,9 +111,9 @@ const HotelCard = ({ hotel }) => {
               totalPrice={totalPrice}
             />
           )}
-        </div>
+        </>
       )}
-    </div>
+    </article>
   );
 };
 
