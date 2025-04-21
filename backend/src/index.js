@@ -6,6 +6,7 @@ const { swaggerUi, swaggerSpec } = require('./config/swaggerConfig');
 const coreRoutes = require('./routes/core/coreRoutes');
 const hotelRoutes = require('./routes/hotel/hotelRoutes');
 const alquilerRoutes = require('./routes/ventas/alquilerRoutes');
+const facturaRoutes = require('./routes/ventas/facturasRoutes');
 
 // Importar todos los modelos y asociaciones
 require('./models/associations');
@@ -20,6 +21,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', coreRoutes);
 app.use('/api', hotelRoutes);
 app.use('/api', alquilerRoutes);
+app.use('/api', facturaRoutes);
 
 // Sincronizar la base de datos
 sequelize
