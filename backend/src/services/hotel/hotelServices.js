@@ -22,6 +22,7 @@ const Habitacion = require('../../models/hotel/Habitacion');
 const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
 const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
+const Descuento = require('../../models/hotel/Descuento');
 const paquetePromocionalServices = require('./paquetePromocionalServices');
 const verificarDisponibilidad = require('../ventas/verificarDisponibilidad');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
@@ -363,49 +364,20 @@ const agregarDescuentos = async (idHotel, descuento) => {
   return descuentoNuevo;
 };
 
-//Verifica si las habitaciones están disponibles para crear un paquete promocional
-// const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
-//   for (const idHabitacion of habitaciones) {
-//     const alquileres = await AlquilerHabitacion.findAll({
-//       where: {
-//         habitacionId: idHabitacion,
-//         [Op.or]: [
-//           {
-//             fechaInicio: {
-//               [Op.between]: [fechaInicio, fechaFin],
-//             },
-//           },
-//           {
-//             fechaFin: {
-//               [Op.between]: [fechaInicio, fechaFin],
-//             },
-//           },
-//           {
-//             [Op.and]: [
-//               {
-//                 fechaInicio: {
-//                   [Op.lte]: fechaInicio,
-//                 },
-//               },
-//               {
-//                 fechaFin: {
-//                   [Op.gte]: fechaFin,
-//                 },
-//               },
-//             ],
-//           },
-//         ],
-//       },
-//     });
+const getDescuentosDeHotel = async (hotelId) => {
+  try {
+    const descuentos = await Descuento.findAll({
+      where: { hotelId },
+      attributes: ['id', 'porcentaje', 'cantidad_de_habitaciones'], // Seleccionar solo los campos necesarios
+    });
 
-//     if (alquileres.length > 0) {
-//       throw new CustomError(
-//         `La habitación con ID ${idHabitacion} ya está alquilada en ese rango de fechas`,
-//         409,
-//       ); // Conflict
-//     }
-//   }
-// };
+    return descuentos;
+  } catch (error) {
+    throw new Error(
+      `Error al obtener los descuentos del hotel: ${error.message}`,
+    );
+  }
+};
 
 /**
  * VERIFICAR QUE EXISTAN HOTELES EN LA CIUDAD
@@ -439,6 +411,8 @@ const getDisponibilidadPorHotel = async (
       fechaFin,
     );
 
+    const descuentos = await getDescuentosDeHotel(hotel.id);
+
     // Obtener las habitaciones disponibles agrupadas por tipo
     const habitaciones =
       await habitacionServices.obtenerHabitacionesDisponiblesPorTipo(
@@ -462,6 +436,8 @@ const getDisponibilidadPorHotel = async (
       estrellas: hotel.categoria.nombre,
       descripcion: hotel.descripcion,
       temporada: temporada,
+      descuentos: descuentos,
+      direccion: hotel.direccion,
       ubicacion: {
         pais: hotel.ciudad.provincia.pais.nombre,
         provincia: hotel.ciudad.provincia.nombre,

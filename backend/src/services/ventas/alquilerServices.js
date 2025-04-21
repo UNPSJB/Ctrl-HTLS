@@ -26,6 +26,9 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
   const desde = convertirFechas(fechaInicio);
   const hasta = convertirFechas(fechaFin);
 
+  // Verificar las fechas
+  verificarFechas(desde, hasta);
+
   if (pasajeros < 0) {
     throw new CustomError('La cantidad de pasajeros debe ser mayor a 0', 400); // Bad Request
   }
