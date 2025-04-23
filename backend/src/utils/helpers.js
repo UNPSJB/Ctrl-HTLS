@@ -3,6 +3,7 @@ const Cliente = require('../models/core/Cliente');
 const Empleado = require('../models/core/Empleado');
 const Hotel = require('../models/hotel/Hotel');
 const TipoHabitacion = require('../models/hotel/TipoHabitacion');
+const Encargado = require('../models/hotel/Encargado');
 
 const CustomError = require('./CustomError');
 
@@ -10,6 +11,30 @@ const verificarCiudad = async (ciudadId) => {
   const ciudadExistente = await Ciudad.findByPk(ciudadId);
   if (!ciudadExistente) {
     throw new CustomError('La ciudad no existe', 404); // Not Found
+  }
+};
+
+const verificarDocumento = async (numeroDocumento) => {
+  // Verificar si ya existe un cliente con el mismo documento
+  const encargadoExistente = await Encargado.findOne({
+    where: { dni: numeroDocumento },
+  });
+  if (encargadoExistente) {
+    throw new CustomError('Ya existe un encargado con el mismo documento', 409); // Conflict
+  }
+  // Verificar si ya existe un empleado con el mismo documento
+  const empleadoExistente = await Empleado.findOne({
+    where: { numeroDocumento },
+  });
+  if (empleadoExistente) {
+    throw new CustomError('Ya existe un empleado con el mismo documento', 409); // Conflict
+  }
+
+  const clienteExistente = await Cliente.findOne({
+    where: { numeroDocumento },
+  });
+  if (clienteExistente) {
+    throw new CustomError('Ya existe un cliente con el mismo documento', 409); // Conflict
   }
 };
 
@@ -142,6 +167,7 @@ const verificarPorcentaje = (porcentaje) => {
 module.exports = {
   convertirFechas,
   verificarCiudad,
+  verificarDocumento,
   verificarEmail,
   verificarIdHotel,
   verificarFechas,

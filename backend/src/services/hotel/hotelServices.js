@@ -1,4 +1,5 @@
 const Hotel = require('../../models/hotel/Hotel');
+const sequelize = require('../../config/database');
 const {
   verificarCiudad,
   verificarDireccion,
@@ -29,6 +30,8 @@ const { verificarHabitacionesHotel } = require('./habitacionServices');
 const temporadaServices = require('./temporadaServices');
 const descuentoServices = require('./descuentoServices');
 const habitacionServices = require('./habitacionServices');
+const tipoHabitacionServices = require('./tipoHabitacionServices');
+const hotelTipoHabitacionServices = require('./hotelTipoHabitacionServices');
 
 const crearHotel = async (
   nombre,
@@ -136,51 +139,67 @@ const modificarHotel = async (
 const eliminarHotel = async (id) => {};
 
 const asignarTipoHabitaciones = async (hotelId, tipoHabitaciones) => {
-  // Verificar que los IDs de los tipos de habitación existan y no sean duplicados
-  await verificarTiposHabitacion(tipoHabitaciones);
+  const transaction = await sequelize.transaction(); // Iniciamos transacción manual
+  try {
+    const hotel = await Hotel.findByPk(hotelId, { transaction });
+    if (!hotel) {
+      throw new CustomError('El hotel no existe', 404); // Not Found
+    }
 
-  for (const tipoHabitacion of tipoHabitaciones) {
-    const { idTipoHabitacion, precio } = tipoHabitacion;
+    const tiposHabitacionAsignados = [];
 
-    // Crear la relación en la tabla intermedia
-    await HotelTipoHabitacion.create({
-      hotelId,
-      tipoHabitacionId: idTipoHabitacion,
-      precio,
-    });
+    for (const tipoHabitacion of tipoHabitaciones) {
+      // Verificamos si el tipo de habitación existe
+      const tipo = await tipoHabitacionServices.getTipoHabitacion(
+        tipoHabitacion.id,
+      );
+      if (!tipo) {
+        throw new CustomError(
+          `Tipo de habitación con ID ${tipoHabitacion.id} no existe`,
+          400,
+        );
+      }
+
+      // Verificamos si ya está asociado
+      const yaAsociado =
+        await hotelTipoHabitacionServices.getTipoHabitacionDeHotel(
+          hotelId,
+          tipoHabitacion.id,
+        );
+      if (yaAsociado) {
+        throw new CustomError(
+          `El tipo de habitación con ID ${tipoHabitacion.id} ya está asignado al hotel`,
+          409, // Conflict
+        );
+      }
+
+      // Asociamos dentro de la transacción
+      await hotelTipoHabitacionServices.asociarTipoHabitacionAHotel(
+        hotelId,
+        tipoHabitacion.id,
+        tipoHabitacion.precio,
+        transaction,
+      );
+
+      tiposHabitacionAsignados.push(tipo);
+    }
+
+    await transaction.commit(); // Todo salió bien, confirmamos los cambios
+    return tiposHabitacionAsignados;
+  } catch (error) {
+    await transaction.rollback(); // Algo falló, deshacemos todo
+    throw new CustomError(error.message, error.status || 500);
   }
 };
 
 // Obtener los tipos de habitaciones de un hotel
 const getTiposHabitacionesHotel = async (idHotel) => {
   // Obtener los registros de la tabla intermedia
-  const tiposHabitacionesAsignadas = await HotelTipoHabitacion.findAll({
-    where: { hotelId: idHotel },
-  });
-
-  // Obtener los IDs de los tipos de habitación
-  const idsTipoHabitacion = tiposHabitacionesAsignadas.map(
-    (th) => th.tipoHabitacionId,
-  );
-
-  // Obtener los nombres de los tipos de habitación
-  const tiposHabitacion = await TipoHabitacion.findAll({
-    where: { id: idsTipoHabitacion },
-    attributes: ['id', 'nombre'],
-  });
-
-  // Crear un mapa para acceder rápidamente a los nombres de los tipos de habitación
-  const mapaTiposHabitacion = tiposHabitacion.reduce((mapa, tipo) => {
-    mapa[tipo.id] = tipo.nombre;
-    return mapa;
-  }, {});
-
-  // Combinar los datos y devolver el resultado
-  return tiposHabitacionesAsignadas.map((th) => ({
-    idTipoHabitacion: th.tipoHabitacionId,
-    precio: th.precio,
-    nombre: mapaTiposHabitacion[th.tipoHabitacionId],
-  }));
+  try {
+    return hotelTipoHabitacionServices.getTipoHabitacionesDeHotel(idHotel);
+  } catch (error) {
+    throw new CustomError(error.message, error.status || 500);
+  }
 };
 
 const getNombreEncargado = async (encargadoId) => {

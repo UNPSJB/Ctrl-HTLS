@@ -51,9 +51,9 @@ router.get('/ciudades/:id', validateId, getCiudadById); //Ruta para obtener una 
 //#endregion
 
 //#region Rutas de Empleados
-router.post('/empleado', validateEmpleado, createEmpleado); //Ruta para crear un administrador
-router.put('/empleado/:id', validateId, validateEmpleado, updateEmpleado); //Ruta para actualizar un administrador
-router.delete('/empleado/:id', validateId, deleteEmpleado); //Ruta para eliminar un administrador
+router.post('/empleado', validateEmpleado, createEmpleado); //Ruta para crear un administrador/vendedor
+router.put('/empleado/:id', validateId, validateEmpleado, updateEmpleado); //Ruta para actualizar un administrador/vendedor
+router.delete('/empleado/:id', validateId, deleteEmpleado); //Ruta para eliminar un administrador/vendedor
 router.get('/vendedores', getVendedores); //Ruta para obtener todos los vendedores
 router.get('vendedor/:id', validateId, getVendedor); //Ruta para obtener un vendedor por su ID
 //#endregion

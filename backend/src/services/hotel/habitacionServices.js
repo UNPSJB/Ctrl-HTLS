@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const sequelize = require('../../config/database');
 const CustomError = require('../../utils/CustomError');
 const Hotel = require('../../models/hotel/Hotel');
 const Habitacion = require('../../models/hotel/Habitacion');
@@ -6,70 +7,96 @@ const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocio
 const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const HotelTipoHabitacion = require('../../models/hotel/HotelTipoHabitacion');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
+const tipoHabitacionServices = require('./tipoHabitacionServices');
+const {
+  verificarDisponibilidadHabitaciones,
+  verificarHabitacionesPaquetePromocional,
+} = require('../ventas/verificarDisponibilidad');
 
-const agregarHabitaciones = async (idHotel, habitaciones) => {
-  // Verificar si el hotel existe
-  const hotel = await Hotel.findByPk(idHotel);
-  if (!hotel) {
-    throw new CustomError('El hotel no existe', 404); // Not Found
-  }
+const crearHabitaciones = async (idHotel, habitaciones) => {
+  const transaction = await sequelize.transaction(); // Iniciar una transacción
 
-  // Verificar si todos los tipos de habitación existen
-  const idsTipoHabitacion = habitaciones.map((h) => h.idTipoHabitacion);
-  await Promise.all(
-    idsTipoHabitacion.map(async (idTipoHabitacion) => {
-      const tipoHabitacionEncontrado = await verificarTipoHabitacion(
-        idTipoHabitacion,
-        idHotel,
-      );
-      if (!tipoHabitacionEncontrado) {
-        throw new CustomError(
-          `El tipo de habitación con ID ${idTipoHabitacion} no existe`,
-          404,
-        ); // Not Found
-      }
-    }),
-  );
-
-  // Verificar límites de habitaciones y pisos
-  await verificarLimitesHabitaciones(idHotel, habitaciones);
-
-  // Verificar si hay números de habitaciones duplicados
-  const numerosHabitacion = habitaciones.map((h) => h.numero);
-  const numerosUnicos = new Set(numerosHabitacion);
-  if (numerosUnicos.size !== numerosHabitacion.length) {
-    throw new CustomError(
-      'No puedes asignar números de habitaciones repetidos.',
-      400,
-    ); // Bad Request
-  }
-
-  // Verificar si el número de habitación y piso ya están guardados en el mismo hotel
-  for (const habitacion of habitaciones) {
-    const habitacionExistente = await Habitacion.findOne({
-      where: {
-        hotelId: idHotel,
-        numero: habitacion.numero,
-      },
-    });
-    if (habitacionExistente) {
-      throw new CustomError(
-        `La habitación número ${habitacion.numero} ya existe en este hotel.`,
-        409,
-      ); // Conflict
+  try {
+    // Verificar si el hotel existe
+    const hotel = await Hotel.findByPk(idHotel, { transaction });
+    if (!hotel) {
+      throw new CustomError('El hotel no existe', 404); // Not Found
     }
-  }
 
-  // Crear las habitaciones
-  for (const habitacion of habitaciones) {
-    await Habitacion.create({
-      hotelId: idHotel,
-      numero: habitacion.numero,
-      piso: habitacion.piso,
-      tipoHabitacionId: habitacion.idTipoHabitacion,
-    });
+    // Verificar si los tipos de habitación son válidos y están relacionados con el hotel
+    const idsTipoHabitacion = habitaciones.map((h) => h.idTipoHabitacion);
+    const tiposPorHotel =
+      await tipoHabitacionServices.obtenerTiposDeHabitacionDeHotel(idHotel);
+    console.log(tiposPorHotel);
+
+    // const tiposRelacionados = await HotelTipoHabitacion.findAll({
+    //   where: {
+    //     hotelId: idHotel,
+    //     tipoHabitacionId: { [Op.in]: idsTipoHabitacion },
+    //   },
+    //   transaction,
+    // });
+
+    // const tiposRelacionadosIds = tiposRelacionados.map(
+    //   (t) => t.tipoHabitacionId,
+    // );
+    // const tiposInvalidos = idsTipoHabitacion.filter(
+    //   (id) => !tiposRelacionadosIds.includes(id),
+    // );
+
+    // if (tiposInvalidos.length > 0) {
+    //   throw new CustomError(
+    //     `Los siguientes tipos de habitación no están relacionados con el hotel: ${tiposInvalidos.join(
+    //       ', ',
+    //     )}`,
+    //     400, // Bad Request
+    //   );
+    // }
+
+    // // Verificar si hay números de habitación duplicados en el mismo hotel
+    // const numerosHabitacion = habitaciones.map((h) => h.numero);
+    // const habitacionesExistentes = await Habitacion.findAll({
+    //   where: {
+    //     hotelId: idHotel,
+    //     numero: { [Op.in]: numerosHabitacion },
+    //   },
+    //   transaction,
+    // });
+
+    // if (habitacionesExistentes.length > 0) {
+    //   const numerosDuplicados = habitacionesExistentes.map((h) => h.numero);
+    //   throw new CustomError(
+    //     `Los siguientes números de habitación ya existen en este hotel: ${numerosDuplicados.join(
+    //       ', ',
+    //     )}`,
+    //     409, // Conflict
+    //   );
+    // }
+
+    // // Crear las habitaciones
+    // const habitacionesCreadas = await Promise.all(
+    //   habitaciones.map((habitacion) =>
+    //     Habitacion.create(
+    //       {
+    //         hotelId: idHotel,
+    //         numero: habitacion.numero,
+    //         piso: habitacion.piso,
+    //         tipoHabitacionId: habitacion.idTipoHabitacion,
+    //       },
+    //       { transaction },
+    //     ),
+    //   ),
+    // );
+
+    // // Confirmar la transacción
+    // await transaction.commit();
+
+    // return habitacionesCreadas;
+  } catch (error) {
+    // Revertir la transacción si algo falla
+    await transaction.rollback();
+    throw new CustomError(`Error al crear habitaciones: ${error.message}`, 500);
   }
-  return obtenerHabitaciones(idHotel);
 };
 
 const obtenerHabitaciones = async (idHotel) => {
@@ -121,32 +148,25 @@ const modificarHabitacion = async (idHotel, idHabitacion, habitacion) => {
   }
 
   // Verificar si la habitación existe
-  const habitacionExistente = await Habitacion.findOne({
-    where: {
-      hotelId: idHotel,
-      id: idHabitacion,
-    },
-  });
+  const habitacionExistente = await getHabitacion(idHabitacion);
+
   if (!habitacionExistente) {
     throw new CustomError('La habitación no existe', 404); // Not Found
   }
 
   //Verificar que no exista una habitación con el mismo número en el mismo hotel
-  const habitacionExistenteNum = await Habitacion.findOne({
-    where: {
-      hotelId: idHotel,
-      numero: habitacion.numero,
-    },
-  });
+  const habitacionExistenteNum = await getHabitacionPorNumeroYHotel(
+    idHotel,
+    habitacion.numero,
+  );
 
-  if (
-    habitacionExistenteNum &&
-    habitacionExistenteNum.id.toInt !== idHabitacion.toInt
-  ) {
-    throw new CustomError(
-      `La habitación número ${habitacion.numero} ya existe en este hotel.`,
-      409,
-    ); // Conflict
+  if (habitacionExistenteNum) {
+    if (habitacionExistenteNum.id !== idHabitacion) {
+      throw new CustomError(
+        `La habitación número ${habitacion.numero} ya existe en este hotel.`,
+        409,
+      ); // Conflict
+    }
   }
 
   // Verificar si el tipo de habitación existe
@@ -155,11 +175,36 @@ const modificarHabitacion = async (idHotel, idHabitacion, habitacion) => {
   // Verificar que no se excedan los límites de habitaciones y pisos
   await verificarLimitesHabitaciones(idHotel, [habitacion]);
 
+  const fechaActual = new Date(); // Fecha actual
+  const fechaFin = new Date('9999-12-31'); // Fecha futura amplia
+
   // Verificar si la habitación está alquilada actualmente o en el futuro
-  await verificarOcupada(idHabitacion);
+  const habitacionesAlquiladas = await verificarDisponibilidadHabitaciones(
+    [idHabitacion], // Pasar el ID como un arreglo
+    fechaActual,
+    fechaFin,
+  );
+
+  if (habitacionesAlquiladas.length > 0) {
+    throw new CustomError(
+      'La habitación está alquilada actualmente o en el futuro y no puede ser modificada.',
+      400,
+    ); // Bad Request
+  }
 
   // Verificar si la habitación está asociada a uno o más paquetes promocionales
-  await verificarPaquetePromocional(idHabitacion);
+  const habitacionesEnPaquete = await verificarHabitacionesPaquetePromocional(
+    [idHabitacion], // Pasar el ID como un arreglo
+    fechaActual,
+    fechaFin,
+  );
+
+  if (habitacionesEnPaquete.length > 0) {
+    throw new CustomError(
+      'La habitación está asignada a un paquete promocional actualmente o en el futuro y no puede ser modificada.',
+      400,
+    ); // Bad Request
+  }
 
   habitacionExistente.numero = habitacion.numero;
   habitacionExistente.piso = habitacion.piso;
@@ -178,21 +223,44 @@ const eliminarHabitacion = async (idHotel, idHabitacion) => {
   }
 
   // Verificar si la habitación existe
-  const habitacion = await Habitacion.findOne({
-    where: {
-      hotelId: idHotel,
-      id: idHabitacion,
-    },
-  });
+  const habitacion = await getHabitacion(idHabitacion);
+
   if (!habitacion) {
     throw new CustomError('La habitación no existe', 404); // Not Found
   }
 
+  const fechaActual = new Date(); // Fecha actual
+  const fechaFin = new Date('9999-12-31'); // Fecha futura amplia
+
   // Verificar si la habitación está alquilada actualmente o en el futuro
-  await verificarOcupada(idHabitacion);
+  const habitacionesAlquiladas = await verificarDisponibilidadHabitaciones(
+    [idHabitacion], // Pasar el ID como un arreglo
+    fechaActual,
+    fechaFin,
+  );
+
+  if (habitacionesAlquiladas.length > 0) {
+    throw new CustomError(
+      'La habitación está alquilada actualmente o en el futuro y no puede ser eliminada.',
+      400,
+    ); // Bad Request
+  }
 
   // Verificar si la habitación está asociada a uno o más paquetes promocionales
-  await verificarPaquetePromocional(idHabitacion);
+  const habitacionesEnPaquete = await verificarHabitacionesPaquetePromocional(
+    [idHabitacion], // Pasar el ID como un arreglo
+    fechaActual,
+    fechaFin,
+  );
+
+  if (habitacionesEnPaquete.length > 0) {
+    throw new CustomError(
+      'La habitación está asignada a un paquete promocional actualmente o en el futuro y no puede ser eliminada.',
+      400,
+    ); // Bad Request
+  }
+
+  //Verificar que no exista una habitación con el mismo número en el mismo hotel
 
   await habitacion.destroy();
 };
@@ -492,8 +560,30 @@ const guardarHabitaciones = async (
   await AlquilerHabitacion.bulkCreate(habitacionesData, { transaction });
 };
 
+const getHabitacion = (idHabitacion) => {
+  return Habitacion.findOne({
+    where: { id: idHabitacion },
+    include: [
+      {
+        model: TipoHabitacion,
+        as: 'tipoHabitacion',
+        attributes: ['nombre', 'capacidad'],
+      },
+    ],
+  });
+};
+
+const getHabitacionPorNumeroYHotel = (idHotel, numero) => {
+  return Habitacion.findOne({
+    where: {
+      hotelId: idHotel,
+      numero: numero,
+    },
+  });
+};
+
 module.exports = {
-  agregarHabitaciones,
+  crearHabitaciones,
   obtenerHabitaciones,
   modificarHabitacion,
   eliminarHabitacion,

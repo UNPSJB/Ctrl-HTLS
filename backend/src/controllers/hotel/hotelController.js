@@ -92,10 +92,7 @@ const setHabitaciones = async (req, res) => {
   const habitaciones = req.body;
 
   try {
-    const hotel = await habitacionServices.agregarHabitaciones(
-      id,
-      habitaciones,
-    );
+    const hotel = await habitacionServices.crearHabitaciones(id, habitaciones);
     res.json(hotel);
   } catch (error) {
     const statusCode = error.statusCode || 500;

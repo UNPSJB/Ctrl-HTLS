@@ -4,7 +4,12 @@ const Encargado = require('../../models/hotel/Encargado');
 const { Op } = require('sequelize');
 const CustomError = require('../../utils/CustomError');
 const bcrypt = require('bcrypt');
-const { verificarCiudad } = require('../../utils/helpers');
+const {
+  verificarCiudad,
+  verificarEmail,
+  verificarTelefono,
+  verificarDocumento,
+} = require('../../utils/helpers');
 
 /**
  * Crea un nuevo empleado.
@@ -38,6 +43,7 @@ const crearEmpleado = async (empleado) => {
   } = empleado;
 
   // Verificar datos
+
   await verificarExistente(numeroDocumento, email, telefono);
   await verificarCiudad(ciudadId);
 
@@ -283,43 +289,12 @@ const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
 };
 
 const verificarExistente = async (numeroDocumento, email, telefono) => {
-  const emailEmpleado = await Empleado.findOne({ where: { email } });
-  const emailCliente = await Cliente.findOne({ where: { email } });
-
-  const emailEncargado = await Encargado.findOne({ where: { email } });
-
-  const existingEmail = emailEmpleado || emailCliente || emailEncargado;
-  if (existingEmail) {
-    throw new CustomError('El email ya está registrado', 409); // Conflict
-  }
-
-  // Verificar si el número de documento ya existe
-  const documentoEmpleado = await Empleado.findOne({
-    where: { numeroDocumento },
-  });
-  const documentoCliente = await Cliente.findOne({
-    where: { numeroDocumento },
-  });
-
-  const documentoEncargado = await Encargado.findOne({
-    where: { numeroDocumento },
-  });
-
-  const existingDocumento =
-    documentoEmpleado || documentoCliente || documentoEncargado;
-  if (existingDocumento) {
-    throw new CustomError('El número de documento ya está registrado', 409); // Conflict
-  }
-
-  // Verificar si el teléfono ya existe
-  const telefonoEmpleado = await Empleado.findOne({ where: { telefono } });
-  const telefonoCliente = await Cliente.findOne({ where: { telefono } });
-  const telefonoEncargado = await Encargado.findOne({ where: { telefono } });
-
-  const existingTelefono =
-    telefonoEmpleado || telefonoCliente || telefonoEncargado;
-  if (existingTelefono) {
-    throw new CustomError('El teléfono ya está registrado', 409); // Conflict
+  try {
+    await verificarEmail(email);
+    await verificarTelefono(telefono);
+    await verificarDocumento(numeroDocumento);
+  } catch (error) {
+    throw new CustomError(error.message, error.statusCode);
   }
 };
 
