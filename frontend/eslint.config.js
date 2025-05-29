@@ -23,6 +23,7 @@ export default [
         'error',
         {
           singleQuote: true, // Prettier usa comillas simples
+          endOfLine: 'auto',
         },
       ],
     },
