@@ -1,3 +1,59 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Estilos personalizados para la barra de desplazamiento */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Ancho de la barra */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Fondo de la barra */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.3); /* Color de la barra */
+  border-radius: 4px; /* Bordes redondeados */
+  transition: background 0.3s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.6); /* Color al pasar el mouse */
+}
+
+/* Modo oscuro */
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(200, 200, 200, 0.3);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 200, 200, 0.6);
+}
+
+/* Scroll horizontal (X) */
+.custom-scrollbar-x::-webkit-scrollbar {
+  height: 8px; /* Altura de la barra horizontal */
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.3);
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.6);
+}
+
+/* Modo oscuro para scroll horizontal */
+.dark .custom-scrollbar-x::-webkit-scrollbar-thumb {
+  background: rgba(200, 200, 200, 0.3);
+}
+
+.dark .custom-scrollbar-x::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 200, 200, 0.6);
+}

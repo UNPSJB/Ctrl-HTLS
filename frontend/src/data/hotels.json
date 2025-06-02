@@ -1,72 +1,139 @@
 [
     {
         "id": 1,
-        "image": "https://via.placeholder.com/400x200",
-        "stars": 4.8,
-        "name": "Hotel Marina Bay",
-        "price": 199,
-        "location": "Barcelona, España",
-        "priceLabel": "Precio por noche",
-        "description": "Disfruta de vistas espectaculares al mar en nuestras lujosas habitaciones con todo el confort."
+        "nombre": "Hotel Paraíso",
+        "estrellas": 5,
+        "temporada": "alta",
+        "coeficiente": 0.15,
+        "ubicacion": {
+            "pais": "Argentina",
+            "provincia": "Buenos Aires",
+            "ciudad": "Mar del Plata"
+        },
+        "descripcion": "Ubicado en el corazón de Mar del Plata, el Hotel Paraíso ofrece una experiencia de lujo inigualable.",
+        "imagen": "Hotel Paraíso.webp",
+        "habitaciones": [
+            {
+                "id": 1,
+                "nombre": "Deluxe",
+                "capacidad": 2,
+                "precio": 200
+            },
+            {
+                "id": 2,
+                "nombre": "Suite Ejecutiva",
+                "capacidad": 3,
+                "precio": 300
+            }
+        ],
+        "paquetes": [
+            {
+                "id": 1,
+                "nombre": "Escapada Romántica",
+                "habitaciones": [
+                    {
+                        "id": 1,
+                        "nombre": "Deluxe",
+                        "capacidad": 2,
+                        "precio": 200
+                    },
+                    {
+                        "id": 2,
+                        "nombre": "Estándar",
+                        "capacidad": 2,
+                        "precio": 150
+                    }
+                ],
+                "descuento": 10,
+                "noches": 3,
+                "descripcion": "Paquete romántico de tres noches."
+            }
+        ]
     },
     {
         "id": 2,
-        "image": "https://via.placeholder.com/400x200",
-        "stars": 3.5,
-        "name": "Grand Palace",
-        "price": 250,
-        "location": "Madrid, España",
-        "priceLabel": "Precio por noche",
-        "description": "Experimenta el lujo en el corazón de la ciudad con servicios exclusivos y gastronomía de primera clase."
+        "nombre": "Gran Hotel Mar del Plata",
+        "estrellas": 4,
+        "ubicacion": {
+            "pais": "Argentina",
+            "provincia": "Buenos Aires",
+            "ciudad": "Mar del Plata"
+        },
+        "descripcion": "El Gran Hotel Mar del Plata se destaca por su arquitectura clásica y su ambiente acogedor.",
+        "imagen": "Gran Hotel Mar del Plata.webp",
+        "habitaciones": [
+            {
+                "id": 1,
+                "nombre": "Estándar",
+                "capacidad": 2,
+                "precio": 150
+            },
+            {
+                "id": 2,
+                "nombre": "Suite Familiar",
+                "capacidad": 4,
+                "precio": 250
+            }
+        ],
+        "paquetes": [
+            {
+                "id": 1,
+                "nombre": "Fin de Semana Relax",
+                "habitaciones": [
+                    {
+                        "id": 1,
+                        "nombre": "Estándar",
+                        "capacidad": 2,
+                        "precio": 150
+                    }
+                ],
+                "descuento": 5,
+                "noches": 2,
+                "descripcion": "Fin de semana relajante."
+            }
+        ]
     },
     {
         "id": 3,
-        "image": "https://via.placeholder.com/400x200",
-        "stars": 4.3,
-        "name": "Mountain Retreat",
-        "price": 120,
-        "location": "Andorra",
-        "priceLabel": "Precio por noche",
-        "description": "Escápate a las montañas y relájate rodeado de naturaleza en un ambiente tranquilo y acogedor."
-    },
-    {
-        "id": 4,
-        "image": "https://via.placeholder.com/400x200",
-        "stars": 4.1,
-        "name": "City Lights Hotel",
-        "price": 180,
-        "location": "Valencia, España",
-        "priceLabel": "Precio por noche",
-        "description": "Vive la emoción de la ciudad con habitaciones modernas y una ubicación privilegiada."
-    },
-    {
-        "id": 5,
-        "image": "https://via.placeholder.com/400x200",
-        "stars": 4.6,
-        "name": "Ocean Breeze Resort",
-        "price": 220,
-        "location": "Malaga, España",
-        "priceLabel": "Precio por noche",
-        "description": "Relájate junto al mar con nuestras suites de lujo y actividades para toda la familia."
-    },
-    {
-        "id": 6,
-        "image": "https://via.placeholder.com/400x200",
-        "stars": 4.7,
-        "name": "Desert Oasis",
-        "price": 210,
-        "location": "Almería, España",
-        "priceLabel": "Precio por noche",
-        "description": "Disfruta de la tranquilidad del desierto con vistas impresionantes y un ambiente exclusivo."
-    },
-    {
-        "id": 7,
-        "image": "https://via.placeholder.com/400x200",
-        "stars": 4.9,
-        "name": "Lakeside Hotel & Resort",
-        "price": 300,
-        "location": "Lago de Bañolas, España",
-        "priceLabel": "Precio por noche",
-        "description": "Escápate a la serenidad de la naturaleza con vistas al lago y un ambiente de lujo."
+        "nombre": "Hotel Boutique Playa Grande",
+        "estrellas": 3,
+        "ubicacion": {
+            "pais": "Argentina",
+            "provincia": "Buenos Aires",
+            "ciudad": "Mar del Plata"
+        },
+        "descripcion": "El Hotel Boutique Playa Grande es una joya escondida en Mar del Plata.",
+        "imagen": "Hotel Boutique Playa Grande.webp",
+        "habitaciones": [
+            {
+                "id": 1,
+                "nombre": "Habitación Simple",
+                "capacidad": 1,
+                "precio": 100
+            },
+            {
+                "id": 2,
+                "nombre": "Habitación Doble",
+                "capacidad": 2,
+                "precio": 180
+            }
+        ],
+        "paquetes": [
+            {
+                "id": 1,
+                "nombre": "Aventura Surfista",
+                "habitaciones": [
+                    {
+                        "id": 1,
+                        "nombre": "Habitación Simple",
+                        "capacidad": 1,
+                        "precio": 100
+                    }
+                ],
+                "descuento": 8,
+                "noches": 4,
+                "descripcion": "Paquete para surfistas."
+            }
+        ]
     }
 ]
