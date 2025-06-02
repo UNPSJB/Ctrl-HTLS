@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "documento": "12345678",
+        "nombre": "Juan Pérez",
+        "email": "juan.perez@example.com",
+        "telefono": "+1 234 567 890",
+        "fecha_registro": "2022-03-10",
+        "puntos": 1500
+    },
+    {
+        "id": 2,
+        "documento": "87654321",
+        "nombre": "María González",
+        "email": "maria.gonzalez@example.com",
+        "telefono": "+1 987 654 321",
+        "fecha_registro": "2021-07-15",
+        "puntos": 2300
+    },
+    {
+        "id": 3,
+        "documento": "45678912",
+        "nombre": "Carlos Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "telefono": "+1 456 789 123",
+        "fecha_registro": "2023-01-20",
+        "puntos": 750
+    }
+]
