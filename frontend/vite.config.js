@@ -12,6 +12,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'), // Configura el alias para la carpeta src
+      '@api': resolve(__dirname, './src/api'), // Alias para la carpeta api
       '@components': resolve(__dirname, './src/components'), // Alias para componentes
       '@hooks': resolve(__dirname, './src/hooks'), // Alias para hooks
       '@context': resolve(__dirname, './src/context'), // Alias para contextos

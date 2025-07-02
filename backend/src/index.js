@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const port = 3000;
 const sequelize = require('./config/database');
 const { swaggerUi, swaggerSpec } = require('./config/swaggerConfig');
@@ -12,6 +13,7 @@ const facturaRoutes = require('./routes/ventas/facturasRoutes');
 require('./models/associations');
 require('./docs/swaggerDocs');
 
+app.use(cors());
 app.use(express.json());
 
 // Middleware para Swagger

@@ -10,22 +10,14 @@ const {
   verificarFechas,
   verificarPorcentaje,
 } = require('../../utils/helpers');
-const { Op } = require('sequelize');
 const CustomError = require('../../utils/CustomError');
-const HotelTipoHabitacion = require('../../models/hotel/HotelTipoHabitacion');
 const Categoria = require('../../models/hotel/Categoria');
 const Encargado = require('../../models/hotel/Encargado');
-const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const Ciudad = require('../../models/core/Ciudad');
 const Provincia = require('../../models/core/Provincia');
 const Pais = require('../../models/core/Pais');
-const Habitacion = require('../../models/hotel/Habitacion');
-const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
-const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
-const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const Descuento = require('../../models/hotel/Descuento');
 const paquetePromocionalServices = require('./paquetePromocionalServices');
-const verificarDisponibilidad = require('../ventas/verificarDisponibilidad');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
 const temporadaServices = require('./temporadaServices');
 const descuentoServices = require('./descuentoServices');
@@ -470,6 +462,20 @@ const getDisponibilidadPorHotel = async (
   return disponibilidad;
 };
 
+const obtenerTiposDeHabitacion = async () => {
+  // Obtener todos los tipos de habitaciones
+  try {
+    const tiposDeHabitacion =
+      await tipoHabitacionServices.getTiposDeHabitacion();
+    return tiposDeHabitacion;
+  } catch (error) {
+    throw new CustomError(
+      `Error al obtener los tipos de habitación: ${error.message}`,
+      500,
+    ); // Internal Server Error
+  }
+};
+
 module.exports = {
   crearHotel,
   modificarHotel,
@@ -478,6 +484,7 @@ module.exports = {
   agregarTemporada,
   agregarDescuentos,
   getDisponibilidadPorHotel,
+  obtenerTiposDeHabitacion,
   //getHabitacionesDisponibles,
   //getPaquetesDisponibles,
 };

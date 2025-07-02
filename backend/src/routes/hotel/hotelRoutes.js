@@ -15,6 +15,7 @@ const {
   updateHabitacion,
   deleteHabitacion,
   setPaquetePromocional,
+  getTiposDeHabitacion,
 } = require('../../controllers/hotel/hotelController');
 
 const router = express.Router();
@@ -29,6 +30,9 @@ router.delete(
   validateId,
   deleteHabitacion,
 );
+
+//Rutas de tipos de habitaciones
+router.get('/obtener-tiposHabitaciones', getTiposDeHabitacion); //Ruta para obtener las categorias de los hoteles
 
 router.post(
   '/hotel/:id/paquete-promocional',

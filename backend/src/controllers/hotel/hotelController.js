@@ -181,6 +181,16 @@ const setDescuento = async (req, res) => {
   }
 };
 
+const getTiposDeHabitacion = async (req, res) => {
+  try {
+    const tipos = await hotelServices.obtenerTiposDeHabitacion();
+    res.json(tipos);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createHotel,
   updateHotel,
@@ -191,4 +201,5 @@ module.exports = {
   updateHabitacion,
   deleteHabitacion,
   setPaquetePromocional,
+  getTiposDeHabitacion,
 };
