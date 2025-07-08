@@ -16,6 +16,7 @@ const {
   deleteHabitacion,
   setPaquetePromocional,
   getTiposDeHabitacion,
+  createEncargado,
 } = require('../../controllers/hotel/hotelController');
 
 const router = express.Router();
@@ -30,6 +31,8 @@ router.delete(
   validateId,
   deleteHabitacion,
 );
+
+router.post('/hotel/encargados', createEncargado);
 
 //Rutas de tipos de habitaciones
 router.get('/obtener-tiposHabitaciones', getTiposDeHabitacion); //Ruta para obtener las categorias de los hoteles

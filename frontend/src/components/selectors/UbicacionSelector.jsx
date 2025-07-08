@@ -1,6 +1,9 @@
-import useUbicacion from '@/hooks/useUbicacion';
+'use client';
 
-const UbicacionSelector = ({ errors = {} }) => {
+import useUbicacion from '@/hooks/useUbicacion';
+import { useEffect } from 'react';
+
+const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
   const {
     paises,
     provincias,
@@ -15,6 +18,34 @@ const UbicacionSelector = ({ errors = {} }) => {
     handleCiudadChange,
   } = useUbicacion();
 
+  // Sincronizar los valores del hook useUbicacion con react-hook-form
+  useEffect(() => {
+    setValue('paisId', paisId);
+  }, [paisId, setValue]);
+
+  useEffect(() => {
+    setValue('provinciaId', provinciaId);
+  }, [provinciaId, setValue]);
+
+  useEffect(() => {
+    setValue('ciudadId', ciudadId);
+  }, [ciudadId, setValue]);
+
+  const handlePaisChangeInternal = (value) => {
+    handlePaisChange(value);
+    setValue('paisId', value);
+  };
+
+  const handleProvinciaChangeInternal = (value) => {
+    handleProvinciaChange(value);
+    setValue('provinciaId', value);
+  };
+
+  const handleCiudadChangeInternal = (value) => {
+    handleCiudadChange(value);
+    setValue('ciudadId', value);
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
@@ -28,7 +59,7 @@ const UbicacionSelector = ({ errors = {} }) => {
           </label>
           <select
             value={paisId}
-            onChange={(e) => handlePaisChange(e.target.value)}
+            onChange={(e) => handlePaisChangeInternal(e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
               errors.paisId ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -51,7 +82,7 @@ const UbicacionSelector = ({ errors = {} }) => {
           </label>
           <select
             value={provinciaId}
-            onChange={(e) => handleProvinciaChange(e.target.value)}
+            onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
             disabled={isProvinciasDisabled}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
               errors.provinciaId ? 'border-red-500' : 'border-gray-300'
@@ -79,7 +110,7 @@ const UbicacionSelector = ({ errors = {} }) => {
           </label>
           <select
             value={ciudadId}
-            onChange={(e) => handleCiudadChange(e.target.value)}
+            onChange={(e) => handleCiudadChangeInternal(e.target.value)}
             disabled={isCiudadesDisabled}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
               errors.ciudadId ? 'border-red-500' : 'border-gray-300'
@@ -101,6 +132,18 @@ const UbicacionSelector = ({ errors = {} }) => {
           )}
         </div>
       </div>
+
+      {/* Vista previa de la ubicación seleccionada */}
+      {paisId && provinciaId && ciudadId && (
+        <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+          <p className="text-sm text-green-800">
+            <strong>Ubicación seleccionada:</strong>{' '}
+            {ciudades.find((c) => c.id.toString() === ciudadId)?.nombre},{' '}
+            {provincias.find((p) => p.id.toString() === provinciaId)?.nombre},{' '}
+            {paises.find((p) => p.id.toString() === paisId)?.nombre}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

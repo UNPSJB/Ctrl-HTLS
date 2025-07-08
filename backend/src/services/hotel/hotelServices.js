@@ -5,10 +5,11 @@ const {
   verificarDireccion,
   verificarEmail,
   verificarTelefono,
-  verificarTiposHabitacion,
+  verificarTipoDocumento,
   verificarIdHotel,
   verificarFechas,
   verificarPorcentaje,
+  verificarDocumento,
 } = require('../../utils/helpers');
 const CustomError = require('../../utils/CustomError');
 const Categoria = require('../../models/hotel/Categoria');
@@ -47,6 +48,25 @@ const crearHotel = async (
     categoriaId,
   );
   let nuevoHotel = {};
+
+  // console.log(
+  //   'Nombre: ',
+  //   nombre,
+  //   'Direccion: ',
+  //   direccion,
+  //   'Telefono: ',
+  //   telefono,
+  //   'Email: ',
+  //   email,
+  //   'Tipos: ',
+  //   tipoHabitaciones,
+  //   'Ciudad: ',
+  //   ciudadId,
+  //   'Encargado: ',
+  //   encargadoId,
+  //   'Categoria: ',
+  //   categoriaId,
+  // );
   try {
     // Crear el nuevo hotel
     nuevoHotel = await Hotel.create({
@@ -128,7 +148,9 @@ const modificarHotel = async (
 };
 
 //IMPLEMENTAR
-const eliminarHotel = async (id) => {};
+const eliminarHotel = async (id) => {
+  return id;
+};
 
 const asignarTipoHabitaciones = async (hotelId, tipoHabitaciones) => {
   const transaction = await sequelize.transaction(); // Iniciamos transacción manual
@@ -296,10 +318,14 @@ const verificarHotel = async (
       409,
     ); // Conflict
   }
+
+  console.log('ENCARGADO ID:', encargadoId);
+
   const encargadoExistente = await Encargado.findByPk(encargadoId);
   if (!encargadoExistente) {
     throw new CustomError('El encargado no existe', 404); // Not Found
   }
+
   const encargadoHotelExistente = await Hotel.findOne({
     where: { encargadoId },
   });
@@ -476,6 +502,30 @@ const obtenerTiposDeHabitacion = async () => {
   }
 };
 
+const crearEncargado = async (
+  nombre,
+  apellido,
+  tipoDocumento,
+  numeroDocumento,
+) => {
+  // Verificar si el encargado ya existe
+  verificarDocumento(numeroDocumento);
+  verificarTipoDocumento(tipoDocumento);
+  // Crear el nuevo encargado
+  try {
+    const nuevoEncargado = await Encargado.create({
+      nombre,
+      apellido,
+      dni: numeroDocumento,
+      tipoDocumento,
+    });
+
+    return nuevoEncargado.dataValues;
+  } catch (error) {
+    throw new CustomError(`Error al crear el encargado: ${error.message}`, 500); // Internal Server Error
+  }
+};
+
 module.exports = {
   crearHotel,
   modificarHotel,
@@ -485,6 +535,8 @@ module.exports = {
   agregarDescuentos,
   getDisponibilidadPorHotel,
   obtenerTiposDeHabitacion,
+  eliminarHotel,
   //getHabitacionesDisponibles,
   //getPaquetesDisponibles,
+  crearEncargado,
 };

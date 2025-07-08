@@ -4,13 +4,18 @@ require('dotenv').config();
 const sequelize = new Sequelize(process.env.DB_URL, {
   dialect: 'postgres',
   protocol: 'postgres',
-  logging: false,
   dialectOptions: {
     ssl: {
       require: true,
       rejectUnauthorized: false,
     },
   },
+  loggin: false,
+  // loggin: (msg) => {
+  //   if (process.env.NODE_ENV === 'development') {
+  //     console.log(msg);
+  //   }
+  // },
 });
 
 // const sequelize = new Sequelize(

@@ -38,6 +38,16 @@ const verificarDocumento = async (numeroDocumento) => {
   }
 };
 
+const verificarTipoDocumento = (tipoDocumento) => {
+  const tiposValidos = ['dni', 'li', 'le', 'pasaporte'];
+  if (!tiposValidos.includes(tipoDocumento)) {
+    throw new CustomError(
+      `Tipo de documento inválido. Debe ser uno de: ${tiposValidos.join(', ')}`,
+      400, // Bad Request
+    );
+  }
+};
+
 const verificarEmail = async (email) => {
   // Verificar si ya existe un hotel con el mismo email
   const hotelExistenteEmail = await Hotel.findOne({
@@ -168,6 +178,7 @@ module.exports = {
   convertirFechas,
   verificarCiudad,
   verificarDocumento,
+  verificarTipoDocumento,
   verificarEmail,
   verificarIdHotel,
   verificarFechas,
