@@ -37,32 +37,6 @@ export default function HotelFormPage() {
     setValue(field, value);
   };
 
-  // Mostrar mensaje de error si hay problemas cargando los datos
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
-          <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              Error al cargar datos
-            </h2>
-            <p className="text-gray-600 mb-4">
-              No se pudieron cargar los datos necesarios para el formulario.
-            </p>
-            <p className="text-sm text-red-600 mb-4">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-2xl mx-auto">
