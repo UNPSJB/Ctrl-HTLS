@@ -1,13 +1,14 @@
-import axios from '@/api/axiosInstance';
+'use client';
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import axios from '../api/axiosInstance'; // Asegúrate de que esta ruta sea correcta
 
 const useHotelForm = () => {
   const [tiposSeleccionados, setTiposSeleccionados] = useState([]);
   const [selectedTipo, setSelectedTipo] = useState('');
   const [precioTemporal, setPrecioTemporal] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [encargadoNuevo, setEncargadoNuevo] = useState(null);
 
   const form = useForm({
     defaultValues: {
@@ -28,8 +29,13 @@ const useHotelForm = () => {
       encargadoApellido: '',
       encargadoTipoDocumento: '',
       encargadoNumeroDocumento: '',
+
+      // Campo virtual para validar tipos de habitaciones
+      tiposHabitaciones: [],
     },
   });
+
+  const { setValue, clearErrors, setError } = form;
 
   const handleAgregarTipoHabitacion = () => {
     if (selectedTipo && precioTemporal && !isNaN(precioTemporal)) {
@@ -43,7 +49,15 @@ const useHotelForm = () => {
           precio: Number.parseInt(precioTemporal),
         };
 
-        setTiposSeleccionados([...tiposSeleccionados, nuevoTipo]);
+        const nuevosSeleccionados = [...tiposSeleccionados, nuevoTipo];
+        setTiposSeleccionados(nuevosSeleccionados);
+
+        // Actualizar el campo virtual para la validación
+        setValue('tiposHabitaciones', nuevosSeleccionados);
+
+        // Limpiar error si existe
+        clearErrors('tiposHabitaciones');
+
         setSelectedTipo('');
         setPrecioTemporal('');
       }
@@ -51,18 +65,33 @@ const useHotelForm = () => {
   };
 
   const handleTipoHabitacionRemove = (tipoId) => {
-    setTiposSeleccionados(
-      tiposSeleccionados.filter((tipo) => tipo.id !== tipoId)
+    const nuevosSeleccionados = tiposSeleccionados.filter(
+      (tipo) => tipo.id !== tipoId
     );
+    setTiposSeleccionados(nuevosSeleccionados);
+
+    // Actualizar el campo virtual para la validación
+    setValue('tiposHabitaciones', nuevosSeleccionados);
+
+    // Si no quedan tipos, mostrar error
+    if (nuevosSeleccionados.length === 0) {
+      setError('tiposHabitaciones', {
+        type: 'required',
+        message: 'Debe agregar al menos un tipo de habitación',
+      });
+    }
   };
 
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
 
-      // Validar que se hayan seleccionado los datos de ubicación
-      if (!data.paisId || !data.provinciaId || !data.ciudadId) {
-        alert('Por favor seleccione país, provincia y ciudad');
+      // Validación adicional para tipos de habitaciones
+      if (tiposSeleccionados.length === 0) {
+        setError('tiposHabitaciones', {
+          type: 'required',
+          message: 'Debe agregar al menos un tipo de habitación',
+        });
         return;
       }
 
@@ -73,33 +102,59 @@ const useHotelForm = () => {
         tipoDocumento: data.encargadoTipoDocumento,
         numeroDocumento: data.encargadoNumeroDocumento,
       };
-      let response;
+
+      console.log('Enviando datos del encargado:', encargadoData);
+
+      // Crear el encargado primero
+      let encargadoId;
       try {
-        response = await axios.post('/hotel/encargados', encargadoData);
+        const respEncargado = await axios.post(
+          '/hotel/encargados',
+          encargadoData
+        );
+        console.log('Respuesta del encargado:', respEncargado.data);
+        encargadoId = respEncargado.data.id;
+
+        console.log('Encargado creado con ID:', encargadoId);
       } catch (error) {
         console.error('Error al crear el encargado:', error);
+        throw new Error('Error al crear el encargado');
       }
 
-      // Preparar datos del hotel
+      // Preparar datos del hotel con el ID del encargado
       const hotelData = {
         nombre: data.nombre,
         direccion: data.direccion,
         telefono: data.telefono,
         email: data.email,
-        ciudadId: data.ciudadId, // Ahora se incluye correctamente
+        paisId: data.paisId,
+        provinciaId: data.provinciaId,
+        ciudadId: data.ciudadId,
         categoriaId: data.categoriaId,
-        encargadoId: response.data.id, // ID del encargado recién creado
+        encargadoId: encargadoId,
         tipoHabitaciones: tiposSeleccionados,
       };
 
-      const hotelResponse = await axios.post('/hotel', hotelData);
+      console.log('Enviando datos del hotel:', hotelData);
 
-      console.log('Hotel creado:', hotelResponse.data);
+      // Crear el hotel
+      try {
+        const respHotel = await axios.post('/hotel', hotelData);
+        console.log('Respuesta del hotel:', respHotel.data);
 
-      //return { encargadoId, hotelData };
+        console.log('✅ Hotel y encargado creados exitosamente!');
+
+        // Opcional: resetear el formulario después del éxito
+        // resetForm()
+
+        return { encargadoId, hotelData: respHotel.data };
+      } catch (error) {
+        console.error('Error al crear el hotel:', error);
+        throw new Error('Error al crear el hotel');
+      }
     } catch (error) {
-      console.error('Error al crear hotel:', error);
-      alert('Error al crear el hotel. Por favor intente nuevamente.');
+      console.error('Error general:', error);
+      throw error; // Re-lanzar el error para que react-hook-form lo maneje
     } finally {
       setIsSubmitting(false);
     }

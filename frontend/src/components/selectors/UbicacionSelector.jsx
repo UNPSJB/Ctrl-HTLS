@@ -1,5 +1,3 @@
-'use client';
-
 import useUbicacion from '@/hooks/useUbicacion';
 import { useEffect } from 'react';
 
@@ -58,6 +56,7 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
             País *
           </label>
           <select
+            {...register('paisId', { required: 'Debe seleccionar un país' })}
             value={paisId}
             onChange={(e) => handlePaisChangeInternal(e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
@@ -81,6 +80,9 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
             Provincia/Estado *
           </label>
           <select
+            {...register('provinciaId', {
+              required: 'Debe seleccionar una provincia',
+            })}
             value={provinciaId}
             onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
             disabled={isProvinciasDisabled}
@@ -109,6 +111,9 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
             Ciudad *
           </label>
           <select
+            {...register('ciudadId', {
+              required: 'Debe seleccionar una ciudad',
+            })}
             value={ciudadId}
             onChange={(e) => handleCiudadChangeInternal(e.target.value)}
             disabled={isCiudadesDisabled}

@@ -6,7 +6,7 @@ import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import TiposHabitacionSelector from '@/components/selectors/TipoHabitacionSelector';
 import EncargadoForm from '@/components/forms/EncargadoForm';
 import useHotel from '@/hooks/useHotel';
-export default function Component() {
+export default function HotelFormPage() {
   const hotelForm = useHotelForm();
   const { tiposHabitacion, categorias, loading, error } = useHotel();
 
@@ -245,6 +245,7 @@ export default function Component() {
                 onRemover={handleTipoHabitacionRemove}
                 canAdd={canAddTipoHabitacion}
                 loading={loading || isSubmitting}
+                errors={errors} // Pasamos los errores al componente
               />
 
               {/* Categoría */}
@@ -258,6 +259,9 @@ export default function Component() {
                     Categoría *
                   </label>
                   <select
+                    {...register('categoriaId', {
+                      required: 'Debe seleccionar una categoría',
+                    })}
                     onChange={(e) =>
                       handleSelectChange('categoriaId', e.target.value)
                     }

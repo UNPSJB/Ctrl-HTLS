@@ -1,7 +1,9 @@
-import useHotel from '@/hooks/useHotel';
+'use client';
+
 import { X, Plus, DollarSign } from 'lucide-react';
 
 const TiposHabitacionSelector = ({
+  tiposHabitaciones = [],
   tiposSeleccionados,
   selectedTipo,
   setSelectedTipo,
@@ -10,9 +12,9 @@ const TiposHabitacionSelector = ({
   onAgregar,
   onRemover,
   canAdd,
+  loading = false,
+  errors = {}, // Agregamos errors como prop
 }) => {
-  const { tiposHabitaciones } = useHotel();
-
   const getTipoHabitacionNombre = (id) => {
     return (
       tiposHabitaciones.find((tipo) => tipo.id === id.toString())?.nombre || ''
@@ -46,9 +48,14 @@ const TiposHabitacionSelector = ({
             <select
               value={selectedTipo}
               onChange={(e) => setSelectedTipo(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              disabled={loading}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                loading ? 'bg-gray-100 cursor-not-allowed' : ''
+              }`}
             >
-              <option value="">Seleccionar tipo</option>
+              <option value="">
+                {loading ? 'Cargando tipos...' : 'Seleccionar tipo'}
+              </option>
               {tiposHabitaciones.map((tipo) => (
                 <option
                   key={tipo.id}
@@ -74,7 +81,10 @@ const TiposHabitacionSelector = ({
                 placeholder="50000"
                 value={precioTemporal}
                 onChange={(e) => setPrecioTemporal(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={loading}
+                className={`w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  loading ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
                 min="0"
               />
             </div>
@@ -83,17 +93,26 @@ const TiposHabitacionSelector = ({
           <button
             type="button"
             onClick={onAgregar}
-            disabled={!canAdd}
+            disabled={!canAdd || loading}
             className={`px-4 py-2 rounded-md text-white font-medium flex items-center gap-1 ${
-              canAdd
+              canAdd && !loading
                 ? 'bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500'
                 : 'bg-gray-400 cursor-not-allowed'
             }`}
           >
             <Plus className="h-4 w-4" />
-            Agregar
+            {loading ? '...' : 'Agregar'}
           </button>
         </div>
+
+        {/* Error de validación para tipos de habitaciones */}
+        {errors.tiposHabitaciones && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600 text-sm font-medium">
+              {errors.tiposHabitaciones.message}
+            </p>
+          </div>
+        )}
 
         {/* Lista de tipos agregados */}
         {tiposSeleccionados.length > 0 && (
@@ -125,6 +144,16 @@ const TiposHabitacionSelector = ({
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Mensaje cuando no hay tipos agregados */}
+        {tiposSeleccionados.length === 0 && (
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800 text-sm">
+              <strong>Nota:</strong> Debe agregar al menos un tipo de habitación
+              con su precio antes de registrar el hotel.
+            </p>
           </div>
         )}
       </div>
