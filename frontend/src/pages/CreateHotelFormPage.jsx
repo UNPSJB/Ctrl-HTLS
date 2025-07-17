@@ -1,14 +1,15 @@
-'use client';
-
 import { Building2 } from 'lucide-react';
 import useHotelForm from '@/hooks/useHotelForm';
 import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import TiposHabitacionSelector from '@/components/selectors/TipoHabitacionSelector';
 import EncargadoForm from '@/components/forms/EncargadoForm';
 import useHotel from '@/hooks/useHotel';
-export default function HotelFormPage() {
+import { Loading } from '@/components/modals/Loading';
+import Swal from 'sweetalert2';
+
+export default function CreateHotelFormPage() {
   const hotelForm = useHotelForm();
-  const { tiposHabitacion, categorias, loading, error } = useHotel();
+  const { tiposHabitaciones, categorias, loading } = useHotel();
 
   const {
     register,
@@ -55,18 +56,7 @@ export default function HotelFormPage() {
           </div>
 
           {/* Loading Overlay */}
-          {(loading || isSubmitting) && (
-            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">
-                  {loading
-                    ? 'Cargando datos del formulario...'
-                    : 'Creando hotel y encargado...'}
-                </p>
-              </div>
-            </div>
-          )}
+          {loading && <Loading />}
 
           {/* Content */}
           <div className="p-6 relative">
@@ -209,7 +199,7 @@ export default function HotelFormPage() {
 
               {/* Tipos de Habitaciones */}
               <TiposHabitacionSelector
-                tiposHabitaciones={tiposHabitacion}
+                tiposHabitaciones={tiposHabitaciones}
                 tiposSeleccionados={tiposSeleccionados}
                 selectedTipo={selectedTipo}
                 setSelectedTipo={setSelectedTipo}

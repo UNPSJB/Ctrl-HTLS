@@ -1,7 +1,7 @@
 import useUbicacion from '@/hooks/useUbicacion';
 import { useEffect } from 'react';
 
-const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
+const UbicacionSelector = ({ errors = {}, register, setValue }) => {
   const {
     paises,
     provincias,
@@ -137,18 +137,6 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
           )}
         </div>
       </div>
-
-      {/* Vista previa de la ubicación seleccionada */}
-      {paisId && provinciaId && ciudadId && (
-        <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-          <p className="text-sm text-green-800">
-            <strong>Ubicación seleccionada:</strong>{' '}
-            {ciudades.find((c) => c.id.toString() === ciudadId)?.nombre},{' '}
-            {provincias.find((p) => p.id.toString() === provinciaId)?.nombre},{' '}
-            {paises.find((p) => p.id.toString() === paisId)?.nombre}
-          </p>
-        </div>
-      )}
     </div>
   );
 };

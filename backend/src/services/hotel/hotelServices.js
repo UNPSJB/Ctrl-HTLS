@@ -36,38 +36,20 @@ const crearHotel = async (
   encargadoId,
   categoriaId,
 ) => {
-  await verificarCiudad(ciudadId);
-
-  await verificarHotel(
-    nombre,
-    ciudadId,
-    direccion,
-    email,
-    telefono,
-    encargadoId,
-    categoriaId,
-  );
   let nuevoHotel = {};
 
-  // console.log(
-  //   'Nombre: ',
-  //   nombre,
-  //   'Direccion: ',
-  //   direccion,
-  //   'Telefono: ',
-  //   telefono,
-  //   'Email: ',
-  //   email,
-  //   'Tipos: ',
-  //   tipoHabitaciones,
-  //   'Ciudad: ',
-  //   ciudadId,
-  //   'Encargado: ',
-  //   encargadoId,
-  //   'Categoria: ',
-  //   categoriaId,
-  // );
   try {
+    await verificarCiudad(ciudadId);
+
+    await verificarHotel(
+      nombre,
+      ciudadId,
+      direccion,
+      email,
+      telefono,
+      encargadoId,
+      categoriaId,
+    );
     // Crear el nuevo hotel
     nuevoHotel = await Hotel.create({
       nombre,
@@ -103,8 +85,8 @@ const crearHotel = async (
       ciudadCompleta,
     };
   } catch (error) {
-    await nuevoHotel.destroy();
-    throw error;
+    await deleteEncargado(encargadoId);
+    throw new CustomError(error.message, error.status || 500);
   }
 };
 
@@ -508,12 +490,11 @@ const crearEncargado = async (
   tipoDocumento,
   numeroDocumento,
 ) => {
-  // Verificar si el encargado ya existe
-  verificarDocumento(numeroDocumento);
-  verificarTipoDocumento(tipoDocumento);
-  // Crear el nuevo encargado
+  let nuevoEncargado = {};
   try {
-    const nuevoEncargado = await Encargado.create({
+    await verificarDocumento(numeroDocumento);
+    await verificarTipoDocumento(tipoDocumento);
+    nuevoEncargado = await Encargado.create({
       nombre,
       apellido,
       dni: numeroDocumento,
@@ -523,6 +504,25 @@ const crearEncargado = async (
     return nuevoEncargado.dataValues;
   } catch (error) {
     throw new CustomError(`Error al crear el encargado: ${error.message}`, 500); // Internal Server Error
+  }
+};
+
+const deleteEncargado = async (id) => {
+  try {
+    const encargado = await Encargado.findByPk(id);
+
+    if (!encargado) {
+      throw new CustomError(`Encargado no encontrado con id ${id}`, 404); // Not Found
+    }
+
+    await encargado.destroy();
+
+    return { message: `Encargado con id ${id} eliminado correctamente` };
+  } catch (error) {
+    throw new CustomError(
+      `Error al eliminar el encargado: ${error.message}`,
+      500,
+    );
   }
 };
 

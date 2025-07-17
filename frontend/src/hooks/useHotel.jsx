@@ -13,7 +13,7 @@ const useHotel = () => {
         setLoading(true);
         setError(null);
 
-        const [resTipos, resCategorias, resEncargados] = await Promise.all([
+        const [resTipos, resCategorias] = await Promise.all([
           axios.get('/obtener-tiposHabitaciones'),
           axios.get('/categorias'),
         ]);

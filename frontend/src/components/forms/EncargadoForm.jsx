@@ -8,7 +8,7 @@ const tiposDocumento = [
   { id: 'le', nombre: 'Tarjeta de Identidad' },
 ];
 
-const EncargadoForm = ({ register, errors, watch, loading }) => {
+const EncargadoForm = ({ register, errors, loading }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 border-b pb-2">
@@ -148,28 +148,6 @@ const EncargadoForm = ({ register, errors, watch, loading }) => {
           )}
         </div>
       </div>
-
-      {/* Resumen del encargado */}
-      {watch('encargadoNombre') && watch('encargadoApellido') && (
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-800">
-            <strong>Encargado:</strong> {watch('encargadoNombre')}{' '}
-            {watch('encargadoApellido')}
-            {watch('encargadoTipoDocumento') &&
-              watch('encargadoNumeroDocumento') && (
-                <span className="ml-2">
-                  (
-                  {
-                    tiposDocumento.find(
-                      (t) => t.id === watch('encargadoTipoDocumento')
-                    )?.nombre
-                  }
-                  : {watch('encargadoNumeroDocumento')})
-                </span>
-              )}
-          </p>
-        </div>
-      )}
     </div>
   );
 };

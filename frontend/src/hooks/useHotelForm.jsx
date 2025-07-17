@@ -1,14 +1,14 @@
-'use client';
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from '../api/axiosInstance'; // Asegúrate de que esta ruta sea correcta
+import Swal from 'sweetalert2';
 
 const useHotelForm = () => {
   const [tiposSeleccionados, setTiposSeleccionados] = useState([]);
   const [selectedTipo, setSelectedTipo] = useState('');
   const [precioTemporal, setPrecioTemporal] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alertaAccion, setAlertaAccion] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -112,13 +112,11 @@ const useHotelForm = () => {
           '/hotel/encargados',
           encargadoData
         );
-        console.log('Respuesta del encargado:', respEncargado.data);
         encargadoId = respEncargado.data.id;
-
-        console.log('Encargado creado con ID:', encargadoId);
       } catch (error) {
-        console.error('Error al crear el encargado:', error);
-        throw new Error('Error al crear el encargado');
+        const mensaje =
+          error.response?.data?.error || 'Error al crear el encargado';
+        Swal.fire('Error', mensaje, 'error');
       }
 
       // Preparar datos del hotel con el ID del encargado
@@ -135,29 +133,35 @@ const useHotelForm = () => {
         tipoHabitaciones: tiposSeleccionados,
       };
 
-      console.log('Enviando datos del hotel:', hotelData);
-
       // Crear el hotel
       try {
         const respHotel = await axios.post('/hotel', hotelData);
-        console.log('Respuesta del hotel:', respHotel.data);
+        resetForm();
+        setAlertaAccion(true);
+        setAlertaAccion(true);
 
-        console.log('✅ Hotel y encargado creados exitosamente!');
-
-        // Opcional: resetear el formulario después del éxito
-        // resetForm()
-
+        Swal.fire({
+          icon: 'success',
+          title: 'Hotel creado exitosamente',
+          text: `El hotel "${data.nombre}" fue registrado.`,
+          confirmButtonColor: '#3085d6',
+        });
         return { encargadoId, hotelData: respHotel.data };
       } catch (error) {
-        console.error('Error al crear el hotel:', error);
-        throw new Error('Error al crear el hotel');
+        const mensaje =
+          error.response?.data?.error || 'Error al crear el hotel';
+        Swal.fire('Error', mensaje, 'error');
       }
     } catch (error) {
-      console.error('Error general:', error);
-      throw error; // Re-lanzar el error para que react-hook-form lo maneje
+      const mensaje = error.response?.data?.error || 'Error de servidor';
+      Swal.fire('Error', mensaje, 'error');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const closeAlert = () => {
+    setAlertaAccion(false);
   };
 
   const resetForm = () => {
@@ -184,6 +188,8 @@ const useHotelForm = () => {
     onSubmit,
     resetForm,
     isSubmitting,
+    closeAlert,
+    alertaAccion,
 
     // Validaciones
     canAddTipoHabitacion:
