@@ -40,9 +40,12 @@ const Header = () => {
             <img src={logo} alt="Logo" className="w-52" />
           </Link>
 
+<<<<<<< HEAD
           {/* Navegación (puedes agregar enlaces aquí si lo necesitas) */}
           <nav />
 
+=======
+>>>>>>> origin/features
           {/* Acciones del usuario */}
           <div className="flex items-center space-x-4">
             <CartToggleButton onClick={handleCartToggle} />

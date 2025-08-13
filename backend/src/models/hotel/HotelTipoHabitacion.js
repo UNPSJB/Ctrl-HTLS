@@ -6,6 +6,7 @@ const HotelTipoHabitacion = sequelize.define(
   {
     hotelId: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
         model: 'Hotel',
         key: 'id',
@@ -13,13 +14,14 @@ const HotelTipoHabitacion = sequelize.define(
     },
     tipoHabitacionId: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
         model: 'TipoHabitacion',
         key: 'id',
       },
     },
     precio: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
   },

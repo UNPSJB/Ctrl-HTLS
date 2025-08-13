@@ -1,31 +1,30 @@
 const Hotel = require('../../models/hotel/Hotel');
+const sequelize = require('../../config/database');
 const {
   verificarCiudad,
   verificarDireccion,
   verificarEmail,
   verificarTelefono,
-  verificarTiposHabitacion,
+  verificarTipoDocumento,
   verificarIdHotel,
   verificarFechas,
   verificarPorcentaje,
+  verificarDocumento,
 } = require('../../utils/helpers');
-const { Op } = require('sequelize');
 const CustomError = require('../../utils/CustomError');
-const HotelTipoHabitacion = require('../../models/hotel/HotelTipoHabitacion');
 const Categoria = require('../../models/hotel/Categoria');
 const Encargado = require('../../models/hotel/Encargado');
-const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const Ciudad = require('../../models/core/Ciudad');
 const Provincia = require('../../models/core/Provincia');
 const Pais = require('../../models/core/Pais');
-const Habitacion = require('../../models/hotel/Habitacion');
-const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
-const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
-const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
+const Descuento = require('../../models/hotel/Descuento');
 const paquetePromocionalServices = require('./paquetePromocionalServices');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
 const temporadaServices = require('./temporadaServices');
 const descuentoServices = require('./descuentoServices');
+const habitacionServices = require('./habitacionServices');
+const tipoHabitacionServices = require('./tipoHabitacionServices');
+const hotelTipoHabitacionServices = require('./hotelTipoHabitacionServices');
 
 const crearHotel = async (
   nombre,
@@ -37,19 +36,20 @@ const crearHotel = async (
   encargadoId,
   categoriaId,
 ) => {
-  await verificarCiudad(ciudadId);
-
-  await verificarHotel(
-    nombre,
-    ciudadId,
-    direccion,
-    email,
-    telefono,
-    encargadoId,
-    categoriaId,
-  );
   let nuevoHotel = {};
+
   try {
+    await verificarCiudad(ciudadId);
+
+    await verificarHotel(
+      nombre,
+      ciudadId,
+      direccion,
+      email,
+      telefono,
+      encargadoId,
+      categoriaId,
+    );
     // Crear el nuevo hotel
     nuevoHotel = await Hotel.create({
       nombre,
@@ -85,8 +85,8 @@ const crearHotel = async (
       ciudadCompleta,
     };
   } catch (error) {
-    await nuevoHotel.destroy();
-    throw error;
+    await deleteEncargado(encargadoId);
+    throw new CustomError(error.message, error.status || 500);
   }
 };
 
@@ -130,54 +130,72 @@ const modificarHotel = async (
 };
 
 //IMPLEMENTAR
-const eliminarHotel = async (id) => {};
+const eliminarHotel = async (id) => {
+  return id;
+};
 
 const asignarTipoHabitaciones = async (hotelId, tipoHabitaciones) => {
-  // Verificar que los IDs de los tipos de habitación existan y no sean duplicados
-  await verificarTiposHabitacion(tipoHabitaciones);
+  const transaction = await sequelize.transaction(); // Iniciamos transacción manual
+  try {
+    const hotel = await Hotel.findByPk(hotelId, { transaction });
+    if (!hotel) {
+      throw new CustomError('El hotel no existe', 404); // Not Found
+    }
 
-  for (const tipoHabitacion of tipoHabitaciones) {
-    const { idTipoHabitacion, precio } = tipoHabitacion;
+    const tiposHabitacionAsignados = [];
 
-    // Crear la relación en la tabla intermedia
-    await HotelTipoHabitacion.create({
-      hotelId,
-      tipoHabitacionId: idTipoHabitacion,
-      precio,
-    });
+    for (const tipoHabitacion of tipoHabitaciones) {
+      // Verificamos si el tipo de habitación existe
+      const tipo = await tipoHabitacionServices.getTipoHabitacion(
+        tipoHabitacion.id,
+      );
+      if (!tipo) {
+        throw new CustomError(
+          `Tipo de habitación con ID ${tipoHabitacion.id} no existe`,
+          400,
+        );
+      }
+
+      // Verificamos si ya está asociado
+      const yaAsociado =
+        await hotelTipoHabitacionServices.getTipoHabitacionDeHotel(
+          hotelId,
+          tipoHabitacion.id,
+        );
+      if (yaAsociado) {
+        throw new CustomError(
+          `El tipo de habitación con ID ${tipoHabitacion.id} ya está asignado al hotel`,
+          409, // Conflict
+        );
+      }
+
+      // Asociamos dentro de la transacción
+      await hotelTipoHabitacionServices.asociarTipoHabitacionAHotel(
+        hotelId,
+        tipoHabitacion.id,
+        tipoHabitacion.precio,
+        transaction,
+      );
+
+      tiposHabitacionAsignados.push(tipo);
+    }
+
+    await transaction.commit(); // Todo salió bien, confirmamos los cambios
+    return tiposHabitacionAsignados;
+  } catch (error) {
+    await transaction.rollback(); // Algo falló, deshacemos todo
+    throw new CustomError(error.message, error.status || 500);
   }
 };
 
 // Obtener los tipos de habitaciones de un hotel
 const getTiposHabitacionesHotel = async (idHotel) => {
   // Obtener los registros de la tabla intermedia
-  const tiposHabitacionesAsignadas = await HotelTipoHabitacion.findAll({
-    where: { hotelId: idHotel },
-  });
-
-  // Obtener los IDs de los tipos de habitación
-  const idsTipoHabitacion = tiposHabitacionesAsignadas.map(
-    (th) => th.tipoHabitacionId,
-  );
-
-  // Obtener los nombres de los tipos de habitación
-  const tiposHabitacion = await TipoHabitacion.findAll({
-    where: { id: idsTipoHabitacion },
-    attributes: ['id', 'nombre'],
-  });
-
-  // Crear un mapa para acceder rápidamente a los nombres de los tipos de habitación
-  const mapaTiposHabitacion = tiposHabitacion.reduce((mapa, tipo) => {
-    mapa[tipo.id] = tipo.nombre;
-    return mapa;
-  }, {});
-
-  // Combinar los datos y devolver el resultado
-  return tiposHabitacionesAsignadas.map((th) => ({
-    idTipoHabitacion: th.tipoHabitacionId,
-    precio: th.precio,
-    nombre: mapaTiposHabitacion[th.tipoHabitacionId],
-  }));
+  try {
+    return hotelTipoHabitacionServices.getTipoHabitacionesDeHotel(idHotel);
+  } catch (error) {
+    throw new CustomError(error.message, error.status || 500);
+  }
 };
 
 const getNombreEncargado = async (encargadoId) => {
@@ -225,6 +243,37 @@ const getCiudadCompleta = async (ciudadId) => {
   return ciudad;
 };
 
+const getHotelesPorCiudad = async (ciudadId) => {
+  // Obtener los hoteles de la ciudad especificada
+  const hoteles = await Hotel.findAll({
+    where: { ciudadId },
+    include: [
+      {
+        model: Categoria,
+        as: 'categoria',
+      },
+      {
+        model: Ciudad,
+        as: 'ciudad',
+        include: [
+          {
+            model: Provincia,
+            as: 'provincia',
+            include: [
+              {
+                model: Pais,
+                as: 'pais',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  return hoteles;
+};
+
 const obtenerCategorias = async () => {
   // Obtener todas las categorías de los hoteles
   const categorias = await Categoria.findAll();
@@ -251,10 +300,14 @@ const verificarHotel = async (
       409,
     ); // Conflict
   }
+
+  console.log('ENCARGADO ID:', encargadoId);
+
   const encargadoExistente = await Encargado.findByPk(encargadoId);
   if (!encargadoExistente) {
     throw new CustomError('El encargado no existe', 404); // Not Found
   }
+
   const encargadoHotelExistente = await Hotel.findOne({
     where: { encargadoId },
   });
@@ -271,18 +324,13 @@ const verificarHotel = async (
   await verificarTelefono(telefono);
 };
 
-//TERMINAR
 const agregarPaquetePromocional = async (idHotel, paquete) => {
   // Verificar si el hotel existe
-
   await verificarIdHotel(idHotel);
+  // Verifica si las habitaciones pertenecen al hotel
   await verificarHabitacionesHotel(idHotel, paquete.habitaciones);
+  // Verificar si la fecha inicio es menor a la fecha fin
   await verificarFechas(paquete.fecha_inicio, paquete.fecha_fin);
-  await verificarAlquilada(
-    paquete.habitaciones,
-    paquete.fechaInicio,
-    paquete.fechaFin,
-  );
 
   const paqueteCreado = await paquetePromocionalServices.crearPaquete(
     idHotel,
@@ -297,7 +345,6 @@ const agregarPaquetePromocional = async (idHotel, paquete) => {
     );
 
   return paqueteCompleto;
-  // return obtenerPaquetesPromocionales(idHotel);
 };
 
 const agregarTemporada = async (idHotel, temporada) => {
@@ -336,46 +383,18 @@ const agregarDescuentos = async (idHotel, descuento) => {
   return descuentoNuevo;
 };
 
-const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
-  for (const idHabitacion of habitaciones) {
-    const alquileres = await AlquilerHabitacion.findAll({
-      where: {
-        habitacionId: idHabitacion,
-        [Op.or]: [
-          {
-            fechaInicio: {
-              [Op.between]: [fechaInicio, fechaFin],
-            },
-          },
-          {
-            fechaFin: {
-              [Op.between]: [fechaInicio, fechaFin],
-            },
-          },
-          {
-            [Op.and]: [
-              {
-                fechaInicio: {
-                  [Op.lte]: fechaInicio,
-                },
-              },
-              {
-                fechaFin: {
-                  [Op.gte]: fechaFin,
-                },
-              },
-            ],
-          },
-        ],
-      },
+const getDescuentosDeHotel = async (hotelId) => {
+  try {
+    const descuentos = await Descuento.findAll({
+      where: { hotelId },
+      attributes: ['id', 'porcentaje', 'cantidad_de_habitaciones'], // Seleccionar solo los campos necesarios
     });
 
-    if (alquileres.length > 0) {
-      throw new CustomError(
-        `La habitación con ID ${idHabitacion} ya está alquilada en ese rango de fechas`,
-        409,
-      ); // Conflict
-    }
+    return descuentos;
+  } catch (error) {
+    throw new Error(
+      `Error al obtener los descuentos del hotel: ${error.message}`,
+    );
   }
 };
 
@@ -385,198 +404,126 @@ const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
  * QUE TENGA HABITACIONES DISPOBIBLES
  * BUSCAR PAQUETES QUE COINCIDAN CON LAS FECHAS
  */
-const getHabitacionesDisponibles = async (
+const getDisponibilidadPorHotel = async (
   ubicacion,
   fechaInicio,
   fechaFin,
   pasajeros,
 ) => {
+  const hotelesCiudad = await getHotelesPorCiudad(ubicacion);
+  if (!hotelesCiudad) {
+    throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
+  }
   // Obtener los hoteles en la ubicación especificada
-  const hotelesCiudad = await Hotel.findAll({
-    where: { ciudadId: ubicacion },
-  });
 
   if (hotelesCiudad.length === 0) {
     throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
   }
 
-  const idsHoteles = hotelesCiudad.map((h) => h.id);
+  const disponibilidad = [];
 
-  // Inicializar un array para almacenar las habitaciones disponibles
-  let habitacionesDisponibles = [];
+  for (const hotel of hotelesCiudad) {
+    // Obtener la temporada actual del hotel
+    const temporada = await temporadaServices.obtenerTemporadaActual(
+      hotel.id,
+      fechaInicio,
+      fechaFin,
+    );
 
-  // Recorrer cada hotel para obtener las habitaciones disponibles
-  for (const idHotel of idsHoteles) {
-    const habitaciones = await Habitacion.findAll({
-      where: { hotelId: idHotel },
-      include: [
-        {
-          model: TipoHabitacion,
-          as: 'tipoHabitacion',
-          attributes: ['nombre', 'capacidad'],
-        },
-      ],
-    });
+    const descuentos = await getDescuentosDeHotel(hotel.id);
 
-    // Filtrar las habitaciones que no están ocupadas en el rango de fechas especificado
-    for (const habitacion of habitaciones) {
-      const ocupada = await verificarOcupada(
-        habitacion.id,
+    // Obtener las habitaciones disponibles agrupadas por tipo
+    const habitaciones =
+      await habitacionServices.obtenerHabitacionesDisponiblesPorTipo(
+        hotel.id,
         fechaInicio,
         fechaFin,
+        pasajeros,
       );
-      if (!ocupada) {
-        habitacionesDisponibles.push(habitacion);
-      }
-    }
+
+    // Obtener los paquetes turísticos disponibles
+    const paquetes = await paquetePromocionalServices.obtenerPaquetesTuristicos(
+      hotel.id,
+      fechaInicio,
+      fechaFin,
+    );
+
+    // Estructurar el objeto del hotel
+    disponibilidad.push({
+      hotelId: hotel.id,
+      nombre: hotel.nombre,
+      estrellas: hotel.categoria.nombre,
+      descripcion: hotel.descripcion,
+      temporada: temporada,
+      descuentos: descuentos,
+      direccion: hotel.direccion,
+      ubicacion: {
+        pais: hotel.ciudad.provincia.pais.nombre,
+        provincia: hotel.ciudad.provincia.nombre,
+        ciudad: hotel.ciudad.nombre,
+      },
+      habitaciones: habitaciones,
+      paquetes: paquetes,
+    });
   }
 
-  // Si la cantidad de pasajeros supera la capacidad máxima de una habitación, devolver todas las habitaciones disponibles
-  const capacidadMaxima = Math.max(
-    ...habitacionesDisponibles.map((h) => h.tipoHabitacion.capacidad),
-  );
-  if (pasajeros > capacidadMaxima) {
-    return habitacionesDisponibles;
+  return disponibilidad;
+};
+
+const obtenerTiposDeHabitacion = async () => {
+  // Obtener todos los tipos de habitaciones
+  try {
+    const tiposDeHabitacion =
+      await tipoHabitacionServices.getTiposDeHabitacion();
+    return tiposDeHabitacion;
+  } catch (error) {
+    throw new CustomError(
+      `Error al obtener los tipos de habitación: ${error.message}`,
+      500,
+    ); // Internal Server Error
   }
-
-  // Filtrar habitaciones que cumplen con la capacidad requerida
-  return habitacionesDisponibles.filter(
-    (h) => h.tipoHabitacion.capacidad >= pasajeros,
-  );
 };
 
-const verificarOcupada = async (idHabitacion, fechaInicio, fechaFin) => {
-  const alquileres = await AlquilerHabitacion.findAll({
-    where: {
-      habitacionId: idHabitacion,
-      [Op.or]: [
-        {
-          fechaInicio: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          fechaFin: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          [Op.and]: [
-            {
-              fechaInicio: {
-                [Op.lte]: fechaInicio,
-              },
-            },
-            {
-              fechaFin: {
-                [Op.gte]: fechaFin,
-              },
-            },
-          ],
-        },
-      ],
-    },
-  });
-
-  return alquileres.length > 0;
-};
-
-const getPaquetesDisponibles = async (
-  ubicacion,
-  fechaInicio,
-  fechaFin,
-  pasajeros,
+const crearEncargado = async (
+  nombre,
+  apellido,
+  tipoDocumento,
+  numeroDocumento,
 ) => {
-  // Obtener los hoteles en la ubicación especificada
-  const hotelesCiudad = await Hotel.findAll({
-    where: { ciudadId: ubicacion },
-  });
-
-  if (hotelesCiudad.length === 0) {
-    throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
-  }
-
-  const idsHoteles = hotelesCiudad.map((h) => h.id);
-
-  // Inicializar un array para almacenar los paquetes disponibles
-  let paquetesDisponibles = [];
-
-  // Recorrer cada hotel para obtener los paquetes disponibles
-  for (const idHotel of idsHoteles) {
-    const paquetesHotel = await PaquetePromocional.findAll({
-      where: { hotelId: idHotel },
-      include: [
-        {
-          model: Habitacion,
-          as: 'habitaciones',
-          include: [
-            {
-              model: TipoHabitacion,
-              as: 'tipoHabitacion',
-              attributes: ['nombre', 'capacidad'],
-            },
-          ],
-        },
-      ],
+  let nuevoEncargado = {};
+  try {
+    await verificarDocumento(numeroDocumento);
+    await verificarTipoDocumento(tipoDocumento);
+    nuevoEncargado = await Encargado.create({
+      nombre,
+      apellido,
+      dni: numeroDocumento,
+      tipoDocumento,
     });
 
-    // Filtrar los paquetes que no están ocupados en el rango de fechas especificado
-    for (const paquete of paquetesHotel) {
-      const habitaciones = paquete.habitaciones;
-      const capacidadTotal = habitaciones.reduce((total, habitacion) => {
-        return total + habitacion.tipoHabitacion.capacidad;
-      }, 0);
-
-      if (capacidadTotal >= pasajeros) {
-        const ocupada = await verificarOcupadaPaquete(
-          paquete.id,
-          fechaInicio,
-          fechaFin,
-        );
-        if (!ocupada) {
-          paquetesDisponibles.push(paquete);
-        }
-      }
-    }
+    return nuevoEncargado.dataValues;
+  } catch (error) {
+    throw new CustomError(`Error al crear el encargado: ${error.message}`, 500); // Internal Server Error
   }
-
-  return paquetesDisponibles;
 };
 
-const verificarOcupadaPaquete = async (idPaquete, fechaInicio, fechaFin) => {
-  const habitacionesPaquete = await PaquetePromocionalHabitacion.findAll({
-    where: {
-      paquetePromocionalId: idPaquete,
-      [Op.or]: [
-        {
-          fechaInicio: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          fechaFin: {
-            [Op.between]: [fechaInicio, fechaFin],
-          },
-        },
-        {
-          [Op.and]: [
-            {
-              fechaInicio: {
-                [Op.lte]: fechaInicio,
-              },
-            },
-            {
-              fechaFin: {
-                [Op.gte]: fechaFin,
-              },
-            },
-          ],
-        },
-      ],
-    },
-  });
+const deleteEncargado = async (id) => {
+  try {
+    const encargado = await Encargado.findByPk(id);
 
-  return habitacionesPaquete.length > 0;
+    if (!encargado) {
+      throw new CustomError(`Encargado no encontrado con id ${id}`, 404); // Not Found
+    }
+
+    await encargado.destroy();
+
+    return { message: `Encargado con id ${id} eliminado correctamente` };
+  } catch (error) {
+    throw new CustomError(
+      `Error al eliminar el encargado: ${error.message}`,
+      500,
+    );
+  }
 };
 
 module.exports = {
@@ -586,6 +533,10 @@ module.exports = {
   agregarPaquetePromocional,
   agregarTemporada,
   agregarDescuentos,
-  getHabitacionesDisponibles,
-  getPaquetesDisponibles,
+  getDisponibilidadPorHotel,
+  obtenerTiposDeHabitacion,
+  eliminarHotel,
+  //getHabitacionesDisponibles,
+  //getPaquetesDisponibles,
+  crearEncargado,
 };

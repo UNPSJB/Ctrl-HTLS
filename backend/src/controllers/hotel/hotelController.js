@@ -92,10 +92,7 @@ const setHabitaciones = async (req, res) => {
   const habitaciones = req.body;
 
   try {
-    const hotel = await habitacionServices.agregarHabitaciones(
-      id,
-      habitaciones,
-    );
+    const hotel = await habitacionServices.crearHabitaciones(id, habitaciones);
     res.json(hotel);
   } catch (error) {
     const statusCode = error.statusCode || 500;
@@ -184,6 +181,35 @@ const setDescuento = async (req, res) => {
   }
 };
 
+const getTiposDeHabitacion = async (req, res) => {
+  try {
+    const tipos = await hotelServices.obtenerTiposDeHabitacion();
+    res.json(tipos);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const createEncargado = async (req, res) => {
+  const { nombre, apellido, tipoDocumento, numeroDocumento } = req.body;
+
+  try {
+    const encargado = await hotelServices.crearEncargado(
+      nombre,
+      apellido,
+      tipoDocumento,
+      numeroDocumento,
+    );
+    res.status(201).json(encargado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  } finally {
+    console.log('createEncargado executed');
+  }
+};
+
 module.exports = {
   createHotel,
   updateHotel,
@@ -194,4 +220,6 @@ module.exports = {
   updateHabitacion,
   deleteHabitacion,
   setPaquetePromocional,
+  getTiposDeHabitacion,
+  createEncargado,
 };

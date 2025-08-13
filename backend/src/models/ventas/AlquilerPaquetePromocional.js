@@ -34,6 +34,7 @@ const AlquilerPaquetePromocional = sequelize.define(
       {
         unique: true,
         fields: ['paquetePromocionalId', 'fechaInicio', 'fechaFin'],
+        name: 'idx_alquiler_paquete_fecha',
       },
     ],
   },
