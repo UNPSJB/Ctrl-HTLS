@@ -1,24 +1,34 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from '@/pages/HomePage';
 import MainLayout from '@/layouts/MainLayout';
-import NotFoundPage from '@/pages/NotFoundPage';
+import HomePage from '@/pages/HomePage';
 import ReservaPage from '@/pages/ReservaPage';
 import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
-import AdminDashboard from '@/pages/AdminDashBoard';
+import DashboardPage from '@/pages/DashboardPage';
 
-const AppRouter = () => {
+function AppRouter() {
+  const userRole = 'vendedor'; // Esto se debería obtener del estado global o contexto
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="/reserva" element={<ReservaPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-          <Route path="/crear-hotel" element={<CreateHotelFormPage />} />
-        </Route>
+        {/* Layout para vendedor */}
+        {userRole === 'vendedor' && (
+          <Route path="/" element={<MainLayout variant="vendedor" />}>
+            <Route index element={<HomePage />} />
+            <Route path="reserva" element={<ReservaPage />} />
+            <Route path="crear-hotel" element={<CreateHotelFormPage />} />
+          </Route>
+        )}
+
+        {/* Layout para admin */}
+        {userRole === 'admin' && (
+          <Route path="/" element={<MainLayout variant="admin" />}>
+            <Route index element={<DashboardPage />} />
+          </Route>
+        )}
       </Routes>
     </BrowserRouter>
   );
-};
+}
 
 export default AppRouter;
