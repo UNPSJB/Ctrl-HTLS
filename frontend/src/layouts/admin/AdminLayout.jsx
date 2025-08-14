@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AdminSidebar from '@layouts/AdminSidebar';
+import AdminSidebar from '@layouts/admin/AdminSidebar';
 import { Menu } from 'lucide-react';
 import VerVendedores from '@/pages/admin/VerVendedores';
 

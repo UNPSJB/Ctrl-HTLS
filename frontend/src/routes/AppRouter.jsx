@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
-import AdminLayout from '@/layouts/AdminLayout';
+import AdminLayout from '@/layouts/admin/AdminLayout';
 import HomePage from '@/pages/HomePage';
 import ReservaPage from '@/pages/ReservaPage';
 import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
