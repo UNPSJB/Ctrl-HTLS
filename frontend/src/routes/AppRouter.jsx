@@ -1,20 +1,21 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
+import AdminLayout from '@/layouts/AdminLayout';
 import HomePage from '@/pages/HomePage';
 import ReservaPage from '@/pages/ReservaPage';
 import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
 import DashboardPage from '@/pages/DashboardPage';
 
 function AppRouter() {
-  const userRole = 'admin'; // Esto se debería obtener del estado global o contexto
+  const userRole = 'admin'; // Esto debería venir del contexto o autenticación
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Layout para vendedor */}
         {userRole === 'vendedor' && (
-          <Route path="/" element={<MainLayout variant="vendedor" />}>
-            <Route index element={<HomePage />} />
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<HomePage />} />
             <Route path="reserva" element={<ReservaPage />} />
             <Route path="crear-hotel" element={<CreateHotelFormPage />} />
           </Route>
@@ -22,8 +23,8 @@ function AppRouter() {
 
         {/* Layout para admin */}
         {userRole === 'admin' && (
-          <Route path="/" element={<MainLayout variant="admin" />}>
-            <Route index element={<DashboardPage />} />
+          <Route element={<AdminLayout />}>
+            <Route path="/" element={<DashboardPage />} />
           </Route>
         )}
       </Routes>

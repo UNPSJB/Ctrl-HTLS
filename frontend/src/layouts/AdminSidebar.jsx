@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useContext, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Home,
   Building2,
@@ -8,16 +9,31 @@ import {
   Settings,
   ChevronDown,
 } from 'lucide-react';
+import { ThemeContext } from '@context/ThemeContext';
+import ThemeToggle from '@ui/ThemeToggle';
+import Avatar from '@components/Avatar';
+import logoLight from '@assets/logo.svg';
+import logoDark from '@assets/logo-dark.svg';
 
-function AdminSidebar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+function AdminSidebar({ onClose = () => {} }) {
+  const [openSubmenu, setOpenSubmenu] = useState(null);
+  const { theme } = useContext(ThemeContext);
+
+  const logo = useMemo(
+    () => (theme === 'dark' ? logoDark : logoLight),
+    [theme]
+  );
+
+  const handleToggleSubmenu = (title) => {
+    setOpenSubmenu((prev) => (prev === title ? null : title));
+  };
 
   const menuItems = [
     {
       title: 'Dashboard',
       icon: Home,
-      path: '/admin/dashboard',
-      description: 'Vista general del sistema',
+      path: '/admin',
+      description: 'Vista general',
     },
     {
       title: 'Gestión de Hoteles',
@@ -38,95 +54,140 @@ function AdminSidebar() {
       submenu: [
         { title: 'Ver Vendedores', path: '/admin/vendedores' },
         { title: 'Crear Vendedor', path: '/admin/vendedores/crear' },
-        { title: 'Asignar Hoteles', path: '/admin/vendedores/asignar' },
       ],
     },
     {
       title: 'Gestión de Usuarios',
       icon: Users,
       path: '/admin/usuarios',
-      description: 'ABM de usuarios del sistema',
+      description: 'ABM de usuarios',
       submenu: [
         { title: 'Ver Usuarios', path: '/admin/usuarios' },
         { title: 'Crear Usuario', path: '/admin/usuarios/crear' },
-        { title: 'Roles y Permisos', path: '/admin/usuarios/roles' },
       ],
     },
     {
       title: 'Reportes',
       icon: BarChart3,
       path: '/admin/reportes',
-      description: 'Estadísticas y reportes',
+      description: 'Estadísticas',
       submenu: [
         { title: 'Reservas', path: '/admin/reportes/reservas' },
         { title: 'Ingresos', path: '/admin/reportes/ingresos' },
-        { title: 'Ocupación', path: '/admin/reportes/ocupacion' },
       ],
-    },
-    {
-      title: 'Configuración',
-      icon: Settings,
-      path: '/admin/configuracion',
-      description: 'Configuración del sistema',
     },
   ];
 
   return (
-    <>
-      {/* Sidebar Menu */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out 
-        ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} 
-        lg:translate-x-0 lg:static lg:inset-0`}
-      >
-        <div className="flex flex-col h-full pt-16 lg:pt-0">
-          <div className="flex-1 overflow-y-auto p-4">
-            <nav className="space-y-2">
-              {menuItems.map((item, index) => (
-                <div key={index}>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group">
-                    <item.icon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                        {item.title}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {item.description}
-                      </p>
-                    </div>
-                    {item.submenu && (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
-                    )}
-                  </button>
+    <div className="h-full flex flex-col">
+      <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
+        <Link to="/admin" onClick={onClose} aria-label="Ir al dashboard">
+          <img src={logo} alt="Logo" className="h-8" />
+        </Link>
+      </div>
 
-                  {/* Submenu (a futuro puede tener toggle propio) */}
-                  {item.submenu && (
-                    <div className="ml-8 mt-1 space-y-1">
-                      {item.submenu.map((subitem, subindex) => (
-                        <button
-                          key={subindex}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors duration-200"
-                        >
-                          {subitem.title}
-                        </button>
-                      ))}
+      <nav
+        className="flex-1 overflow-y-auto p-4 space-y-2"
+        aria-label="Menú principal"
+      >
+        {menuItems.map((item, idx) => (
+          <div key={idx}>
+            {item.submenu ? (
+              <>
+                <button
+                  onClick={() => handleToggleSubmenu(item.title)}
+                  aria-expanded={openSubmenu === item.title}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                      {item.title}
+                    </div>
+                    {item.description && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.description}
+                      </div>
+                    )}
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-400 transform transition-transform ${openSubmenu === item.title ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {openSubmenu === item.title && (
+                  <div className="ml-8 mt-2 space-y-1">
+                    {item.submenu.map((sub, sidx) => (
+                      <Link
+                        key={sidx}
+                        to={sub.path}
+                        onClick={onClose}
+                        className="block px-3 py-2 text-sm rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+                      >
+                        {sub.title}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                to={item.path}
+                onClick={onClose}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
+              >
+                <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <div>
+                  <div className="font-medium">{item.title}</div>
+                  {item.description && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.description}
                     </div>
                   )}
                 </div>
-              ))}
-            </nav>
+              </Link>
+            )}
           </div>
-        </div>
-      </aside>
+        ))}
+      </nav>
 
-      {/* Overlay para móvil */}
-      {isMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
-    </>
+      <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
+        <div className="flex flex-col gap-3">
+          {/* Modo oscuro/claro */}
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Tema
+            </div>
+            <ThemeToggle />
+          </div>
+
+          {/* Usuario */}
+          <div className="flex items-center gap-3">
+            <Avatar />
+            <div className="flex-1">
+              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Carlos Rodríguez
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                admin@hotelapp.com
+              </div>
+            </div>
+          </div>
+
+          {/* Configuración */}
+          <Link
+            to="/admin/configuracion"
+            onClick={onClose}
+            className="w-full inline-flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm text-gray-700 dark:text-gray-300"
+          >
+            <div className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              <span>Configuración</span>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
 

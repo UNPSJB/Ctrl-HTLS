@@ -4,18 +4,17 @@ import Avatar from '@components/Avatar';
 import ThemeToggle from '@ui/ThemeToggle';
 import logoLight from '@assets/logo.svg';
 import logoDark from '@assets/logo-dark.svg';
+import { Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-function AdminHeader() {
+function AdminHeader({ onToggleSidebar }) {
   const { theme } = useContext(ThemeContext);
 
-  // Elegir logo según el tema
   const logo = useMemo(
     () => (theme === 'dark' ? logoDark : logoLight),
     [theme]
   );
 
-  // Clases dinámicas para el header
   const headerClass = useMemo(
     () =>
       theme === 'dark'
@@ -25,15 +24,24 @@ function AdminHeader() {
   );
 
   return (
-    <header className={`${headerClass} p-4 sticky top-0 z-50`}>
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Logo: lleva al dashboard del admin */}
-        <Link to="/admin" aria-label="Ir al panel de administración">
-          <img src={logo} alt="Logo" className="w-52" />
-        </Link>
+    <header className={`${headerClass} h-16 flex items-center`}>
+      <div className="container mx-auto px-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Botón menu para móvil */}
+          <button
+            onClick={onToggleSidebar}
+            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden"
+            aria-label="Abrir menú"
+          >
+            <Menu className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+          </button>
 
-        {/* Acciones del usuario */}
-        <div className="flex items-center space-x-4">
+          <Link to="/admin" aria-label="Ir al dashboard">
+            <img src={logo} alt="Logo" className="h-8" />
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-3">
           <ThemeToggle />
           <Avatar />
         </div>
