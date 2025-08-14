@@ -2,6 +2,7 @@ import { useState } from 'react';
 import AdminSidebar from '@layouts/admin/AdminSidebar';
 import { Menu } from 'lucide-react';
 import VerVendedores from '@/pages/admin/VerVendedores';
+import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
 
 function AdminLayout() {
   const [selectedView, setSelectedView] = useState(null);
@@ -9,6 +10,7 @@ function AdminLayout() {
 
   const viewMap = {
     VerVendedores: <VerVendedores />,
+    CrearHotel: <CreateHotelFormPage />,
     // VerHoteles: <VerHoteles />,
     // Dashboard: <DashboardHome />,
     // Configuracion: <Configuracion />,

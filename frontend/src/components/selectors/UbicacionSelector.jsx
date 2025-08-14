@@ -46,13 +46,13 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
         Ubicación
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             País *
           </label>
           <select
@@ -76,7 +76,7 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Provincia/Estado *
           </label>
           <select
@@ -107,7 +107,7 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Ciudad *
           </label>
           <select
