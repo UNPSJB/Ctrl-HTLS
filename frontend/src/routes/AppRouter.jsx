@@ -4,7 +4,7 @@ import AdminLayout from '@/layouts/AdminLayout';
 import HomePage from '@/pages/HomePage';
 import ReservaPage from '@/pages/ReservaPage';
 import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
-import DashboardPage from '@/pages/DashboardPage';
+import DashboardPage from '@/pages/admin/DashboardPage';
 
 function AppRouter() {
   const userRole = 'admin'; // Esto debería venir del contexto o autenticación
