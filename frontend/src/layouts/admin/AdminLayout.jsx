@@ -3,14 +3,16 @@ import AdminSidebar from '@layouts/admin/AdminSidebar';
 import { Menu } from 'lucide-react';
 import VerVendedores from '@/pages/admin/VerVendedores';
 import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
+import CrearVendedor from '@/pages/admin/CrearVendedor';
 
 function AdminLayout() {
   const [selectedView, setSelectedView] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const viewMap = {
-    VerVendedores: <VerVendedores />,
     CrearHotel: <CreateHotelFormPage />,
+    VerVendedores: <VerVendedores />,
+    CrearVendedor: <CrearVendedor />,
     // VerHoteles: <VerHoteles />,
     // Dashboard: <DashboardHome />,
     // Configuracion: <Configuracion />,
