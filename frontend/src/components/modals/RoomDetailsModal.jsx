@@ -21,7 +21,7 @@ const RoomDetailsModal = ({ habitacion, coeficiente, onClose, onReserve }) => {
       </div>
 
       {/* Contenido del modal */}
-      <div className="p-6 overflow-y-auto flex flex-col flex-1 gap-2 custom-scrollbar">
+      <div className="p-6 overflow-y-auto flex flex-col flex-1 gap-2">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           {habitacion.nombre}
         </h2>

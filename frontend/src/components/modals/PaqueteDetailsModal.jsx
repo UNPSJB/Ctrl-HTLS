@@ -18,7 +18,7 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
   return (
     <Modal onClose={onClose}>
       {/* Galería de imágenes de habitaciones */}
-      <div className="flex gap-4 overflow-x-auto scroll-smooth custom-scrollbar-x p-4 h-[19rem]">
+      <div className="flex gap-4 overflow-x-auto scroll-smooth p-4 h-[19rem]">
         {paquete.habitaciones.map((hab, index) => (
           <div key={index} className="w-full flex-shrink-0">
             <ImageLoader
@@ -31,7 +31,7 @@ const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
       </div>
 
       {/* Contenido del modal */}
-      <div className="p-6 overflow-y-auto flex flex-col flex-1 gap-2 custom-scrollbar">
+      <div className="p-6 overflow-y-auto flex flex-col flex-1 gap-2">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           {paquete.nombre}
         </h2>

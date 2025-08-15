@@ -59,7 +59,7 @@ const Carrito = ({ isOpen, onClose }) => {
           </div>
 
           {/* Contenido del carrito */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-6">
             {carrito.hoteles.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400">

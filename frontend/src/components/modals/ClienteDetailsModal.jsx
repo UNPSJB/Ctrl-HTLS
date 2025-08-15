@@ -6,7 +6,7 @@ const ClienteDetailsModal = ({ cliente, onClose }) => {
 
   return (
     <Modal onClose={onClose}>
-      <div className="p-6 overflow-y-auto flex flex-col flex-1 gap-4 custom-scrollbar">
+      <div className="p-6 overflow-y-auto flex flex-col flex-1 gap-4">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
           <User className="w-6 h-6" />
           {cliente.nombre}
