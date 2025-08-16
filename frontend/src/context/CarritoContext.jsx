@@ -162,8 +162,21 @@ export function CarritoProvider({ children }) {
   );
   const [estado, dispatch] = useReducer(carritoReducer, persistedState);
 
+  // Sincronizar cambios del reducer con localStorage (debounced)
+  // Evita escrituras frecuentes a localStorage cuando hay muchas acciones seguidas.
   useEffect(() => {
-    setPersistedState(estado);
+    const SAVE_DELAY = 400;
+    let timeoutId = null;
+
+    // Guardado diferido
+    timeoutId = setTimeout(() => {
+      setPersistedState(estado);
+    }, SAVE_DELAY);
+
+    // Cleanup: cancelar si estado cambia antes de timeout
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [estado, setPersistedState]);
 
   const agregarHabitacion = useCallback(
