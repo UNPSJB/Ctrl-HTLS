@@ -1,15 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 
-const SelectionSummary = ({
+function SelectionSummary({
   selectedRoomsCount,
   selectedPackagesCount,
   totalPrice,
-}) => {
+}) {
   const navigate = useNavigate();
 
   const handleReservation = () => {
     navigate('/reserva');
   };
+
+  const safeTotal = Number(totalPrice ?? 0);
 
   return (
     <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex justify-between items-center">
@@ -19,7 +21,7 @@ const SelectionSummary = ({
           {selectedPackagesCount} paquetes
         </p>
         <p className="text-sm text-blue-700 dark:text-blue-300">
-          Total: ${totalPrice.toFixed(2)}
+          Total: ${safeTotal.toFixed(2)}
         </p>
       </div>
       <button
@@ -30,6 +32,6 @@ const SelectionSummary = ({
       </button>
     </div>
   );
-};
+}
 
 export default SelectionSummary;

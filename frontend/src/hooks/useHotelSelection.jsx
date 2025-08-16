@@ -1,69 +1,41 @@
-import { useState } from 'react';
-import {
-  calculateRoomsTotal,
-  calculatePackagesTotal,
-} from '../utils/hotelUtils';
+import { useMemo } from 'react';
+import { useCarrito } from '@context/CarritoContext';
+import { calcularTotalHotel } from '@utils/pricingUtils';
 
 /**
- * Hook personalizado para gestionar la selección de habitaciones y paquetes turísticos en un hotel.
- *
- * Proporciona funciones para seleccionar/deseleccionar habitaciones y paquetes, y calcula el total
- * a pagar considerando posibles descuentos por temporada alta.
- *
- * @param {Object} hotel - Objeto con la información del hotel.
- * @returns {Object} - Estados y funciones para manejar la selección de habitaciones y paquetes.
+ * Hook para reflejar la selección REAL (desde el carrito) y calcular el total
+ * del hotel actual usando pricingUtils.
  */
 const useHotelSelection = (hotel) => {
-  // Estado para almacenar habitaciones seleccionadas
-  const [selectedRooms, setSelectedRooms] = useState([]);
+  const { carrito } = useCarrito();
 
-  // Estado para almacenar paquetes seleccionados
-  const [selectedPackages, setSelectedPackages] = useState([]);
+  const hotelEnCarrito = useMemo(
+    () => carrito.hoteles.find((h) => h.idHotel === hotel.id) || null,
+    [carrito.hoteles, hotel.id]
+  );
 
-  // Determina el coeficiente de descuento si la temporada es alta
+  const selectedRooms = useMemo(
+    () => (hotelEnCarrito?.habitaciones || []).map((h) => h.id),
+    [hotelEnCarrito]
+  );
+
+  const selectedPackages = useMemo(
+    () => (hotelEnCarrito?.paquetes || []).map((p) => p.id),
+    [hotelEnCarrito]
+  );
+
+  const totalPrice = useMemo(() => {
+    if (!hotelEnCarrito) return 0;
+    const { final } = calcularTotalHotel(hotelEnCarrito);
+    return final;
+  }, [hotelEnCarrito]);
+
+  // Para compatibilidad con el código existente:
+  const toggleRoomSelection = () => {};
+  const togglePackageSelection = () => {};
+
   const discountCoefficient =
-    hotel.temporada === 'alta' ? hotel.coeficiente : 1;
-
-  /**
-   * Alterna la selección de una habitación.
-   * Si la habitación ya está seleccionada, se elimina. Si no, se agrega.
-   *
-   * @param {string} roomName - Nombre de la habitación a seleccionar/deseleccionar.
-   */
-  const toggleRoomSelection = (roomName) => {
-    setSelectedRooms((prevSelected) =>
-      prevSelected.includes(roomName)
-        ? prevSelected.filter((name) => name !== roomName)
-        : [...prevSelected, roomName]
-    );
-  };
-
-  /**
-   * Alterna la selección de un paquete turístico.
-   * Si el paquete ya está seleccionado, se elimina. Si no, se agrega.
-   *
-   * @param {string} packageName - Nombre del paquete a seleccionar/deseleccionar.
-   */
-  const togglePackageSelection = (packageName) => {
-    setSelectedPackages((prevSelected) =>
-      prevSelected.includes(packageName)
-        ? prevSelected.filter((name) => name !== packageName)
-        : [...prevSelected, packageName]
-    );
-  };
-
-  // Calcula el total a pagar sumando habitaciones y paquetes seleccionados
-  const totalPrice =
-    calculateRoomsTotal(
-      selectedRooms,
-      hotel.habitaciones,
-      discountCoefficient
-    ) +
-    calculatePackagesTotal(
-      selectedPackages,
-      hotel.paquetes,
-      discountCoefficient
-    );
+    hotel.temporada === 'alta' ? hotel.coeficiente : 0;
 
   return {
     selectedRooms,

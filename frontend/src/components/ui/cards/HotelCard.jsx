@@ -7,27 +7,27 @@ import SelectionSummary from '../SelectionSummary';
 import HotelHeader from '@components/HotelHeader';
 import { useCarrito } from '@context/CarritoContext';
 
-const HotelCard = ({ hotel }) => {
+function HotelCard({ hotel }) {
   if (!hotel) return null;
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const {
-    selectedRooms,
-    selectedPackages,
-    toggleRoomSelection,
-    togglePackageSelection,
-    totalPrice,
-  } = useHotelSelection(hotel);
-  const { carrito } = useCarrito();
+  const { toggleRoomSelection, togglePackageSelection } =
+    useHotelSelection(hotel);
+  const { carrito, getHotelTotal } = useCarrito();
+
+  const hotelInCart = carrito.hoteles.find((h) => h.idHotel === hotel.id);
 
   const habitacionesSeleccionadas =
-    carrito.hoteles
-      .find((h) => h.idHotel === hotel.id)
-      ?.habitaciones.map((hab) => hab.id) || [];
+    hotelInCart?.habitaciones.map((hab) => hab.id) || [];
   const paquetesSeleccionados =
-    carrito.hoteles
-      .find((h) => h.idHotel === hotel.id)
-      ?.paquetes.map((paq) => paq.id) || [];
+    hotelInCart?.paquetes.map((paq) => paq.id) || [];
+
+  const selectedRoomsCount = habitacionesSeleccionadas.length;
+  const selectedPackagesCount = paquetesSeleccionados.length;
+
+  const hotelTotals = getHotelTotal(hotel.id);
+  const totalPriceForHotel = hotelTotals?.final ?? 0;
+  const hotelEnCarrito = Boolean(hotelInCart);
 
   const hotelData = {
     idHotel: hotel.id,
@@ -36,8 +36,6 @@ const HotelCard = ({ hotel }) => {
     coeficiente: hotel.coeficiente,
     temporada: hotel.temporada,
   };
-
-  const hotelEnCarrito = carrito.hoteles.some((h) => h.idHotel === hotel.id);
 
   return (
     <article className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
@@ -49,7 +47,6 @@ const HotelCard = ({ hotel }) => {
 
       {isExpanded && (
         <>
-          {/* Sección de Habitaciones Disponibles */}
           <section
             aria-labelledby={`rooms-${hotel.id}-title`}
             className="p-4 border-t border-gray-200 dark:border-gray-700"
@@ -77,7 +74,6 @@ const HotelCard = ({ hotel }) => {
             </ul>
           </section>
 
-          {/* Sección de Paquetes Turísticos */}
           <section
             aria-labelledby={`packages-${hotel.id}-title`}
             className="p-4 border-t border-gray-200 dark:border-gray-700"
@@ -103,18 +99,17 @@ const HotelCard = ({ hotel }) => {
             </ul>
           </section>
 
-          {/* Resumen de selección */}
           {hotelEnCarrito && (
             <SelectionSummary
-              selectedRoomsCount={selectedRooms.length}
-              selectedPackagesCount={selectedPackages.length}
-              totalPrice={totalPrice}
+              selectedRoomsCount={selectedRoomsCount}
+              selectedPackagesCount={selectedPackagesCount}
+              totalPrice={totalPriceForHotel}
             />
           )}
         </>
       )}
     </article>
   );
-};
+}
 
 export default HotelCard;

@@ -7,15 +7,14 @@ import {
   useCallback,
 } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
+import pricing from '../utils/pricingUtils'; // import por defecto con nombres en español
 
 const STORAGE_KEY = 'carritoState';
 
-// Estado inicial
 const estadoInicial = {
   hoteles: [],
 };
 
-// Tipos de acción
 const TIPOS = {
   AGREGAR_HOTEL: 'AGREGAR_HOTEL',
   AGREGAR_HABITACION: 'AGREGAR_HABITACION',
@@ -25,7 +24,6 @@ const TIPOS = {
   REMOVER_HOTEL: 'REMOVER_HOTEL',
 };
 
-// Reducer
 function carritoReducer(estado, accion) {
   switch (accion.type) {
     case TIPOS.AGREGAR_HOTEL: {
@@ -134,10 +132,8 @@ function carritoReducer(estado, accion) {
   }
 }
 
-// Crear contexto
 const CarritoContext = createContext(undefined);
 
-// --- NUEVO: función para asegurar que el hotel existe en el carrito ---
 function asegurarHotel(dispatch, { idHotel, nombre, temporada, coeficiente }) {
   dispatch({
     type: TIPOS.AGREGAR_HOTEL,
@@ -145,7 +141,6 @@ function asegurarHotel(dispatch, { idHotel, nombre, temporada, coeficiente }) {
   });
 }
 
-// --- NUEVO: función genérica para agregar elementos ---
 function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
   asegurarHotel(dispatch, hotelInfo);
   dispatch({
@@ -160,23 +155,17 @@ function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
   });
 }
 
-// Provider
 export function CarritoProvider({ children }) {
-  // Usar usePersistedState para el estado persistente
   const [persistedState, setPersistedState] = usePersistedState(
     STORAGE_KEY,
     estadoInicial
   );
-
-  // useReducer con estado inicial desde localStorage
   const [estado, dispatch] = useReducer(carritoReducer, persistedState);
 
-  // Sincronizar cambios del reducer con localStorage
   useEffect(() => {
     setPersistedState(estado);
   }, [estado, setPersistedState]);
 
-  // Acciones memoizadas
   const agregarHabitacion = useCallback(
     (hotelInfo, habitacion, fechas) =>
       agregarElemento(
@@ -188,7 +177,6 @@ export function CarritoProvider({ children }) {
       ),
     [dispatch]
   );
-
   const agregarPaquete = useCallback(
     (hotelInfo, paquete, fechas) =>
       agregarElemento(
@@ -209,7 +197,6 @@ export function CarritoProvider({ children }) {
       }),
     [dispatch]
   );
-
   const removerPaquete = useCallback(
     (idHotel, idPaquete) =>
       dispatch({
@@ -218,7 +205,6 @@ export function CarritoProvider({ children }) {
       }),
     [dispatch]
   );
-
   const removerHotel = useCallback(
     (idHotel) => dispatch({ type: TIPOS.REMOVER_HOTEL, payload: { idHotel } }),
     [dispatch]
@@ -234,6 +220,26 @@ export function CarritoProvider({ children }) {
     [estado.hoteles]
   );
 
+  // Totales por hotel y total del carrito (usando funciones en español)
+  const hotelTotalsMap = useMemo(() => {
+    const map = {};
+    estado.hoteles.forEach((h) => {
+      map[h.idHotel] = pricing.calcularTotalHotel(h);
+    });
+    return map;
+  }, [estado.hoteles]);
+
+  const cartTotals = useMemo(
+    () => pricing.calcularTotalCarrito(estado.hoteles),
+    [estado.hoteles]
+  );
+
+  useEffect(() => {
+    console.debug('[Carrito] estado actualizado:', estado);
+
+    console.debug('[Carrito] cartTotals:', cartTotals);
+  }, [estado, cartTotals]);
+
   const value = useMemo(
     () => ({
       carrito: estado,
@@ -243,6 +249,10 @@ export function CarritoProvider({ children }) {
       removerPaquete,
       removerHotel,
       totalElementos,
+      cartTotals,
+      hotelTotalsMap,
+      getHotelTotal: (id) =>
+        hotelTotalsMap[id] ?? { original: 0, final: 0, descuento: 0 },
     }),
     [
       estado,
@@ -252,6 +262,8 @@ export function CarritoProvider({ children }) {
       removerPaquete,
       removerHotel,
       totalElementos,
+      cartTotals,
+      hotelTotalsMap,
     ]
   );
 
@@ -260,7 +272,6 @@ export function CarritoProvider({ children }) {
   );
 }
 
-// Hook para consumir el contexto
 export function useCarrito() {
   const context = useContext(CarritoContext);
   if (context === undefined) {

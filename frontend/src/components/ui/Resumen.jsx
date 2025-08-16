@@ -1,9 +1,8 @@
 import PriceTag from '../PriceTag';
-import { calculateReservationTotal } from '@utils/pricingUtils';
+import { calcularTotalReserva } from '@utils/pricingUtils';
 
 const Resumen = ({ habitaciones, paquetes, porcentaje = 1, isHighSeason }) => {
-  // Usar la utilidad para calcular totales
-  const { totalFinal } = calculateReservationTotal(
+  const { totalFinal } = calcularTotalReserva(
     habitaciones,
     paquetes,
     isHighSeason,

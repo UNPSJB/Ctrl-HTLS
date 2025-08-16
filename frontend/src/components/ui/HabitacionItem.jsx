@@ -3,6 +3,7 @@ import RoomDetailsModal from '@components/modals/RoomDetailsModal';
 import PriceTag from '@components/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
+import { normalizarDescuento } from '@utils/pricingUtils';
 
 const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
   if (!habitacion) return null;
@@ -12,12 +13,18 @@ const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
   const { filtros } = useBusqueda();
   const { fechaInicio, fechaFin } = filtros;
 
-  // Siempre mostrar el precio por una noche
-  const precioPorNoche = habitacion.precio;
+  // Siempre mostrar el precio por una noche (unitario).
+  const precioOriginalNoche = habitacion.precio;
+
+  // Si la temporada del hotel es "alta", aplicamos el coeficiente (descuento) SOLO para mostrar.
+  const esAlta = hotelData?.temporada === 'alta';
+  const descHotel = esAlta ? normalizarDescuento(hotelData?.coeficiente) : 0;
+  const precioFinalNoche =
+    Math.round(precioOriginalNoche * (1 - descHotel) * 100) / 100;
 
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
-    onSelect(habitacion.id);
+    onSelect(habitacion.id); // compat
     if (checked) {
       agregarHabitacion(hotelData, habitacion, { fechaInicio, fechaFin });
     } else {
@@ -32,7 +39,6 @@ const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
         className="grid items-center border rounded-md px-6 py-4 bg-gray-50 dark:bg-gray-900 shadow-sm border-gray-200 dark:border-gray-700 gap-10"
         style={{ gridTemplateColumns: '1fr auto auto' }}
       >
-        {/* Encabezado: checkbox + información */}
         <header className="flex items-center gap-6">
           <input
             type="checkbox"
@@ -55,17 +61,14 @@ const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
           </div>
         </header>
 
-        {/* Sección: contador de cantidad */}
         <section className="flex justify-center">
-          {/* Aquí iría tu componente de contador reutilizable */}
-          {/* <Counter max={habitacion.capacidad} /> */}
+          {/* Contador opcional */}
         </section>
 
-        {/* Pie de artículo: precio y botón de detalles */}
         <footer className="flex flex-col items-end gap-1">
           <PriceTag
-            precio={precioPorNoche}
-            coeficiente={hotelData.coeficiente}
+            precio={precioFinalNoche}
+            original={esAlta ? precioOriginalNoche : undefined}
           />
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"

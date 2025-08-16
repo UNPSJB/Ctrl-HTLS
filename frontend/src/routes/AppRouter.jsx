@@ -7,7 +7,7 @@ import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
 import DashboardPage from '@/pages/admin/DashboardPage';
 
 function AppRouter() {
-  const userRole = 'admin'; // Esto debería venir del contexto o autenticación
+  const userRole = 'vendedor'; // Esto debería venir del contexto o autenticación
 
   return (
     <BrowserRouter>

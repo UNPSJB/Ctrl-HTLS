@@ -4,7 +4,7 @@ import HabitacionCard from '@ui/cards/HabitacionCard';
 import PaqueteCard from '@ui/cards/PaqueteCard';
 import Resumen from '@ui/Resumen';
 import Cliente from '@components/Cliente';
-import { calculateReservationTotal } from '@utils/pricingUtils';
+import { calcularTotalReserva } from '@utils/pricingUtils';
 import Temporada from '@components/Temporada';
 
 const ReservaPage = () => {
@@ -30,7 +30,7 @@ const ReservaPage = () => {
         } = hotelReserva;
 
         if (habitaciones.length > 0 || paquetes.length > 0) {
-          calculateReservationTotal(
+          calcularTotalReserva(
             habitaciones,
             paquetes,
             temporada === 'alta',

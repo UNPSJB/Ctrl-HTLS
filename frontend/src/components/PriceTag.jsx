@@ -1,18 +1,18 @@
-import { applySeasonDiscount } from '@utils/price';
+// Muestra el precio final y, si viene "original", lo muestra tachado.
+// Por compatibilidad, aceptamos "coeficiente" pero NO recalculamos aquí.
 
-const PriceTag = ({ precio, coeficiente }) => {
-  // Se usa la función para calcular el precio final con descuento
-  const discountedPrice = applySeasonDiscount(precio, coeficiente);
+function PriceTag({ precio = 0, original, coeficiente }) {
+  const mostrarOriginal = typeof original === 'number' && original > precio;
 
   return (
     <>
-      {coeficiente !== 1 ? (
+      {mostrarOriginal ? (
         <div className="flex items-center gap-2">
           <p className="text-md font-bold text-green-600 dark:text-green-400">
-            ${discountedPrice.toFixed(2)}
+            ${precio.toFixed(2)}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 line-through">
-            ${precio.toFixed(2)}
+            ${original.toFixed(2)}
           </p>
         </div>
       ) : (
@@ -22,6 +22,6 @@ const PriceTag = ({ precio, coeficiente }) => {
       )}
     </>
   );
-};
+}
 
 export default PriceTag;

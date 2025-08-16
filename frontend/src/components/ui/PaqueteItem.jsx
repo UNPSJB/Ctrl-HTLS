@@ -1,9 +1,9 @@
-// PaqueteItem.jsx
 import { useState } from 'react';
 import PaqueteDetailsModal from '../modals/PaqueteDetailsModal';
 import PriceTag from '@components/PriceTag';
-import { useCarrito } from '../../context/CarritoContext';
-import { useBusqueda } from '../../context/BusquedaContext';
+import { useCarrito } from '@context/CarritoContext';
+import { useBusqueda } from '@context/BusquedaContext';
+import { calcularNoches, normalizarDescuento } from '@utils/pricingUtils';
 
 const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
   if (!paquete) return null;
@@ -15,7 +15,7 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
 
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
-    onSelect(paquete.id);
+    onSelect(paquete.id); // compat
     if (checked) {
       agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
     } else {
@@ -23,11 +23,27 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
     }
   };
 
-  // Cálculo del precio total con descuento y noches
-  const precioBase =
-    paquete.habitaciones.reduce((acum, hab) => acum + hab.precio, 0) *
-    (1 - paquete.descuento / 100) *
-    paquete.noches;
+  // --- Cálculo de precios del paquete ---
+  const noches =
+    typeof paquete.noches === 'number'
+      ? Math.max(1, Math.floor(paquete.noches))
+      : calcularNoches(paquete.fechaInicio, paquete.fechaFin);
+
+  const sumaPorNoche = (paquete.habitaciones || []).reduce(
+    (sum, h) => sum + Number(h.precio || 0),
+    0
+  );
+
+  const precioOriginal = Math.round(sumaPorNoche * noches * 100) / 100;
+
+  const descPaquete = normalizarDescuento(paquete.descuento);
+  const despuesPaquete =
+    Math.round(precioOriginal * (1 - descPaquete) * 100) / 100;
+
+  const esAlta = hotelData?.temporada === 'alta';
+  const descHotel = esAlta ? normalizarDescuento(hotelData?.coeficiente) : 0;
+
+  const precioFinal = Math.round(despuesPaquete * (1 - descHotel) * 100) / 100;
 
   return (
     <>
@@ -36,7 +52,6 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
         className="grid items-center border rounded-md px-6 py-4 bg-gray-50 dark:bg-gray-900 shadow-sm border-gray-200 dark:border-gray-700 gap-10"
         style={{ gridTemplateColumns: '1fr auto auto' }}
       >
-        {/* Encabezado: checkbox + información básica */}
         <header className="flex items-center gap-6">
           <input
             type="checkbox"
@@ -59,15 +74,15 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
           </div>
         </header>
 
-        {/* Sección: contador */}
         <section className="flex justify-center">
-          {/* Aquí puedes insertar tu componente reutilizable de contador */}
-          {/* <Counter max={paquete.habitaciones.length} /> */}
+          {/* Contador opcional */}
         </section>
 
-        {/* Pie: precio y botón de detalles */}
         <footer className="flex flex-col items-end gap-1">
-          <PriceTag precio={precioBase} coeficiente={hotelData.coeficiente} />
+          <PriceTag
+            precio={precioFinal}
+            original={precioFinal < precioOriginal ? precioOriginal : undefined}
+          />
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
             onClick={() => setMostrarModal(true)}
