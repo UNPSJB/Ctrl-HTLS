@@ -6,17 +6,23 @@ import PaqueteItem from '../PaqueteItem';
 import SelectionSummary from '../SelectionSummary';
 import HotelHeader from '@components/HotelHeader';
 import { useCarrito } from '@context/CarritoContext';
+import { calcularTotalHotel } from '@utils/pricingUtils';
 
 function HotelCard({ hotel }) {
   if (!hotel) return null;
 
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Hook que gestiona selección UI local (toggleRoomSelection / togglePackageSelection)
   const { toggleRoomSelection, togglePackageSelection } =
     useHotelSelection(hotel);
-  const { carrito, getHotelTotal } = useCarrito();
 
+  const { carrito } = useCarrito();
+
+  // Objeto del hotel en el carrito (si fue agregado)
   const hotelInCart = carrito.hoteles.find((h) => h.idHotel === hotel.id);
 
+  // Listas de ids seleccionados en el carrito (para marcar checkboxes)
   const habitacionesSeleccionadas =
     hotelInCart?.habitaciones.map((hab) => hab.id) || [];
   const paquetesSeleccionados =
@@ -25,7 +31,8 @@ function HotelCard({ hotel }) {
   const selectedRoomsCount = habitacionesSeleccionadas.length;
   const selectedPackagesCount = paquetesSeleccionados.length;
 
-  const hotelTotals = getHotelTotal(hotel.id);
+  // Si el hotel está en el carrito, calculamos sus totales reales usando pricingUtils
+  const hotelTotals = hotelInCart ? calcularTotalHotel(hotelInCart) : null;
   const totalPriceForHotel = hotelTotals?.final ?? 0;
   const hotelEnCarrito = Boolean(hotelInCart);
 

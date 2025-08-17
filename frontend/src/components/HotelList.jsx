@@ -4,7 +4,6 @@ import hotelsData from '@/data/hotels.json';
 const HotelList = () => {
   const filteredHotels = hotelsData;
 
-  // Estado vacío: anuncio accesible
   if (filteredHotels.length === 0) {
     return (
       <section

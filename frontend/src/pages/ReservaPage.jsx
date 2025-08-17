@@ -62,7 +62,7 @@ const ReservaPage = () => {
                     <HabitacionCard
                       key={hab.id}
                       habitacion={hab}
-                      porcentaje={coeficiente}
+                      porcentaje={temporada === 'alta' ? coeficiente : 0}
                     />
                   ))}
                 </div>
@@ -80,7 +80,7 @@ const ReservaPage = () => {
                     <PaqueteCard
                       key={pack.id}
                       paquete={pack}
-                      porcentaje={coeficiente}
+                      porcentaje={temporada === 'alta' ? coeficiente : 0}
                     />
                   ))}
                 </div>

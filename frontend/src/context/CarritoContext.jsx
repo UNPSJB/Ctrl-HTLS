@@ -7,14 +7,15 @@ import {
   useCallback,
 } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
-import pricing from '../utils/pricingUtils'; // import por defecto con nombres en español
 
 const STORAGE_KEY = 'carritoState';
 
+// Estado inicial
 const estadoInicial = {
   hoteles: [],
 };
 
+// Tipos de acción
 const TIPOS = {
   AGREGAR_HOTEL: 'AGREGAR_HOTEL',
   AGREGAR_HABITACION: 'AGREGAR_HABITACION',
@@ -22,8 +23,10 @@ const TIPOS = {
   REMOVER_HABITACION: 'REMOVER_HABITACION',
   REMOVER_PAQUETE: 'REMOVER_PAQUETE',
   REMOVER_HOTEL: 'REMOVER_HOTEL',
+  REEMPLAZAR_ESTADO: 'REEMPLAZAR_ESTADO',
 };
 
+// Reducer
 function carritoReducer(estado, accion) {
   switch (accion.type) {
     case TIPOS.AGREGAR_HOTEL: {
@@ -127,13 +130,25 @@ function carritoReducer(estado, accion) {
           (hotel) => hotel.idHotel !== accion.payload.idHotel
         ),
       };
+    case TIPOS.REEMPLAZAR_ESTADO:
+      // Reemplaza todo el estado (usado para migración/normalización inicial)
+      return accion.payload ?? estado;
     default:
       return estado;
   }
 }
 
+// Crear contexto
 const CarritoContext = createContext(undefined);
 
+// Helper: normaliza valor de fecha -> null si vacío/espacios
+function normalizeDateValue(v) {
+  if (v === undefined || v === null) return null;
+  const s = String(v).trim();
+  return s === '' ? null : s;
+}
+
+// --- NUEVO: función para asegurar que el hotel existe en el carrito ---
 function asegurarHotel(dispatch, { idHotel, nombre, temporada, coeficiente }) {
   dispatch({
     type: TIPOS.AGREGAR_HOTEL,
@@ -141,44 +156,79 @@ function asegurarHotel(dispatch, { idHotel, nombre, temporada, coeficiente }) {
   });
 }
 
+// --- NUEVO: función genérica para agregar elementos (robusta con normalización de fechas) ---
 function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
   asegurarHotel(dispatch, hotelInfo);
+
+  // Normalizamos y forzamos que fecha fields estén siempre en el objeto
+  let fechaInicio = fechas.fechaInicio ?? elemento.fechaInicio ?? null;
+  let fechaFin = fechas.fechaFin ?? elemento.fechaFin ?? null;
+
+  fechaInicio = normalizeDateValue(fechaInicio);
+  fechaFin = normalizeDateValue(fechaFin);
+
+  const item = {
+    ...elemento,
+    fechaInicio,
+    fechaFin,
+  };
+
   dispatch({
     type: tipo,
     payload: {
       idHotel: hotelInfo.idHotel,
-      [tipo === TIPOS.AGREGAR_HABITACION ? 'habitacion' : 'paquete']: {
-        ...elemento,
-        ...fechas,
-      },
+      [tipo === TIPOS.AGREGAR_HABITACION ? 'habitacion' : 'paquete']: item,
     },
   });
 }
 
+// Provider
 export function CarritoProvider({ children }) {
+  // Usar usePersistedState para el estado persistente
   const [persistedState, setPersistedState] = usePersistedState(
     STORAGE_KEY,
     estadoInicial
   );
+
+  // Inicializar reducer con estado persistido
   const [estado, dispatch] = useReducer(carritoReducer, persistedState);
 
-  // Sincronizar cambios del reducer con localStorage (debounced)
-  // Evita escrituras frecuentes a localStorage cuando hay muchas acciones seguidas.
+  // Al montar: normalizar persistedState (migración)
   useEffect(() => {
-    const SAVE_DELAY = 400;
-    let timeoutId = null;
+    const normalizeHoteles = (hoteles = []) =>
+      (hoteles || []).map((h) => ({
+        ...h,
+        habitaciones: (h.habitaciones || []).map((hab) => ({
+          ...hab,
+          fechaInicio: normalizeDateValue(hab.fechaInicio),
+          fechaFin: normalizeDateValue(hab.fechaFin),
+        })),
+        paquetes: (h.paquetes || []).map((p) => ({
+          ...p,
+          fechaInicio: normalizeDateValue(p.fechaInicio),
+          fechaFin: normalizeDateValue(p.fechaFin),
+        })),
+      }));
 
-    // Guardado diferido
-    timeoutId = setTimeout(() => {
-      setPersistedState(estado);
-    }, SAVE_DELAY);
-
-    // Cleanup: cancelar si estado cambia antes de timeout
-    return () => {
-      clearTimeout(timeoutId);
+    const normalized = {
+      ...persistedState,
+      hoteles: normalizeHoteles(persistedState.hoteles || []),
     };
+
+    // Si hay diferencia con persistedState, actualizamos persisted y el reducer
+    if (JSON.stringify(normalized) !== JSON.stringify(persistedState)) {
+      setPersistedState(normalized);
+      // Reemplazamos el estado del reducer para que la UI use los datos normalizados ahora mismo
+      dispatch({ type: TIPOS.REEMPLAZAR_ESTADO, payload: normalized });
+    }
+  }, []); // solo en mount
+
+  // Sincronizar cambios del reducer con localStorage
+  useEffect(() => {
+    setPersistedState(estado);
   }, [estado, setPersistedState]);
 
+  // Acciones memoizadas
   const agregarHabitacion = useCallback(
     (hotelInfo, habitacion, fechas) =>
       agregarElemento(
@@ -190,6 +240,7 @@ export function CarritoProvider({ children }) {
       ),
     [dispatch]
   );
+
   const agregarPaquete = useCallback(
     (hotelInfo, paquete, fechas) =>
       agregarElemento(
@@ -210,6 +261,7 @@ export function CarritoProvider({ children }) {
       }),
     [dispatch]
   );
+
   const removerPaquete = useCallback(
     (idHotel, idPaquete) =>
       dispatch({
@@ -218,6 +270,7 @@ export function CarritoProvider({ children }) {
       }),
     [dispatch]
   );
+
   const removerHotel = useCallback(
     (idHotel) => dispatch({ type: TIPOS.REMOVER_HOTEL, payload: { idHotel } }),
     [dispatch]
@@ -227,31 +280,13 @@ export function CarritoProvider({ children }) {
     () =>
       estado.hoteles.reduce(
         (acum, hotel) =>
-          acum + hotel.habitaciones.length + hotel.paquetes.length,
+          acum +
+          (hotel.habitaciones ? hotel.habitaciones.length : 0) +
+          (hotel.paquetes ? hotel.paquetes.length : 0),
         0
       ),
     [estado.hoteles]
   );
-
-  // Totales por hotel y total del carrito (usando funciones en español)
-  const hotelTotalsMap = useMemo(() => {
-    const map = {};
-    estado.hoteles.forEach((h) => {
-      map[h.idHotel] = pricing.calcularTotalHotel(h);
-    });
-    return map;
-  }, [estado.hoteles]);
-
-  const cartTotals = useMemo(
-    () => pricing.calcularTotalCarrito(estado.hoteles),
-    [estado.hoteles]
-  );
-
-  useEffect(() => {
-    console.debug('[Carrito] estado actualizado:', estado);
-
-    console.debug('[Carrito] cartTotals:', cartTotals);
-  }, [estado, cartTotals]);
 
   const value = useMemo(
     () => ({
@@ -262,10 +297,6 @@ export function CarritoProvider({ children }) {
       removerPaquete,
       removerHotel,
       totalElementos,
-      cartTotals,
-      hotelTotalsMap,
-      getHotelTotal: (id) =>
-        hotelTotalsMap[id] ?? { original: 0, final: 0, descuento: 0 },
     }),
     [
       estado,
@@ -275,8 +306,6 @@ export function CarritoProvider({ children }) {
       removerPaquete,
       removerHotel,
       totalElementos,
-      cartTotals,
-      hotelTotalsMap,
     ]
   );
 
@@ -285,6 +314,7 @@ export function CarritoProvider({ children }) {
   );
 }
 
+// Hook para consumir el contexto
 export function useCarrito() {
   const context = useContext(CarritoContext);
   if (context === undefined) {
