@@ -1,6 +1,7 @@
 import { ThemeProvider } from './context/ThemeContext';
 import { CarritoProvider } from './context/CarritoContext';
 import { BusquedaProvider } from '@context/BusquedaContext';
+import { ClienteProvider } from '@context/ClienteContext';
 import AppRouter from './routes/AppRouter';
 
 function App() {
@@ -8,7 +9,9 @@ function App() {
     <ThemeProvider>
       <BusquedaProvider>
         <CarritoProvider>
-          <AppRouter />
+          <ClienteProvider>
+            <AppRouter />
+          </ClienteProvider>
         </CarritoProvider>
       </BusquedaProvider>
     </ThemeProvider>

@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { Search, User, UserPlus } from 'lucide-react';
 import ClienteDetailsModal from './modals/ClienteDetailsModal';
 import clientesData from '../data/clientes.json';
+import { useCliente } from '@context/ClienteContext';
 
-const Cliente = () => {
+function Cliente() {
   const [documentNumber, setDocumentNumber] = useState('');
   const [searchResult, setSearchResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+
+  const { selectClient, clearClient } = useCliente();
 
   // Maneja la búsqueda simulando una llamada a API
   const handleSearch = () => {
@@ -23,17 +26,26 @@ const Cliente = () => {
       );
       setSearchResult(foundClient || null);
       setIsSearching(false);
+
+      if (foundClient) {
+        // Guardamos en contexto: si ya había otro cliente, se sobreescribe.
+        selectClient(foundClient);
+        console.log('Cliente seleccionado en contexto:', foundClient);
+      } else {
+        // Si no encontramos, limpiamos el cliente seleccionado (puedes comentar esto si prefieres mantenerlo)
+        clearClient();
+        console.log('No se encontró cliente. Cliente en contexto limpiado.');
+      }
     }, 800);
   };
 
   // Cierra el modal de detalles del cliente
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+  const handleCloseModal = () => setIsModalOpen(false);
 
-  // Simulación de acción para ingresar cliente
+  // Simulación de acción para ingresar cliente (puedes mapear a un formulario real)
   const handleAddClient = () => {
     console.log('Ingresar cliente con documento:', documentNumber);
+    // aquí podrías abrir un modal/form para crear nuevo cliente
   };
 
   return (
@@ -83,16 +95,35 @@ const Cliente = () => {
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       DNI: {searchResult.documento}
                     </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Puntos: {searchResult.puntos ?? 0}
+                    </p>
                   </div>
                 </div>
 
-                {/* Botón de detalles */}
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline whitespace-nowrap"
-                >
-                  Ver detalles
-                </button>
+                {/* Botones: detalles (modal) + (opcional) seleccionar manualmente */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline whitespace-nowrap"
+                  >
+                    Ver detalles
+                  </button>
+
+                  {/* Botón de selección manual (útil si querés que la selección no sea automática) */}
+                  <button
+                    onClick={() => {
+                      selectClient(searchResult);
+                      console.log(
+                        'Cliente seleccionado manualmente:',
+                        searchResult
+                      );
+                    }}
+                    className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                  >
+                    Seleccionar
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -100,14 +131,12 @@ const Cliente = () => {
           {/* Mensaje de sin resultados y botón para agregar cliente */}
           {searchResult === null && hasSearched && !isSearching && (
             <div className="flex items-center justify-between gap-4">
-              {/* Mensaje sin resultados */}
               <div>
                 <p className="text-red-600 dark:text-red-400 font-medium pl-1">
                   No se encontró ningún cliente con el documento{' '}
                   <span className="font-bold">{documentNumber}</span>
                 </p>
               </div>
-              {/* Botón para agregar cliente */}
               <div>
                 <button
                   onClick={handleAddClient}
@@ -131,6 +160,6 @@ const Cliente = () => {
       )}
     </>
   );
-};
+}
 
 export default Cliente;

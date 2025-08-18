@@ -4,11 +4,14 @@ import HabitacionCard from '@ui/cards/HabitacionCard';
 import PaqueteCard from '@ui/cards/PaqueteCard';
 import Resumen from '@ui/Resumen';
 import Cliente from '@components/Cliente';
-import { calcularTotalReserva } from '@utils/pricingUtils';
+import { useCliente } from '@context/ClienteContext';
+import { useNavigate } from 'react-router-dom';
 import Temporada from '@components/Temporada';
 
 const ReservaPage = () => {
   const { carrito } = useCarrito();
+  const { client } = useCliente();
+  const navigate = useNavigate();
 
   if (!carrito.hoteles.length) {
     return (
@@ -17,6 +20,14 @@ const ReservaPage = () => {
       </div>
     );
   }
+
+  const handleGoToPago = () => {
+    if (!client) {
+      alert('Seleccioná un cliente antes de continuar al pago.');
+      return;
+    }
+    navigate('/pago');
+  };
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -29,15 +40,6 @@ const ReservaPage = () => {
           paquetes = [],
         } = hotelReserva;
 
-        if (habitaciones.length > 0 || paquetes.length > 0) {
-          calcularTotalReserva(
-            habitaciones,
-            paquetes,
-            temporada === 'alta',
-            coeficiente
-          );
-        }
-
         return (
           <div
             key={idx}
@@ -47,7 +49,7 @@ const ReservaPage = () => {
               <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                 {nombre ?? 'Hotel'}
               </h1>
-              {/* Muestra temporada si es alta */}
+              {/* Muestra temporada si es alta (usamos el componente Temporada que tenías) */}
               {temporada === 'alta' && <Temporada porcentaje={coeficiente} />}
             </div>
 
@@ -62,7 +64,7 @@ const ReservaPage = () => {
                     <HabitacionCard
                       key={hab.id}
                       habitacion={hab}
-                      porcentaje={temporada === 'alta' ? coeficiente : 0}
+                      porcentaje={coeficiente}
                     />
                   ))}
                 </div>
@@ -80,7 +82,7 @@ const ReservaPage = () => {
                     <PaqueteCard
                       key={pack.id}
                       paquete={pack}
-                      porcentaje={temporada === 'alta' ? coeficiente : 0}
+                      porcentaje={coeficiente}
                     />
                   ))}
                 </div>
@@ -91,6 +93,7 @@ const ReservaPage = () => {
               habitaciones={habitaciones}
               paquetes={paquetes}
               porcentaje={coeficiente}
+              isHighSeason={temporada === 'alta'}
             />
           </div>
         );
@@ -98,6 +101,16 @@ const ReservaPage = () => {
 
       <div className="mt-6">
         <Cliente />
+      </div>
+
+      {/* Botón general para ir a Pagar */}
+      <div className="mt-8 flex justify-end gap-3">
+        <button
+          onClick={handleGoToPago}
+          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Pagar
+        </button>
       </div>
     </div>
   );
