@@ -4,7 +4,7 @@ import ClienteDetailsModal from './modals/ClienteDetailsModal';
 import clientesData from '../data/clientes.json';
 import { useCliente } from '@context/ClienteContext';
 
-function Cliente() {
+function ClienteSearch() {
   const [documentNumber, setDocumentNumber] = useState('');
   const [searchResult, setSearchResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -162,4 +162,4 @@ function Cliente() {
   );
 }
 
-export default Cliente;
+export default ClienteSearch;

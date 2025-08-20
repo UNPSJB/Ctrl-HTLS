@@ -1,6 +1,6 @@
 import { useCliente } from '@context/ClienteContext';
 import { useNavigate } from 'react-router-dom';
-import Cliente from '@components/Cliente';
+import ClienteSearch from '@components/ClienteSearch';
 import HotelsListView from '@components/HotelsListView';
 
 function ReservaPage() {
@@ -18,7 +18,7 @@ function ReservaPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <HotelsListView />
-      <Cliente />
+      <ClienteSearch />
       <div className="flex justify-end gap-3">
         <button
           onClick={handleGoToPago}
