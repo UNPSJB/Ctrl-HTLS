@@ -50,7 +50,7 @@ function Cliente() {
 
   return (
     <>
-      <div className="mx-auto max-w-4xl">
+      <div className=" max-w-4xl">
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg transition-all duration-300 p-6">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
             Búsqueda de Clientes
