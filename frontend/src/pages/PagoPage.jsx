@@ -1,294 +1,134 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Bed, Package } from 'lucide-react';
+import { useMemo } from 'react';
 import { useCarrito } from '@context/CarritoContext';
-import { useCliente } from '@context/ClienteContext';
-import {
-  calcularTotalCarrito,
-  calcularTotalHotel,
-  calcularNoches,
-} from '@utils/pricingUtils';
-import PriceTag from '@components/PriceTag';
+import HabitacionCard from '@ui/cards/HabitacionCard';
+import PaqueteCard from '@ui/cards/PaqueteCard';
+import Resumen from '@ui/Resumen';
 import ResumenPago from '@components/ResumenPago';
+import Temporada from '@components/Temporada';
+import { calcularTotalReserva } from '@utils/pricingUtils';
 
-/**
- * PagoPage (actualizada para usar ResumenPago)
- */
-
-function convertPointsToAmount(points = 0) {
-  const blocks = Math.floor(Number(points || 0) / 1000);
-  return blocks * 10;
-}
-
-export default function PagoPage() {
-  const navigate = useNavigate();
+function PagoPage() {
   const { carrito } = useCarrito();
-  const { client } = useCliente();
 
-  const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'cash' | 'transfer'
-  const [usePoints, setUsePoints] = useState(false);
-
-  // Campos de tarjeta
-  const [cardData, setCardData] = useState({
-    number: '',
-    name: '',
-    expiry: '',
-    cvc: '',
-  });
-
-  // Totales por hotel (usando pricingUtils)
-  const hotelsData = useMemo(() => {
-    return (carrito.hoteles || []).map((h) => ({
-      id: h.idHotel ?? h.id ?? null,
-      nombre: h.nombre ?? 'Hotel',
-      habitaciones: h.habitaciones ?? [],
-      paquetes: h.paquetes ?? [],
-      temporada: h.temporada,
-      coeficiente: h.coeficiente ?? 0,
-      totals: calcularTotalHotel(h),
-    }));
-  }, [carrito.hoteles]);
-
-  // Totales generales del carrito
-  const cartTotals = useMemo(
-    () => calcularTotalCarrito(carrito.hoteles || []),
+  // Mapear hoteles para mostrar (igual que en ReservaPage)
+  const hotelsData = useMemo(
+    () =>
+      (carrito.hoteles || []).map((h) => {
+        const habitaciones = h.habitaciones ?? [];
+        const paquetes = h.paquetes ?? [];
+        const isHighSeason = (h.temporada ?? '') === 'alta';
+        const totals = calcularTotalReserva(
+          habitaciones,
+          paquetes,
+          isHighSeason,
+          h.coeficiente ?? 0
+        );
+        return {
+          idHotel: h.idHotel,
+          nombre: h.nombre,
+          temporada: h.temporada,
+          coeficiente: h.coeficiente ?? 0,
+          habitaciones,
+          paquetes,
+          totals,
+        };
+      }),
     [carrito.hoteles]
   );
 
-  const subtotal = Number(cartTotals.original ?? 0);
-  const totalDiscounts = Number(cartTotals.descuento ?? 0);
-  const baseTotal = Number(cartTotals.final ?? subtotal - totalDiscounts ?? 0);
-
-  // Punto cliente
-  const clientPoints = client?.puntos ?? 0;
-  const maxPointsAmount = convertPointsToAmount(clientPoints);
-
-  // descuento por puntos
-  const pointsDiscount = usePoints ? Math.min(maxPointsAmount, baseTotal) : 0;
-  const finalTotal = Math.max(
-    0,
-    Math.round((baseTotal - pointsDiscount) * 100) / 100
-  );
-
-  // helper noches
-  const calcNights = (start, end) => calcularNoches(start, end);
-
-  // validación simple de tarjeta
-  const isCardValid = () => {
-    if (paymentMethod !== 'card') return true;
-    const num = String(cardData.number || '').replace(/\s+/g, '');
-    const name = String(cardData.name || '').trim();
-    const expiry = String(cardData.expiry || '').trim();
-    const cvc = String(cardData.cvc || '').trim();
-    if (num.length < 12) return false;
-    if (name.length < 2) return false;
-    if (!/^\d{2}\/\d{2}$/.test(expiry)) return false;
-    if (!/^\d{3,4}$/.test(cvc)) return false;
-    return true;
-  };
-
-  // confirmar (simulado)
-  const handleConfirm = () => {
-    if (!client) {
-      alert('Seleccioná un cliente antes de confirmar la reserva.');
-      return;
-    }
-    if (!carrito.hoteles.length) {
-      alert('El carrito está vacío.');
-      return;
-    }
-    if (!isCardValid()) {
-      alert('Datos de tarjeta incompletos o inválidos.');
-      return;
-    }
-
-    alert(
-      `Reserva confirmada (simulado). Total pagado: $${finalTotal.toFixed(2)}`
-    );
-    navigate('/reserva/confirmacion');
-  };
-
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-6xl p-6 space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-            Confirmar Reserva
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
-            Revisa los detalles antes de confirmar el pago
-          </p>
-        </div>
+    <div className="mx-auto max-w-6xl p-6">
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Confirmar y Pagar
+        </h1>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Revisá los detalles antes de procesar el pago.
+        </p>
+      </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left column: detalles de reserva (sin cambios) */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Cliente */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
-              <div className="p-6 flex items-start justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {client?.nombre ?? 'Cliente no seleccionado'}
-                  </h3>
-                  <div className="mt-2 text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                    <div>DNI: {client?.documento ?? '-'}</div>
-                    <div>Email: {client?.email ?? '-'}</div>
-                    <div>Teléfono: {client?.telefono ?? '-'}</div>
-                  </div>
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* columna principal: igual a ReservaPage */}
+        <div className="lg:col-span-2 space-y-6">
+          {hotelsData.map((hotelReserva, idx) => {
+            const {
+              nombre,
+              temporada,
+              coeficiente,
+              habitaciones = [],
+              paquetes = [],
+            } = hotelReserva;
+
+            return (
+              <div
+                key={idx}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden p-6 mb-8"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                    {nombre ?? 'Hotel'}
+                  </h2>
+                  {temporada === 'alta' && (
+                    <Temporada porcentaje={coeficiente} />
+                  )}
                 </div>
 
-                {/* Bloque puntos */}
-                <div className="ml-6 text-center">
-                  <div className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-4 rounded-xl shadow-lg w-36">
-                    <p className="text-2xl font-bold">{clientPoints}</p>
-                    <p className="text-sm opacity-90">Puntos</p>
-                    <p className="text-xs mt-1">≈ ${maxPointsAmount}</p>
-                  </div>
-                </div>
+                {/* Habitaciones */}
+                {habitaciones.length > 0 && (
+                  <section className="mb-8">
+                    <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100">
+                      <Bed className="w-5 h-5" />
+                      Habitaciones Seleccionadas
+                    </h3>
+                    <div className="space-y-4">
+                      {habitaciones.map((hab) => (
+                        <HabitacionCard
+                          key={hab.id}
+                          habitacion={hab}
+                          porcentaje={coeficiente}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Paquetes */}
+                {paquetes.length > 0 && (
+                  <section className="mb-8">
+                    <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100">
+                      <Package className="w-5 h-5" />
+                      Paquetes Seleccionados
+                    </h3>
+                    <div className="space-y-4">
+                      {paquetes.map((pack) => (
+                        <PaqueteCard
+                          key={pack.id}
+                          paquete={pack}
+                          porcentaje={coeficiente}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Resumen por hotel (usa tu componente Resumen) */}
+                <Resumen
+                  habitaciones={habitaciones}
+                  paquetes={paquetes}
+                  porcentaje={coeficiente}
+                  isHighSeason={temporada === 'alta'}
+                />
               </div>
-            </div>
-
-            {/* Hoteles / items */}
-            <div className="space-y-6">
-              {hotelsData.length === 0 && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  No hay items en el carrito.
-                </div>
-              )}
-
-              {hotelsData.map((hotel) => (
-                <div
-                  key={hotel.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden"
-                >
-                  <div className="p-4 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-gray-800 dark:text-gray-100">
-                        {hotel.nombre}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {hotel.habitaciones.length} habitaciones —{' '}
-                        {hotel.paquetes.length} paquetes
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Original
-                      </p>
-                      <PriceTag
-                        precio={hotel.totals.original}
-                        coeficiente={1}
-                      />
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Final
-                      </p>
-                      <PriceTag precio={hotel.totals.final} coeficiente={1} />
-                    </div>
-                  </div>
-
-                  <div className="p-4 space-y-3">
-                    {/* Habitaciones */}
-                    {hotel.habitaciones.map((hab) => {
-                      const noches = calcNights(hab.fechaInicio, hab.fechaFin);
-                      const cantidad = hab.qty ?? 1;
-                      const totalRoom =
-                        (hab.precio ?? hab.price ?? 0) * noches * cantidad;
-                      return (
-                        <div
-                          key={`h-${hotel.id}-${hab.id}`}
-                          className="flex justify-between items-center py-2 border-b last:border-b-0 border-gray-100 dark:border-gray-800"
-                        >
-                          <div>
-                            <p className="font-medium text-gray-800 dark:text-gray-100">
-                              {hab.nombre}
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              Capacidad: {hab.capacidad} personas
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {hab.fechaInicio || '-'} — {hab.fechaFin || '-'}{' '}
-                              <span className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-900 rounded">
-                                {noches} noche{noches > 1 ? 's' : ''}
-                              </span>
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <PriceTag
-                              precio={Math.round(totalRoom * 100) / 100}
-                              coeficiente={hotel.coeficiente}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {/* Paquetes */}
-                    {hotel.paquetes.length > 0 && (
-                      <div className="pt-2">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                          Paquetes
-                        </h4>
-                        {hotel.paquetes.map((p) => {
-                          const noches = calcNights(p.fechaInicio, p.fechaFin);
-                          const priceBase =
-                            (p.precioFinal ?? p.precio ?? 0) * (p.qty ?? 1);
-                          return (
-                            <div
-                              key={`p-${hotel.id}-${p.id}`}
-                              className="flex justify-between items-center py-2 border-b last:border-b-0 border-gray-100 dark:border-gray-800 bg-blue-50 dark:bg-blue-900/10 rounded p-2"
-                            >
-                              <div className="flex-1">
-                                <p className="font-medium text-gray-800 dark:text-gray-100">
-                                  {p.nombre}
-                                </p>
-                                {p.descripcion && (
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {p.descripcion}
-                                  </p>
-                                )}
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                  {p.fechaInicio || '-'} — {p.fechaFin || '-'}{' '}
-                                  <span className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-900 rounded">
-                                    {noches} noches
-                                  </span>
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <PriceTag
-                                  precio={Math.round(priceBase * 100) / 100}
-                                  coeficiente={hotel.coeficiente}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right column: USAMOS ResumenPago */}
-          <ResumenPago
-            subtotal={subtotal}
-            totalDiscounts={totalDiscounts}
-            baseTotal={baseTotal}
-            clientPoints={clientPoints}
-            maxPointsAmount={maxPointsAmount}
-            usePoints={usePoints}
-            setUsePoints={setUsePoints}
-            paymentMethod={paymentMethod}
-            setPaymentMethod={setPaymentMethod}
-            pointsDiscount={pointsDiscount}
-            finalTotal={finalTotal}
-            handleConfirm={handleConfirm}
-            cardData={cardData}
-            setCardData={setCardData}
-          />
+            );
+          })}
         </div>
+
+        {/* columna derecha: ResumenPago (sticky). Sólo le pasamos los totales necesarios */}
+        <ResumenPago />
       </div>
     </div>
   );
 }
+
+export default PagoPage;
