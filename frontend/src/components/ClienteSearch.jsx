@@ -22,7 +22,7 @@ function ClienteSearch() {
 
     setTimeout(() => {
       const foundClient = clientesData.find(
-        (client) => client.documento === documentNumber.trim()
+        (c) => c.documento === documentNumber.trim()
       );
       setSearchResult(foundClient || null);
       setIsSearching(false);
@@ -50,7 +50,7 @@ function ClienteSearch() {
 
   return (
     <>
-      <div className=" max-w-4xl">
+      <div className="max-w-4xl">
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg transition-all duration-300 p-6">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
             Búsqueda de Clientes
@@ -79,49 +79,43 @@ function ClienteSearch() {
             </div>
           </div>
 
-          {/* Resultados de búsqueda */}
+          {/* Resultados de búsqueda (una sola fila de información) */}
           {searchResult && (
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex justify-between items-center gap-4 px-5 py-3">
-                {/* Avatar + info */}
+                {/* Avatar + info en una fila */}
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
                     <User className="w-6 h-6 text-gray-800 dark:text-gray-200" />
                   </div>
-                  <div>
+
+                  {/* Datos en una sola fila: nombre | DNI | Puntos */}
+                  <div className="flex items-baseline gap-4">
                     <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100">
                       {searchResult.nombre}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      DNI: {searchResult.documento}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Puntos: {searchResult.puntos ?? 0}
-                    </p>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      DNI:{' '}
+                      <span className="font-medium text-gray-800 dark:text-gray-100">
+                        {searchResult.documento}
+                      </span>
+                    </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Puntos:{' '}
+                      <span className="font-medium text-gray-800 dark:text-gray-100">
+                        {searchResult.puntos ?? 0}
+                      </span>
+                    </span>
                   </div>
                 </div>
 
-                {/* Botones: detalles (modal) + (opcional) seleccionar manualmente */}
+                {/* Botones: detalles (modal) */}
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setIsModalOpen(true)}
                     className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline whitespace-nowrap"
                   >
                     Ver detalles
-                  </button>
-
-                  {/* Botón de selección manual (útil si querés que la selección no sea automática) */}
-                  <button
-                    onClick={() => {
-                      selectClient(searchResult);
-                      console.log(
-                        'Cliente seleccionado manualmente:',
-                        searchResult
-                      );
-                    }}
-                    className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                  >
-                    Seleccionar
                   </button>
                 </div>
               </div>
@@ -130,7 +124,7 @@ function ClienteSearch() {
 
           {/* Mensaje de sin resultados y botón para agregar cliente */}
           {searchResult === null && hasSearched && !isSearching && (
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-4 mt-4">
               <div>
                 <p className="text-red-600 dark:text-red-400 font-medium pl-1">
                   No se encontró ningún cliente con el documento{' '}
