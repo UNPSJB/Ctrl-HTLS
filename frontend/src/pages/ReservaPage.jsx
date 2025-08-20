@@ -16,9 +16,10 @@ function ReservaPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl flex flex-col gap-6">
       <HotelsListView />
       <ClienteSearch />
+
       <div className="flex justify-end gap-3">
         <button
           onClick={handleGoToPago}

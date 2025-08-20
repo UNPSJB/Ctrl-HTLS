@@ -13,7 +13,6 @@ function ClienteSearch() {
 
   const { selectClient, clearClient } = useCliente();
 
-  // Maneja la búsqueda simulando una llamada a API
   const handleSearch = () => {
     if (!documentNumber.trim()) return;
 
@@ -28,24 +27,19 @@ function ClienteSearch() {
       setIsSearching(false);
 
       if (foundClient) {
-        // Guardamos en contexto: si ya había otro cliente, se sobreescribe.
         selectClient(foundClient);
         console.log('Cliente seleccionado en contexto:', foundClient);
       } else {
-        // Si no encontramos, limpiamos el cliente seleccionado (puedes comentar esto si prefieres mantenerlo)
         clearClient();
         console.log('No se encontró cliente. Cliente en contexto limpiado.');
       }
     }, 800);
   };
 
-  // Cierra el modal de detalles del cliente
   const handleCloseModal = () => setIsModalOpen(false);
 
-  // Simulación de acción para ingresar cliente (puedes mapear a un formulario real)
   const handleAddClient = () => {
     console.log('Ingresar cliente con documento:', documentNumber);
-    // aquí podrías abrir un modal/form para crear nuevo cliente
   };
 
   return (
@@ -56,7 +50,6 @@ function ClienteSearch() {
             Búsqueda de Clientes
           </h1>
 
-          {/* Formulario de búsqueda */}
           <div className="mb-8">
             <div className="flex gap-3">
               <div className="flex-1">
@@ -79,17 +72,14 @@ function ClienteSearch() {
             </div>
           </div>
 
-          {/* Resultados de búsqueda (una sola fila de información) */}
           {searchResult && (
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex justify-between items-center gap-4 px-5 py-3">
-                {/* Avatar + info en una fila */}
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
                     <User className="w-6 h-6 text-gray-800 dark:text-gray-200" />
                   </div>
 
-                  {/* Datos en una sola fila: nombre | DNI | Puntos */}
                   <div className="flex items-baseline gap-4">
                     <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100">
                       {searchResult.nombre}
@@ -109,7 +99,6 @@ function ClienteSearch() {
                   </div>
                 </div>
 
-                {/* Botones: detalles (modal) */}
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setIsModalOpen(true)}
@@ -122,7 +111,6 @@ function ClienteSearch() {
             </div>
           )}
 
-          {/* Mensaje de sin resultados y botón para agregar cliente */}
           {searchResult === null && hasSearched && !isSearching && (
             <div className="flex items-center justify-between gap-4 mt-4">
               <div>
@@ -145,7 +133,6 @@ function ClienteSearch() {
         </div>
       </div>
 
-      {/* Modal de detalles del cliente */}
       {isModalOpen && searchResult && (
         <ClienteDetailsModal
           cliente={searchResult}

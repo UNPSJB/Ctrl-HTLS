@@ -1,6 +1,7 @@
 import { useCarrito } from '@context/CarritoContext';
 import HotelsListView from '@components/HotelsListView';
 import ResumenPago from '@components/ResumenPago';
+import ClienteData from '@components/ClienteData';
 
 function PagoPage() {
   const { carrito } = useCarrito();
@@ -26,6 +27,7 @@ function PagoPage() {
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-6">
+          <ClienteData />
           <HotelsListView />
         </div>
 
