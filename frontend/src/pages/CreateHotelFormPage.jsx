@@ -4,7 +4,7 @@ import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import TiposHabitacionSelector from '@/components/selectors/TipoHabitacionSelector';
 import EncargadoForm from '@/components/forms/EncargadoForm';
 import useHotel from '@/hooks/useHotel';
-import { Loading } from '@/components/modals/Loading';
+import { Loading } from '@/components/ui/Loading';
 
 export default function AdminCreateHotelForm() {
   const hotelForm = useHotelForm();

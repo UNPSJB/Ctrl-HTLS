@@ -22,6 +22,10 @@ export default defineConfig({
       '@layouts': resolve(__dirname, './src/layouts'), // Alias para layouts
       '@pages': resolve(__dirname, './src/pages'), // Alias para páginas
       '@routes': resolve(__dirname, './src/routes'), // Alias para rutas
+      '@hotel': resolve(__dirname, './src/components/hotel'), // Alias para componentes de hotel
+      '@client': resolve(__dirname, './src/components/client'), // Alias para componentes de cliente
+      '@cart': resolve(__dirname, './src/components/cart'), // Alias para componentes de carrito
+      '@data': resolve(__dirname, './src/data'), // Alias para datos
     },
   },
 });

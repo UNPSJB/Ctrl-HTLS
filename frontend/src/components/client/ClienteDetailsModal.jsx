@@ -1,5 +1,5 @@
 import { User, FileText, Phone } from 'lucide-react';
-import Modal from './Modal';
+import Modal from '../ui/Modal';
 
 const ClienteDetailsModal = ({ cliente, onClose }) => {
   if (!cliente) return null;

@@ -3,7 +3,7 @@ import { Bed, Package as PackageIcon } from 'lucide-react';
 import HabitacionCard from '@ui/cards/HabitacionCard';
 import PaqueteCard from '@ui/cards/PaqueteCard';
 import Resumen from '@ui/Resumen';
-import Temporada from '@components/Temporada';
+import Temporada from '@hotel/Temporada';
 import { useCarrito } from '@context/CarritoContext';
 
 function HotelsListView() {

@@ -1,6 +1,6 @@
 import { Bed, Calendar, Percent, Tag } from 'lucide-react';
-import Modal from './Modal';
-import ImageLoader from '../ImageLoader';
+import Modal from '../ui/Modal';
+import ImageLoader from '../ui/ImageLoader';
 
 const PaqueteDetailsModal = ({ paquete, coeficiente, onClose, onReserve }) => {
   if (!paquete) return null;

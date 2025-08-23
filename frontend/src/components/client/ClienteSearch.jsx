@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, User, UserPlus } from 'lucide-react';
-import ClienteDetailsModal from './modals/ClienteDetailsModal';
-import clientesData from '../data/clientes.json';
+import ClienteDetailsModal from './ClienteDetailsModal';
+import clientesData from '@data/clientes.json';
 import { useCliente } from '@context/ClienteContext';
 
 function ClienteSearch() {

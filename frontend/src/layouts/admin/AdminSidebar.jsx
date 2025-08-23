@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { ThemeContext } from '@context/ThemeContext';
 import ThemeToggle from '@ui/ThemeToggle';
-import Avatar from '@components/Avatar';
+import Avatar from '@components/ui/Avatar';
 import logoLight from '@assets/logo.svg';
 import logoDark from '@assets/logo-dark.svg';
 

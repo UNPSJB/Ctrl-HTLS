@@ -1,9 +1,9 @@
 import { useContext, useState, useMemo } from 'react';
 import { ThemeContext } from '@context/ThemeContext';
-import Avatar from '@components/Avatar';
+import Avatar from '@components/ui/Avatar';
 import ThemeToggle from '@ui/ThemeToggle';
-import CartToggleButton from '@ui/CartToggleButton';
-import Carrito from '@components/Carrito';
+import CartToggleButton from '@cart/CartToggleButton';
+import Carrito from '@cart/Carrito';
 import logoLight from '@assets/logo.svg';
 import logoDark from '@assets/logo-dark.svg';
 import { Link } from 'react-router-dom';

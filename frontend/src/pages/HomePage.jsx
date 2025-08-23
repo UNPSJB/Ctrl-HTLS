@@ -1,5 +1,5 @@
-import HotelSearch from '@components/HotelSearch';
-import HotelList from '@components/HotelList';
+import HotelSearch from '@hotel/HotelSearch';
+import HotelList from '@hotel/HotelList';
 import { BusquedaProvider } from '@context/BusquedaContext';
 
 const HomePage = () => {

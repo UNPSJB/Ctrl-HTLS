@@ -1,6 +1,6 @@
 import { X, Trash2, CreditCard, House, Package } from 'lucide-react';
 import { useCarrito } from '@context/CarritoContext';
-import Temporada from './Temporada';
+import Temporada from '@components/hotel/Temporada';
 import { useNavigate } from 'react-router-dom';
 
 const Carrito = ({ isOpen, onClose }) => {

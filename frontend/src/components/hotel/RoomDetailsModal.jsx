@@ -1,6 +1,6 @@
 import { Users, Bath, Tag } from 'lucide-react';
-import Modal from './Modal';
-import ImageLoader from '../ImageLoader';
+import Modal from '../ui/Modal';
+import ImageLoader from '../ui/ImageLoader';
 
 const RoomDetailsModal = ({ habitacion, coeficiente, onClose, onReserve }) => {
   // Cálculo de precios

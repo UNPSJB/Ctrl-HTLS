@@ -1,7 +1,7 @@
 import { useCarrito } from '@context/CarritoContext';
-import HotelsListView from '@components/HotelsListView';
+import HotelsListView from '@hotel/HotelsListView';
 import ResumenPago from '@components/ResumenPago';
-import ClienteData from '@components/ClienteData';
+import ClienteData from '@components/client/ClienteData';
 
 function PagoPage() {
   const { carrito } = useCarrito();

@@ -1,7 +1,7 @@
 import { useCliente } from '@context/ClienteContext';
 import { useNavigate } from 'react-router-dom';
-import ClienteSearch from '@components/ClienteSearch';
-import HotelsListView from '@components/HotelsListView';
+import ClienteSearch from '@client/ClienteSearch';
+import HotelsListView from '@hotel/HotelsListView';
 
 function ReservaPage() {
   const { client } = useCliente();

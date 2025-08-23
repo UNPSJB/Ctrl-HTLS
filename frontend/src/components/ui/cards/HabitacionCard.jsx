@@ -1,4 +1,4 @@
-import PriceTag from '@/components/PriceTag';
+import PriceTag from '@/components/ui/PriceTag';
 import { Users } from 'lucide-react';
 import {
   calcularPrecioFinalHabitacion,

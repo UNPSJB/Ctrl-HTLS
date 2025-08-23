@@ -1,7 +1,7 @@
 // HotelHeader.jsx
 import { Star, MapPin } from 'lucide-react';
 import Temporada from './Temporada';
-import ImageLoader from './ImageLoader';
+import ImageLoader from '@ui/ImageLoader';
 
 const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
   return (

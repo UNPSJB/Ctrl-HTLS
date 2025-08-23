@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Bed, Package } from 'lucide-react';
 import useHotelSelection from '@hooks/useHotelSelection';
-import HabitacionItem from '../HabitacionItem';
-import PaqueteItem from '../PaqueteItem';
-import SelectionSummary from '../SelectionSummary';
-import HotelHeader from '@components/HotelHeader';
+import HabitacionItem from '../../hotel/HabitacionItem';
+import PaqueteItem from '../../hotel/PaqueteItem';
+import SelectionSummary from '../../cart/SelectionSummary';
+import HotelHeader from '@components/hotel/HotelHeader';
 import { useCarrito } from '@context/CarritoContext';
 import { calcularTotalHotel } from '@utils/pricingUtils';
 

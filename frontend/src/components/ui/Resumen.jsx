@@ -1,4 +1,4 @@
-import PriceTag from '../PriceTag';
+import PriceTag from './PriceTag';
 import { calcularTotalReserva } from '@utils/pricingUtils';
 
 function Resumen({
