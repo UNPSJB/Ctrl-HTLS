@@ -1,286 +1,291 @@
-/////////////////////////
-// Helpers
-/////////////////////////
+// src/utils/pricingUtils.js
+// Comentarios en español; nombres de funciones en inglés (para imports limpios).
 
-/** convertirANumero(v) -> normaliza a Number seguro */
-export function convertirANumero(v) {
+/* ============================
+   Helpers internos
+   ============================ */
+
+/** roundTwo(n) -> redondea a 2 decimales */
+export function roundTwo(n) {
+  return Math.round((Number(n) || 0) * 100) / 100;
+}
+
+/** toNumber(v) -> normaliza a Number seguro */
+export function toNumber(v) {
   const n = Number(v ?? 0);
   return Number.isFinite(n) ? n : 0;
 }
 
-/** calcularNoches(fechaInicio, fechaFin) -> devuelve al menos 1 noche */
-export function calcularNoches(fechaInicio, fechaFin) {
+/** calcNights(startDate, endDate) -> devuelve al menos 1 noche */
+export function calcNights(startDate, endDate) {
   try {
-    const inicio = new Date(fechaInicio);
-    const fin = new Date(fechaFin);
-    if (!Number.isFinite(inicio.getTime()) || !Number.isFinite(fin.getTime()))
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()))
       return 1;
-    const diffMs = Math.abs(fin - inicio);
-    const noches = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    return Math.max(1, noches);
+    // Si end < start, mantenemos 1 noche por seguridad (en vez de usar Math.abs)
+    if (end <= start) return 1;
+    const diffMs = end - start;
+    const nights = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return Math.max(1, nights);
   } catch {
     return 1;
   }
 }
 
-/** normalizarDescuento(v) -> convierte 10 -> 0.1 y limita entre 0 y 1 */
-export function normalizarDescuento(v) {
-  let d = convertirANumero(v ?? 0);
+/** normalizeDiscount(v) -> convierte 10 -> 0.1 y limita entre 0 y 1 */
+export function normalizeDiscount(v) {
+  let d = toNumber(v ?? 0);
   if (d > 1) d = d / 100;
   d = Math.min(Math.max(d, 0), 1);
   return d;
 }
 
-/////////////////////////
-// Habitaciones
-/////////////////////////
+/* ============================
+   Habitaciones (rooms)
+   ============================ */
 
 /**
- * calcularBaseHabitacion(habitacion)
- * - Devuelve: { originalPorUnidad, originalTotal, noches, qty }
- * - No aplica descuentos aún.
+ * calcRoomBase(room)
+ * - Devuelve: { unitOriginal, totalOriginal, nights, qty }
  */
-export function calcularBaseHabitacion(habitacion = {}) {
-  const precio = convertirANumero(habitacion.precio ?? habitacion.price);
-  const noches = calcularNoches(
-    habitacion.fechaInicio ?? habitacion.startDate,
-    habitacion.fechaFin ?? habitacion.endDate
+export function calcRoomBase(room = {}) {
+  const price = toNumber(room.precio ?? room.price);
+  const nights = calcNights(
+    room.fechaInicio ?? room.startDate,
+    room.fechaFin ?? room.endDate
   );
-  const qty = Math.max(
-    1,
-    Math.floor(convertirANumero(habitacion.qty ?? habitacion.quantity ?? 1))
-  );
-  const originalPorUnidad = precio * noches;
-  const originalTotal = Math.round(originalPorUnidad * qty * 100) / 100;
-  return { originalPorUnidad, originalTotal, noches, qty };
+  const qty = Math.max(1, Math.floor(toNumber(room.qty ?? room.quantity ?? 1)));
+  const unitOriginal = roundTwo(price * nights);
+  const totalOriginal = roundTwo(unitOriginal * qty);
+  return { unitOriginal, totalOriginal, nights, qty };
 }
 
 /**
- * calcularPrecioFinalHabitacion({ habitacion, descuentoHotel = 0 })
- * - Aplica descuento del hotel (decimal, ej. 0.15)
- * - Retorna { original, final, descuento, noches, qty }
+ * calcRoomFinal({ room, hotelDiscount = 0 })
+ * - Aplica descuento del hotel (hotelDiscount como decimal o porcentaje)
+ * - Retorna { original, final, discount, nights, qty }
  */
-export function calcularPrecioFinalHabitacion({
-  habitacion = {},
-  descuentoHotel = 0,
-} = {}) {
-  const { originalPorUnidad, originalTotal, noches, qty } =
-    calcularBaseHabitacion(habitacion);
-  const hotelDesc = normalizarDescuento(descuentoHotel);
-  const despuesHotelPorUnidad =
-    Math.round(originalPorUnidad * (1 - hotelDesc) * 100) / 100;
-  const finalTotal = Math.round(despuesHotelPorUnidad * qty * 100) / 100;
+export function calcRoomFinal({ room = {}, hotelDiscount = 0 } = {}) {
+  const { unitOriginal, totalOriginal, nights, qty } = calcRoomBase(room);
+  const hotelDesc = normalizeDiscount(hotelDiscount);
+  const afterHotelUnit = roundTwo(unitOriginal * (1 - hotelDesc));
+  const finalTotal = roundTwo(afterHotelUnit * qty);
   return {
-    original: originalTotal,
+    original: totalOriginal,
     final: finalTotal,
-    descuento: Math.round((originalTotal - finalTotal) * 100) / 100,
-    noches,
+    descuento: roundTwo(totalOriginal - finalTotal),
+    nights,
     qty,
   };
 }
 
-/////////////////////////
-// Paquetes
-/////////////////////////
+/* ============================
+   Paquetes (packages)
+   ============================ */
 
 /**
- * calcularBasePaquete(paquete)
+ * calcPackageBase(pkg)
  * - Suma precios por noche de las habitaciones incluidas * noches (sin descuentos)
- * - Retorna { originalPorPaquete, noches, sumaPorNoche }
+ * - Retorna { originalPerPackage, nights, sumPerNight }
  */
-export function calcularBasePaquete(paquete = {}) {
-  const nochesDesdeFechas = calcularNoches(
-    paquete.fechaInicio ?? paquete.startDate,
-    paquete.fechaFin ?? paquete.endDate
+export function calcPackageBase(pkg = {}) {
+  const nightsFromDates = calcNights(
+    pkg.fechaInicio ?? pkg.startDate,
+    pkg.fechaFin ?? pkg.endDate
   );
-  const noches = Math.max(
+  const nights = Math.max(
     1,
-    Math.floor(convertirANumero(paquete.noches ?? nochesDesdeFechas))
+    Math.floor(toNumber(pkg.noches ?? nightsFromDates))
   );
-  const sumaPorNoche = (paquete.habitaciones ?? paquete.rooms ?? []).reduce(
-    (acc, r) => acc + convertirANumero(r.precio ?? r.price),
+  const sumPerNight = (pkg.habitaciones ?? pkg.rooms ?? []).reduce(
+    (acc, r) => acc + toNumber(r.precio ?? r.price),
     0
   );
-  const originalPorPaquete = Math.round(sumaPorNoche * noches * 100) / 100;
-  return { originalPorPaquete, noches, sumaPorNoche };
+  const originalPerPackage = roundTwo(sumPerNight * nights);
+  return { originalPerPackage, nights, sumPerNight };
 }
 
 /**
- * calcularPrecioFinalPaquete({ paquete, descuentoHotel = 0 })
+ * calcPackageFinal({ pkg, hotelDiscount = 0 })
  * - Aplica descuento interno del paquete y luego descuento del hotel
- * - Retorna { original, final, descuento, noches, qty }
+ * - Retorna { original, final, discount, nights, qty }
  */
-export function calcularPrecioFinalPaquete({
-  paquete = {},
-  descuentoHotel = 0,
-} = {}) {
-  const { originalPorPaquete, noches } = calcularBasePaquete(paquete);
-  const descPaquete = normalizarDescuento(
-    paquete.descuento ?? paquete.discount ?? 0
-  );
-  const despuesPaquete =
-    Math.round(originalPorPaquete * (1 - descPaquete) * 100) / 100;
-  const hotelDesc = normalizarDescuento(descuentoHotel);
-  const despuesHotel = Math.round(despuesPaquete * (1 - hotelDesc) * 100) / 100;
-  const qty = Math.max(
-    1,
-    Math.floor(convertirANumero(paquete.qty ?? paquete.quantity ?? 1))
-  );
-  const originalTotal = Math.round(originalPorPaquete * qty * 100) / 100;
-  const finalTotal = Math.round(despuesHotel * qty * 100) / 100;
+export function calcPackageFinal({ pkg = {}, hotelDiscount = 0 } = {}) {
+  const { originalPerPackage, nights } = calcPackageBase(pkg);
+  const pkgDisc = normalizeDiscount(pkg.descuento ?? pkg.discount ?? 0);
+  const afterPkg = roundTwo(originalPerPackage * (1 - pkgDisc));
+  const hotelDisc = normalizeDiscount(hotelDiscount);
+  const afterHotel = roundTwo(afterPkg * (1 - hotelDisc));
+  const qty = Math.max(1, Math.floor(toNumber(pkg.qty ?? pkg.quantity ?? 1)));
+  const originalTotal = roundTwo(originalPerPackage * qty);
+  const finalTotal = roundTwo(afterHotel * qty);
   return {
     original: originalTotal,
     final: finalTotal,
-    descuento: Math.round((originalTotal - finalTotal) * 100) / 100,
-    noches,
+    descuento: roundTwo(originalTotal - finalTotal),
+    nights,
     qty,
   };
 }
 
-/////////////////////////
-// Totales / Agregados
-/////////////////////////
+/* ============================
+   Totales / agregados
+   ============================ */
 
 /**
- * calcularTotalHotel(hotel)
+ * calcHotelTotal(hotel)
  * - hotel: { habitaciones, paquetes, coeficiente, temporada }
- * - Retorna { original, final, descuento }
+ * - Retorna { original, final, discount }
  */
-export function calcularTotalHotel(hotel = {}) {
-  const hotelDesc = normalizarDescuento(
+export function calcHotelTotal(hotel = {}) {
+  const hotelDesc = normalizeDiscount(
     hotel.coeficiente ?? hotel.coefficient ?? 0
   );
-  const habitaciones = hotel.habitaciones ?? hotel.rooms ?? [];
-  const paquetes = hotel.paquetes ?? hotel.packages ?? [];
+  const rooms = hotel.habitaciones ?? hotel.rooms ?? [];
+  const packages = hotel.paquetes ?? hotel.packages ?? [];
 
-  const totRooms = (habitaciones || []).map((h) =>
-    calcularPrecioFinalHabitacion({ habitacion: h, descuentoHotel: hotelDesc })
+  const totRooms = (rooms || []).map((r) =>
+    calcRoomFinal({ room: r, hotelDiscount: hotelDesc })
   );
-  const totPackages = (paquetes || []).map((p) =>
-    calcularPrecioFinalPaquete({ paquete: p, descuentoHotel: hotelDesc })
+  const totPackages = (packages || []).map((p) =>
+    calcPackageFinal({ pkg: p, hotelDiscount: hotelDesc })
   );
 
-  const original =
+  const original = roundTwo(
     totRooms.reduce((acc, t) => acc + (t.original ?? 0), 0) +
-    totPackages.reduce((acc, t) => acc + (t.original ?? 0), 0);
-  const final =
+      totPackages.reduce((acc, t) => acc + (t.original ?? 0), 0)
+  );
+  const final = roundTwo(
     totRooms.reduce((acc, t) => acc + (t.final ?? 0), 0) +
-    totPackages.reduce((acc, t) => acc + (t.final ?? 0), 0);
+      totPackages.reduce((acc, t) => acc + (t.final ?? 0), 0)
+  );
 
-  return {
-    original: Math.round(original * 100) / 100,
-    final: Math.round(final * 100) / 100,
-    descuento: Math.round((original - final) * 100) / 100,
-  };
+  return { original, final, descuento: roundTwo(original - final) };
 }
 
 /**
- * calcularTotalCarrito(hotelesArray)
- * - Devuelve { original, final, descuento }
+ * calcCartTotal(hotelsArray)
+ * - Devuelve { original, final, discount }
  */
-export function calcularTotalCarrito(hotelesArray = []) {
-  const totales = (hotelesArray || []).map((h) => calcularTotalHotel(h));
-  const original = totales.reduce((acc, t) => acc + (t.original ?? 0), 0);
-  const final = totales.reduce((acc, t) => acc + (t.final ?? 0), 0);
-  return {
-    original: Math.round(original * 100) / 100,
-    final: Math.round(final * 100) / 100,
-    descuento: Math.round((original - final) * 100) / 100,
-  };
+export function calcCartTotal(hotelsArray = []) {
+  const totals = (hotelsArray || []).map((h) => calcHotelTotal(h));
+  const original = roundTwo(
+    totals.reduce((acc, t) => acc + (t.original ?? 0), 0)
+  );
+  const final = roundTwo(totals.reduce((acc, t) => acc + (t.final ?? 0), 0));
+  return { original, final, descuento: roundTwo(original - final) };
 }
 
-/////////////////////////
-// Helpers para selecciones
-/////////////////////////
+/* ============================
+   Helpers para selecciones
+   ============================ */
 
 /**
- * calcularTotalHabitacionesSeleccionadas(selectedIds, habitaciones, descuentoHotel)
- * - selectedIds: array de ids (string|number)
- * - habitaciones: array completo
- * - Devuelve total final (sumatoria)
+ * calcSelectedRoomsTotal(selectedIds, rooms, hotelDiscount)
+ * - Devuelve total final (sumatoria) para habitaciones filtradas por ids.
  */
-export function calcularTotalHabitacionesSeleccionadas(
+export function calcSelectedRoomsTotal(
   selectedIds = [],
-  habitaciones = [],
-  descuentoHotel = 0
+  rooms = [],
+  hotelDiscount = 0
 ) {
-  const selectedSet = new Set((selectedIds || []).map((id) => String(id)));
-  const totals = (habitaciones || [])
-    .filter((h) => selectedSet.has(String(h.id)))
-    .map((h) =>
-      calcularPrecioFinalHabitacion({ habitacion: h, descuentoHotel })
-    );
-  const total = totals.reduce((acc, t) => acc + (t.final ?? 0), 0);
-  return Math.round(total * 100) / 100;
+  const set = new Set((selectedIds || []).map((id) => String(id)));
+  const totals = (rooms || [])
+    .filter((r) => set.has(String(r.id)))
+    .map((r) => calcRoomFinal({ room: r, hotelDiscount }));
+  const total = roundTwo(totals.reduce((acc, t) => acc + (t.final ?? 0), 0));
+  return total;
 }
 
 /**
- * calcularTotalPaquetesSeleccionados(selectedIds, paquetes, descuentoHotel)
+ * calcSelectedPackagesTotal(selectedIds, packages, hotelDiscount)
  */
-export function calcularTotalPaquetesSeleccionados(
+export function calcSelectedPackagesTotal(
   selectedIds = [],
-  paquetes = [],
-  descuentoHotel = 0
+  packages = [],
+  hotelDiscount = 0
 ) {
-  const selectedSet = new Set((selectedIds || []).map((id) => String(id)));
-  const totals = (paquetes || [])
-    .filter((p) => selectedSet.has(String(p.id)))
-    .map((p) => calcularPrecioFinalPaquete({ paquete: p, descuentoHotel }));
-  const total = totals.reduce((acc, t) => acc + (t.final ?? 0), 0);
-  return Math.round(total * 100) / 100;
+  const set = new Set((selectedIds || []).map((id) => String(id)));
+  const totals = (packages || [])
+    .filter((p) => set.has(String(p.id)))
+    .map((p) => calcPackageFinal({ pkg: p, hotelDiscount }));
+  const total = roundTwo(totals.reduce((acc, t) => acc + (t.final ?? 0), 0));
+  return total;
 }
 
 /**
- * calcularTotalReserva(habitaciones, paquetes, isHighSeason, coeficiente)
- * - Para compatibilidad con Resumen/ReservaPage
- * - Retorna { totalOriginal, totalFinal, totalDescuento }
+ * calcReservationTotals(rooms, packages, isHighSeason, coefficient)
+ * - Compatible con Resumen/ReservaPage
+ * - Retorna { totalOriginal, totalFinal, totalDiscount }
  */
-export function calcularTotalReserva(
-  habitaciones = [],
-  paquetes = [],
+export function calcReservationTotals(
+  rooms = [],
+  packages = [],
   isHighSeason = false,
-  coeficiente = 0
+  coefficient = 0
 ) {
-  const hotelDesc = isHighSeason ? coeficiente : 0;
-  const roomsRes = (habitaciones || []).map((r) =>
-    calcularPrecioFinalHabitacion({ habitacion: r, descuentoHotel: hotelDesc })
+  const hotelDesc = isHighSeason ? coefficient : 0;
+  const roomsRes = (rooms || []).map((r) =>
+    calcRoomFinal({ room: r, hotelDiscount: hotelDesc })
   );
-  const packagesRes = (paquetes || []).map((p) =>
-    calcularPrecioFinalPaquete({ paquete: p, descuentoHotel: hotelDesc })
+  const packagesRes = (packages || []).map((p) =>
+    calcPackageFinal({ pkg: p, hotelDiscount: hotelDesc })
   );
 
-  const totalOriginal =
+  const totalOriginal = roundTwo(
     roomsRes.reduce((acc, r) => acc + (r.original ?? 0), 0) +
-    packagesRes.reduce((acc, p) => acc + (p.original ?? 0), 0);
-  const totalFinal =
+      packagesRes.reduce((acc, p) => acc + (p.original ?? 0), 0)
+  );
+  const totalFinal = roundTwo(
     roomsRes.reduce((acc, r) => acc + (r.final ?? 0), 0) +
-    packagesRes.reduce((acc, p) => acc + (p.final ?? 0), 0);
-  const totalDescuento = Math.round((totalOriginal - totalFinal) * 100) / 100;
+      packagesRes.reduce((acc, p) => acc + (p.final ?? 0), 0)
+  );
+  const totalDiscount = roundTwo(totalOriginal - totalFinal);
 
-  return {
-    totalOriginal: Math.round(totalOriginal * 100) / 100,
-    totalFinal: Math.round(totalFinal * 100) / 100,
-    totalDescuento,
-  };
+  return { totalOriginal, totalFinal, totalDiscount };
 }
 
-const DEFAULT = {
-  convertirANumero,
-  calcularNoches,
-  normalizarDescuento,
-  // habitación
-  calcularBaseHabitacion,
-  calcularPrecioFinalHabitacion,
-  // paquete
-  calcularBasePaquete,
-  calcularPrecioFinalPaquete,
-  // totales
-  calcularTotalHotel,
-  calcularTotalCarrito,
-  calcularTotalReserva,
-  // helpers de selección
-  calcularTotalHabitacionesSeleccionadas,
-  calcularTotalPaquetesSeleccionados,
+/* ============================
+   Compatibilidad: exports antiguos (aliases)
+   ============================ */
+/**
+ * Exportamos los nombres en inglés como primarios (recomendado).
+ * Para compatibilidad con tu código existente, también re-exporto
+ * aliases con nombres originales en español.
+ */
+export const DEFAULT = {
+  roundTwo,
+  toNumber,
+  calcNights,
+  normalizeDiscount,
+  // room
+  calcRoomBase,
+  calcRoomFinal,
+  // package
+  calcPackageBase,
+  calcPackageFinal,
+  // totals
+  calcHotelTotal,
+  calcCartTotal,
+  calcReservationTotals,
+  // selection helpers
+  calcSelectedRoomsTotal,
+  calcSelectedPackagesTotal,
 };
 
 export default DEFAULT;
+
+// Aliases para compatibilidad (si tu código importa por ejemplo calcularTotalCarrito)
+export const convertirANumero = toNumber;
+export const calcularNoches = calcNights;
+export const normalizarDescuento = normalizeDiscount;
+export const calcularBaseHabitacion = calcRoomBase;
+export const calcularPrecioFinalHabitacion = calcRoomFinal;
+export const calcularBasePaquete = calcPackageBase;
+export const calcularPrecioFinalPaquete = calcPackageFinal;
+export const calcularTotalHotel = calcHotelTotal;
+export const calcularTotalCarrito = calcCartTotal;
+export const calcularTotalReserva = calcReservationTotals;
+export const calcularTotalHabitacionesSeleccionadas = calcSelectedRoomsTotal;
+export const calcularTotalPaquetesSeleccionados = calcSelectedPackagesTotal;
