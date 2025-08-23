@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Check, CreditCard } from 'lucide-react';
-import TarjetaForm from '@components/forms/TarjetaForm';
+import TarjetaForm from './TarjetaForm';
 
 export default function MetodoPago({
   onChange,

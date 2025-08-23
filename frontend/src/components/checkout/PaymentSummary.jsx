@@ -2,8 +2,8 @@ import { useMemo, useState, useCallback } from 'react';
 import { useCarrito } from '@context/CarritoContext';
 import { useCliente } from '@context/ClienteContext';
 import { calcularTotalCarrito } from '@utils/pricingUtils';
-import PuntosToggle from '@components/ui/PuntosToggle';
-import MetodoPago from '@components/ui/MetodoPago';
+import PuntosToggle from './PuntosToggle';
+import MetodoPago from './MetodoPago';
 
 /* Convierte puntos a monto (si lo necesitas en otros lados, mueve a utils) */
 function convertPointsToAmount(points = 0) {
