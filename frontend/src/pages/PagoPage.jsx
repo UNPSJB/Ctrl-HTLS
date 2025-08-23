@@ -1,6 +1,6 @@
 import { useCarrito } from '@context/CarritoContext';
 import HotelsListView from '@hotel/HotelsListView';
-import ResumenPago from '@components/ResumenPago';
+import PaymentSummary from '@components/PaymentSummary';
 import ClienteData from '@components/client/ClienteData';
 
 function PagoPage() {
@@ -31,7 +31,7 @@ function PagoPage() {
           <HotelsListView />
         </div>
 
-        <ResumenPago />
+        <PaymentSummary />
       </div>
     </div>
   );
