@@ -1,7 +1,5 @@
-// src/components/cart/CartHeader.jsx
 import { X } from 'lucide-react';
 
-// Encabezado del drawer: título + botón cerrar
 function CartHeader({ title = 'Carrito de Reservas', onClose }) {
   return (
     <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">

@@ -42,7 +42,6 @@ function ClienteData() {
           </div>
         </div>
 
-        {/* Right: puntos (énfasis) */}
         <div className="flex flex-col items-end">
           <span className="text-sm text-gray-600 dark:text-gray-400">
             Puntos acumulados

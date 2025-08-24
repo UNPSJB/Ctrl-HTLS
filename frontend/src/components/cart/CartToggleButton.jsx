@@ -1,16 +1,6 @@
-// src/components/cart/CartToggleButton.jsx
 import { ShoppingCart } from 'lucide-react';
 import { useCarrito } from '@context/CarritoContext';
 
-/**
- * CartToggleButton
- * - Mantiene el estilo original del proyecto.
- * - Añade soporte para `disabled` (no ejecuta onClick y cambia apariencia).
- *
- * Props:
- *  - onClick: función (se llamará solo si !disabled)
- *  - disabled: boolean (opcional) -> si true el botón no responde
- */
 function CartToggleButton({ onClick, disabled = false }) {
   const { totalElementos } = useCarrito();
 
@@ -33,12 +23,10 @@ function CartToggleButton({ onClick, disabled = false }) {
       aria-disabled={disabled || totalElementos === 0}
       title={disabled ? 'No hay reservas' : 'Abrir carrito'}
     >
-      {/* Icono: mantiene los estilos originales, usa text-current solo si quieres heredar color */}
       <ShoppingCart
         className={`w-6 h-6 ${disabled ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400 group-hover:text-green-500'}`}
       />
 
-      {/* Badge de cantidad, mantiene tus estilos originales */}
       {totalElementos > 0 && (
         <span
           className="absolute -top-0 -right-1 flex items-center justify-center 

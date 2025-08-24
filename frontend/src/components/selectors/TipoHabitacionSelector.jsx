@@ -1,5 +1,3 @@
-'use client';
-
 import { X, Plus, DollarSign } from 'lucide-react';
 
 const TiposHabitacionSelector = ({
@@ -13,7 +11,7 @@ const TiposHabitacionSelector = ({
   onRemover,
   canAdd,
   loading = false,
-  errors = {}, // Agregamos errors como prop
+  errors = {},
 }) => {
   const getTipoHabitacionNombre = (id) => {
     return (

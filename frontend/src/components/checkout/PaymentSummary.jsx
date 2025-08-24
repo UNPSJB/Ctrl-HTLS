@@ -5,38 +5,29 @@ import { calcularTotalCarrito } from '@utils/pricingUtils';
 import PuntosToggle from './PuntosToggle';
 import MetodoPago from './MetodoPago';
 
-/* Convierte puntos a monto (si lo necesitas en otros lados, mueve a utils) */
 function convertPointsToAmount(points = 0) {
   const blocks = Math.floor(Number(points || 0) / 1000);
   return blocks * 10;
 }
 
-/* Componente visual: muestra resumen del pago y opción de método.
-   NO realiza ninguna llamada a backend — solo UI y estados locales. */
 function PaymentSummary() {
-  // contexts: solo lectura visual
   const { carrito } = useCarrito();
   const { client } = useCliente();
 
-  // estado local controlado por el componente (visual)
-  const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' | 'card' | ...
+  const [paymentMethod, setPaymentMethod] = useState('cash');
   const [usePoints, setUsePoints] = useState(false);
 
-  // payload del formulario de tarjeta (recibido desde MetodoPago -> TarjetaForm)
-  // corregido: guardamos tanto value como setter
   const [cardPayload, setCardPayload] = useState({
     cardData: null,
     valid: false,
   });
 
-  // estado visual al confirmar (no persiste ni hace network)
   const [confirmed, setConfirmed] = useState(false);
 
   const handleCardChange = useCallback(({ cardData, valid }) => {
     setCardPayload({ cardData, valid });
   }, []);
 
-  // Totales calculados con la util existente
   const cartTotals = useMemo(
     () => calcularTotalCarrito(carrito?.hoteles ?? []),
     [carrito?.hoteles]
@@ -45,21 +36,18 @@ function PaymentSummary() {
   const subtotal = Number(cartTotals?.original ?? 0);
   const totalDiscounts = Number(cartTotals?.descuento ?? 0);
 
-  // baseTotal: si el util ya devuelve final, se usa; si no se calcula
   const baseTotal = Number(
     typeof cartTotals?.final === 'number'
       ? cartTotals.final
       : subtotal - totalDiscounts
   );
 
-  // puntos del cliente y máximo convertible a dinero
   const clientPoints = Number(client?.puntos ?? 0);
   const maxPointsAmount = useMemo(
     () => convertPointsToAmount(clientPoints),
     [clientPoints]
   );
 
-  // descuento por puntos (solo visual)
   const pointsDiscount = useMemo(
     () => (usePoints ? Math.min(maxPointsAmount, baseTotal) : 0),
     [usePoints, maxPointsAmount, baseTotal]
@@ -70,20 +58,14 @@ function PaymentSummary() {
     [baseTotal, pointsDiscount]
   );
 
-  // reglas visuales para habilitar el botón:
-  // - si requiere tarjeta, que el form indique valid: true
-  // - que haya al menos un hotel en el carrito
   const requiresCard = paymentMethod === 'card';
   const canConfirm =
     (!requiresCard || (requiresCard && cardPayload.valid)) &&
     carrito?.hoteles?.length > 0;
 
-  // handler puramente visual: marca como confirmado localmente
   const handleConfirm = useCallback(() => {
     if (!canConfirm) return;
-    // Solo efecto visual: marcar confirmado (no enviar nada)
     setConfirmed(true);
-    // Si quieres, aquí podrías abrir un modal local o limpiar estados visuales
   }, [canConfirm]);
 
   return (
@@ -138,7 +120,6 @@ function PaymentSummary() {
             </div>
           </div>
 
-          {/* MetodoPago renderiza TarjetaForm si corresponde; solo comunica cambios al padre */}
           <MetodoPago
             value={paymentMethod}
             onChange={setPaymentMethod}

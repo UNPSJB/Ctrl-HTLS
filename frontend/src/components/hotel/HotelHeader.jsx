@@ -1,4 +1,3 @@
-// HotelHeader.jsx
 import { Star, MapPin } from 'lucide-react';
 import Temporada from './Temporada';
 import ImageLoader from '@ui/ImageLoader';
@@ -10,7 +9,6 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
       onClick={() => setIsExpanded(!isExpanded)}
       aria-expanded={isExpanded}
     >
-      {/* Imagen del hotel: ImageLoader controla w-52/h-52 */}
       <figure className="overflow-hidden rounded-md">
         <ImageLoader name={hotel.nombre} folder="hoteles" cuadrado={true} />
         <figcaption className="sr-only">

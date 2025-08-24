@@ -2,12 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Check, CreditCard } from 'lucide-react';
 import TarjetaForm from './TarjetaForm';
 
-export default function MetodoPago({
-  onChange,
-  onCardChange,
-  value,
-  className = '',
-}) {
+function MetodoPago({ onChange, onCardChange, value, className = '' }) {
   const [paymentMethod, setPaymentMethod] = useState(value ?? 'cash');
 
   // sync si vienen props controladas
@@ -81,3 +76,5 @@ export default function MetodoPago({
     </fieldset>
   );
 }
+
+export default MetodoPago;

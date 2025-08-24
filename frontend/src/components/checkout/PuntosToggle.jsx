@@ -1,26 +1,17 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useCliente } from '@context/ClienteContext';
 
-/**
- * PuntosToggle
- * - No necesita props para leer puntos; usa useCliente()
- * - Regla visual: 1000 puntos => $10 (puedes cambiarla aquí)
- * - Tiene onToggle optional: (usePoints:boolean) => void
- */
-export default function PuntosToggle({ onToggle, className = '' }) {
+function PuntosToggle({ onToggle, className = '' }) {
   const { client } = useCliente?.() ?? {};
   const clientPoints = Number(client?.puntos ?? 0);
 
-  // UI local: si el usuario quiere usar puntos o no
   const [usePoints, setUsePoints] = useState(false);
 
-  // calculo blocks/equivalencia local
   const { blocks, maxPointsAmount } = useMemo(() => {
     const b = Math.floor(clientPoints / 1000);
     return { blocks: b, maxPointsAmount: b * 10 };
   }, [clientPoints]);
 
-  // Notificar al padre opcional
   useEffect(() => {
     if (typeof onToggle === 'function') onToggle(usePoints);
   }, [usePoints, onToggle]);
@@ -57,3 +48,5 @@ export default function PuntosToggle({ onToggle, className = '' }) {
     </div>
   );
 }
+
+export default PuntosToggle;

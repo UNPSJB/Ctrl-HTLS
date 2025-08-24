@@ -1,13 +1,8 @@
-// src/components/cart/PackageCartItem.jsx
 import { Trash2 } from 'lucide-react';
 import { Package as PackageIcon } from 'lucide-react';
 import { useCarrito } from '@context/CarritoContext';
-import {
-  calcularPrecioFinalPaquete,
-  // calcPackageFinal
-} from '@utils/pricingUtils';
+import { calcularPrecioFinalPaquete } from '@utils/pricingUtils';
 
-// Item presentacional de paquete (visual-only)
 function PackageCartItem({ pack = {}, hotel = {}, onRemove: onRemoveProp }) {
   const { removerPaquete } = useCarrito();
   const onRemove =

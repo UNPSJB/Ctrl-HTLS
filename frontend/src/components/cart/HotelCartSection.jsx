@@ -1,9 +1,7 @@
-// src/components/cart/HotelCartSection.jsx
 import Temporada from '@components/hotel/Temporada';
 import RoomCartItem from './RoomCartItem';
 import PackageCartItem from './PackageCartItem';
 
-// Sección por hotel: header + lista de habitaciones y paquetes
 function HotelCartSection({ hotel = {} }) {
   return (
     <section className="mb-6">

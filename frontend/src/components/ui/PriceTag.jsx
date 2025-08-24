@@ -1,6 +1,3 @@
-// Muestra el precio final y, si viene "original", lo muestra tachado.
-// Por compatibilidad, aceptamos "coeficiente" pero NO recalculamos aquí.
-
 function PriceTag({ precio = 0, original, coeficiente }) {
   const mostrarOriginal = typeof original === 'number' && original > precio;
 

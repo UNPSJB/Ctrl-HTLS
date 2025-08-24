@@ -61,9 +61,7 @@ const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
           </div>
         </header>
 
-        <section className="flex justify-center">
-          {/* Contador opcional */}
-        </section>
+        <section className="flex justify-center">{/* Contador */}</section>
 
         <footer className="flex flex-col items-end gap-1">
           <PriceTag

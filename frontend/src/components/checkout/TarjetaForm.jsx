@@ -1,10 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
-
-/**
- * TarjetaForm
- * - Estado local: number, name, expiry, cvc
- * - onChange({ cardData, valid }) opcional para notificar al padre (MetodoPago o ResumenPago)
- */
+import { useCallback, useEffect, useState } from 'react';
 
 function simpleValidate(card) {
   const num = String(card.number || '').replace(/\s+/g, '');
@@ -19,7 +13,7 @@ function simpleValidate(card) {
   return true;
 }
 
-export default function TarjetaForm({ onChange, className = '' }) {
+function TarjetaForm({ onChange, className = '' }) {
   const [cardData, setCardData] = useState({
     number: '',
     name: '',
@@ -35,8 +29,7 @@ export default function TarjetaForm({ onChange, className = '' }) {
     if (typeof onChange === 'function') {
       onChange({ cardData, valid: valid() });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cardData]); // intencional: dependemos sólo de cardData para disparar
+  }, [cardData]);
 
   const handle = useCallback(
     (field) => (e) => {
@@ -116,3 +109,5 @@ export default function TarjetaForm({ onChange, className = '' }) {
     </div>
   );
 }
+
+export default TarjetaForm;

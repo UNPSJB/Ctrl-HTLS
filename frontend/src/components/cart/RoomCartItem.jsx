@@ -1,19 +1,12 @@
-// src/components/cart/RoomCartItem.jsx
 import { Trash2, House } from 'lucide-react';
 import { useCarrito } from '@context/CarritoContext';
-import {
-  calcularPrecioFinalHabitacion,
-  // En caso de que uses la versión refactor en inglés, el alias existe en tu util
-  // calcRoomFinal
-} from '@utils/pricingUtils'; // usa la implementación actual (español) para compatibilidad
+import { calcularPrecioFinalHabitacion } from '@utils/pricingUtils';
 
-// Item presentacional de habitación (visual-only)
 function RoomCartItem({ room = {}, hotel = {}, onRemove: onRemoveProp }) {
   const { removerHabitacion } = useCarrito();
   const onRemove =
     onRemoveProp || (() => removerHabitacion(hotel.idHotel, room.id));
 
-  // calcular precio visual — si la util no existe, fallback simple
   const computed =
     typeof calcularPrecioFinalHabitacion === 'function'
       ? calcularPrecioFinalHabitacion({

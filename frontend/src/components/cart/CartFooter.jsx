@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { calcularTotalCarrito } from '@utils/pricingUtils';
 
-// Footer del drawer: totales + botón CTA
 function CartFooter({ hotels = [], onClose }) {
   const navigate = useNavigate();
 
