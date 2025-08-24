@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useBusqueda } from '@context/BusquedaContext';
 import { Search, MapPin, Calendar, Users, Star } from 'lucide-react';
 
-const HotelSearch = () => {
+function HotelSearch() {
   // Obtenemos la función para actualizar el contexto utilizando el hook personalizado
   const { actualizarFiltros } = useBusqueda();
 
@@ -187,6 +187,6 @@ const HotelSearch = () => {
       </form>
     </div>
   );
-};
+}
 
 export default HotelSearch;
