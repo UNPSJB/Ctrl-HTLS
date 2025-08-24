@@ -1,16 +1,21 @@
+// src/layouts/Header.jsx
 import { useContext, useState, useMemo } from 'react';
 import { ThemeContext } from '@context/ThemeContext';
 import Avatar from '@components/ui/Avatar';
 import ThemeToggle from '@ui/ThemeToggle';
 import CartToggleButton from '@cart/CartToggleButton';
-import Carrito from '@cart/Carrito';
+import CartDrawer from '@cart/CartDrawer';
 import logoLight from '@assets/logo.svg';
 import logoDark from '@assets/logo-dark.svg';
 import { Link } from 'react-router-dom';
+import { useCarrito } from '@context/CarritoContext'; // import del contexto carrito
 
-const Header = () => {
+function Header() {
   const { theme } = useContext(ThemeContext);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Obtener conteo total desde contexto para deshabilitar el toggle si es 0
+  const { totalElementos } = useCarrito();
 
   // Elegir logo según el tema
   const logo = useMemo(
@@ -27,8 +32,15 @@ const Header = () => {
     [theme]
   );
 
-  // Manejar apertura/cierre del carrito
-  const handleCartToggle = () => setIsCartOpen((prev) => !prev);
+  // Manejar apertura/cierre del carrito: solo abrir si hay elementos
+  const handleCartToggle = () => {
+    if (totalElementos > 0) {
+      setIsCartOpen((prev) => !prev);
+    } else {
+      // Opcional: podrías mostrar un tooltip o toast aquí indicando "No hay reservas"
+      // por ahora solo prevenimos la apertura.
+    }
+  };
   const handleCartClose = () => setIsCartOpen(false);
 
   return (
@@ -42,7 +54,11 @@ const Header = () => {
 
           {/* Acciones del usuario */}
           <div className="flex items-center space-x-4">
-            <CartToggleButton onClick={handleCartToggle} />
+            {/* Pasamos disabled si no hay elementos */}
+            <CartToggleButton
+              onClick={handleCartToggle}
+              disabled={totalElementos === 0}
+            />
             <ThemeToggle />
             <Avatar />
           </div>
@@ -50,9 +66,9 @@ const Header = () => {
       </header>
 
       {/* Carrito lateral */}
-      <Carrito isOpen={isCartOpen} onClose={handleCartClose} />
+      <CartDrawer isOpen={isCartOpen} onClose={handleCartClose} />
     </>
   );
-};
+}
 
 export default Header;
