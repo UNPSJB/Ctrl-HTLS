@@ -40,10 +40,10 @@ function HotelSearch() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg transition-all duration-300 p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="p-6 mb-8 shadow-search">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Primera fila: Nombre, Ubicación y Estrellas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Nombre del Hotel
