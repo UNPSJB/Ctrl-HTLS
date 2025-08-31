@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Bed, Package as PackageIcon } from 'lucide-react';
 import HabitacionCard from '@ui/cards/HabitacionCard';
 import PaqueteCard from '@ui/cards/PaqueteCard';
@@ -8,59 +7,51 @@ import { useCarrito } from '@context/CarritoContext';
 
 function HotelsListView() {
   const { carrito } = useCarrito();
-  const hotelsFromContext = carrito?.hoteles ?? [];
-
-  const normalized = useMemo(
-    () =>
-      (hotelsFromContext || []).map((h) => ({
-        idHotel: h.idHotel ?? h.id ?? null,
-        nombre: h.nombre ?? h.name ?? 'Hotel',
-        temporada: h.temporada ?? h.season ?? '',
-        coeficiente: h.coeficiente ?? h.coefficient ?? 0,
-        habitaciones: h.habitaciones ?? h.rooms ?? [],
-        paquetes: h.paquetes ?? h.packages ?? [],
-        totals: h.totals ?? null,
-      })),
-    [hotelsFromContext]
-  );
-
-  if (!normalized.length) return null;
+  const hotels = Array.isArray(carrito?.hoteles) ? carrito.hoteles : [];
 
   return (
     <div className="space-y-6">
-      {normalized.map((hotelReserva, idx) => {
+      {hotels.map((hotel, hotelIndex) => {
         const {
           idHotel,
           nombre,
           temporada,
           coeficiente,
-          habitaciones = [],
-          paquetes = [],
-        } = hotelReserva;
+          habitaciones,
+          paquetes,
+        } = hotel;
 
         return (
           <article
-            key={idHotel ?? idx}
+            key={idHotel ?? `hotel-${hotelIndex}`}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden p-6"
-            aria-labelledby={`hotel-${idHotel ?? idx}-title`}
+            aria-labelledby={`hotel-${idHotel ?? hotelIndex}-title`}
           >
             <div className="space-y-6">
+              {/* Header del hotel */}
               <div className="flex items-center gap-4">
                 <h2
-                  id={`hotel-${idHotel ?? idx}-title`}
+                  id={`hotel-${idHotel ?? hotelIndex}-title`}
                   className="text-2xl font-bold text-gray-800 dark:text-gray-100"
                 >
                   {nombre ?? 'Hotel'}
                 </h2>
+
+                {/* Badge de temporada (si aplica) */}
                 {temporada === 'alta' && <Temporada porcentaje={coeficiente} />}
               </div>
 
+              {/* Habitaciones seleccionadas */}
               {habitaciones.length > 0 && (
-                <section>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100">
+                <section aria-labelledby={`hotel-${idHotel}-rooms-title`}>
+                  <h3
+                    id={`hotel-${idHotel}-rooms-title`}
+                    className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100"
+                  >
                     <Bed className="w-5 h-5" />
                     Habitaciones Seleccionadas
                   </h3>
+
                   <div className="space-y-4">
                     {habitaciones.map((hab, i) => (
                       <HabitacionCard
@@ -73,17 +64,22 @@ function HotelsListView() {
                 </section>
               )}
 
+              {/* Paquetes seleccionados */}
               {paquetes.length > 0 && (
-                <section>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100">
+                <section aria-labelledby={`hotel-${idHotel}-packages-title`}>
+                  <h3
+                    id={`hotel-${idHotel}-packages-title`}
+                    className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-100"
+                  >
                     <PackageIcon className="w-5 h-5" />
                     Paquetes Seleccionados
                   </h3>
+
                   <div className="space-y-4">
-                    {paquetes.map((pack, i) => (
+                    {paquetes.map((pkg, i) => (
                       <PaqueteCard
-                        key={pack.id ?? `${idHotel}-pack-${i}`}
-                        paquete={pack}
+                        key={pkg.id ?? `${idHotel}-pack-${i}`}
+                        paquete={pkg}
                         porcentaje={coeficiente}
                       />
                     ))}
@@ -91,6 +87,7 @@ function HotelsListView() {
                 </section>
               )}
 
+              {/* Resumen por hotel */}
               <Resumen
                 habitaciones={habitaciones}
                 paquetes={paquetes}
