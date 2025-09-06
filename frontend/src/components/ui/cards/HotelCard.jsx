@@ -3,10 +3,8 @@ import { Bed, Package } from 'lucide-react';
 import useHotelSelection from '@hooks/useHotelSelection';
 import HabitacionItem from '../../hotel/HabitacionItem';
 import PaqueteItem from '../../hotel/PaqueteItem';
-import SelectionSummary from '../../cart/SelectionSummary';
 import HotelHeader from '@components/hotel/HotelHeader';
 import { useCarrito } from '@context/CarritoContext';
-import { calcularTotalHotel } from '@utils/pricingUtils';
 
 function HotelCard({ hotel }) {
   if (!hotel) return null;
@@ -27,14 +25,6 @@ function HotelCard({ hotel }) {
     hotelInCart?.habitaciones.map((hab) => hab.id) || [];
   const paquetesSeleccionados =
     hotelInCart?.paquetes.map((paq) => paq.id) || [];
-
-  const selectedRoomsCount = habitacionesSeleccionadas.length;
-  const selectedPackagesCount = paquetesSeleccionados.length;
-
-  // Si el hotel está en el carrito, calculamos sus totales reales usando pricingUtils
-  const hotelTotals = hotelInCart ? calcularTotalHotel(hotelInCart) : null;
-  const totalPriceForHotel = hotelTotals?.final ?? 0;
-  const hotelEnCarrito = Boolean(hotelInCart);
 
   const hotelData = {
     idHotel: hotel.id,
@@ -105,14 +95,6 @@ function HotelCard({ hotel }) {
               ))}
             </ul>
           </section>
-
-          {hotelEnCarrito && (
-            <SelectionSummary
-              selectedRoomsCount={selectedRoomsCount}
-              selectedPackagesCount={selectedPackagesCount}
-              totalPrice={totalPriceForHotel}
-            />
-          )}
         </>
       )}
     </article>
