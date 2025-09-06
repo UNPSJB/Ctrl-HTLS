@@ -28,7 +28,7 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
   const originalTotal = roundTwo(Number(precio) * qty * nights);
 
   return (
-    <div className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3">
+    <div className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3">
       {/* Columna 1: Datos habitación */}
       <div className="flex-1 min-w-0">
         <h4 className="flex items-center gap-2 font-medium text-gray-900 dark:text-gray-100 truncate">
@@ -54,7 +54,7 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
       </div>
 
       {/* Columna 2: Precio */}
-      <div className="flex-shrink-0 text-right">
+      <div className="text-right">
         <PriceTag
           precio={finalTotal}
           original={originalTotal > finalTotal ? originalTotal : undefined}
@@ -62,7 +62,7 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
       </div>
 
       {/* Columna 3: Botón eliminar */}
-      <div className="flex-shrink-0 flex items-center">
+      <div className="flex items-center">
         <button
           onClick={onRemove}
           aria-label={`Eliminar habitación ${nombre ?? room.name ?? ''}`}

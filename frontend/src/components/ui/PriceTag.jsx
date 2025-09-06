@@ -1,10 +1,10 @@
-function PriceTag({ precio = 0, original, coeficiente }) {
+function PriceTag({ precio = 0, original }) {
   const mostrarOriginal = typeof original === 'number' && original > precio;
 
   return (
     <>
       {mostrarOriginal ? (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <p className="text-md font-bold text-green-600 dark:text-green-400 w-full sm:w-auto">
             ${precio.toFixed(2)}
           </p>
