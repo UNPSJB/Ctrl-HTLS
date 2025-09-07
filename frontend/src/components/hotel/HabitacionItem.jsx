@@ -1,3 +1,4 @@
+// src/components/hotel/HabitacionItem.jsx
 import { useState } from 'react';
 import RoomDetailsModal from './RoomDetailsModal';
 import PriceTag from '@ui/PriceTag';
@@ -5,28 +6,52 @@ import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
 import { normalizarDescuento } from '@utils/pricingUtils';
 
-const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
+/**
+ * HabitacionItem
+ * - Recibe habitacion en la forma plana que generamos en HotelCard:
+ *   { id, nombre, capacidad, precio, piso, numero, tipo }
+ *
+ * - Comentarios en español; nombres de variables/archivos en inglés.
+ */
+function HabitacionItem({ hotelData, habitacion, isSelected, onSelect }) {
   if (!habitacion) return null;
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const { agregarHabitacion, removerHabitacion } = useCarrito();
   const { filtros } = useBusqueda();
-  const { fechaInicio, fechaFin } = filtros;
+  const { fechaInicio, fechaFin } = filtros ?? {};
 
-  // Siempre mostrar el precio por una noche (unitario).
-  const precioOriginalNoche = habitacion.precio;
+  // Precio unitario por noche (puede ser null si la API no lo provee)
+  const precioOriginalNoche = habitacion.precio ?? null;
 
-  // Si la temporada del hotel es "alta", aplicamos el coeficiente (descuento) SOLO para mostrar.
+  // Si la temporada del hotel es "alta", aplicamos el coeficiente SOLO para mostrar.
   const esAlta = hotelData?.temporada === 'alta';
   const descHotel = esAlta ? normalizarDescuento(hotelData?.coeficiente) : 0;
   const precioFinalNoche =
-    Math.round(precioOriginalNoche * (1 - descHotel) * 100) / 100;
+    precioOriginalNoche !== null
+      ? Math.round(precioOriginalNoche * (1 - descHotel) * 100) / 100
+      : null;
 
   const manejarSeleccion = (e) => {
     const checked = e.target.checked;
-    onSelect(habitacion.id); // compat
+    // onSelect mantiene la UI local
+    onSelect(habitacion.id);
+
     if (checked) {
-      agregarHabitacion(hotelData, habitacion, { fechaInicio, fechaFin });
+      // Agregar la instancia al carrito: enviamos la forma que el carrito espera (id, nombre, precio, etc.)
+      agregarHabitacion(
+        hotelData,
+        {
+          id: habitacion.id,
+          nombre: habitacion.nombre,
+          capacidad: habitacion.capacidad,
+          precio: habitacion.precio,
+          piso: habitacion.piso,
+          numero: habitacion.numero,
+          tipo: habitacion.tipo,
+        },
+        { fechaInicio, fechaFin }
+      );
     } else {
       removerHabitacion(hotelData.idHotel, habitacion.id);
     }
@@ -57,17 +82,32 @@ const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
             </h4>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Capacidad: {habitacion.capacidad} personas
+              {habitacion.piso !== null && habitacion.numero !== null && (
+                <span className="ml-2">
+                  · Piso {habitacion.piso} · N° {habitacion.numero}
+                </span>
+              )}
             </p>
           </div>
         </header>
 
-        <section className="flex justify-center">{/* Contador */}</section>
+        <section className="flex justify-center">
+          {/* Contador (si aplicara) */}
+        </section>
 
         <footer className="flex flex-col items-end gap-1">
-          <PriceTag
-            precio={precioFinalNoche}
-            original={esAlta ? precioOriginalNoche : undefined}
-          />
+          {/* Si no hay precio mostramos "Consultar" */}
+          {precioFinalNoche !== null ? (
+            <PriceTag
+              precio={precioFinalNoche}
+              original={esAlta ? precioOriginalNoche : undefined}
+            />
+          ) : (
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              Consultar precio
+            </span>
+          )}
+
           <button
             className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
             onClick={() => setMostrarModal(true)}
@@ -84,10 +124,19 @@ const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
           onClose={() => setMostrarModal(false)}
           onReserve={() => {
             if (!isSelected) {
-              agregarHabitacion(hotelData, habitacion, {
-                fechaInicio,
-                fechaFin,
-              });
+              agregarHabitacion(
+                hotelData,
+                {
+                  id: habitacion.id,
+                  nombre: habitacion.nombre,
+                  capacidad: habitacion.capacidad,
+                  precio: habitacion.precio,
+                  piso: habitacion.piso,
+                  numero: habitacion.numero,
+                  tipo: habitacion.tipo,
+                },
+                { fechaInicio, fechaFin }
+              );
             }
             setMostrarModal(false);
           }}
@@ -95,6 +144,6 @@ const HabitacionItem = ({ hotelData, habitacion, isSelected, onSelect }) => {
       )}
     </>
   );
-};
+}
 
 export default HabitacionItem;

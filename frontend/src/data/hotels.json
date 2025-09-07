@@ -1,29 +1,46 @@
 [
     {
-        "id": 1,
+        "hotelId": 1,
         "nombre": "Hotel Paraíso",
-        "estrellas": 5,
-        "temporada": "alta",
-        "coeficiente": 0.15,
-        "ubicacion": {
-            "pais": "Argentina",
-            "provincia": "Buenos Aires",
-            "ciudad": "Mar del Plata"
-        },
+        "estrellas": "5",
         "descripcion": "Ubicado en el corazón de Mar del Plata, el Hotel Paraíso ofrece una experiencia de lujo inigualable.",
+        "temporada": {
+            "tipo": "alta",
+            "fechaInicio": "2025-01-01T00:00:00.000Z",
+            "fechaFin": "2025-03-31T00:00:00.000Z",
+            "porcentaje": "0.15"
+        },
+        "ubicacion": {
+            "nombrePais": "Argentina",
+            "nombreProvincia": "Buenos Aires",
+            "nombreCiudad": "Mar del Plata"
+        },
         "imagen": "Hotel Paraíso.webp",
         "habitaciones": [
             {
-                "id": 1,
-                "nombre": "Deluxe",
-                "capacidad": 2,
-                "precio": 200
+                "Deluxe": [
+                    {
+                        "id": 101,
+                        "numero": 101,
+                        "piso": 1
+                    },
+                    {
+                        "id": 102,
+                        "numero": 102,
+                        "piso": 1
+                    }
+                ],
+                "capacidad": 2
             },
             {
-                "id": 2,
-                "nombre": "Suite Ejecutiva",
-                "capacidad": 3,
-                "precio": 300
+                "Suite Ejecutiva": [
+                    {
+                        "id": 103,
+                        "numero": 201,
+                        "piso": 2
+                    }
+                ],
+                "capacidad": 3
             }
         ],
         "paquetes": [
@@ -31,18 +48,8 @@
                 "id": 1,
                 "nombre": "Escapada Romántica",
                 "habitaciones": [
-                    {
-                        "id": 1,
-                        "nombre": "Deluxe",
-                        "capacidad": 2,
-                        "precio": 200
-                    },
-                    {
-                        "id": 2,
-                        "nombre": "Estándar",
-                        "capacidad": 2,
-                        "precio": 150
-                    }
+                    101,
+                    103
                 ],
                 "descuento": 10,
                 "noches": 3,
@@ -51,41 +58,50 @@
         ]
     },
     {
-        "id": 2,
+        "hotelId": 2,
         "nombre": "Gran Hotel Mar del Plata",
-        "estrellas": 4,
-        "ubicacion": {
-            "pais": "Argentina",
-            "provincia": "Buenos Aires",
-            "ciudad": "Mar del Plata"
-        },
+        "estrellas": "4",
         "descripcion": "El Gran Hotel Mar del Plata se destaca por su arquitectura clásica y su ambiente acogedor.",
+        "temporada": null,
+        "ubicacion": {
+            "nombrePais": "Argentina",
+            "nombreProvincia": "Buenos Aires",
+            "nombreCiudad": "Mar del Plata"
+        },
         "imagen": "Gran Hotel Mar del Plata.webp",
         "habitaciones": [
             {
-                "id": 1,
-                "nombre": "Estándar",
-                "capacidad": 2,
-                "precio": 150
+                "Estándar": [
+                    {
+                        "id": 201,
+                        "numero": 10,
+                        "piso": 1
+                    },
+                    {
+                        "id": 202,
+                        "numero": 11,
+                        "piso": 1
+                    }
+                ],
+                "capacidad": 2
             },
             {
-                "id": 2,
-                "nombre": "Suite Familiar",
-                "capacidad": 4,
-                "precio": 250
+                "Suite Familiar": [
+                    {
+                        "id": 203,
+                        "numero": 30,
+                        "piso": 3
+                    }
+                ],
+                "capacidad": 4
             }
         ],
         "paquetes": [
             {
-                "id": 1,
+                "id": 2,
                 "nombre": "Fin de Semana Relax",
                 "habitaciones": [
-                    {
-                        "id": 1,
-                        "nombre": "Estándar",
-                        "capacidad": 2,
-                        "precio": 150
-                    }
+                    201
                 ],
                 "descuento": 5,
                 "noches": 2,
@@ -94,41 +110,55 @@
         ]
     },
     {
-        "id": 3,
+        "hotelId": 3,
         "nombre": "Hotel Boutique Playa Grande",
-        "estrellas": 3,
-        "ubicacion": {
-            "pais": "Argentina",
-            "provincia": "Buenos Aires",
-            "ciudad": "Mar del Plata"
-        },
+        "estrellas": "3",
         "descripcion": "El Hotel Boutique Playa Grande es una joya escondida en Mar del Plata.",
+        "temporada": {
+            "tipo": "baja",
+            "fechaInicio": "2025-04-01T00:00:00.000Z",
+            "fechaFin": "2025-08-31T00:00:00.000Z",
+            "porcentaje": "0.08"
+        },
+        "ubicacion": {
+            "nombrePais": "Argentina",
+            "nombreProvincia": "Buenos Aires",
+            "nombreCiudad": "Mar del Plata"
+        },
         "imagen": "Hotel Boutique Playa Grande.webp",
         "habitaciones": [
             {
-                "id": 1,
-                "nombre": "Habitación Simple",
-                "capacidad": 1,
-                "precio": 100
+                "Habitación Simple": [
+                    {
+                        "id": 301,
+                        "numero": 1,
+                        "piso": 1
+                    }
+                ],
+                "capacidad": 1
             },
             {
-                "id": 2,
-                "nombre": "Habitación Doble",
-                "capacidad": 2,
-                "precio": 180
+                "Habitación Doble": [
+                    {
+                        "id": 302,
+                        "numero": 2,
+                        "piso": 1
+                    },
+                    {
+                        "id": 303,
+                        "numero": 3,
+                        "piso": 1
+                    }
+                ],
+                "capacidad": 2
             }
         ],
         "paquetes": [
             {
-                "id": 1,
+                "id": 3,
                 "nombre": "Aventura Surfista",
                 "habitaciones": [
-                    {
-                        "id": 1,
-                        "nombre": "Habitación Simple",
-                        "capacidad": 1,
-                        "precio": 100
-                    }
+                    301
                 ],
                 "descuento": 8,
                 "noches": 4,
