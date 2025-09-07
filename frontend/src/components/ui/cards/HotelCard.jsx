@@ -96,7 +96,7 @@ function HotelCard({ hotel }) {
   }, [hotel.habitaciones, hotelId]);
 
   return (
-    <article className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+    <article className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
       <HotelHeader
         hotel={{
           // Normalizamos mínimamente para que HotelHeader reciba datos esperables
@@ -120,13 +120,13 @@ function HotelCard({ hotel }) {
         <>
           <section
             aria-labelledby={`rooms-${hotelId}-title`}
-            className="p-4 border-t border-gray-200 dark:border-gray-700"
+            className="border-t border-gray-200 p-4 dark:border-gray-700"
           >
             <h3
               id={`rooms-${hotelId}-title`}
-              className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4"
+              className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-100"
             >
-              <Bed className="w-5 h-5" />
+              <Bed className="h-5 w-5" />
               Habitaciones Disponibles
             </h3>
             <ul className="space-y-3">
@@ -147,13 +147,13 @@ function HotelCard({ hotel }) {
 
           <section
             aria-labelledby={`packages-${hotelId}-title`}
-            className="p-4 border-t border-gray-200 dark:border-gray-700"
+            className="border-t border-gray-200 p-4 dark:border-gray-700"
           >
             <h3
               id={`packages-${hotelId}-title`}
-              className="text-xl font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100 mb-4"
+              className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-100"
             >
-              <Package className="w-5 h-5" />
+              <Package className="h-5 w-5" />
               Paquetes Turísticos
             </h3>
             <ul className="space-y-3">
