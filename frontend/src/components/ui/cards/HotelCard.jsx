@@ -12,65 +12,47 @@ function HotelCard({ hotel }) {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Hook que gestiona selección UI local (toggleRoomSelection / togglePackageSelection)
+  // Hook que gestiona selección UI local
   const { toggleRoomSelection, togglePackageSelection } =
     useHotelSelection(hotel);
-
   const { carrito } = useCarrito();
 
   // Determinar id del hotel (nuevo formato usa hotelId)
   const hotelId = hotel.hotelId ?? hotel.id;
 
-  // Buscar el hotel en el carrito (adaptado a idHotel)
+  // Buscar el hotel en el carrito
   const hotelInCart = carrito.hoteles.find((h) => h.idHotel === hotelId);
 
-  // Listas de ids seleccionados en el carrito (para marcar checkboxes)
+  // Listas de ids seleccionados en el carrito
   const habitacionesSeleccionadas =
     hotelInCart?.habitaciones.map((hab) => hab.id) || [];
   const paquetesSeleccionados =
     hotelInCart?.paquetes.map((paq) => paq.id) || [];
 
-  /**
-   * Construimos hotelData tal como lo espera el resto de la app:
-   * - idHotel: hotelId
-   * - nombre, descripcion
-   * - coeficiente: si viene como campo use ese, sino intentar derivar desde temporada.porcentaje
-   * - temporada: usamos temporada.tipo (string) para compatibilidad con lógica existente
-   */
-  const coeficiente =
-    typeof hotel.coeficiente === 'number'
-      ? hotel.coeficiente
-      : hotel.temporada && hotel.temporada.porcentaje
-        ? Number(hotel.temporada.porcentaje)
-        : 0;
-
+  // Solo crear hotelData para componentes que realmente lo necesitan (HabitacionItem/PaqueteItem)
   const hotelData = {
     idHotel: hotelId,
     nombre: hotel.nombre,
     descripcion: hotel.descripcion ?? null,
-    coeficiente,
-    temporada: hotel.temporada ? (hotel.temporada.tipo ?? null) : null,
+    coeficiente:
+      typeof hotel.coeficiente === 'number'
+        ? hotel.coeficiente
+        : hotel.temporada?.porcentaje
+          ? Number(hotel.temporada.porcentaje)
+          : 0,
+    temporada: hotel.temporada?.tipo ?? null,
   };
 
-  /**
-   * Flatten rooms: la API trae `habitaciones` como array de grupos:
-   * [ { "Dobles": [{id, numero, piso}, ...], "capacidad": 2 }, ... ]
-   *
-   * Convertimos a array plano de instancias:
-   * [{ id, nombre, capacidad, precio, piso, numero, tipo }]
-   *
-   * Hacemos esto con useMemo por rendimiento.
-   */
+  // Flatten rooms con useMemo por rendimiento
   const flatRooms = useMemo(() => {
     const groups = Array.isArray(hotel.habitaciones) ? hotel.habitaciones : [];
     const result = [];
 
-    groups.forEach((group, gi) => {
-      // la key del tipo (ej. "Dobles", "Simples", etc.)
+    groups.forEach((group) => {
       const typeKey = Object.keys(group).find((k) => k !== 'capacidad');
       if (!typeKey) {
         console.warn(
-          `[HotelCard] Grupo de habitación sin clave esperada en hotel ${hotelId}`,
+          `Grupo de habitación sin clave esperada en hotel ${hotelId}`,
           group
         );
         return;
@@ -82,9 +64,9 @@ function HotelCard({ hotel }) {
       instances.forEach((inst) => {
         result.push({
           id: inst.id,
-          nombre: `${typeKey} - ${inst.numero}`, // p. ej. "Dobles - 9"
+          nombre: `${typeKey} - ${inst.numero}`,
           capacidad: capacidad,
-          precio: inst.precio ?? null, // si la API trae precio por instancia lo usamos; si no queda null
+          precio: inst.precio ?? null,
           piso: inst.piso ?? null,
           numero: inst.numero ?? null,
           tipo: typeKey,
@@ -97,21 +79,9 @@ function HotelCard({ hotel }) {
 
   return (
     <article className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+      {/* Pasar los datos originales directamente */}
       <HotelHeader
-        hotel={{
-          // Normalizamos mínimamente para que HotelHeader reciba datos esperables
-          id: hotelId,
-          nombre: hotel.nombre,
-          descripcion: hotel.descripcion,
-          estrellas: Number(hotel.estrellas) || undefined,
-          ubicacion: {
-            pais: hotel.ubicacion?.nombrePais ?? hotel.ubicacion?.pais,
-            provincia:
-              hotel.ubicacion?.nombreProvincia ?? hotel.ubicacion?.provincia,
-            ciudad: hotel.ubicacion?.nombreCiudad ?? hotel.ubicacion?.ciudad,
-          },
-          imagen: hotel.imagen ?? null,
-        }}
+        hotel={hotel}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
       />
