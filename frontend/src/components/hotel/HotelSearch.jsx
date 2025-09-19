@@ -40,16 +40,16 @@ function HotelSearch() {
   };
 
   return (
-    <div className="p-6 mb-8 shadow-search">
+    <div className="shadow-search mb-8 rounded-lg bg-white p-6 dark:bg-gray-800">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Primera fila: Nombre, Ubicación y Estrellas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Nombre del Hotel
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 value={localFilters.nombre}
@@ -57,17 +57,17 @@ function HotelSearch() {
                   setLocalFilters({ ...localFilters, nombre: e.target.value })
                 }
                 placeholder="Buscar hotel..."
-                className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Ubicación
             </label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 value={localFilters.ubicacion}
@@ -78,17 +78,17 @@ function HotelSearch() {
                   })
                 }
                 placeholder="Ciudad, País..."
-                className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Estrellas
             </label>
             <div className="relative">
-              <Star className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-yellow-500" />
+              <Star className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-yellow-500" />
               <select
                 value={localFilters.estrellas}
                 onChange={(e) =>
@@ -97,7 +97,7 @@ function HotelSearch() {
                     estrellas: Number(e.target.value),
                   })
                 }
-                className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+                className="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               >
                 <option value={0}>Todas las estrellas</option>
                 {[5, 4, 3, 2, 1].map((num) => (
@@ -111,13 +111,13 @@ function HotelSearch() {
         </div>
 
         {/* Segunda fila: Fechas y Capacidad */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Fecha de Inicio
             </label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Calendar className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
                 type="date"
                 value={localFilters.fechaInicio}
@@ -127,34 +127,34 @@ function HotelSearch() {
                     fechaInicio: e.target.value,
                   })
                 }
-                className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Fecha de Fin
             </label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Calendar className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
                 type="date"
                 value={localFilters.fechaFin}
                 onChange={(e) =>
                   setLocalFilters({ ...localFilters, fechaFin: e.target.value })
                 }
-                className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Capacidad
             </label>
             <div className="relative">
-              <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Users className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <select
                 value={localFilters.capacidad}
                 onChange={(e) =>
@@ -163,7 +163,7 @@ function HotelSearch() {
                     capacidad: Number(e.target.value),
                   })
                 }
-                className="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-4 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+                className="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               >
                 {[1, 2, 3, 4, 5, 6].map((num) => (
                   <option key={num} value={num}>
@@ -177,9 +177,9 @@ function HotelSearch() {
           <div className="flex items-end py-1">
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors duration-200 hover:bg-blue-700"
             >
-              <Search className="w-5 h-5" />
+              <Search className="h-5 w-5" />
               Buscar
             </button>
           </div>
