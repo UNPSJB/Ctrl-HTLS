@@ -55,7 +55,8 @@
                 ],
                 "descuento": 10,
                 "noches": 3,
-                "descripcion": "Paquete romántico de tres noches."
+                "descripcion": "Paquete romántico de tres noches. Incluye cena para dos.",
+                "precio": 700
             }
         ]
     },

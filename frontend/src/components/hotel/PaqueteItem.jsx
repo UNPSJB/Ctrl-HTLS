@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Calendar, Percent, Info } from 'lucide-react';
 import PaqueteDetailsModal from './PaqueteDetailsModal';
 import PriceTag from '@ui/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
@@ -45,64 +46,93 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
 
   const precioFinal = Math.round(despuesPaquete * (1 - descHotel) * 100) / 100;
 
+  const handleShowDetails = () => {
+    setMostrarModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setMostrarModal(false);
+  };
+
+  const handleReserveFromModal = () => {
+    if (!isSelected) {
+      agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
+    }
+    setMostrarModal(false);
+  };
+
   return (
     <>
-      <article
-        aria-labelledby={`package-${paquete.id}-title`}
-        className="grid items-center border rounded-md px-6 py-4 bg-gray-50 dark:bg-gray-900 shadow-sm border-gray-200 dark:border-gray-700 gap-10"
-        style={{ gridTemplateColumns: '1fr auto auto' }}
-      >
-        <header className="flex items-center gap-6">
+      <article className="grid grid-cols-3 items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
+        {/* Columna 1: info del paquete (ocupa 2 espacios) */}
+        <div className="col-span-2 flex items-center gap-4">
           <input
             type="checkbox"
             id={`package-${paquete.id}-checkbox`}
             checked={isSelected}
             onChange={manejarSeleccion}
-            className="mt-1 w-5 h-5 cursor-pointer"
+            className="h-5 w-5 cursor-pointer"
             aria-labelledby={`package-${paquete.id}-title`}
           />
+
           <div className="flex flex-col gap-1">
-            <h4
-              id={`package-${paquete.id}-title`}
-              className="text-md font-semibold text-gray-800 dark:text-gray-200"
-            >
-              {paquete.nombre}
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            {/* Primera fila: nombre + iconos */}
+            <div className="flex items-center gap-4">
+              <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                {paquete.nombre}
+              </div>
+
+              {/* Noches con icono */}
+              <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                <Calendar className="h-4 w-4" />
+                <span>{noches}</span>
+              </div>
+
+              {/* Descuento con icono */}
+              {paquete.descuento && (
+                <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
+                  <Percent className="h-4 w-4" />
+                  <span>{paquete.descuento}%</span>
+                </div>
+              )}
+
+              {/* Botón de detalles */}
+              <button
+                onClick={handleShowDetails}
+                className="flex items-center gap-1.5 text-sm text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                <Info className="h-4 w-4" />
+                <span>Detalles</span>
+              </button>
+            </div>
+
+            {/* Segunda fila: descripción */}
+            <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
               {paquete.descripcion}
             </p>
           </div>
-        </header>
+        </div>
 
-        <section className="flex justify-center">
-          {/* Contador opcional */}
-        </section>
-
-        <footer className="flex flex-col items-end gap-1">
-          <PriceTag
-            precio={precioFinal}
-            original={precioFinal < precioOriginal ? precioOriginal : undefined}
-          />
-          <button
-            className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
-            onClick={() => setMostrarModal(true)}
-          >
-            Más Detalles
-          </button>
-        </footer>
+        {/* Columna 3: precio */}
+        <div className="flex justify-end">
+          <div className="text-right">
+            <PriceTag
+              precio={precioFinal}
+              original={
+                precioFinal < precioOriginal ? precioOriginal : undefined
+              }
+            />
+          </div>
+        </div>
       </article>
 
+      {/* Modal de detalles */}
       {mostrarModal && (
         <PaqueteDetailsModal
           paquete={paquete}
           coeficiente={hotelData.coeficiente}
-          onClose={() => setMostrarModal(false)}
-          onReserve={() => {
-            if (!isSelected) {
-              agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
-            }
-            setMostrarModal(false);
-          }}
+          onClose={handleCloseModal}
+          onReserve={handleReserveFromModal}
         />
       )}
     </>
