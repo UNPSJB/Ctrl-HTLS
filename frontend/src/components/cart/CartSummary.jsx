@@ -1,4 +1,3 @@
-// src/components/cart/CartSummary.jsx
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '@context/CarritoContext';
@@ -7,9 +6,6 @@ import HotelCartSection from './HotelCartSection';
 import CartFooter from './CartFooter';
 import CartEmpty from './CartEmpty';
 
-/*
-  CartSummary como columna/summary. Comentarios en español; nombres en inglés.
-*/
 function CartSummary() {
   const { carrito, totalElementos } = useCarrito();
   const navigate = useNavigate();

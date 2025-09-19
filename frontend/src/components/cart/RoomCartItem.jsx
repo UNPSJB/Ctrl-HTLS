@@ -28,25 +28,25 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
   const originalTotal = roundTwo(Number(precio) * qty * nights);
 
   return (
-    <div className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3">
+    <div className="mb-3 flex gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
       {/* Columna 1: Datos habitación */}
-      <div className="flex-1 min-w-0">
-        <h4 className="flex items-center gap-2 font-medium text-gray-900 dark:text-gray-100 truncate">
-          <House className="w-5 h-5 text-current" />
+      <div className="min-w-0 flex-1">
+        <h4 className="flex items-center gap-2 truncate font-medium text-gray-900 dark:text-gray-100">
+          <House className="h-5 w-5 text-current" />
           <span className="truncate">
             {nombre ?? room.name ?? 'Habitación'}
           </span>
         </h4>
 
-        <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-600 dark:text-gray-300">
+        <div className="mt-1 flex flex-col text-sm text-gray-600 dark:text-gray-300 sm:flex-row sm:items-center sm:gap-4">
           <p className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
+            <Users className="h-4 w-4" />
             <span className="font-medium">
               {capacidad ?? room.capacity ?? '-'}
             </span>
           </p>
 
-          <p className="mt-2 sm:mt-0 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 sm:mt-0">
             {formatFecha(fechaInicio)} — {formatFecha(fechaFin)} ({nights} noche
             {nights > 1 ? 's' : ''})
           </p>
@@ -66,10 +66,10 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
         <button
           onClick={onRemove}
           aria-label={`Eliminar habitación ${nombre ?? room.name ?? ''}`}
-          className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
           title="Eliminar habitación"
         >
-          <Trash2 className="w-5 h-5 text-current" />
+          <Trash2 className="h-5 w-5 text-current" />
         </button>
       </div>
     </div>
