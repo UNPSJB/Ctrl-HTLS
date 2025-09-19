@@ -22,12 +22,14 @@
                     {
                         "id": 101,
                         "numero": 101,
-                        "piso": 1
+                        "piso": 1,
+                        "precio": 250
                     },
                     {
                         "id": 102,
                         "numero": 102,
-                        "piso": 1
+                        "piso": 1,
+                        "precio": 250
                     }
                 ],
                 "capacidad": 2
