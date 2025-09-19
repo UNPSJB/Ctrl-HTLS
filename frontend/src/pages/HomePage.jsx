@@ -9,11 +9,11 @@ const HomePage = () => {
       <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">
           <HotelSearch />
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+            <div className="lg:col-span-3">
               <HotelList />
             </div>
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-2">
               <CartSummary />
             </div>
           </div>
