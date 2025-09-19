@@ -58,6 +58,7 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
         <PriceTag
           precio={finalTotal}
           original={originalTotal > finalTotal ? originalTotal : undefined}
+          seasonLayout="column"
         />
       </div>
 

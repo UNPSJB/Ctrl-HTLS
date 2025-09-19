@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
+import { Users, Home } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
 import { normalizarDescuento } from '@utils/pricingUtils';
-import Counter from '@ui/Counter'; // Componente reutilizable de contador
+import Counter from '@ui/Counter';
 
 function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
   if (!habitacionGroup) return null;
@@ -76,24 +77,30 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
   };
 
   return (
-    <article className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
-      {/* Izquierda: info del tipo */}
-      <div className="flex items-center gap-4">
-        <div className="flex flex-col">
+    <article className="grid grid-cols-4 items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
+      {/* Columna 1: info del tipo (ocupa 2 espacios) */}
+      <div className="col-span-2 flex items-center gap-4">
+        <div className="flex gap-4">
           <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
             {habitacionGroup.tipo}
           </div>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Capacidad: {habitacionGroup.capacidad ?? '—'} personas
-          </span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            Disponibles: {maxAvailable}
-          </span>
+
+          {/* Capacidad con icono */}
+          <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+            <Users className="h-4 w-4" />
+            <span>{habitacionGroup.capacidad ?? '—'}</span>
+          </div>
+
+          {/* Disponibilidad con icono */}
+          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+            <Home className="h-4 w-4" />
+            <span>{maxAvailable}</span>
+          </div>
         </div>
       </div>
 
-      {/* Centro: contador */}
-      <div className="mx-4">
+      {/* Columna 2: contador */}
+      <div className="flex justify-center">
         <Counter
           value={selectedCount}
           onIncrement={handleIncrement}
@@ -103,16 +110,13 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
         />
       </div>
 
-      {/* Derecha: precio */}
-      <div className="flex flex-col items-end gap-2">
+      {/* Columna 3: precio */}
+      <div className="flex justify-end">
         <div className="text-right">
           <PriceTag
             precio={precioFinal}
             original={descuentoTemporada ? precioBase : undefined}
           />
-          <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
-            por noche (por habitación)
-          </span>
         </div>
       </div>
     </article>
