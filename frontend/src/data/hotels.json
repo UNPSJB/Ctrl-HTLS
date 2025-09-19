@@ -3,7 +3,7 @@
         "hotelId": 1,
         "nombre": "Hotel Paraíso",
         "estrellas": "5",
-        "descripcion": "Ubicado en el corazón de Mar del Plata, el Hotel Paraíso ofrece una experiencia de lujo inigualable.",
+        "descripcion": "Ubicado en el corazón de Mar del Plata, el Hotel Paraíso ofrece una experiencia de lujo inigualable. Con vistas panorámicas al océano y servicios de primera clase, es el destino perfecto para quienes buscan confort y elegancia. Disfruta de su spa, gastronomía gourmet y actividades exclusivas en un entorno sofisticado.",
         "temporada": {
             "tipo": "alta",
             "fechaInicio": "2025-01-01T00:00:00.000Z",
