@@ -1,4 +1,3 @@
-// src/components/hotel/HotelCard.jsx
 import { useState, useMemo } from 'react';
 import { Bed, Package } from 'lucide-react';
 import useHotelSelection from '@hooks/useHotelSelection';
@@ -86,7 +85,6 @@ function HotelCard({ hotel }) {
                   <HabitacionItem
                     hotelData={hotelData}
                     habitacionGroup={group}
-                    // pasamos el hotelInCart para que el componente calcule selección por ids
                     hotelInCart={hotelInCart}
                   />
                 </li>
