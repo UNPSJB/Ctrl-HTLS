@@ -1,13 +1,16 @@
-import { useMemo } from 'react';
-import { Users, Home } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Users, Home, Info } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
 import { normalizarDescuento } from '@utils/pricingUtils';
 import Counter from '@ui/Counter';
+import RoomDetailsModal from './RoomDetailsModal';
 
 function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
   if (!habitacionGroup) return null;
+
+  const [showModal, setShowModal] = useState(false);
 
   const { agregarHabitacion, removerHabitacion } = useCarrito();
   const { filtros } = useBusqueda();
@@ -34,7 +37,6 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
     instances[0]?.precio ??
     100;
 
-  // Aplicar coeficiente/temporada igual que antes
   const esTemporadaAlta = hotelData?.temporada === 'alta';
   const descuentoTemporada = esTemporadaAlta
     ? normalizarDescuento(hotelData?.coeficiente)
@@ -76,6 +78,20 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
     removerHabitacion(hotelData.idHotel, idARemover);
   };
 
+  const handleShowDetails = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handleReserveFromModal = () => {
+    setShowModal(false);
+    // Agregar habitación igual que el increment
+    handleIncrement();
+  };
+
   return (
     <article className="grid grid-cols-4 items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
       {/* Columna 1: info del tipo (ocupa 2 espacios) */}
@@ -96,6 +112,15 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
             <Home className="h-4 w-4" />
             <span>{maxAvailable}</span>
           </div>
+
+          {/* Botón de detalles */}
+          <button
+            onClick={handleShowDetails}
+            className="flex items-center gap-1.5 text-sm text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            <Info className="h-4 w-4" />
+            <span>Detalles</span>
+          </button>
         </div>
       </div>
 
@@ -119,6 +144,22 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
           />
         </div>
       </div>
+
+      {/* Modal de detalles */}
+      {showModal && (
+        <RoomDetailsModal
+          habitacion={{
+            nombre: habitacionGroup.tipo,
+            capacidad: habitacionGroup.capacidad,
+            precio: precioBase,
+            // Agregar más datos si están disponibles en instances
+            ...instances[0],
+          }}
+          coeficiente={hotelData?.coeficiente}
+          onClose={handleCloseModal}
+          onReserve={handleReserveFromModal}
+        />
+      )}
     </article>
   );
 }
