@@ -22,13 +22,13 @@ function CartSummary() {
 
   return (
     <aside
-      className="sticky top-6 shadow-card p-4 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+      className="shadow-card sticky top-10 rounded-lg bg-white p-4 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
       aria-labelledby="cart-summary-title"
       role="complementary"
     >
       <CartHeader />
 
-      <div className="mt-4 space-y-4 overflow-auto max-h-[65vh]">
+      <div className="mt-4 max-h-[65vh] space-y-4 overflow-auto">
         {isEmpty ? (
           <CartEmpty />
         ) : (
