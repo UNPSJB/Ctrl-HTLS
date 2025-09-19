@@ -11,25 +11,14 @@ function HotelCard({ hotel }) {
   if (!hotel) return null;
 
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // Hook que gestiona selección UI local
-  const { toggleRoomSelection, togglePackageSelection } =
-    useHotelSelection(hotel);
+  const { togglePackageSelection } = useHotelSelection(hotel);
   const { carrito } = useCarrito();
 
-  // Determinar id del hotel (nuevo formato usa hotelId)
   const hotelId = hotel.hotelId ?? hotel.id;
 
-  // Buscar el hotel en el carrito
   const hotelInCart = carrito.hoteles.find((h) => h.idHotel === hotelId);
 
-  // Listas de ids seleccionados en el carrito
-  const habitacionesSeleccionadas =
-    hotelInCart?.habitaciones.map((hab) => hab.id) || [];
-  const paquetesSeleccionados =
-    hotelInCart?.paquetes.map((paq) => paq.id) || [];
-
-  // Solo crear hotelData para componentes que realmente lo necesitan (HabitacionItem/PaqueteItem)
+  // hotelData que se pase a child components (normalizado)
   const hotelData = {
     idHotel: hotelId,
     nombre: hotel.nombre,
@@ -43,34 +32,26 @@ function HotelCard({ hotel }) {
     temporada: hotel.temporada?.tipo ?? null,
   };
 
-  // Flatten rooms con useMemo por rendimiento
-  const flatRooms = useMemo(() => {
+  // Agrupar habitaciones por tipo usando useMemo (mejora rendimiento)
+  const groupedRooms = useMemo(() => {
     const groups = Array.isArray(hotel.habitaciones) ? hotel.habitaciones : [];
     const result = [];
 
     groups.forEach((group) => {
+      // cada group tiene una clave que es el tipo (ej: "Deluxe") y 'capacidad'
       const typeKey = Object.keys(group).find((k) => k !== 'capacidad');
       if (!typeKey) {
-        console.warn(
-          `Grupo de habitación sin clave esperada en hotel ${hotelId}`,
-          group
-        );
+        console.warn(`Grupo sin clave esperada en hotel ${hotelId}`, group);
         return;
       }
 
       const instances = Array.isArray(group[typeKey]) ? group[typeKey] : [];
       const capacidad = Number(group.capacidad) || null;
 
-      instances.forEach((inst) => {
-        result.push({
-          id: inst.id,
-          nombre: `${typeKey} - ${inst.numero}`,
-          capacidad: capacidad,
-          precio: inst.precio ?? null,
-          piso: inst.piso ?? null,
-          numero: inst.numero ?? null,
-          tipo: typeKey,
-        });
+      result.push({
+        tipo: typeKey,
+        capacidad,
+        instances,
       });
     });
 
@@ -79,7 +60,6 @@ function HotelCard({ hotel }) {
 
   return (
     <article className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
-      {/* Pasar los datos originales directamente */}
       <HotelHeader
         hotel={hotel}
         isExpanded={isExpanded}
@@ -99,16 +79,15 @@ function HotelCard({ hotel }) {
               <Bed className="h-5 w-5" />
               Habitaciones Disponibles
             </h3>
+
             <ul className="space-y-3">
-              {flatRooms.map((habitacion) => (
-                <li key={habitacion.id}>
+              {groupedRooms.map((group) => (
+                <li key={`${hotelId}-${group.tipo}`}>
                   <HabitacionItem
                     hotelData={hotelData}
-                    habitacion={habitacion}
-                    isSelected={habitacionesSeleccionadas.includes(
-                      habitacion.id
-                    )}
-                    onSelect={toggleRoomSelection}
+                    habitacionGroup={group}
+                    // pasamos el hotelInCart para que el componente calcule selección por ids
+                    hotelInCart={hotelInCart}
                   />
                 </li>
               ))}
@@ -133,7 +112,9 @@ function HotelCard({ hotel }) {
                     <PaqueteItem
                       hotelData={hotelData}
                       paquete={paquete}
-                      isSelected={paquetesSeleccionados.includes(paquete.id)}
+                      isSelected={hotelInCart?.paquetes?.some(
+                        (p) => p.id === paquete.id
+                      )}
                       onSelect={togglePackageSelection}
                     />
                   </li>
