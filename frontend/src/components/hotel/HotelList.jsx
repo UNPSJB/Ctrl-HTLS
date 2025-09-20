@@ -23,7 +23,7 @@ const HotelList = () => {
       </h2>
       <ul className="flex flex-col gap-6">
         {filteredHotels.map((hotel) => (
-          <li key={hotel.id}>
+          <li key={hotel.hotelId}>
             <HotelCard hotel={hotel} />
           </li>
         ))}
