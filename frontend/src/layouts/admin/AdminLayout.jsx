@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import AdminSidebar from '@layouts/admin/AdminSidebar';
 import { Menu } from 'lucide-react';
-import VerVendedores from '@/pages/admin/VerVendedores';
-import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
-import CrearVendedor from '@/pages/admin/CrearVendedor';
-import ClientesList from '@/components/ui/admin/ClientesList';
+import AdminSidebar from '@layouts/admin/AdminSidebar';
+import VendedoresLIst from '@ui/admin/list/VendedoresLIst';
+import CreateHotelFormPage from '@pages/CreateHotelFormPage';
+import CrearVendedor from '@pages/admin/CrearVendedor';
+import ClientesList from '@ui/admin/list/ClientesList';
 
 function AdminLayout() {
   const [selectedView, setSelectedView] = useState(null);
@@ -12,7 +12,7 @@ function AdminLayout() {
 
   const viewMap = {
     CrearHotel: <CreateHotelFormPage />,
-    VerVendedores: <VerVendedores />,
+    VerVendedores: <VendedoresLIst />,
     CrearVendedor: <CrearVendedor />,
     VerUsuarios: <ClientesList />,
     // VerHoteles: <VerHoteles />,

@@ -1,0 +1,53 @@
+[
+    {
+        "id": 1,
+        "nombre": "Laura Fernández",
+        "email": "laura.fernandez@empresa.com",
+        "telefono": "+54 9 11 2345 6789",
+        "hotelesPermitidos": [
+            101,
+            102,
+            105
+        ]
+    },
+    {
+        "id": 2,
+        "nombre": "Carlos Ramírez",
+        "email": "carlos.ramirez@empresa.com",
+        "telefono": "+54 9 351 987 6543",
+        "hotelesPermitidos": [
+            103,
+            104
+        ]
+    },
+    {
+        "id": 3,
+        "nombre": "Ana Gómez",
+        "email": "ana.gomez@empresa.com",
+        "telefono": "+54 9 261 567 1234",
+        "hotelesPermitidos": [
+            101,
+            104,
+            106
+        ]
+    },
+    {
+        "id": 4,
+        "nombre": "Martín López",
+        "email": "martin.lopez@empresa.com",
+        "telefono": "+54 9 381 456 7890",
+        "hotelesPermitidos": [
+            102
+        ]
+    },
+    {
+        "id": 5,
+        "nombre": "Sofía Torres",
+        "email": "sofia.torres@empresa.com",
+        "telefono": "+54 9 223 678 9012",
+        "hotelesPermitidos": [
+            105,
+            106
+        ]
+    }
+]

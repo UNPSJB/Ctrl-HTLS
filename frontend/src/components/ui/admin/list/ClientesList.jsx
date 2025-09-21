@@ -1,6 +1,6 @@
 import { Edit, Trash2, Eye } from 'lucide-react';
-import TableButton from '@/components/ui/TableButton';
-import clientesData from '../../../data/clientes.json';
+import TableButton from '@ui/TableButton';
+import clientesData from '@data/clientes.json';
 
 const ClientesList = () => {
   const clientes = clientesData;
