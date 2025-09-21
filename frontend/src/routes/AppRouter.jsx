@@ -6,6 +6,7 @@ import ReservaPage from '@/pages/ReservaPage';
 import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
 import DashboardPage from '@/pages/admin/DashboardPage';
 import PagoPage from '@/pages/PagoPage';
+import HotelPage from '@/pages/HotelPage';
 
 function AppRouter() {
   const userRole = 'vendedor'; // Esto debería venir del contexto o autenticación
@@ -20,6 +21,7 @@ function AppRouter() {
             <Route path="reserva" element={<ReservaPage />} />
             <Route path="pago" element={<PagoPage />} />
             <Route path="crear-hotel" element={<CreateHotelFormPage />} />
+            <Route path="hotel/:id" element={<HotelPage />} />
           </Route>
         )}
 
