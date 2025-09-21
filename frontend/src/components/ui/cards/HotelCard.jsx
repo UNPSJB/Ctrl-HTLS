@@ -58,7 +58,7 @@ function HotelCard({ hotel }) {
   }, [hotel.habitaciones, hotelId]);
 
   return (
-    <article className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+    <article className="overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
       <HotelHeader
         hotel={hotel}
         isExpanded={isExpanded}
