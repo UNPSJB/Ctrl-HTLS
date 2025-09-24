@@ -9,7 +9,7 @@ import PagoPage from '@/pages/PagoPage';
 import HotelPage from '@/pages/HotelPage';
 
 function AppRouter() {
-  const userRole = 'admin'; // Esto debería venir del contexto o autenticación
+  const userRole = 'vendedor'; // Esto debería venir del contexto o autenticación
 
   return (
     <BrowserRouter>
