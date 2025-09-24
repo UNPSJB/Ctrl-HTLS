@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBusqueda } from '@context/BusquedaContext';
-import { Search, MapPin, Calendar, Users, Star } from 'lucide-react';
+import { Search, MapPin, Calendar, Users, Globe, Building } from 'lucide-react';
 
 function HotelSearch() {
   // Obtenemos la función para actualizar el contexto utilizando el hook personalizado
@@ -9,12 +9,19 @@ function HotelSearch() {
   // Estado local para almacenar los filtros del formulario
   const [localFilters, setLocalFilters] = useState({
     nombre: '',
-    ubicacion: '',
+    pais: '',
+    provincia: '',
+    ciudad: '',
     fechaInicio: '',
     fechaFin: '',
     capacidad: 1,
-    estrellas: 0,
   });
+
+  // Obtener la fecha de hoy en formato YYYY-MM-DD
+  const getToday = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
 
   // Función para validar el rango de fechas
   const validateDates = () => {
@@ -42,7 +49,7 @@ function HotelSearch() {
   return (
     <div className="shadow-search mb-8 rounded-lg bg-white p-6 dark:bg-gray-800">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Primera fila: Nombre, Ubicación y Estrellas */}
+        {/* Primera fila: Nombre del Hotel, País, Provincia, Ciudad */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -64,20 +71,20 @@ function HotelSearch() {
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Ubicación
+              País
             </label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <Globe className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                value={localFilters.ubicacion}
+                value={localFilters.pais}
                 onChange={(e) =>
                   setLocalFilters({
                     ...localFilters,
-                    ubicacion: e.target.value,
+                    pais: e.target.value,
                   })
                 }
-                placeholder="Ciudad, País..."
+                placeholder="Ej: Argentina"
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
@@ -85,32 +92,48 @@ function HotelSearch() {
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Estrellas
+              Provincia
             </label>
             <div className="relative">
-              <Star className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-yellow-500" />
-              <select
-                value={localFilters.estrellas}
+              <Building className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={localFilters.provincia}
                 onChange={(e) =>
                   setLocalFilters({
                     ...localFilters,
-                    estrellas: Number(e.target.value),
+                    provincia: e.target.value,
                   })
                 }
-                className="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-              >
-                <option value={0}>Todas las estrellas</option>
-                {[5, 4, 3, 2, 1].map((num) => (
-                  <option key={num} value={num}>
-                    {num} {num === 1 ? 'estrella' : 'estrellas'} o más
-                  </option>
-                ))}
-              </select>
+                placeholder="Ej: Buenos Aires"
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Ciudad
+            </label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={localFilters.ciudad}
+                onChange={(e) =>
+                  setLocalFilters({
+                    ...localFilters,
+                    ciudad: e.target.value,
+                  })
+                }
+                placeholder="Ej: Mar del Plata"
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+              />
             </div>
           </div>
         </div>
 
-        {/* Segunda fila: Fechas y Capacidad */}
+        {/* Segunda fila: Fechas, Capacidad y Botón de Búsqueda */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -121,6 +144,7 @@ function HotelSearch() {
               <input
                 type="date"
                 value={localFilters.fechaInicio}
+                min={getToday()}
                 onChange={(e) =>
                   setLocalFilters({
                     ...localFilters,
@@ -141,6 +165,7 @@ function HotelSearch() {
               <input
                 type="date"
                 value={localFilters.fechaFin}
+                min={localFilters.fechaInicio || getToday()}
                 onChange={(e) =>
                   setLocalFilters({ ...localFilters, fechaFin: e.target.value })
                 }
@@ -155,22 +180,20 @@ function HotelSearch() {
             </label>
             <div className="relative">
               <Users className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <select
+              <input
+                type="number"
                 value={localFilters.capacidad}
+                min="1"
+                max="100"
                 onChange={(e) =>
                   setLocalFilters({
                     ...localFilters,
                     capacidad: Number(e.target.value),
                   })
                 }
-                className="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-              >
-                {[1, 2, 3, 4, 5, 6].map((num) => (
-                  <option key={num} value={num}>
-                    {num} {num === 1 ? 'persona' : 'personas'}
-                  </option>
-                ))}
-              </select>
+                placeholder="Número de personas"
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+              />
             </div>
           </div>
 
