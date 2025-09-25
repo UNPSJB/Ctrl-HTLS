@@ -11,13 +11,13 @@ const ImageLoader = ({ name, folder, cuadrado = true }) => {
 
   return imageError ? (
     <div
-      className={`${widthClass} ${heightClass} flex items-center justify-center bg-gray-200 dark:bg-gray-700`}
+      className={`${widthClass} ${heightClass} flex items-center justify-center bg-gray-200 transition-all duration-300 dark:bg-gray-700`}
     >
-      <ImageOff className="h-12 w-12 text-gray-500" />
+      <ImageOff className="h-12 w-12 text-gray-500 transition-all duration-300" />
     </div>
   ) : (
     <img
-      className={`${widthClass} ${heightClass} object-cover`}
+      className={`${widthClass} ${heightClass} object-cover transition-all duration-300`}
       src={imagePath}
       alt={name}
       onError={() => setImageError(true)}
