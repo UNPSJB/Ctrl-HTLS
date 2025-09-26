@@ -1,33 +1,60 @@
+import { useState, useMemo } from 'react';
 import HotelCard from '@ui/cards/HotelCard';
 import hotelsData from '@/data/hotels.json';
+import HotelFilter from './HotelFilter';
 
 const HotelList = () => {
-  const filteredHotels = hotelsData;
+  const [estrellasSeleccionadas, setEstrellasSeleccionadas] = useState([]);
 
-  if (filteredHotels.length === 0) {
-    return (
-      <section
-        role="alert"
-        aria-live="polite"
-        className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-lg dark:border-gray-700 dark:bg-gray-800"
-      >
-        <p className="text-gray-500">No se encontraron hoteles.</p>
-      </section>
-    );
-  }
+  // Normalizar los hoteles para que la propiedad "estrellas" sea número
+  const hotelesNormalizados = useMemo(
+    () => hotelsData.map((h) => ({ ...h, estrellas: Number(h.estrellas) })),
+    []
+  );
+
+  // Filtrar hoteles según las estrellas seleccionadas
+  const filteredHotels =
+    estrellasSeleccionadas.length === 0
+      ? hotelesNormalizados
+      : hotelesNormalizados.filter((hotel) =>
+          estrellasSeleccionadas.includes(hotel.estrellas)
+        );
+
+  // Mostrar el filtro mientras haya hoteles
+  const hayHoteles = hotelesNormalizados.length > 0;
 
   return (
     <section aria-labelledby="hotel-list-title" className="flex flex-col">
       <h2 id="hotel-list-title" className="sr-only">
         Hoteles disponibles
       </h2>
-      <ul className="flex flex-col gap-6">
-        {filteredHotels.map((hotel) => (
-          <li key={hotel.hotelId}>
-            <HotelCard hotel={hotel} />
-          </li>
-        ))}
-      </ul>
+
+      {hayHoteles && (
+        <HotelFilter
+          estrellasSeleccionadas={estrellasSeleccionadas}
+          setEstrellasSeleccionadas={setEstrellasSeleccionadas}
+        />
+      )}
+
+      {filteredHotels.length === 0 ? (
+        <section
+          role="alert"
+          aria-live="polite"
+          className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-lg dark:border-gray-700 dark:bg-gray-800"
+        >
+          <p className="text-gray-500">
+            No se encontraron hoteles con las estrellas seleccionadas.
+          </p>
+        </section>
+      ) : (
+        <ul className="flex flex-col gap-6">
+          {filteredHotels.map((hotel) => (
+            <li key={hotel.hotelId}>
+              <HotelCard hotel={hotel} />
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 };

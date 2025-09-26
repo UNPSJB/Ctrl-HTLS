@@ -1,9 +1,12 @@
+// src/components/RoomCartItem.jsx
+import { useCallback } from 'react';
 import { Trash2, House, Users } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import { normalizarDescuento, roundTwo } from '@utils/pricingUtils';
 import { formatFecha, nightsBetween } from '@utils/dateUtils';
+import { useCarrito } from '@context/CarritoContext';
 
-function RoomCartItem({ room, hotel, onRemove = () => {} }) {
+function RoomCartItem({ room, hotel, onRemove = null }) {
   const {
     fechaInicio,
     fechaFin,
@@ -11,7 +14,7 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
     qty = 1,
     nombre,
     capacidad,
-  } = room;
+  } = room || {};
 
   const nights = nightsBetween(fechaInicio, fechaFin, { useUTC: true });
 
@@ -26,6 +29,30 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
   const precioPorNoche = roundTwo(Number(precio) * (1 - desc));
   const finalTotal = roundTwo(precioPorNoche * qty * nights);
   const originalTotal = roundTwo(Number(precio) * qty * nights);
+
+  // Acciones del contexto
+  const { removerHabitacion } = useCarrito();
+
+  // Maneja la eliminación: si viene onRemove lo usa, sino usa el contexto.
+  // NOTA: eliminamos confirmaciones — al click se quita inmediatamente.
+  const handleRemove = useCallback(() => {
+    if (typeof onRemove === 'function') {
+      onRemove(room);
+      return;
+    }
+
+    if (!room?.id) {
+      console.warn(
+        'RoomCartItem: no se encontró room.id — la acción removerHabitacion requiere un id único.'
+      );
+      return;
+    }
+
+    // Llamada directa al contexto (sin confirmación)
+    removerHabitacion(hotel?.idHotel ?? hotel?.id ?? '', room.id);
+  }, [onRemove, room, removerHabitacion, hotel]);
+
+  if (!room) return null;
 
   return (
     <div className="mb-3 flex gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
@@ -62,13 +89,14 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
         />
       </div>
 
-      {/* Columna 3: Botón eliminar */}
+      {/* Columna 3: Botón eliminar (sin confirmación) */}
       <div className="flex items-center">
         <button
-          onClick={onRemove}
+          onClick={handleRemove}
           aria-label={`Eliminar habitación ${nombre ?? room.name ?? ''}`}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
           title="Eliminar habitación"
+          disabled={!room?.id}
+          className={`flex h-8 w-8 transform items-center justify-center rounded-full text-red-600 transition duration-150 ease-in-out hover:scale-105 hover:bg-red-50 hover:text-red-700 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200 focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/10 dark:hover:text-red-300 dark:focus-visible:ring-red-700`}
         >
           <Trash2 className="h-5 w-5 text-current" />
         </button>
