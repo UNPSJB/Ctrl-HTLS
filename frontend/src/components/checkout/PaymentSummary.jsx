@@ -104,18 +104,16 @@ function PaymentSummary() {
 
   return (
     <aside
-      className="max-w-md space-y-6"
+      className="shadow-card sticky top-28 h-fit rounded-lg bg-white p-4 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
       aria-labelledby="payment-summary-title"
+      role="complementary"
     >
-      <div className="rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800">
-        <h3
-          id="payment-summary-title"
-          className="mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100"
-        >
+      <div>
+        <h3 id="payment-summary-title" className="mb-3 text-lg font-semibold">
           Resumen de Pago
         </h3>
 
-        <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+        <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span className="font-medium">${subtotal.toFixed(2)}</span>
@@ -158,7 +156,7 @@ function PaymentSummary() {
             <div className="text-sm text-gray-500 dark:text-gray-400">
               Total Final
             </div>
-            <div className="text-2xl font-extrabold text-gray-800 dark:text-gray-100">
+            <div className="text-2xl font-extrabold">
               ${finalTotal.toFixed(2)}
             </div>
           </div>

@@ -15,8 +15,8 @@ function PagoPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
-      <div className="text-center">
+    <div className="mx-auto max-w-6xl p-6">
+      <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Confirmar y Pagar
         </h1>
@@ -25,13 +25,17 @@ function PagoPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-6 lg:col-span-2">
+      <div className="flex gap-6">
+        {/* Contenido principal - columna izquierda */}
+        <div className="flex-1 space-y-6">
           <ClienteData />
           <HotelsListView />
         </div>
 
-        <PaymentSummary />
+        {/* Sidebar sticky - columna derecha */}
+        <div className="w-80 shrink-0">
+          <PaymentSummary />
+        </div>
       </div>
     </div>
   );
