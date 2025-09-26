@@ -5,7 +5,7 @@ function ClienteData() {
 
   if (!client) {
     return (
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6">
+      <div className="rounded-lg bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
         <p className="text-sm text-gray-600 dark:text-gray-300">
           No hay cliente seleccionado. Usá la búsqueda para seleccionar uno.
         </p>
@@ -21,11 +21,11 @@ function ClienteData() {
     .toUpperCase();
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6">
+    <div className="rounded-lg bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center justify-between gap-4">
         {/* Left: avatar + datos */}
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 font-semibold">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-100">
             {initials || 'UX'}
           </div>
 

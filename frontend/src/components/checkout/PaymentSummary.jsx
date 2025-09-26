@@ -1,33 +1,33 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useCarrito } from '@context/CarritoContext';
 import { useCliente } from '@context/ClienteContext';
 import { calcularTotalCarrito } from '@utils/pricingUtils';
-import PuntosToggle from './PuntosToggle';
 import MetodoPago from './MetodoPago';
 
-function convertPointsToAmount(points = 0) {
-  const blocks = Math.floor(Number(points || 0) / 1000);
-  return blocks * 10;
-}
-
 function PaymentSummary() {
+  // Context del carrito (hoteles y selección)
   const { carrito } = useCarrito();
+  // Context del cliente para obtener puntos
   const { client } = useCliente();
 
+  // Método de pago seleccionado (controlado localmente y pasado a MetodoPago)
   const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [usePoints, setUsePoints] = useState(false);
 
+  // Payload de la tarjeta (validación desde TarjetaForm)
   const [cardPayload, setCardPayload] = useState({
     cardData: null,
     valid: false,
   });
 
+  // Estado visual de confirmación
   const [confirmed, setConfirmed] = useState(false);
 
+  // Handler para recibir cambios desde TarjetaForm
   const handleCardChange = useCallback(({ cardData, valid }) => {
     setCardPayload({ cardData, valid });
   }, []);
 
+  // Totales calculados a partir del carrito
   const cartTotals = useMemo(
     () => calcularTotalCarrito(carrito?.hoteles ?? []),
     [carrito?.hoteles]
@@ -36,47 +36,81 @@ function PaymentSummary() {
   const subtotal = Number(cartTotals?.original ?? 0);
   const totalDiscounts = Number(cartTotals?.descuento ?? 0);
 
-  const baseTotal = Number(
-    typeof cartTotals?.final === 'number'
-      ? cartTotals.final
-      : subtotal - totalDiscounts
+  // baseTotal es el total antes de cualquier forma de pago especial
+  const baseTotal = useMemo(
+    () =>
+      Number(
+        typeof cartTotals?.final === 'number'
+          ? cartTotals.final
+          : subtotal - totalDiscounts
+      ),
+    [cartTotals?.final, subtotal, totalDiscounts]
   );
 
-  const clientPoints = Number(client?.puntos ?? 0);
-  const maxPointsAmount = useMemo(
-    () => convertPointsToAmount(clientPoints),
-    [clientPoints]
+  // Puntos del cliente (número)
+  const clientPoints = useMemo(
+    () => Number(client?.puntos ?? 0),
+    [client?.puntos]
   );
 
-  const pointsDiscount = useMemo(
-    () => (usePoints ? Math.min(maxPointsAmount, baseTotal) : 0),
-    [usePoints, maxPointsAmount, baseTotal]
+  // Si el cliente tiene suficientes puntos para cubrir el total
+  const clientePuedePagarConPuntos = useMemo(
+    () => clientPoints >= baseTotal,
+    [clientPoints, baseTotal]
   );
 
-  const finalTotal = useMemo(
-    () => Math.max(0, Math.round((baseTotal - pointsDiscount) * 100) / 100),
-    [baseTotal, pointsDiscount]
-  );
-
+  // Si el método seleccionado es tarjeta
   const requiresCard = paymentMethod === 'card';
+
+  // Si el método seleccionado es 'punto' y el cliente no tiene suficientes puntos,
+  // evitar confirmar / procesar (además MetodoPago ya deshabiliza la opción).
+  const requiresPuntoValid =
+    paymentMethod === 'punto' ? clientePuedePagarConPuntos : true;
+
+  // Condición para poder confirmar:
+  // - Si se requiere tarjeta, que la tarjeta sea válida.
+  // - Si se requiere punto, que el cliente tenga suficientes puntos.
+  // - Que haya al menos un hotel en el carrito.
   const canConfirm =
     (!requiresCard || (requiresCard && cardPayload.valid)) &&
+    requiresPuntoValid &&
     carrito?.hoteles?.length > 0;
+
+  // Si llega un cambio externo del método (p. ej. controlado por padre), sincronizar.
+  // (En este componente no esperamos prop 'value' controlado, así que esto es solo guardia.)
+  useEffect(() => {
+    // Si el método actual es 'punto' pero el cliente ya no puede pagar con puntos,
+    // forzamos fallback a 'cash' para evitar inconsistencias.
+    if (paymentMethod === 'punto' && !clientePuedePagarConPuntos) {
+      setPaymentMethod('cash');
+    }
+  }, [paymentMethod, clientePuedePagarConPuntos]);
+
+  // Si el método es 'punto' y el cliente puede usarlo, el total final será 0 (pago con puntos).
+  // En cualquier otro caso, el total final es el baseTotal (redondeado a 2 decimales).
+  const finalTotal = useMemo(() => {
+    if (paymentMethod === 'punto' && clientePuedePagarConPuntos) {
+      return 0;
+    }
+    return Math.max(0, Math.round(baseTotal * 100) / 100);
+  }, [paymentMethod, clientePuedePagarConPuntos, baseTotal]);
 
   const handleConfirm = useCallback(() => {
     if (!canConfirm) return;
+    // Aquí solo marcamos confirmación visual; el flujo real de "reserva" / petición al backend
+    // debería implementarse en el handler padre o en una función adicional.
     setConfirmed(true);
   }, [canConfirm]);
 
   return (
     <aside
-      className="space-y-6 max-w-md"
+      className="max-w-md space-y-6"
       aria-labelledby="payment-summary-title"
     >
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border p-4">
+      <div className="rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800">
         <h3
           id="payment-summary-title"
-          className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-100"
+          className="mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100"
         >
           Resumen de Pago
         </h3>
@@ -94,24 +128,33 @@ function PaymentSummary() {
             </span>
           </div>
 
-          <div className="pt-2 border-t border-gray-100 dark:border-gray-800" />
+          <div className="border-t border-gray-100 pt-2 dark:border-gray-800" />
 
           <div className="flex justify-between">
-            <span className="font-medium">Total antes de puntos</span>
+            <span className="font-medium">Total antes de pago</span>
             <span className="font-bold">${baseTotal.toFixed(2)}</span>
           </div>
 
-          {/* Toggle visual de puntos: le pasamos información para que muestre saldo */}
-          <PuntosToggle
-            onToggle={setUsePoints}
+          <MetodoPago
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            onCardChange={handleCardChange}
             clientPoints={clientPoints}
-            maxPointsAmount={maxPointsAmount}
-            disabled={clientPoints < 1000}
+            totalAmount={baseTotal}
           />
 
-          <div className="pt-2 border-t border-gray-100 dark:border-gray-800" />
+          {/* Mostrar resumen específico si se usa 'punto' */}
+          {paymentMethod === 'punto' && clientePuedePagarConPuntos && (
+            <div className="mt-2 rounded bg-green-50 p-2 text-sm text-green-800">
+              Pago con <strong>puntos</strong> seleccionado. Se utilizarán los
+              puntos del cliente para cubrir el total de ${baseTotal.toFixed(2)}
+              .
+            </div>
+          )}
 
-          <div className="flex justify-between items-center mt-3">
+          <div className="border-t border-gray-100 pt-2 dark:border-gray-800" />
+
+          <div className="mt-3 flex items-center justify-between">
             <div className="text-sm text-gray-500 dark:text-gray-400">
               Total Final
             </div>
@@ -120,16 +163,10 @@ function PaymentSummary() {
             </div>
           </div>
 
-          <MetodoPago
-            value={paymentMethod}
-            onChange={setPaymentMethod}
-            onCardChange={handleCardChange}
-          />
-
           {confirmed ? (
             <div
               role="status"
-              className="mt-3 p-3 rounded bg-green-50 text-green-800"
+              className="mt-3 rounded bg-green-50 p-3 text-green-800"
             >
               Reserva marcada como <strong>confirmada (visual)</strong>.
             </div>
@@ -141,10 +178,10 @@ function PaymentSummary() {
               onClick={handleConfirm}
               disabled={!canConfirm}
               aria-disabled={!canConfirm}
-              className={`w-full px-4 py-3 rounded-lg font-semibold text-white ${
+              className={`w-full rounded-lg px-4 py-3 font-semibold text-white ${
                 canConfirm
                   ? 'bg-blue-600 hover:bg-blue-700'
-                  : 'bg-gray-400 cursor-not-allowed'
+                  : 'cursor-not-allowed bg-gray-400'
               }`}
             >
               {confirmed ? 'Reserva Confirmada' : 'Confirmar Reserva'}
