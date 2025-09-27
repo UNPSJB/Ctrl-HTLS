@@ -25,6 +25,8 @@ const descuentoServices = require('./descuentoServices');
 const habitacionServices = require('./habitacionServices');
 const tipoHabitacionServices = require('./tipoHabitacionServices');
 const hotelTipoHabitacionServices = require('./hotelTipoHabitacionServices');
+const HotelEmpleado = require('../../models/hotel/HotelEmpleado');
+const personaServices = require('../core/personaServices');
 
 const crearHotel = async (
   nombre,
@@ -404,26 +406,47 @@ const getDescuentosDeHotel = async (hotelId) => {
  * QUE TENGA HABITACIONES DISPOBIBLES
  * BUSCAR PAQUETES QUE COINCIDAN CON LAS FECHAS
  */
+
+/**
+ * Funcion que obtiene la disponibilidad de hoteles en una ubicación específica
+ *
+ * @param {*} ubicacion - ID de la ciudad
+ * @param {*} fechaInicio - Fecha de inicio de alquiler en formato ISO (YYYY-MM-DD)
+ * @param {*} fechaFin - Fecha de fin de alquiler en formato ISO (YYYY-MM-DD)
+ * @param {*} pasajeros - Cantidad de pasajeros
+ * @param {*} nombreHotel - Nombre del hotel (opcional, puede ser 'null')
+ * @param {*} vendedorId - ID del vendedor que realiza la consulta
+ * @returns - Arreglo de hoteles con su disponibilidad, habitaciones y paquetes
+ */
 const getDisponibilidadPorHotel = async (
   ubicacion,
   fechaInicio,
   fechaFin,
   pasajeros,
+  nombreHotel,
+  vendedorId,
 ) => {
-  const hotelesCiudad = await getHotelesPorCiudad(ubicacion);
-  if (!hotelesCiudad) {
-    throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
-  }
-  // Obtener los hoteles en la ubicación especificada
-
-  if (hotelesCiudad.length === 0) {
-    throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
-  }
-
   const disponibilidad = [];
 
-  for (const hotel of hotelesCiudad) {
-    // Obtener la temporada actual del hotel
+  if (nombreHotel !== 'null') {
+    console.log(nombreHotel.length);
+
+    const hotel = await verificarHotelUbicacion(nombreHotel, ubicacion);
+    if (!hotel) {
+      throw new CustomError(
+        `No se encontró el hotel ${nombreHotel} en la ciudad especificada`,
+        404,
+      ); // Not Found
+    }
+
+    const hotelVendedor = await verificarHotelVendedor(hotel.id, vendedorId);
+    if (!hotelVendedor) {
+      throw new CustomError(
+        `El vendedor no está asociado al hotel ${nombreHotel}`,
+        403,
+      ); // Forbidden
+    }
+
     const temporada = await temporadaServices.obtenerTemporadaActual(
       hotel.id,
       fechaInicio,
@@ -465,8 +488,66 @@ const getDisponibilidadPorHotel = async (
       habitaciones: habitaciones,
       paquetes: paquetes,
     });
-  }
+  } else {
+    const hotelesCiudad = await getHotelesPorCiudadYVendedor(
+      ubicacion,
+      vendedorId,
+    );
 
+    if (!hotelesCiudad) {
+      throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
+    }
+    // Obtener los hoteles en la ubicación especificada
+
+    if (hotelesCiudad.length === 0) {
+      throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
+    }
+    for (const hotel of hotelesCiudad) {
+      // Obtener la temporada actual del hotel
+      const temporada = await temporadaServices.obtenerTemporadaActual(
+        hotel.id,
+        fechaInicio,
+        fechaFin,
+      );
+
+      const descuentos = await getDescuentosDeHotel(hotel.id);
+
+      // Obtener las habitaciones disponibles agrupadas por tipo
+      const habitaciones =
+        await habitacionServices.obtenerHabitacionesDisponiblesPorTipo(
+          hotel.id,
+          fechaInicio,
+          fechaFin,
+          pasajeros,
+        );
+
+      // Obtener los paquetes turísticos disponibles
+      const paquetes =
+        await paquetePromocionalServices.obtenerPaquetesTuristicos(
+          hotel.id,
+          fechaInicio,
+          fechaFin,
+        );
+
+      // Estructurar el objeto del hotel
+      disponibilidad.push({
+        hotelId: hotel.id,
+        nombre: hotel.nombre,
+        estrellas: hotel.categoria.nombre,
+        descripcion: hotel.descripcion,
+        temporada: temporada,
+        descuentos: descuentos,
+        direccion: hotel.direccion,
+        ubicacion: {
+          pais: hotel.ciudad.provincia.pais.nombre,
+          provincia: hotel.ciudad.provincia.nombre,
+          ciudad: hotel.ciudad.nombre,
+        },
+        habitaciones: habitaciones,
+        paquetes: paquetes,
+      });
+    }
+  }
   return disponibilidad;
 };
 
@@ -526,6 +607,160 @@ const deleteEncargado = async (id) => {
   }
 };
 
+/**
+ * Verifica si un hotel con el nombre dado existe en la ciudad especificada
+ * @param {*} nombreHotel - Nombre del hotel a verificar
+ * @param {*} ciudadId - ID de la ciudad donde buscar el hotel
+ * @returns {Object|null} - Retorna el hotel si existe, de lo contrario null
+ */
+const verificarHotelUbicacion = async (nombreHotel, ciudadId) => {
+  try {
+    const hotel = await Hotel.findOne({
+      where: { nombre: nombreHotel, ciudadId: ciudadId },
+      include: [
+        {
+          model: Categoria,
+          as: 'categoria',
+        },
+        {
+          model: Ciudad,
+          as: 'ciudad',
+          include: [
+            {
+              model: Provincia,
+              as: 'provincia',
+              include: [
+                {
+                  model: Pais,
+                  as: 'pais',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    return hotel || null;
+  } catch (error) {
+    throw new CustomError(
+      `Error al verificar el hotel en la ubicación: ${error.message}`,
+      500,
+    ); // Internal Server Error
+  }
+};
+
+/**
+ * Verifica si un vendedor está asociado a un hotel específico
+ *
+ * @param {*} hotelId - ID del hotel
+ * @param {*} vendedorId - ID del vendedor
+ * @returns {Object|null} - Retorna el registro de HotelEmpleado si existe, de lo contrario null
+ */
+const verificarHotelVendedor = async (hotelId, vendedorId) => {
+  try {
+    const hotelVendedor = await HotelEmpleado.findOne({
+      where: { hotelId, empleadoId: vendedorId },
+    });
+    return hotelVendedor || null;
+  } catch (error) {
+    throw new CustomError(
+      `Error al verificar el hotel y vendedor: ${error.message}`,
+      500,
+    ); // Internal Server Error
+  }
+};
+
+/**
+ * Función para obtener hoteles en una ciudad donde trabaja un vendedor específico
+ *
+ * @param {*} ciudadId - ID de la ciudad
+ * @param {*} vendedorId - ID del vendedor
+ * @returns - Arreglo de hoteles en la ciudad donde trabaja el vendedor
+ */
+const getHotelesPorCiudadYVendedor = async (ciudadId, vendedorId) => {
+  // Obtener IDs de hoteles donde trabaja el vendedor
+  const hotelEmpleados = await HotelEmpleado.findAll({
+    where: { empleadoId: vendedorId },
+    attributes: ['hotelId'],
+  });
+
+  const hotelesIds = hotelEmpleados.map((he) => he.hotelId);
+
+  if (hotelesIds.length === 0) {
+    throw new CustomError(
+      'El vendedor no está asociado a ningún hotel en la ciudad especificada',
+      403,
+    ); // Forbidden
+  }
+
+  // Obtener hoteles de la ciudad que están en esa lista
+  const hoteles = await Hotel.findAll({
+    where: {
+      ciudadId,
+      id: hotelesIds,
+    },
+    include: [
+      {
+        model: Categoria,
+        as: 'categoria',
+      },
+      {
+        model: Ciudad,
+        as: 'ciudad',
+        include: [
+          {
+            model: Provincia,
+            as: 'provincia',
+            include: [
+              {
+                model: Pais,
+                as: 'pais',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  return hoteles;
+};
+
+/**
+ * Función para asignar un empleado a un hotel
+ *
+ * @param {*} hotelId - ID del hotel
+ * @param {*} empleadoId  - ID del empleado (vendedor)
+ * @returns - Objeto de la asignación creada
+ */
+const asignarEmpleadoAHotel = async (hotelId, empleadoId) => {
+  try {
+    // Verificar si el hotel existe
+    await verificarIdHotel(hotelId);
+
+    //Verificar si el empleado existe
+    await personaServices.obtenerVendedorPorId(empleadoId);
+    // Verificar si el empleado ya está asignado al hotel
+    const asignacionExistente = await HotelEmpleado.findOne({
+      where: { hotelId, empleadoId },
+    });
+    if (asignacionExistente) {
+      throw new CustomError('El empleado ya está asignado a este hotel', 409); // Conflict
+    }
+    // Crear la asignación
+    const nuevaAsignacion = await HotelEmpleado.create({
+      hotelId,
+      empleadoId,
+    });
+    return nuevaAsignacion;
+  } catch (error) {
+    throw new CustomError(
+      `Error al asignar el empleado al hotel: ${error.message}`,
+      error.status || 500,
+    ); // Internal Server Error
+  }
+};
+
 module.exports = {
   crearHotel,
   modificarHotel,
@@ -534,9 +769,11 @@ module.exports = {
   agregarTemporada,
   agregarDescuentos,
   getDisponibilidadPorHotel,
+  getHotelesPorCiudad,
   obtenerTiposDeHabitacion,
   eliminarHotel,
   //getHabitacionesDisponibles,
   //getPaquetesDisponibles,
   crearEncargado,
+  asignarEmpleadoAHotel,
 };

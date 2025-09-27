@@ -141,12 +141,12 @@ const verificarFechas = (fechaInicio, fechaFin) => {
   const fechaFinDate = new Date(fechaFin);
   const fechaActual = new Date();
 
-  if (fechaInicioDate < fechaActual) {
-    throw new CustomError(
-      'La fecha de inicio debe ser mayor a la fecha actual',
-      400,
-    ); // Bad Request
-  }
+  // if (fechaInicioDate < fechaActual) {
+  //   throw new CustomError(
+  //     'La fecha de inicio debe ser mayor a la fecha actual',
+  //     400,
+  //   ); // Bad Request
+  // }
   if (fechaInicioDate >= fechaFinDate) {
     throw new CustomError(
       'La fecha de inicio debe ser menor a la fecha de fin',
@@ -164,6 +164,7 @@ const verificarIdHotel = async (hotelId) => {
 
 const convertirFechas = (fecha) => {
   const fechaFormateada = new Date(fecha);
+  console.log(new Date(fecha));
 
   return fechaFormateada;
 };

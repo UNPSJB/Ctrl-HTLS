@@ -210,6 +210,20 @@ const createEncargado = async (req, res) => {
   }
 };
 
+const asignarEmpleado = async (req, res) => {
+  const { hotelId, vendedorId } = req.body;
+  try {
+    const asignacion = await hotelServices.asignarEmpleadoAHotel(
+      hotelId,
+      vendedorId,
+    );
+    res.status(201).json(asignacion);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createHotel,
   updateHotel,
@@ -222,4 +236,5 @@ module.exports = {
   setPaquetePromocional,
   getTiposDeHabitacion,
   createEncargado,
+  asignarEmpleado,
 };

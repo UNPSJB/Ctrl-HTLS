@@ -17,12 +17,18 @@ const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
 
 const obtenerDisponibilidad = async (consultaAlquiler) => {
-  const { ubicacion, fechaInicio, fechaFin, pasajeros } = consultaAlquiler;
+  const {
+    ubicacion,
+    fechaInicio,
+    fechaFin,
+    pasajeros,
+    nombreHotel,
+    vendedorId,
+  } = consultaAlquiler;
 
   // Verificar la ciudad
   await verificarCiudad(ubicacion);
 
-  // Convertir strings a objetos Date
   const desde = convertirFechas(fechaInicio);
   const hasta = convertirFechas(fechaFin);
 
@@ -33,11 +39,15 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
     throw new CustomError('La cantidad de pasajeros debe ser mayor a 0', 400); // Bad Request
   }
 
+  const nombreHotelString = nombreHotel.toString().toLowerCase();
+
   return await hotelServices.getDisponibilidadPorHotel(
     ubicacion,
-    desde,
-    hasta,
+    fechaInicio,
+    fechaFin,
     pasajeros,
+    nombreHotelString,
+    vendedorId,
   );
 };
 
