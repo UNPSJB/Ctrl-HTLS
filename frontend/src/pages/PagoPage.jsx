@@ -8,15 +8,15 @@ function PagoPage() {
 
   if (!carrito.hoteles || carrito.hoteles.length === 0) {
     return (
-      <div className="flex justify-center items-center text-gray-600 dark:text-gray-300 min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center text-gray-600 dark:text-gray-300">
         No hay reservas en el carrito.
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-6xl p-6 flex flex-col gap-6">
-      <div className="text-center">
+    <div className="mx-auto max-w-6xl p-6">
+      <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Confirmar y Pagar
         </h1>
@@ -25,13 +25,17 @@ function PagoPage() {
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex flex-col gap-6">
+      <div className="flex gap-6">
+        {/* Contenido principal - columna izquierda */}
+        <div className="flex-1 space-y-6">
           <ClienteData />
           <HotelsListView />
         </div>
 
-        <PaymentSummary />
+        {/* Sidebar sticky - columna derecha */}
+        <div className="w-80 shrink-0">
+          <PaymentSummary />
+        </div>
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ const TIPOS = {
 function carritoReducer(estado, accion) {
   switch (accion.type) {
     case TIPOS.AGREGAR_HOTEL: {
-      if (estado.hoteles.some((h) => h.idHotel === accion.payload.idHotel)) {
+      if (estado.hoteles.some((h) => h.hotelId === accion.payload.hotelId)) {
         return estado;
       }
       return {
@@ -38,21 +38,21 @@ function carritoReducer(estado, accion) {
         hoteles: [
           ...estado.hoteles,
           {
-            idHotel: accion.payload.idHotel,
+            hotelId: accion.payload.hotelId,
             nombre: accion.payload.nombre,
             temporada: accion.payload.temporada,
-            coeficiente: accion.payload.coeficiente,
             habitaciones: [],
             paquetes: [],
           },
         ],
       };
     }
+
     case TIPOS.AGREGAR_HABITACION: {
       return {
         ...estado,
         hoteles: estado.hoteles.map((hotel) =>
-          hotel.idHotel === accion.payload.idHotel
+          hotel.hotelId === accion.payload.hotelId
             ? hotel.habitaciones.some(
                 (room) => room.id === accion.payload.habitacion.id
               )
@@ -68,11 +68,12 @@ function carritoReducer(estado, accion) {
         ),
       };
     }
+
     case TIPOS.AGREGAR_PAQUETE: {
       return {
         ...estado,
         hoteles: estado.hoteles.map((hotel) =>
-          hotel.idHotel === accion.payload.idHotel
+          hotel.hotelId === accion.payload.hotelId
             ? hotel.paquetes.some((pkg) => pkg.id === accion.payload.paquete.id)
               ? hotel
               : {
@@ -83,12 +84,13 @@ function carritoReducer(estado, accion) {
         ),
       };
     }
+
     case TIPOS.REMOVER_HABITACION: {
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
-          if (hotel.idHotel === accion.payload.idHotel) {
+          if (hotel.hotelId === accion.payload.hotelId) {
             const updatedHabitaciones = hotel.habitaciones.filter(
-              (room) => room.id !== accion.payload.idHabitacion
+              (room) => room.id !== accion.payload.habitacionId
             );
             if (
               updatedHabitaciones.length === 0 &&
@@ -103,12 +105,13 @@ function carritoReducer(estado, accion) {
         .filter(Boolean);
       return { ...estado, hoteles: nuevosHoteles };
     }
+
     case TIPOS.REMOVER_PAQUETE: {
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
-          if (hotel.idHotel === accion.payload.idHotel) {
+          if (hotel.hotelId === accion.payload.hotelId) {
             const updatedPaquetes = hotel.paquetes.filter(
-              (pkg) => pkg.id !== accion.payload.idPaquete
+              (pkg) => pkg.id !== accion.payload.paqueteId
             );
             if (
               hotel.habitaciones.length === 0 &&
@@ -123,16 +126,18 @@ function carritoReducer(estado, accion) {
         .filter(Boolean);
       return { ...estado, hoteles: nuevosHoteles };
     }
+
     case TIPOS.REMOVER_HOTEL:
       return {
         ...estado,
         hoteles: estado.hoteles.filter(
-          (hotel) => hotel.idHotel !== accion.payload.idHotel
+          (hotel) => hotel.hotelId !== accion.payload.hotelId
         ),
       };
+
     case TIPOS.REEMPLAZAR_ESTADO:
-      // Reemplaza todo el estado (usado para migración/normalización inicial)
       return accion.payload ?? estado;
+
     default:
       return estado;
   }
@@ -148,15 +153,15 @@ function normalizeDateValue(v) {
   return s === '' ? null : s;
 }
 
-// --- NUEVO: función para asegurar que el hotel existe en el carrito ---
-function asegurarHotel(dispatch, { idHotel, nombre, temporada, coeficiente }) {
+// Función para asegurar que el hotel existe en el carrito
+function asegurarHotel(dispatch, { hotelId, nombre, temporada }) {
   dispatch({
     type: TIPOS.AGREGAR_HOTEL,
-    payload: { idHotel, nombre, temporada, coeficiente },
+    payload: { hotelId, nombre, temporada },
   });
 }
 
-// --- NUEVO: función genérica para agregar elementos (robusta con normalización de fechas) ---
+// Función genérica para agregar elementos con normalización de fechas
 function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
   asegurarHotel(dispatch, hotelInfo);
 
@@ -176,7 +181,7 @@ function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
   dispatch({
     type: tipo,
     payload: {
-      idHotel: hotelInfo.idHotel,
+      hotelId: hotelInfo.hotelId,
       [tipo === TIPOS.AGREGAR_HABITACION ? 'habitacion' : 'paquete']: item,
     },
   });
@@ -198,6 +203,8 @@ export function CarritoProvider({ children }) {
     const normalizeHoteles = (hoteles = []) =>
       (hoteles || []).map((h) => ({
         ...h,
+        // Asegurar que se use hotelId en lugar de idHotel
+        hotelId: h.hotelId || h.idHotel,
         habitaciones: (h.habitaciones || []).map((hab) => ({
           ...hab,
           fechaInicio: normalizeDateValue(hab.fechaInicio),
@@ -218,7 +225,6 @@ export function CarritoProvider({ children }) {
     // Si hay diferencia con persistedState, actualizamos persisted y el reducer
     if (JSON.stringify(normalized) !== JSON.stringify(persistedState)) {
       setPersistedState(normalized);
-      // Reemplazamos el estado del reducer para que la UI use los datos normalizados ahora mismo
       dispatch({ type: TIPOS.REEMPLAZAR_ESTADO, payload: normalized });
     }
   }, []); // solo en mount
@@ -254,25 +260,25 @@ export function CarritoProvider({ children }) {
   );
 
   const removerHabitacion = useCallback(
-    (idHotel, idHabitacion) =>
+    (hotelId, habitacionId) =>
       dispatch({
         type: TIPOS.REMOVER_HABITACION,
-        payload: { idHotel, idHabitacion },
+        payload: { hotelId, habitacionId },
       }),
     [dispatch]
   );
 
   const removerPaquete = useCallback(
-    (idHotel, idPaquete) =>
+    (hotelId, paqueteId) =>
       dispatch({
         type: TIPOS.REMOVER_PAQUETE,
-        payload: { idHotel, idPaquete },
+        payload: { hotelId, paqueteId },
       }),
     [dispatch]
   );
 
   const removerHotel = useCallback(
-    (idHotel) => dispatch({ type: TIPOS.REMOVER_HOTEL, payload: { idHotel } }),
+    (hotelId) => dispatch({ type: TIPOS.REMOVER_HOTEL, payload: { hotelId } }),
     [dispatch]
   );
 

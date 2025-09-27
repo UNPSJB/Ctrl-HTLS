@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '@context/CarritoContext';
 import CartHeader from './CartHeader';
 import HotelCartSection from './HotelCartSection';
@@ -8,17 +6,12 @@ import CartEmpty from './CartEmpty';
 
 function CartSummary() {
   const { carrito, totalElementos } = useCarrito();
-  const navigate = useNavigate();
 
   const isEmpty = Number(totalElementos ?? 0) === 0;
 
-  const handleNavigateToReservation = useCallback(() => {
-    navigate('/reserva');
-  }, [navigate]);
-
   return (
     <aside
-      className="shadow-card sticky top-10 rounded-lg bg-white p-4 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+      className="shadow-card sticky top-28 rounded-lg bg-white p-4 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
       aria-labelledby="cart-summary-title"
       role="complementary"
     >
@@ -30,7 +23,7 @@ function CartSummary() {
         ) : (
           (carrito?.hoteles || []).map((hotel) => (
             <HotelCartSection
-              key={hotel.idHotel ?? hotel.nombre}
+              key={hotel.hotelId ?? hotel.nombre}
               hotel={hotel}
             />
           ))
@@ -38,10 +31,7 @@ function CartSummary() {
       </div>
 
       <div className="mt-4">
-        <CartFooter
-          hotels={carrito?.hoteles ?? []}
-          onClose={handleNavigateToReservation}
-        />
+        <CartFooter hotels={carrito?.hoteles ?? []} />
       </div>
     </aside>
   );

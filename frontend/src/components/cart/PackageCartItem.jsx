@@ -17,10 +17,10 @@ function PackageCartItem({ pack = {}, hotel = {}, onRemove: onRemoveProp }) {
       : { final: 0 };
 
   return (
-    <div className="flex gap-4 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3">
+    <div className="mb-3 flex items-center gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
       <div className="flex-1">
         <h4 className="flex items-center gap-2 font-medium text-gray-900 dark:text-gray-100">
-          <PackageIcon className="w-5 h-5 text-current" />
+          <PackageIcon className="h-5 w-5 text-current" />
           <span>{pack.nombre}</span>
         </h4>
         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -34,10 +34,10 @@ function PackageCartItem({ pack = {}, hotel = {}, onRemove: onRemoveProp }) {
       <button
         onClick={onRemove}
         aria-label={`Eliminar paquete ${pack.nombre}`}
-        className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
         title="Eliminar paquete"
       >
-        <Trash2 className="w-5 h-5 text-current" />
+        <Trash2 className="h-5 w-5 text-current" />
       </button>
     </div>
   );

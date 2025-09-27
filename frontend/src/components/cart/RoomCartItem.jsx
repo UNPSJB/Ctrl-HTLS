@@ -1,9 +1,12 @@
+// src/components/RoomCartItem.jsx
+import { useCallback } from 'react';
 import { Trash2, House, Users } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import { normalizarDescuento, roundTwo } from '@utils/pricingUtils';
 import { formatFecha, nightsBetween } from '@utils/dateUtils';
+import { useCarrito } from '@context/CarritoContext';
 
-function RoomCartItem({ room, hotel, onRemove = () => {} }) {
+function RoomCartItem({ room, hotel, onRemove = null }) {
   const {
     fechaInicio,
     fechaFin,
@@ -11,21 +14,43 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
     qty = 1,
     nombre,
     capacidad,
-  } = room;
+  } = room || {};
 
   const nights = nightsBetween(fechaInicio, fechaFin, { useUTC: true });
 
-  // temporada / coeficiente
-  const temporada = hotel?.temporada ?? hotel?.season ?? '';
-  const coef = Number(hotel?.coeficiente ?? hotel?.coefficient ?? 0);
+  // Calcular precio con temporada (si existe)
+  let precioPorNoche = Number(precio);
+  let originalTotal = roundTwo(precioPorNoche * qty * nights);
+  let finalTotal = originalTotal;
 
-  const esAlta = String(temporada).toLowerCase() === 'alta';
-  const desc = esAlta ? normalizarDescuento(coef) : 0;
+  if (hotel?.temporada) {
+    const descTemporada = normalizarDescuento(hotel.temporada.porcentaje);
+    precioPorNoche = roundTwo(Number(precio) * (1 - descTemporada));
+    finalTotal = roundTwo(precioPorNoche * qty * nights);
+  }
 
-  // precio por noche final y totals
-  const precioPorNoche = roundTwo(Number(precio) * (1 - desc));
-  const finalTotal = roundTwo(precioPorNoche * qty * nights);
-  const originalTotal = roundTwo(Number(precio) * qty * nights);
+  // Acciones del contexto
+  const { removerHabitacion } = useCarrito();
+
+  // Maneja la eliminación: si viene onRemove lo usa, sino usa el contexto.
+  const handleRemove = useCallback(() => {
+    if (typeof onRemove === 'function') {
+      onRemove(room);
+      return;
+    }
+
+    if (!room?.id) {
+      console.warn(
+        'RoomCartItem: no se encontró room.id — la acción removerHabitacion requiere un id único.'
+      );
+      return;
+    }
+
+    // Llamada directa al contexto usando hotelId
+    removerHabitacion(hotel?.hotelId ?? '', room.id);
+  }, [onRemove, room, removerHabitacion, hotel]);
+
+  if (!room) return null;
 
   return (
     <div className="mb-3 flex gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
@@ -57,7 +82,7 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
       <div className="text-right">
         <PriceTag
           precio={finalTotal}
-          original={originalTotal > finalTotal ? originalTotal : undefined}
+          original={finalTotal < originalTotal ? originalTotal : undefined}
           seasonLayout="column"
         />
       </div>
@@ -65,10 +90,11 @@ function RoomCartItem({ room, hotel, onRemove = () => {} }) {
       {/* Columna 3: Botón eliminar */}
       <div className="flex items-center">
         <button
-          onClick={onRemove}
+          onClick={handleRemove}
           aria-label={`Eliminar habitación ${nombre ?? room.name ?? ''}`}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
           title="Eliminar habitación"
+          disabled={!room?.id}
+          className={`flex h-8 w-8 transform items-center justify-center rounded-full text-red-600 transition duration-150 ease-in-out hover:scale-105 hover:bg-red-50 hover:text-red-700 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200 focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/10 dark:hover:text-red-300 dark:focus-visible:ring-red-700`}
         >
           <Trash2 className="h-5 w-5 text-current" />
         </button>

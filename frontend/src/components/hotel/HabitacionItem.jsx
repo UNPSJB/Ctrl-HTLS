@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Users, Home, Info } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
@@ -31,18 +32,26 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
       .length;
   }, [selectedIds, instances]);
 
-  // Precio representativo: toma la primera instancia con precio o fallback
-  const precioBase =
-    instances.find((i) => typeof i.precio === 'number')?.precio ??
-    instances[0]?.precio ??
-    100;
+  // CORREGIDO: El precio ahora viene del grupo, no de las instancias individuales
+  const precioBase = habitacionGroup.precio ?? 100;
 
-  const esTemporadaAlta = hotelData?.temporada === 'alta';
-  const descuentoTemporada = esTemporadaAlta
-    ? normalizarDescuento(hotelData?.coeficiente)
-    : 0;
-  const precioFinal =
-    Math.round(precioBase * (1 - descuentoTemporada) * 100) / 100;
+  // Calcular precio según temporada
+  let precioFinal = precioBase;
+  let precioOriginal = undefined;
+
+  if (hotelData?.temporada) {
+    const porcentaje = normalizarDescuento(hotelData.temporada.porcentaje);
+
+    if (hotelData.temporada.tipo === 'alta') {
+      // Temporada alta: precio disminuye (descuento)
+      precioFinal = Math.round(precioBase * (1 - porcentaje) * 100) / 100;
+      precioOriginal = precioBase;
+    } else if (hotelData.temporada.tipo === 'baja') {
+      // Temporada baja: precio disminuye (descuento)
+      precioFinal = Math.round(precioBase * (1 - porcentaje) * 100) / 100;
+      precioOriginal = precioBase;
+    }
+  }
 
   // Cuando incrementamos, tomamos la primera instancia que NO esté en selectedIds
   const handleIncrement = () => {
@@ -53,11 +62,12 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
     );
     if (!instanciaParaAgregar) return;
 
-    // metadatos útiles (tipo, capacidad, nombre) para facilitar renderizado en el carrito
+    // metadatos útiles (tipo, capacidad, nombre, precio) para facilitar renderizado en el carrito
     const habitacionAAgregar = {
       ...instanciaParaAgregar,
       tipo: habitacionGroup.tipo,
       capacidad: habitacionGroup.capacidad,
+      precio: precioBase, // Agregamos el precio del grupo
       nombre: `${habitacionGroup.tipo} - ${instanciaParaAgregar.numero ?? ''}`,
     };
 
@@ -75,10 +85,11 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
     const idARemover = seleccionadasDelGrupo[seleccionadasDelGrupo.length - 1];
     if (!idARemover) return;
 
-    removerHabitacion(hotelData.idHotel, idARemover);
+    removerHabitacion(hotelData.hotelId, idARemover);
   };
 
-  const handleShowDetails = () => {
+  const handleShowDetails = (e) => {
+    e.stopPropagation(); // Evita que se active el hover de la card padre
     setShowModal(true);
   };
 
@@ -93,74 +104,75 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
   };
 
   return (
-    <article className="grid grid-cols-4 items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
-      {/* Columna 1: info del tipo (ocupa 2 espacios) */}
-      <div className="col-span-2 flex items-center gap-4">
-        <div className="flex gap-4">
-          <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-            {habitacionGroup.tipo}
-          </div>
+    <>
+      <article className="grid grid-cols-4 items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
+        {/* Columna 1: info del tipo (ocupa 2 espacios) */}
+        <div className="col-span-2 flex items-center gap-4">
+          <div className="flex gap-4">
+            <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              {habitacionGroup.tipo}
+            </div>
 
-          {/* Capacidad con icono */}
-          <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
-            <Users className="h-4 w-4" />
-            <span>{habitacionGroup.capacidad ?? '—'}</span>
-          </div>
+            {/* Capacidad con icono */}
+            <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+              <Users className="h-4 w-4" />
+              <span>{habitacionGroup.capacidad ?? '—'}</span>
+            </div>
 
-          {/* Disponibilidad con icono */}
-          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
-            <Home className="h-4 w-4" />
-            <span>{maxAvailable}</span>
-          </div>
+            {/* Disponibilidad con icono */}
+            <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+              <Home className="h-4 w-4" />
+              <span>{maxAvailable}</span>
+            </div>
 
-          {/* Botón de detalles */}
-          <button
-            onClick={handleShowDetails}
-            className="flex items-center gap-1.5 text-sm text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            <Info className="h-4 w-4" />
-            <span>Detalles</span>
-          </button>
+            {/* Botón de detalles */}
+            <button
+              onClick={handleShowDetails}
+              className="flex items-center gap-1.5 text-sm text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              <Info className="h-4 w-4" />
+              <span>Detalles</span>
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Columna 2: contador */}
-      <div className="flex justify-center">
-        <Counter
-          value={selectedCount}
-          onIncrement={handleIncrement}
-          onDecrement={handleDecrement}
-          min={0}
-          max={maxAvailable}
-        />
-      </div>
-
-      {/* Columna 3: precio */}
-      <div className="flex justify-end">
-        <div className="text-right">
-          <PriceTag
-            precio={precioFinal}
-            original={descuentoTemporada ? precioBase : undefined}
+        {/* Columna 2: contador */}
+        <div className="flex justify-center">
+          <Counter
+            value={selectedCount}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+            min={0}
+            max={maxAvailable}
           />
         </div>
-      </div>
 
-      {/* Modal de detalles */}
-      {showModal && (
-        <RoomDetailsModal
-          habitacion={{
-            nombre: habitacionGroup.tipo,
-            capacidad: habitacionGroup.capacidad,
-            precio: precioBase,
-            // Agregar más datos si están disponibles en instances
-            ...instances[0],
-          }}
-          coeficiente={hotelData?.coeficiente}
-          onClose={handleCloseModal}
-          onReserve={handleReserveFromModal}
-        />
-      )}
-    </article>
+        {/* Columna 3: precio */}
+        <div className="flex justify-end">
+          <div className="text-right">
+            <PriceTag precio={precioFinal} original={precioOriginal} />
+          </div>
+        </div>
+      </article>
+
+      {/* Modal renderizado directamente en el body usando portal */}
+      {showModal &&
+        createPortal(
+          <RoomDetailsModal
+            habitacion={{
+              nombre: habitacionGroup.tipo,
+              capacidad: habitacionGroup.capacidad,
+              precio: precioBase,
+              // Agregar más datos si están disponibles en instances
+              ...instances[0],
+            }}
+            temporada={hotelData?.temporada}
+            onClose={handleCloseModal}
+            onReserve={handleReserveFromModal}
+          />,
+          document.body
+        )}
+    </>
   );
 }
 
