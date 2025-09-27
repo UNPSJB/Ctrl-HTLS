@@ -20,7 +20,7 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
     if (checked) {
       agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
     } else {
-      removerPaquete(hotelData.idHotel, paquete.id);
+      removerPaquete(hotelData.hotelId, paquete.id);
     }
   };
 
@@ -37,14 +37,17 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
 
   const precioOriginal = Math.round(sumaPorNoche * noches * 100) / 100;
 
+  // Aplicar descuento del paquete
   const descPaquete = normalizarDescuento(paquete.descuento);
   const despuesPaquete =
     Math.round(precioOriginal * (1 - descPaquete) * 100) / 100;
 
-  const esAlta = hotelData?.temporada === 'alta';
-  const descHotel = esAlta ? normalizarDescuento(hotelData?.coeficiente) : 0;
-
-  const precioFinal = Math.round(despuesPaquete * (1 - descHotel) * 100) / 100;
+  // Aplicar descuento de temporada (si existe)
+  let precioFinal = despuesPaquete;
+  if (hotelData?.temporada) {
+    const descTemporada = normalizarDescuento(hotelData.temporada.porcentaje);
+    precioFinal = Math.round(despuesPaquete * (1 - descTemporada) * 100) / 100;
+  }
 
   const handleShowDetails = () => {
     setMostrarModal(true);
@@ -92,7 +95,9 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
               {paquete.descuento && (
                 <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
                   <Percent className="h-4 w-4" />
-                  <span>{paquete.descuento}%</span>
+                  <span>
+                    {(normalizarDescuento(paquete.descuento) * 100).toFixed(0)}%
+                  </span>
                 </div>
               )}
 
@@ -130,7 +135,7 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
       {mostrarModal && (
         <PaqueteDetailsModal
           paquete={paquete}
-          coeficiente={hotelData.coeficiente}
+          temporada={hotelData.temporada}
           onClose={handleCloseModal}
           onReserve={handleReserveFromModal}
         />

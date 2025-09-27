@@ -18,23 +18,21 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
 
   const nights = nightsBetween(fechaInicio, fechaFin, { useUTC: true });
 
-  // temporada / coeficiente
-  const temporada = hotel?.temporada ?? hotel?.season ?? '';
-  const coef = Number(hotel?.coeficiente ?? hotel?.coefficient ?? 0);
+  // Calcular precio con temporada (si existe)
+  let precioPorNoche = Number(precio);
+  let originalTotal = roundTwo(precioPorNoche * qty * nights);
+  let finalTotal = originalTotal;
 
-  const esAlta = String(temporada).toLowerCase() === 'alta';
-  const desc = esAlta ? normalizarDescuento(coef) : 0;
-
-  // precio por noche final y totals
-  const precioPorNoche = roundTwo(Number(precio) * (1 - desc));
-  const finalTotal = roundTwo(precioPorNoche * qty * nights);
-  const originalTotal = roundTwo(Number(precio) * qty * nights);
+  if (hotel?.temporada) {
+    const descTemporada = normalizarDescuento(hotel.temporada.porcentaje);
+    precioPorNoche = roundTwo(Number(precio) * (1 - descTemporada));
+    finalTotal = roundTwo(precioPorNoche * qty * nights);
+  }
 
   // Acciones del contexto
   const { removerHabitacion } = useCarrito();
 
   // Maneja la eliminación: si viene onRemove lo usa, sino usa el contexto.
-  // NOTA: eliminamos confirmaciones — al click se quita inmediatamente.
   const handleRemove = useCallback(() => {
     if (typeof onRemove === 'function') {
       onRemove(room);
@@ -48,8 +46,8 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
       return;
     }
 
-    // Llamada directa al contexto (sin confirmación)
-    removerHabitacion(hotel?.idHotel ?? hotel?.id ?? '', room.id);
+    // Llamada directa al contexto usando hotelId
+    removerHabitacion(hotel?.hotelId ?? '', room.id);
   }, [onRemove, room, removerHabitacion, hotel]);
 
   if (!room) return null;
@@ -84,12 +82,12 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
       <div className="text-right">
         <PriceTag
           precio={finalTotal}
-          original={originalTotal > finalTotal ? originalTotal : undefined}
+          original={finalTotal < originalTotal ? originalTotal : undefined}
           seasonLayout="column"
         />
       </div>
 
-      {/* Columna 3: Botón eliminar (sin confirmación) */}
+      {/* Columna 3: Botón eliminar */}
       <div className="flex items-center">
         <button
           onClick={handleRemove}

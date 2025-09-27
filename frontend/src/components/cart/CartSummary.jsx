@@ -23,7 +23,7 @@ function CartSummary() {
         ) : (
           (carrito?.hoteles || []).map((hotel) => (
             <HotelCartSection
-              key={hotel.idHotel ?? hotel.nombre}
+              key={hotel.hotelId ?? hotel.nombre}
               hotel={hotel}
             />
           ))

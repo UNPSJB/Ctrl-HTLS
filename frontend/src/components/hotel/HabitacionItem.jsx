@@ -32,18 +32,26 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
       .length;
   }, [selectedIds, instances]);
 
-  // Precio representativo: toma la primera instancia con precio o fallback
-  const precioBase =
-    instances.find((i) => typeof i.precio === 'number')?.precio ??
-    instances[0]?.precio ??
-    100;
+  // CORREGIDO: El precio ahora viene del grupo, no de las instancias individuales
+  const precioBase = habitacionGroup.precio ?? 100;
 
-  const esTemporadaAlta = hotelData?.temporada === 'alta';
-  const descuentoTemporada = esTemporadaAlta
-    ? normalizarDescuento(hotelData?.coeficiente)
-    : 0;
-  const precioFinal =
-    Math.round(precioBase * (1 - descuentoTemporada) * 100) / 100;
+  // Calcular precio según temporada
+  let precioFinal = precioBase;
+  let precioOriginal = undefined;
+
+  if (hotelData?.temporada) {
+    const porcentaje = normalizarDescuento(hotelData.temporada.porcentaje);
+
+    if (hotelData.temporada.tipo === 'alta') {
+      // Temporada alta: precio disminuye (descuento)
+      precioFinal = Math.round(precioBase * (1 - porcentaje) * 100) / 100;
+      precioOriginal = precioBase;
+    } else if (hotelData.temporada.tipo === 'baja') {
+      // Temporada baja: precio disminuye (descuento)
+      precioFinal = Math.round(precioBase * (1 - porcentaje) * 100) / 100;
+      precioOriginal = precioBase;
+    }
+  }
 
   // Cuando incrementamos, tomamos la primera instancia que NO esté en selectedIds
   const handleIncrement = () => {
@@ -54,11 +62,12 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
     );
     if (!instanciaParaAgregar) return;
 
-    // metadatos útiles (tipo, capacidad, nombre) para facilitar renderizado en el carrito
+    // metadatos útiles (tipo, capacidad, nombre, precio) para facilitar renderizado en el carrito
     const habitacionAAgregar = {
       ...instanciaParaAgregar,
       tipo: habitacionGroup.tipo,
       capacidad: habitacionGroup.capacidad,
+      precio: precioBase, // Agregamos el precio del grupo
       nombre: `${habitacionGroup.tipo} - ${instanciaParaAgregar.numero ?? ''}`,
     };
 
@@ -76,7 +85,7 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
     const idARemover = seleccionadasDelGrupo[seleccionadasDelGrupo.length - 1];
     if (!idARemover) return;
 
-    removerHabitacion(hotelData.idHotel, idARemover);
+    removerHabitacion(hotelData.hotelId, idARemover);
   };
 
   const handleShowDetails = (e) => {
@@ -141,10 +150,7 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
         {/* Columna 3: precio */}
         <div className="flex justify-end">
           <div className="text-right">
-            <PriceTag
-              precio={precioFinal}
-              original={descuentoTemporada ? precioBase : undefined}
-            />
+            <PriceTag precio={precioFinal} original={precioOriginal} />
           </div>
         </div>
       </article>
@@ -160,7 +166,7 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
               // Agregar más datos si están disponibles en instances
               ...instances[0],
             }}
-            coeficiente={hotelData?.coeficiente}
+            temporada={hotelData?.temporada}
             onClose={handleCloseModal}
             onReserve={handleReserveFromModal}
           />,
