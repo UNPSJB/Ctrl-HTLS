@@ -15,6 +15,11 @@
                 "id": 1,
                 "porcentaje": "0.10",
                 "cantidad_de_habitaciones": 2
+            },
+            {
+                "id": 2,
+                "porcentaje": "0.15",
+                "cantidad_de_habitaciones": 4
             }
         ],
         "direccion": "Av. Colón 1234",

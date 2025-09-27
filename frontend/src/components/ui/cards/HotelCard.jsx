@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Bed, Package } from 'lucide-react';
+import { Bed, Package, Percent } from 'lucide-react';
 import useHotelSelection from '@hooks/useHotelSelection';
 import HabitacionItem from '../../hotel/HabitacionItem';
 import PaqueteItem from '../../hotel/PaqueteItem';
@@ -56,6 +56,23 @@ function HotelCard({ hotel }) {
     return result;
   }, [hotel.habitaciones, hotel.hotelId]);
 
+  // Formatear descuentos para mostrar
+  const formatearDescuentos = useMemo(() => {
+    if (!Array.isArray(hotel.descuentos) || hotel.descuentos.length === 0) {
+      return null;
+    }
+
+    return hotel.descuentos.map((descuento) => {
+      const porcentaje = Math.round(Number(descuento.porcentaje) * 100);
+      return {
+        id: descuento.id,
+        porcentaje,
+        cantidad: descuento.cantidad_de_habitaciones,
+        texto: `${porcentaje}% OFF en ${descuento.cantidad_de_habitaciones}+ habitaciones`,
+      };
+    });
+  }, [hotel.descuentos]);
+
   return (
     <article className="cursor-pointer overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-gradient-to-br hover:from-white hover:to-blue-50/30 hover:shadow-2xl dark:border-gray-700 dark:bg-gray-800 dark:hover:from-gray-800 dark:hover:to-blue-900/20">
       <HotelHeader
@@ -70,13 +87,27 @@ function HotelCard({ hotel }) {
             aria-labelledby={`rooms-${hotel.hotelId}-title`}
             className="border-t border-gray-200 p-4 dark:border-gray-700"
           >
-            <h3
-              id={`rooms-${hotel.hotelId}-title`}
-              className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-100"
-            >
-              <Bed className="h-5 w-5" />
-              Habitaciones Disponibles
-            </h3>
+            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <h3
+                id={`rooms-${hotel.hotelId}-title`}
+                className="flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-100"
+              >
+                <Bed className="h-5 w-5" />
+                Habitaciones Disponibles
+              </h3>
+
+              {/* Mostrar descuentos por cantidad */}
+              {formatearDescuentos &&
+                formatearDescuentos.map((descuento) => (
+                  <span
+                    key={descuento.id}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400"
+                  >
+                    <Percent className="h-3 w-3" />
+                    {descuento.texto}
+                  </span>
+                ))}
+            </div>
 
             <ul className="space-y-3">
               {groupedRooms.map((group) => (
