@@ -27,6 +27,7 @@ const tipoHabitacionServices = require('./tipoHabitacionServices');
 const hotelTipoHabitacionServices = require('./hotelTipoHabitacionServices');
 const HotelEmpleado = require('../../models/hotel/HotelEmpleado');
 const personaServices = require('../core/personaServices');
+const Servicio = require('../../models/hotel/Servicio');
 
 const crearHotel = async (
   nombre,
@@ -475,7 +476,10 @@ const getDisponibilidadPorHotel = async (
     disponibilidad.push({
       hotelId: hotel.id,
       nombre: hotel.nombre,
-      estrellas: hotel.categoria.nombre,
+      categoria: {
+        estrellas: hotel.categoria.nombre,
+        servicios: hotel.categoria.servicios.map((servicio) => servicio.nombre),
+      },
       descripcion: hotel.descripcion,
       temporada: temporada,
       descuentos: descuentos,
@@ -493,6 +497,8 @@ const getDisponibilidadPorHotel = async (
       ubicacion,
       vendedorId,
     );
+
+    console.log(hotelesCiudad[0].categoria);
 
     if (!hotelesCiudad) {
       throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
@@ -533,7 +539,12 @@ const getDisponibilidadPorHotel = async (
       disponibilidad.push({
         hotelId: hotel.id,
         nombre: hotel.nombre,
-        estrellas: hotel.categoria.nombre,
+        categoria: {
+          estrellas: hotel.categoria.nombre,
+          servicios: hotel.categoria.servicios.map(
+            (servicio) => servicio.nombre,
+          ),
+        },
         descripcion: hotel.descripcion,
         temporada: temporada,
         descuentos: descuentos,
@@ -621,6 +632,13 @@ const verificarHotelUbicacion = async (nombreHotel, ciudadId) => {
         {
           model: Categoria,
           as: 'categoria',
+          include: [
+            {
+              model: Servicio,
+              as: 'servicios', // Usar el alias de la relación many-to-many
+              through: { attributes: [] }, // No incluir atributos de la tabla intermedia
+            },
+          ],
         },
         {
           model: Ciudad,
@@ -677,6 +695,7 @@ const verificarHotelVendedor = async (hotelId, vendedorId) => {
  * @param {*} vendedorId - ID del vendedor
  * @returns - Arreglo de hoteles en la ciudad donde trabaja el vendedor
  */
+
 const getHotelesPorCiudadYVendedor = async (ciudadId, vendedorId) => {
   // Obtener IDs de hoteles donde trabaja el vendedor
   const hotelEmpleados = await HotelEmpleado.findAll({
@@ -703,6 +722,13 @@ const getHotelesPorCiudadYVendedor = async (ciudadId, vendedorId) => {
       {
         model: Categoria,
         as: 'categoria',
+        include: [
+          {
+            model: Servicio,
+            as: 'servicios', // Usar el alias de la relación many-to-many
+            through: { attributes: [] }, // No incluir atributos de la tabla intermedia
+          },
+        ],
       },
       {
         model: Ciudad,
@@ -725,6 +751,55 @@ const getHotelesPorCiudadYVendedor = async (ciudadId, vendedorId) => {
 
   return hoteles;
 };
+
+// const getHotelesPorCiudadYVendedor = async (ciudadId, vendedorId) => {
+//   // Obtener IDs de hoteles donde trabaja el vendedor
+//   const hotelEmpleados = await HotelEmpleado.findAll({
+//     where: { empleadoId: vendedorId },
+//     attributes: ['hotelId'],
+//   });
+
+//   const hotelesIds = hotelEmpleados.map((he) => he.hotelId);
+
+//   if (hotelesIds.length === 0) {
+//     throw new CustomError(
+//       'El vendedor no está asociado a ningún hotel en la ciudad especificada',
+//       403,
+//     ); // Forbidden
+//   }
+
+//   // Obtener hoteles de la ciudad que están en esa lista
+//   const hoteles = await Hotel.findAll({
+//     where: {
+//       ciudadId,
+//       id: hotelesIds,
+//     },
+//     include: [
+//       {
+//         model: Categoria,
+//         as: 'categoria',
+//       },
+//       {
+//         model: Ciudad,
+//         as: 'ciudad',
+//         include: [
+//           {
+//             model: Provincia,
+//             as: 'provincia',
+//             include: [
+//               {
+//                 model: Pais,
+//                 as: 'pais',
+//               },
+//             ],
+//           },
+//         ],
+//       },
+//     ],
+//   });
+
+//   return hoteles;
+// };
 
 /**
  * Función para asignar un empleado a un hotel
