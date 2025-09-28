@@ -10,7 +10,6 @@ const {
   verificarTelefono,
   verificarDocumento,
 } = require('../../utils/helpers');
-const { raw } = require('express');
 const Hotel = require('../../models/hotel/Hotel');
 
 /**
