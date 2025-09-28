@@ -10,6 +10,8 @@ const {
   verificarTelefono,
   verificarDocumento,
 } = require('../../utils/helpers');
+const { raw } = require('express');
+const Hotel = require('../../models/hotel/Hotel');
 
 /**
  * Crea un nuevo empleado.
@@ -131,8 +133,26 @@ const eliminarEmpleado = async (id) => {
 const obtenerVendedores = async () => {
   const vendedores = await Empleado.findAll({
     where: { rol: 'vendedor' },
+    include: [
+      {
+        model: Hotel,
+        as: 'hoteles',
+        attributes: ['id', 'nombre'],
+        through: { attributes: [] },
+      },
+    ],
   });
-  return vendedores;
+
+  return vendedores.map((vendedor) => ({
+    id: vendedor.id,
+    nombre: `${vendedor.nombre} ${vendedor.apellido}`,
+    email: vendedor.email,
+    telefono: vendedor.telefono,
+    hotelesPermitidos: vendedor.hoteles.map((hotel) => ({
+      id: hotel.id,
+      nombre: hotel.nombre,
+    })),
+  }));
 };
 
 const obtenerVendedorPorId = async (id) => {
