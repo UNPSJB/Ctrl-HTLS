@@ -1,15 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Calendar, Percent, Info } from 'lucide-react';
 import PaqueteDetailsModal from './PaqueteDetailsModal';
 import PriceTag from '@ui/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
-import {
-  calcNights,
-  normalizeDiscount,
-  roundTwo,
-  toNumber,
-} from '@utils/pricingUtils';
+import { calcPackageTotal, normalizeDiscount } from '@utils/pricingUtils';
 
 function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
   if (!paquete) return null;
@@ -42,25 +37,25 @@ function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
     }
   };
 
-  // --- Cálculo de precios del paquete ---
-  const noches =
-    typeof paquete.noches === 'number'
-      ? Math.max(1, Math.floor(paquete.noches))
-      : calcNights(paquete.fechaInicio, paquete.fechaFin);
+  // --- Cálculo de precios del paquete SIMPLIFICADO ---
+  // Se usa useMemo para optimizar el cálculo llamando a la función centralizada.
+  const calc = useMemo(() => {
+    const hotelSeasonDiscount = hotelData?.temporada?.porcentaje ?? 0;
 
-  const sumaPorNoche = (
-    Array.isArray(paquete.habitaciones) ? paquete.habitaciones : []
-  ).reduce((sum, h) => sum + toNumber(h.precio), 0);
+    // calcPackageTotal devuelve los precios ya redondeados a ENTERO.
+    return calcPackageTotal({
+      paquete,
+      hotelSeasonDiscount: hotelSeasonDiscount,
+      qty: 1, // Se calcula para una unidad para mostrar el precio unitario
+    });
+  }, [paquete, hotelData.temporada?.porcentaje]);
 
-  const precioOriginal = roundTwo(sumaPorNoche * noches);
+  const { noches, final: precioFinal, original: precioOriginal } = calc;
 
-  // Descuento propio del paquete (normalizamos "0.1" o "10" -> decimal)
+  // Se calcula el descuento total combinado para mostrar el porcentaje correcto en la UI
   const descPaquete = normalizeDiscount(paquete.descuento);
-  const despuesPaquete = roundTwo(precioOriginal * (1 - descPaquete));
-
-  // Aplicar descuento de temporada del hotel si existe
   const descTemporada = normalizeDiscount(hotelData?.temporada?.porcentaje);
-  const precioFinal = roundTwo(despuesPaquete * (1 - descTemporada));
+  const totalDisc = 1 - (1 - descPaquete) * (1 - descTemporada);
 
   const handleShowDetails = () => setMostrarModal(true);
   const handleCloseModal = () => setMostrarModal(false);
@@ -104,10 +99,10 @@ function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
               </div>
 
               {/* Descuento con icono */}
-              {paquete.descuento != null && (
+              {totalDisc > 0 && (
                 <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
                   <Percent className="h-4 w-4" />
-                  <span>{(descPaquete * 100).toFixed(0)}%</span>
+                  <span>{(totalDisc * 100).toFixed(0)}%</span>
                 </div>
               )}
 

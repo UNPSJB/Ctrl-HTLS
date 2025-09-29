@@ -1,9 +1,12 @@
 import PriceTag from '@/components/ui/PriceTag';
 import { Users } from 'lucide-react';
+import { useMemo } from 'react';
 import {
   calcNights,
   calcPackageTotal,
   normalizeDiscount,
+  toNumber,
+  roundToInteger,
 } from '@utils/pricingUtils';
 
 function PaqueteCard({ paquete, porcentaje = 0 }) {
@@ -12,33 +15,34 @@ function PaqueteCard({ paquete, porcentaje = 0 }) {
   // Noches entre fechas (fallback seguro a 1)
   const noches = calcNights(paquete?.fechaInicio, paquete?.fechaFin);
 
-  // Calculamos el "base" a mostrar: suma de precios por noche entre las habitaciones del paquete
-  const sumaPorNoche = Array.isArray(paquete?.habitaciones)
-    ? paquete.habitaciones.reduce((acc, h) => acc + (Number(h?.precio) || 0), 0)
-    : 0;
+  // 1. Precio base por noche (suma de precios de habitación), redondeado a entero
+  const sumaPorNoche = useMemo(() => {
+    const sum = Array.isArray(paquete?.habitaciones)
+      ? paquete.habitaciones.reduce(
+          (acc, h) => acc + (toNumber(h?.precio) || 0),
+          0
+        )
+      : 0;
+    // Se usa roundToInteger para que este precio unitario también sea entero
+    return roundToInteger(sum);
+  }, [paquete]);
 
-  const base = {
-    originalPorPaquete: Math.round(sumaPorNoche * noches * 100) / 100,
-    noches,
-    sumaPorNoche,
-  };
-
-  // Precio final del paquete usando la util actual
-  const infoFinal =
-    typeof calcPackageTotal === 'function'
+  // 2. Precio final del paquete usando la util central (retorna enteros)
+  const infoFinal = useMemo(() => {
+    return typeof calcPackageTotal === 'function'
       ? calcPackageTotal({
           paquete: {
             ...paquete,
-            // dejamos las fechas tal cual (la util usa paquete.noches), pero aseguramos campos si vienen vacíos
-            fechaInicio: paquete?.fechaInicio,
-            fechaFin: paquete?.fechaFin,
+            // Aseguramos que el campo noches esté definido si calcPackageTotal lo usa
+            noches: paquete?.noches || noches,
           },
           hotelSeasonDiscount: porcentaje ?? 0,
           qty: paquete?.qty ?? 1,
         })
       : { final: 0, original: 0, noches, qty: paquete?.qty ?? 1 };
+  }, [paquete, porcentaje, noches]);
 
-  const precioBasePorNoche = base.sumaPorNoche ?? 0;
+  const precioBasePorNoche = sumaPorNoche;
   const precioTotalFinal = Number(infoFinal.final ?? 0);
   const precioTotalOriginal = Number(infoFinal.original ?? precioTotalFinal);
 
@@ -64,6 +68,7 @@ function PaqueteCard({ paquete, porcentaje = 0 }) {
         </div>
 
         {/* Precio base por noche (suma de precios por noche sin aplicar noches ni descuentos) */}
+        {/* Este precio ahora es entero */}
         <PriceTag precio={precioBasePorNoche} />
       </div>
 
@@ -75,6 +80,7 @@ function PaqueteCard({ paquete, porcentaje = 0 }) {
         </div>
 
         {/* Precio final: total para el paquete considerando noches y descuentos */}
+        {/* Estos precios son enteros gracias a calcPackageTotal */}
         <PriceTag
           precio={precioTotalFinal}
           original={
@@ -97,7 +103,8 @@ function PaqueteCard({ paquete, porcentaje = 0 }) {
                 {hab?.nombre ?? `Habitación ${idx + 1}`} (
                 {hab?.capacidad ?? '-'} personas)
                 <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                  ${Number(hab?.precio ?? 0).toFixed(2)} por noche
+                  ${Number(hab?.precio ?? 0).toFixed(0)} por noche{' '}
+                  {/* Se cambia el formato a toFixed(0) aquí también */}
                 </span>
               </span>
             </li>

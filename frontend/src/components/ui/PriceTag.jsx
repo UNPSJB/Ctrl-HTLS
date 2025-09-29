@@ -1,15 +1,11 @@
-// PriceTag.jsx
-// Muestra el precio y opcionalmente el precio original (tachado).
-// Nuevo prop: seasonLayout -> 'column' | 'row' (por defecto: 'row')
-// Estructura de componente requerida: función que retorna JSX y exportación por defecto.
-
 function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
-  // Formateador sencillo de moneda. Recomiendo moverlo a utils/formatting.js
+  // Formateador de moneda: AJUSTADO para mostrar CERO decimales.
   const formatCurrency = (value) =>
     new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0, // <-- Cambio clave: Mínimo 0 decimales
+      maximumFractionDigits: 0, // <-- Cambio clave: Máximo 0 decimales
     }).format(value);
 
   const mostrarOriginal = typeof original === 'number' && original > precio;

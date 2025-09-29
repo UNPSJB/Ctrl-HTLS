@@ -4,7 +4,18 @@ export function toNumber(v) {
 }
 
 /**
- * Redondea a 2 decimales (útil para cálculos internos).
+ * Redondea a número entero (útil para cálculos internos de montos finales).
+ * Usa Math.round: 0.5 o más hacia arriba, menos de 0.5 hacia abajo.
+ * @param {number} n
+ * @returns {number}
+ */
+export function roundToInteger(n) {
+  return Math.round(toNumber(n));
+}
+
+/**
+ * Redondea a 2 decimales (útil para cálculos intermedios que requieren precisión,
+ * pero ya no se usa para el resultado final de un precio/monto).
  * @param {number} n
  * @returns {number}
  */
@@ -53,9 +64,9 @@ export function calcNights(startDate, endDate) {
  * A partir de hotel.habitaciones devuelve una lista de tipos de habitación.
  * El JSON del hotel tiene elementos como:
  * {
- *   "Deluxe": [ { id: 101, numero: 101, piso: 1 }, ... ],
- *   "precio": 250,
- *   "capacidad": 2
+ * "Deluxe": [ { id: 101, numero: 101, piso: 1 }, ... ],
+ * "precio": 250,
+ * "capacidad": 2
  * }
  *
  * Esta función detecta todas las claves cuyo valor es un array (las considera tipos)
@@ -77,6 +88,7 @@ export function getRoomTypesFromHotel(hotel) {
       .filter((k) => Array.isArray(typeObj[k]))
       .map((typeName) => ({
         typeName,
+        // El precio base por noche/unidad se mantiene como número (puede tener decimales)
         price: precio,
         capacity: capacidad,
         instances: Array.isArray(typeObj[typeName]) ? typeObj[typeName] : [],
@@ -114,9 +126,9 @@ export function flattenRoomInstances(hotel) {
 
 /**
  * Calcula el precio de una instancia de habitación:
- * - unitOriginal = price * nights
- * - totalOriginal = unitOriginal * qty
- * - final = totalOriginal * (1 - hotelSeasonDiscount)
+ * - unitOriginal = price * nights (redondeado a 2 decimales para precisión)
+ * - totalOriginal = unitOriginal * qty (redondeado a 2 decimales para precisión)
+ * - final = totalOriginal * (1 - hotelSeasonDiscount) (redondeado a *entero*)
  *
  * Nota: hotelSeasonDiscount debe ser decimal (ej. 0.15) o se normaliza con normalizeDiscount.
  *
@@ -137,12 +149,17 @@ export function calcRoomInstanceTotal({
   const nightsNum = Math.max(1, Math.floor(toNumber(nights)));
   const qtyNum = Math.max(1, Math.floor(toNumber(qty)));
 
+  // Cálculos intermedios con precisión de 2 decimales
   const unitOriginal = roundTwo(pricePerNight * nightsNum);
-  const totalOriginal = roundTwo(unitOriginal * qtyNum);
+  const totalOriginalIntermediate = roundTwo(unitOriginal * qtyNum);
 
   const hDisc = normalizeDiscount(hotelSeasonDiscount);
-  const final = roundTwo(totalOriginal * (1 - hDisc));
-  const descuentoTotal = roundTwo(totalOriginal - final);
+  // El precio final se redondea al entero más cercano
+  const final = roundToInteger(totalOriginalIntermediate * (1 - hDisc));
+
+  // El original y el descuento también deben ser enteros para mantener la coherencia
+  const totalOriginal = roundToInteger(totalOriginalIntermediate);
+  const descuentoTotal = roundToInteger(totalOriginalIntermediate - final);
 
   return {
     original: totalOriginal,
@@ -160,9 +177,11 @@ export function calcRoomInstanceTotal({
 /**
  * Calcula precio de un paquete:
  * - suma precios de paquete.habitaciones (campo precio) -> sumPerNight
- * - originalPerPackage = sumPerNight * paquete.noches
- * - aplica paquete.descuento (propio del paquete)
- * - luego aplica descuento de temporada del hotel (hotelSeasonDiscount)
+ * - originalPerPackage = sumPerNight * paquete.noches (redondeado a 2 decimales para precisión)
+ * - originalTotal = originalPerPackage * qty (redondeado a 2 decimales para precisión)
+ * - aplica paquete.descuento
+ * - luego aplica descuento de temporada del hotel
+ * - el resultado final se redondea a *entero*
  *
  * @param {Object} params
  * @param {object} params.paquete   // objeto paquete tal cual viene en hotels.json
@@ -185,18 +204,25 @@ export function calcPackageTotal({
   const nochesNum = Math.max(1, Math.floor(toNumber(paquete.noches)));
   const qtyNum = Math.max(1, Math.floor(toNumber(qty)));
 
+  // Cálculos intermedios con precisión de 2 decimales
   const originalPerPackage = roundTwo(sumPerNight * nochesNum);
-  const originalTotal = roundTwo(originalPerPackage * qtyNum);
+  const originalTotalIntermediate = roundTwo(originalPerPackage * qtyNum);
 
   const packageDisc = normalizeDiscount(paquete.descuento);
-  const afterPackageDisc = roundTwo(originalTotal * (1 - packageDisc));
+  const afterPackageDisc = roundTwo(
+    originalTotalIntermediate * (1 - packageDisc)
+  );
 
   const hotelDisc = normalizeDiscount(hotelSeasonDiscount);
-  const final = roundTwo(afterPackageDisc * (1 - hotelDisc));
-  const descuentoTotal = roundTwo(originalTotal - final);
+  // El precio final se redondea al entero más cercano
+  const final = roundToInteger(afterPackageDisc * (1 - hotelDisc));
+
+  // El original y el descuento también deben ser enteros para mantener la coherencia
+  const totalOriginal = roundToInteger(originalTotalIntermediate);
+  const descuentoTotal = roundToInteger(originalTotalIntermediate - final);
 
   return {
-    original: originalTotal,
+    original: totalOriginal,
     final,
     descuento: descuentoTotal,
     noches: nochesNum,
@@ -214,7 +240,7 @@ export function calcPackageTotal({
  * - selectedInstanceIds: array de ids de instancias seleccionadas (ej: [101, 102])
  * - selectedPackageIds: array de ids de paquetes seleccionados (ej: ['p1', 'p2'])
  * - options: permite pasar nightsByInstance (obj id->nights), qtyByInstance (obj id->qty),
- *            packageQtyMap (obj packageId->qty)
+ * packageQtyMap (obj packageId->qty)
  *
  * Devuelve { original, final, descuento, hotelId }
  *
@@ -279,9 +305,10 @@ export function calcHotelTotalFromSelection(
     { original: 0, final: 0, descuento: 0 }
   );
 
-  const original = roundTwo(roomsTotal.original + packagesTotal.original);
-  const final = roundTwo(roomsTotal.final + packagesTotal.final);
-  const descuento = roundTwo(original - final);
+  // Los totales del hotel también se redondean al sumar los componentes
+  const original = roundToInteger(roomsTotal.original + packagesTotal.original);
+  const final = roundToInteger(roomsTotal.final + packagesTotal.final);
+  const descuento = roundToInteger(original - final);
 
   return {
     original,
@@ -322,9 +349,10 @@ export function calcCartTotal(hotelsSelections = []) {
     finalSum += res.final;
   });
 
-  const original = roundTwo(originalSum);
-  const final = roundTwo(finalSum);
-  const descuento = roundTwo(original - final);
+  // Los totales del carrito también se redondean al sumar los componentes
+  const original = roundToInteger(originalSum);
+  const final = roundToInteger(finalSum);
+  const descuento = roundToInteger(original - final);
 
   return { original, final, descuento, breakdown };
 }
@@ -387,6 +415,7 @@ export function normalizeHotelForBooking(hotelOriginal) {
 
 const DEFAULT = {
   toNumber,
+  roundToInteger, // Nueva función exportada
   roundTwo,
   normalizeDiscount,
   calcNights,

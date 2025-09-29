@@ -4,7 +4,11 @@ import { Users, Home, Info } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
-import { normalizeDiscount } from '@utils/pricingUtils';
+import {
+  normalizeDiscount,
+  roundToInteger,
+  toNumber,
+} from '@utils/pricingUtils';
 import Counter from '@ui/Counter';
 import RoomDetailsModal from './RoomDetailsModal';
 
@@ -33,7 +37,7 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
   }, [selectedIds, instances]);
 
   // Precio base viene del grupo (precio del tipo)
-  const precioBase = habitacionGroup.precio ?? 100;
+  const precioBase = toNumber(habitacionGroup.precio ?? 100);
 
   // Calcular precio según temporada (si existe)
   let precioFinal = precioBase;
@@ -42,14 +46,19 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
   if (hotelData?.temporada) {
     const porcentaje = normalizeDiscount(hotelData.temporada.porcentaje);
 
-    // Aquí asumimos que temporada.tipo puede ser 'alta' o 'baja'.
-    // La lógica actual aplica un descuento en ambos casos (si así lo define negocio).
+    // Aplicar lógica de descuento de temporada
     if (
-      hotelData.temporada.tipo === 'alta' ||
-      hotelData.temporada.tipo === 'baja'
+      (hotelData.temporada.tipo === 'alta' ||
+        hotelData.temporada.tipo === 'baja') &&
+      porcentaje > 0
     ) {
-      precioFinal = Math.round(precioBase * (1 - porcentaje) * 100) / 100;
-      precioOriginal = precioBase;
+      const precioConDescuento = precioBase * (1 - porcentaje);
+
+      // El precio final por noche se redondea a entero
+      precioFinal = roundToInteger(precioConDescuento);
+
+      // El precio original también se redondea a entero para consistencia
+      precioOriginal = roundToInteger(precioBase);
     }
   }
 
@@ -66,7 +75,7 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
       ...instanciaParaAgregar,
       tipo: habitacionGroup.tipo,
       capacidad: habitacionGroup.capacidad,
-      precio: precioBase,
+      precio: precioBase, // Se mantiene el precio base para el cálculo interno
       nombre: `${habitacionGroup.tipo} - ${instanciaParaAgregar.numero ?? ''}`,
     };
 
