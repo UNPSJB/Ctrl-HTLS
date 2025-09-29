@@ -6,12 +6,14 @@ import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
 import DashboardPage from '@/pages/admin/DashboardPage';
 import PagoPage from '@/pages/PagoPage';
 import HotelPage from '@/pages/HotelPage';
+import ScrollToTop from '@/components/ScrollToTop';
 
 function AppRouter() {
   const userRole = 'vendedor'; // Esto debería venir del contexto o autenticación
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Layout para vendedor */}
         {userRole === 'vendedor' && (
