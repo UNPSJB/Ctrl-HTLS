@@ -72,9 +72,7 @@ function CartFooter({ hotels = [], onClose }) {
     setIsClienteModalOpen(false);
   };
 
-  const handleClienteSelected = (cliente) => {
-    // Log / manejo mínimo; el modal puede guardar en contexto como haga falta
-    console.log('Cliente seleccionado para la reserva:', cliente);
+  const handleClienteSelected = () => {
     setIsClienteModalOpen(false);
     onClose?.();
     navigate('/pago');
@@ -114,18 +112,6 @@ function CartFooter({ hotels = [], onClose }) {
             Reservar
           </button>
         </div>
-
-        {/* Opcional: breakdown por hotel (pequeño resumen) */}
-        {Array.isArray(totals.breakdown) && totals.breakdown.length > 0 && (
-          <div className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-            {totals.breakdown.map((b) => (
-              <div key={b.hotelId} className="flex justify-between">
-                <span>Hotel {b.hotelId}</span>
-                <span>${Number(b.final ?? 0).toFixed(2)}</span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {isClienteModalOpen && (
