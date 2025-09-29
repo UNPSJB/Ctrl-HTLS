@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useCarrito } from '@context/CarritoContext';
 import { useCliente } from '@context/ClienteContext';
-import { calcularTotalCarrito } from '@utils/pricingUtils';
+import { calcCartTotal, calcNights } from '@utils/pricingUtils';
 import MetodoPago from './MetodoPago';
 
 function PaymentSummary() {
@@ -27,12 +27,79 @@ function PaymentSummary() {
     setCardPayload({ cardData, valid });
   }, []);
 
-  // Totales calculados a partir del carrito
-  const cartTotals = useMemo(
-    () => calcularTotalCarrito(carrito?.hoteles ?? []),
-    [carrito?.hoteles]
-  );
+  /**
+   * Convertimos carrito.hoteles a la estructura que espera calcCartTotal:
+   * [
+   *   {
+   *     hotel, // objeto tal cual está en carrito
+   *     selectedInstanceIds: [101, 102],
+   *     selectedPackageIds: [1, 2],
+   *     options: {
+   *       nightsByInstance: { 101: 2, 102: 1 },
+   *       qtyByInstance: { 101: 1, 102: 2 },
+   *       packageQtyMap: { 1: 1, 2: 3 }
+   *     }
+   *   },
+   *   ...
+   * ]
+   */
+  const selections = useMemo(() => {
+    const hotels = Array.isArray(carrito?.hoteles) ? carrito.hoteles : [];
+    return hotels.map((hotel) => {
+      const habitaciones = Array.isArray(hotel.habitaciones)
+        ? hotel.habitaciones
+        : [];
+      const paquetes = Array.isArray(hotel.paquetes) ? hotel.paquetes : [];
 
+      const selectedInstanceIds = habitaciones
+        .map((r) => r && (r.id !== undefined ? r.id : null))
+        .filter((id) => id != null);
+
+      const nightsByInstance = {};
+      const qtyByInstance = {};
+
+      habitaciones.forEach((r) => {
+        if (!r || r.id == null) return;
+        nightsByInstance[r.id] = calcNights(r.fechaInicio, r.fechaFin);
+        qtyByInstance[r.id] = Number.isFinite(Number(r.qty))
+          ? Math.max(1, Math.floor(Number(r.qty)))
+          : 1;
+      });
+
+      const selectedPackageIds = paquetes
+        .map((p) => p && (p.id !== undefined ? p.id : null))
+        .filter((id) => id != null);
+
+      const packageQtyMap = {};
+      paquetes.forEach((p) => {
+        if (!p || p.id == null) return;
+        packageQtyMap[p.id] = Number.isFinite(Number(p.qty))
+          ? Math.max(1, Math.floor(Number(p.qty)))
+          : 1;
+      });
+
+      return {
+        hotel,
+        selectedInstanceIds,
+        selectedPackageIds,
+        options: {
+          nightsByInstance,
+          qtyByInstance,
+          packageQtyMap,
+        },
+      };
+    });
+  }, [carrito?.hoteles]);
+
+  // Totales calculados a partir del carrito usando la util nueva
+  const cartTotals = useMemo(() => {
+    if (typeof calcCartTotal === 'function') {
+      return calcCartTotal(selections);
+    }
+    return { original: 0, final: 0, descuento: 0, breakdown: [] };
+  }, [selections]);
+
+  // Compatibilidad con nombres previos: mantener la semántica que usabas
   const subtotal = Number(cartTotals?.original ?? 0);
   const totalDiscounts = Number(cartTotals?.descuento ?? 0);
 
@@ -63,7 +130,7 @@ function PaymentSummary() {
   const requiresCard = paymentMethod === 'card';
 
   // Si el método seleccionado es 'punto' y el cliente no tiene suficientes puntos,
-  // evitar confirmar / procesar (además MetodoPago ya deshabiliza la opción).
+  // evitar confirmar / procesar (además MetodoPago ya deshabilita la opción).
   const requiresPuntoValid =
     paymentMethod === 'punto' ? clientePuedePagarConPuntos : true;
 

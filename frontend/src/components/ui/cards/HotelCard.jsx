@@ -10,26 +10,40 @@ function HotelCard({ hotel }) {
   if (!hotel) return null;
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const { togglePackageSelection } = useHotelSelection(hotel);
+  const {
+    selectedRooms,
+    toggleRoomSelection,
+    togglePackageSelection,
+    totalPrice,
+    discountCoefficient,
+  } = useHotelSelection(hotel);
+
+  // Si necesitas acceso directo al carrito
   const { carrito } = useCarrito();
 
+  // hotelInCart para compatibilidad con otros componentes que usan esa variable
   const hotelInCart = carrito.hoteles.find((h) => h.hotelId === hotel.hotelId);
 
-  // hotelData que se pasa a child components (normalizado)
-  const hotelData = {
-    hotelId: hotel.hotelId,
-    nombre: hotel.nombre,
-    temporada: hotel.temporada,
-  };
+  // hotelData normalizado que pasamos a los child components (ligero)
+  const hotelData = useMemo(() => {
+    return {
+      hotelId: hotel.hotelId,
+      nombre: hotel.nombre,
+      temporada: hotel.temporada,
+      // si necesitas el coeficiente ya normalizado:
+      temporadaPercent: hotel.temporada
+        ? Number(hotel.temporada.porcentaje)
+        : 0,
+    };
+  }, [hotel.hotelId, hotel.nombre, hotel.temporada]);
 
-  // Agrupar habitaciones por tipo usando useMemo (mejora rendimiento)
+  // Agrupar habitaciones por tipo (igual que antes, compatible con hotels.json)
   const groupedRooms = useMemo(() => {
     if (!Array.isArray(hotel.habitaciones)) return [];
 
     const result = [];
 
     hotel.habitaciones.forEach((group) => {
-      // cada group tiene una clave que es el tipo (ej: "Deluxe"), precio y capacidad
       const typeKey = Object.keys(group).find(
         (k) => !['precio', 'capacidad'].includes(k)
       );
@@ -56,13 +70,14 @@ function HotelCard({ hotel }) {
     return result;
   }, [hotel.habitaciones, hotel.hotelId]);
 
-  // Formatear descuentos para mostrar
+  // Formateo de descuentos por cantidad (para mostrar)
   const formatearDescuentos = useMemo(() => {
     if (!Array.isArray(hotel.descuentos) || hotel.descuentos.length === 0) {
       return null;
     }
 
     return hotel.descuentos.map((descuento) => {
+      // descuento.porcentaje puede venir como "0.15" o 0.15 -> lo transformamos a porcentaje entero
       const porcentaje = Math.round(Number(descuento.porcentaje) * 100);
       return {
         id: descuento.id,
@@ -79,6 +94,9 @@ function HotelCard({ hotel }) {
         hotel={hotel}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
+        // opcional: pasar totalPrice o discountCoefficient si quieres mostrarlos en el header
+        totalPrice={totalPrice}
+        discountCoefficient={discountCoefficient}
       />
 
       {isExpanded && (
@@ -116,6 +134,9 @@ function HotelCard({ hotel }) {
                     hotelData={hotelData}
                     habitacionGroup={group}
                     hotelInCart={hotelInCart}
+                    // pasamos selectedRooms y el toggle para que el item controle selección
+                    selectedRooms={selectedRooms}
+                    onToggleRoom={toggleRoomSelection}
                   />
                 </li>
               ))}
@@ -143,7 +164,7 @@ function HotelCard({ hotel }) {
                       isSelected={hotelInCart?.paquetes?.some(
                         (p) => p.id === paquete.id
                       )}
-                      onSelect={togglePackageSelection}
+                      onSelect={() => togglePackageSelection(paquete.id)}
                     />
                   </li>
                 ))

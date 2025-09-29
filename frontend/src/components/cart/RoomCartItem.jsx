@@ -1,8 +1,7 @@
-// src/components/RoomCartItem.jsx
 import { useCallback } from 'react';
 import { Trash2, House, Users } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
-import { normalizarDescuento, roundTwo } from '@utils/pricingUtils';
+import { normalizeDiscount, roundTwo } from '@utils/pricingUtils';
 import { formatFecha, nightsBetween } from '@utils/dateUtils';
 import { useCarrito } from '@context/CarritoContext';
 
@@ -18,13 +17,13 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
 
   const nights = nightsBetween(fechaInicio, fechaFin, { useUTC: true });
 
-  // Calcular precio con temporada (si existe)
+  // Calcular precio con temporada (si existe). Ahora usamos hotel.temporada.porcentaje
   let precioPorNoche = Number(precio);
   let originalTotal = roundTwo(precioPorNoche * qty * nights);
   let finalTotal = originalTotal;
 
   if (hotel?.temporada) {
-    const descTemporada = normalizarDescuento(hotel.temporada.porcentaje);
+    const descTemporada = normalizeDiscount(hotel.temporada.porcentaje);
     precioPorNoche = roundTwo(Number(precio) * (1 - descTemporada));
     finalTotal = roundTwo(precioPorNoche * qty * nights);
   }
@@ -46,7 +45,7 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
       return;
     }
 
-    // Llamada directa al contexto usando hotelId
+    // Llamada directa al contexto usando hotelId (nuevo nombre)
     removerHabitacion(hotel?.hotelId ?? '', room.id);
   }, [onRemove, room, removerHabitacion, hotel]);
 

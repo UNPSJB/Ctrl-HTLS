@@ -1,9 +1,6 @@
 import PriceTag from '@/components/ui/PriceTag';
 import { Users } from 'lucide-react';
-import {
-  calcularPrecioFinalHabitacion,
-  calcularNoches,
-} from '@utils/pricingUtils';
+import { calcRoomInstanceTotal, calcNights } from '@utils/pricingUtils';
 import { useBusqueda } from '@context/BusquedaContext';
 
 function HabitacionCard({ habitacion, porcentaje = 0 }) {
@@ -24,19 +21,23 @@ function HabitacionCard({ habitacion, porcentaje = 0 }) {
     safeValue(habitacion.fechaFin) || safeValue(filtros?.fechaFin);
 
   // noches desde fechas resueltas (al menos 1)
-  const nochesFromDates = calcularNoches(fechaInicio, fechaFin);
+  const nochesFromDates = calcNights(fechaInicio, fechaFin);
 
-  // Calculo final usando las fechas resueltas
-  const infoFinal = calcularPrecioFinalHabitacion({
-    habitacion: { ...habitacion, fechaInicio, fechaFin },
-    descuentoHotel: porcentaje ?? 0,
+  // Calculamos el precio usando la util actual:
+  // calcRoomInstanceTotal espera un objeto roomInstance con .price
+  // y opciones nights, qty y hotelSeasonDiscount
+  const infoFinal = calcRoomInstanceTotal({
+    roomInstance: { price: habitacion.precio ?? habitacion.price ?? 0 },
+    nights: nochesFromDates,
+    qty: habitacion.qty ?? 1,
+    hotelSeasonDiscount: porcentaje ?? 0,
   });
 
   // Qty y nights: preferimos los valores devueltos por util si están
   const qty = Math.max(1, Math.floor(Number(infoFinal.qty ?? 1)));
   const nights = Math.max(
     1,
-    Math.floor(Number(infoFinal.noches ?? nochesFromDates))
+    Math.floor(Number(infoFinal.nights ?? nochesFromDates))
   );
 
   const originalTotal = Number(infoFinal.original ?? 0);
@@ -45,7 +46,7 @@ function HabitacionCard({ habitacion, porcentaje = 0 }) {
   const perNightOriginal =
     nights > 0 && qty > 0
       ? Math.round((originalTotal / qty / nights) * 100) / 100
-      : Number(habitacion.precio ?? 0);
+      : Number(habitacion.precio ?? habitacion.price ?? 0);
 
   const perNightFinal =
     nights > 0 && qty > 0
@@ -64,16 +65,17 @@ function HabitacionCard({ habitacion, porcentaje = 0 }) {
   };
 
   return (
-    <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-      <div className="flex justify-between items-start">
+    <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-700">
+      <div className="flex items-start justify-between">
         <div className="flex">
           <h3 className="font-medium text-gray-800 dark:text-gray-100">
             {habitacion.nombre}
           </h3>
           <div className="mx-4 border-l border-gray-300 dark:border-gray-600" />
-          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Capacidad: {habitacion.capacidad} personas
+          <p className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <Users className="h-4 w-4" />
+            Capacidad: {habitacion.capacidad ?? habitacion.capacity ?? '-'}{' '}
+            personas
           </p>
         </div>
 
@@ -88,7 +90,7 @@ function HabitacionCard({ habitacion, porcentaje = 0 }) {
 
       <hr className="my-4 border-gray-300 dark:border-gray-600" />
 
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div className="text-sm text-gray-600 dark:text-gray-400">
           {formatFecha(fechaInicio)} {' - '}
           {formatFecha(fechaFin)} {' - '} ( {nights} noche

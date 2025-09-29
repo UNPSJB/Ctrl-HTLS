@@ -4,23 +4,41 @@ import PaqueteDetailsModal from './PaqueteDetailsModal';
 import PriceTag from '@ui/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
-import { calcularNoches, normalizarDescuento } from '@utils/pricingUtils';
+import {
+  calcNights,
+  normalizeDiscount,
+  roundTwo,
+  toNumber,
+} from '@utils/pricingUtils';
 
-const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
+function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
   if (!paquete) return null;
 
   const [mostrarModal, setMostrarModal] = useState(false);
-  const { agregarPaquete, removerPaquete } = useCarrito();
-  const { filtros } = useBusqueda();
-  const { fechaInicio, fechaFin } = filtros;
+  const carrito = useCarrito();
+  const agregarPaquete = carrito?.agregarPaquete;
+  const removerPaquete = carrito?.removerPaquete;
+
+  const { filtros } = useBusqueda?.() ?? {};
+  const { fechaInicio, fechaFin } = filtros ?? {};
 
   const manejarSeleccion = (e) => {
-    const checked = e.target.checked;
-    onSelect(paquete.id); // compat
+    const checked = Boolean(e.target.checked);
+    // Notificar al padre (HotelCard) para mantener UI consistente
+    if (typeof onSelect === 'function') onSelect(paquete.id);
+
     if (checked) {
-      agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
+      if (typeof agregarPaquete === 'function') {
+        agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
+      } else {
+        console.warn('useCarrito no expone agregarPaquete');
+      }
     } else {
-      removerPaquete(hotelData.hotelId, paquete.id);
+      if (typeof removerPaquete === 'function') {
+        removerPaquete(hotelData.hotelId, paquete.id);
+      } else {
+        console.warn('useCarrito no expone removerPaquete');
+      }
     }
   };
 
@@ -28,38 +46,32 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
   const noches =
     typeof paquete.noches === 'number'
       ? Math.max(1, Math.floor(paquete.noches))
-      : calcularNoches(paquete.fechaInicio, paquete.fechaFin);
+      : calcNights(paquete.fechaInicio, paquete.fechaFin);
 
-  const sumaPorNoche = (paquete.habitaciones || []).reduce(
-    (sum, h) => sum + Number(h.precio || 0),
-    0
-  );
+  const sumaPorNoche = (
+    Array.isArray(paquete.habitaciones) ? paquete.habitaciones : []
+  ).reduce((sum, h) => sum + toNumber(h.precio), 0);
 
-  const precioOriginal = Math.round(sumaPorNoche * noches * 100) / 100;
+  const precioOriginal = roundTwo(sumaPorNoche * noches);
 
-  // Aplicar descuento del paquete
-  const descPaquete = normalizarDescuento(paquete.descuento);
-  const despuesPaquete =
-    Math.round(precioOriginal * (1 - descPaquete) * 100) / 100;
+  // Descuento propio del paquete (normalizamos "0.1" o "10" -> decimal)
+  const descPaquete = normalizeDiscount(paquete.descuento);
+  const despuesPaquete = roundTwo(precioOriginal * (1 - descPaquete));
 
-  // Aplicar descuento de temporada (si existe)
-  let precioFinal = despuesPaquete;
-  if (hotelData?.temporada) {
-    const descTemporada = normalizarDescuento(hotelData.temporada.porcentaje);
-    precioFinal = Math.round(despuesPaquete * (1 - descTemporada) * 100) / 100;
-  }
+  // Aplicar descuento de temporada del hotel si existe
+  const descTemporada = normalizeDiscount(hotelData?.temporada?.porcentaje);
+  const precioFinal = roundTwo(despuesPaquete * (1 - descTemporada));
 
-  const handleShowDetails = () => {
-    setMostrarModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setMostrarModal(false);
-  };
+  const handleShowDetails = () => setMostrarModal(true);
+  const handleCloseModal = () => setMostrarModal(false);
 
   const handleReserveFromModal = () => {
     if (!isSelected) {
-      agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
+      if (typeof agregarPaquete === 'function') {
+        agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
+      } else {
+        console.warn('useCarrito no expone agregarPaquete');
+      }
     }
     setMostrarModal(false);
   };
@@ -72,7 +84,7 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
           <input
             type="checkbox"
             id={`package-${paquete.id}-checkbox`}
-            checked={isSelected}
+            checked={Boolean(isSelected)}
             onChange={manejarSeleccion}
             className="h-5 w-5 cursor-pointer"
             aria-labelledby={`package-${paquete.id}-title`}
@@ -92,12 +104,10 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
               </div>
 
               {/* Descuento con icono */}
-              {paquete.descuento && (
+              {paquete.descuento != null && (
                 <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
                   <Percent className="h-4 w-4" />
-                  <span>
-                    {(normalizarDescuento(paquete.descuento) * 100).toFixed(0)}%
-                  </span>
+                  <span>{(descPaquete * 100).toFixed(0)}%</span>
                 </div>
               )}
 
@@ -105,6 +115,7 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
               <button
                 onClick={handleShowDetails}
                 className="flex items-center gap-1.5 text-sm text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                type="button"
               >
                 <Info className="h-4 w-4" />
                 <span>Detalles</span>
@@ -135,13 +146,13 @@ const PaqueteItem = ({ hotelData, paquete, isSelected, onSelect }) => {
       {mostrarModal && (
         <PaqueteDetailsModal
           paquete={paquete}
-          temporada={hotelData.temporada}
+          temporada={hotelData?.temporada}
           onClose={handleCloseModal}
           onReserve={handleReserveFromModal}
         />
       )}
     </>
   );
-};
+}
 
 export default PaqueteItem;
