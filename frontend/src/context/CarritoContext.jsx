@@ -7,7 +7,9 @@ import {
   useCallback,
 } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
+import dateUtils from '../utils/dateUtils';
 
+const { normalizeDateValue } = dateUtils;
 const STORAGE_KEY = 'carritoState';
 
 // Estado inicial
@@ -146,14 +148,7 @@ function carritoReducer(estado, accion) {
 // Crear contexto
 const CarritoContext = createContext(undefined);
 
-// Helper: normaliza valor de fecha -> null si vacío/espacios
-function normalizeDateValue(v) {
-  if (v === undefined || v === null) return null;
-  const s = String(v).trim();
-  return s === '' ? null : s;
-}
-
-// Función para asegurar que el hotel existe en el carrito
+/** Asegura que el hotel existe en el carrito. */
 function asegurarHotel(dispatch, { hotelId, nombre, temporada }) {
   dispatch({
     type: TIPOS.AGREGAR_HOTEL,
@@ -161,11 +156,10 @@ function asegurarHotel(dispatch, { hotelId, nombre, temporada }) {
   });
 }
 
-// Función genérica para agregar elementos con normalización de fechas
+/** Agrega elementos con normalización de fechas. */
 function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
   asegurarHotel(dispatch, hotelInfo);
 
-  // Normalizamos y forzamos que fecha fields estén siempre en el objeto
   let fechaInicio = fechas.fechaInicio ?? elemento.fechaInicio ?? null;
   let fechaFin = fechas.fechaFin ?? elemento.fechaFin ?? null;
 
@@ -189,13 +183,10 @@ function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
 
 // Provider
 export function CarritoProvider({ children }) {
-  // Usar usePersistedState para el estado persistente
   const [persistedState, setPersistedState] = usePersistedState(
     STORAGE_KEY,
     estadoInicial
   );
-
-  // Inicializar reducer con estado persistido
   const [estado, dispatch] = useReducer(carritoReducer, persistedState);
 
   // Al montar: normalizar persistedState (migración)
@@ -203,7 +194,6 @@ export function CarritoProvider({ children }) {
     const normalizeHoteles = (hoteles = []) =>
       (hoteles || []).map((h) => ({
         ...h,
-        // Asegurar que se use hotelId en lugar de idHotel
         hotelId: h.hotelId || h.idHotel,
         habitaciones: (h.habitaciones || []).map((hab) => ({
           ...hab,
@@ -222,12 +212,11 @@ export function CarritoProvider({ children }) {
       hoteles: normalizeHoteles(persistedState.hoteles || []),
     };
 
-    // Si hay diferencia con persistedState, actualizamos persisted y el reducer
     if (JSON.stringify(normalized) !== JSON.stringify(persistedState)) {
       setPersistedState(normalized);
       dispatch({ type: TIPOS.REEMPLAZAR_ESTADO, payload: normalized });
     }
-  }, []); // solo en mount
+  }, []);
 
   // Sincronizar cambios del reducer con localStorage
   useEffect(() => {
