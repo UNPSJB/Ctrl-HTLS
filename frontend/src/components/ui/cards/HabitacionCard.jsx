@@ -1,68 +1,44 @@
-import PriceTag from '@/components/ui/PriceTag';
+import PriceTag from '@ui/PriceTag';
 import { Users } from 'lucide-react';
-import { calcRoomInstanceTotal, calcNights } from '@utils/pricingUtils';
+import pricingUtils from '@utils/pricingUtils';
+import dateUtils from '@utils/dateUtils';
 import { useBusqueda } from '@context/BusquedaContext';
+
+// Destructuramos las funciones necesarias
+const { calcRoomInstanceTotal } = pricingUtils;
+// Importamos la utilidad de fecha y noches, y la función de normalización
+const { nightsBetween, formatFecha, normalizeDateValue } = dateUtils;
 
 function HabitacionCard({ habitacion, porcentaje = 0 }) {
   if (!habitacion) return null;
 
   const { filtros } = useBusqueda();
 
-  // Helper: convierte "" / null / undefined / "   " -> null
-  const safeValue = (v) =>
-    v !== undefined && v !== null && String(v).trim() !== ''
-      ? String(v).trim()
-      : null;
+  // Lógica de fechas usando la utilidad centralizada normalizeDateValue.
+  // Prioridad: 1) fecha de la habitación 2) fecha de los filtros.
 
-  // Prioridad de fechas: 1) habitacion (si tiene valor no vacío) 2) filtros del buscador
-  const fechaInicio =
-    safeValue(habitacion.fechaInicio) || safeValue(filtros?.fechaInicio);
-  const fechaFin =
-    safeValue(habitacion.fechaFin) || safeValue(filtros?.fechaFin);
+  const roomFechaInicio = normalizeDateValue(habitacion.fechaInicio);
+  const filterFechaInicio = normalizeDateValue(filtros?.fechaInicio);
+  const fechaInicio = roomFechaInicio || filterFechaInicio;
+
+  const roomFechaFin = normalizeDateValue(habitacion.fechaFin);
+  const filterFechaFin = normalizeDateValue(filtros?.fechaFin);
+  const fechaFin = roomFechaFin || filterFechaFin;
 
   // noches desde fechas resueltas (al menos 1)
-  const nochesFromDates = calcNights(fechaInicio, fechaFin);
+  const nights = nightsBetween(fechaInicio, fechaFin);
 
-  // Calculamos el precio usando la util actual:
-  // calcRoomInstanceTotal espera un objeto roomInstance con .price
-  // y opciones nights, qty y hotelSeasonDiscount
+  // Calculamos el precio usando la utilidad centralizada:
   const infoFinal = calcRoomInstanceTotal({
     roomInstance: { price: habitacion.precio ?? habitacion.price ?? 0 },
-    nights: nochesFromDates,
+    nights: nights,
     qty: habitacion.qty ?? 1,
-    hotelSeasonDiscount: porcentaje ?? 0,
+    hotelSeasonDiscount: porcentaje,
   });
 
-  // Qty y nights: preferimos los valores devueltos por util si están
-  const qty = Math.max(1, Math.floor(Number(infoFinal.qty ?? 1)));
-  const nights = Math.max(
-    1,
-    Math.floor(Number(infoFinal.nights ?? nochesFromDates))
-  );
-
-  const originalTotal = Number(infoFinal.original ?? 0);
-  const finalTotal = Number(infoFinal.final ?? 0);
-
-  const perNightOriginal =
-    nights > 0 && qty > 0
-      ? Math.round((originalTotal / qty / nights) * 100) / 100
-      : Number(habitacion.precio ?? habitacion.price ?? 0);
-
-  const perNightFinal =
-    nights > 0 && qty > 0
-      ? Math.round((finalTotal / qty / nights) * 100) / 100
-      : perNightOriginal;
-
-  // Formateo defensivo de fechas
-  const formatFecha = (fecha) => {
-    if (!fecha) return '-';
-    const d = new Date(fecha);
-    if (!Number.isFinite(d.getTime())) return '-';
-    const dia = String(d.getDate()).padStart(2, '0');
-    const mes = String(d.getMonth() + 1).padStart(2, '0');
-    const anio = d.getFullYear();
-    return `${dia}/${mes}/${anio}`;
-  };
+  // Nombres de variables finales
+  const perNightOriginal = infoFinal.original / infoFinal.nights;
+  const perNightFinal = infoFinal.final / infoFinal.nights;
 
   return (
     <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-700">
@@ -94,14 +70,14 @@ function HabitacionCard({ habitacion, porcentaje = 0 }) {
         <div className="text-sm text-gray-600 dark:text-gray-400">
           {formatFecha(fechaInicio)} {' - '}
           {formatFecha(fechaFin)} {' - '} ( {nights} noche
-          {nights > 1 ? 's' : ''} )
+          {nights > 1 ? 's' : ''})
         </div>
-
-        {/* Total final para el rango de fechas */}
-        <PriceTag
-          precio={finalTotal}
-          original={finalTotal < originalTotal ? originalTotal : undefined}
-        />
+        <button
+          // onClick aquí debe manejar la adición al carrito o selección temporal
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          Seleccionar
+        </button>
       </div>
     </div>
   );

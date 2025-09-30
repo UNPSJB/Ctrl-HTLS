@@ -201,6 +201,27 @@ export function calcHotelTotalFromSelection(
   };
 }
 
+/**
+ * Calcula el precio base por noche de un paquete (la suma de los precios por noche de todas las habitaciones).
+ * @param {object} paquete - El objeto paquete que contiene el array de habitaciones.
+ * @returns {number} El precio base por noche, redondeado a un número entero.
+ */
+export function calcPackageBasePricePerNight(paquete) {
+  // Aseguramos que toNumber y roundToInteger estén definidos aquí,
+  // ya sea importándolos o asumiendo que están en el ámbito (si es que pricingUtils
+  // no está usando módulos ESM puros). Usaremos los que ya definimos.
+
+  // Usamos el 'toNumber' y 'roundToInteger' que ya existen en este módulo.
+  const sum = Array.isArray(paquete?.habitaciones)
+    ? paquete.habitaciones.reduce(
+        (acc, h) => acc + (toNumber(h?.precio) || 0),
+        0
+      )
+    : 0;
+
+  return roundToInteger(sum);
+}
+
 /** Calcula totales del carrito (suma de varios hoteles). */
 export function calcCartTotal(hotelsSelections = []) {
   const breakdown = [];
@@ -283,6 +304,7 @@ const DEFAULT = {
   calcHotelTotalFromSelection,
   calcCartTotal,
   normalizeHotelForBooking,
+  calcPackageBasePricePerNight,
 };
 
 export default Object.freeze(DEFAULT);

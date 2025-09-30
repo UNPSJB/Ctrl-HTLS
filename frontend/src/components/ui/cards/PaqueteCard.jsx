@@ -1,30 +1,30 @@
-import PriceTag from '@/components/ui/PriceTag';
+import PriceTag from '@ui/PriceTag';
 import { Users } from 'lucide-react';
 import { useMemo } from 'react';
+
+// Se agrega la nueva utilidad a la importación
 import {
-  calcNights,
   calcPackageTotal,
   normalizeDiscount,
-  toNumber,
-  roundToInteger,
+  calcPackageBasePricePerNight, // NUEVA UTILIDAD IMPORTADA
 } from '@utils/pricingUtils';
+
+// Importamos la utilidad de fechas/noches desde dateUtils.
+import dateUtils from '@utils/dateUtils';
+
+const { nightsBetween } = dateUtils;
 
 function PaqueteCard({ paquete, porcentaje = 0 }) {
   if (!paquete) return null;
 
-  // Noches entre fechas (fallback seguro a 1)
-  const noches = calcNights(paquete?.fechaInicio, paquete?.fechaFin);
+  // Cálculo de noches (ya corregido en el paso anterior)
+  const noches = nightsBetween(paquete?.fechaInicio, paquete?.fechaFin);
 
-  // 1. Precio base por noche (suma de precios de habitación), redondeado a entero
+  // 1. Precio base por noche (suma de precios de habitación)
+  // CAMBIO CLAVE: Lógica compleja movida a la utilidad.
   const sumaPorNoche = useMemo(() => {
-    const sum = Array.isArray(paquete?.habitaciones)
-      ? paquete.habitaciones.reduce(
-          (acc, h) => acc + (toNumber(h?.precio) || 0),
-          0
-        )
-      : 0;
-    // Se usa roundToInteger para que este precio unitario también sea entero
-    return roundToInteger(sum);
+    // LLAMAMOS DIRECTAMENTE A LA UTILIDAD CENTRALIZADA
+    return calcPackageBasePricePerNight(paquete);
   }, [paquete]);
 
   // 2. Precio final del paquete usando la util central (retorna enteros)
@@ -68,7 +68,6 @@ function PaqueteCard({ paquete, porcentaje = 0 }) {
         </div>
 
         {/* Precio base por noche (suma de precios por noche sin aplicar noches ni descuentos) */}
-        {/* Este precio ahora es entero */}
         <PriceTag precio={precioBasePorNoche} />
       </div>
 
@@ -80,7 +79,6 @@ function PaqueteCard({ paquete, porcentaje = 0 }) {
         </div>
 
         {/* Precio final: total para el paquete considerando noches y descuentos */}
-        {/* Estos precios son enteros gracias a calcPackageTotal */}
         <PriceTag
           precio={precioTotalFinal}
           original={
@@ -104,7 +102,6 @@ function PaqueteCard({ paquete, porcentaje = 0 }) {
                 {hab?.capacidad ?? '-'} personas)
                 <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                   ${Number(hab?.precio ?? 0).toFixed(0)} por noche{' '}
-                  {/* Se cambia el formato a toFixed(0) aquí también */}
                 </span>
               </span>
             </li>

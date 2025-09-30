@@ -1,5 +1,9 @@
-import PriceTag from './PriceTag';
-import { calcNights, calcCartTotal } from '@utils/pricingUtils';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+// Importamos la utilidad correcta para el cálculo total
+import { calcCartTotal } from '@utils/pricingUtils';
+// Importamos el nuevo Custom Hook
+import { useCartSelections } from '@hooks/useCartSelections';
 
 function Resumen({
   habitaciones = [],
@@ -7,75 +11,62 @@ function Resumen({
   porcentaje = 0,
   isHighSeason,
 }) {
-  // Derivamos si es temporada alta a partir del porcentaje (por compatibilidad)
-  const effectiveHighSeason =
-    typeof isHighSeason === 'boolean'
-      ? isHighSeason
-      : Boolean(Number(porcentaje) > 0);
+  const navigate = useNavigate();
 
-  /**
-   * Adaptamos habitaciones y paquetes a la estructura que espera calcCartTotal:
-   * [
-   *   {
-   *     hotel: { temporada: { porcentaje } }, // aquí usamos porcentaje para simular temporada
-   *     selectedInstanceIds: [...],
-   *     selectedPackageIds: [...],
-   *     options: { nightsByInstance, qtyByInstance, packageQtyMap }
-   *   }
-   * ]
-   */
-  const selectedInstanceIds = habitaciones
-    .map((h) => (h && h.id != null ? h.id : null))
-    .filter((id) => id != null);
+  const selections = useCartSelections(
+    habitaciones,
+    paquetes,
+    porcentaje,
+    isHighSeason
+  );
 
-  const nightsByInstance = {};
-  const qtyByInstance = {};
-  habitaciones.forEach((h) => {
-    if (!h || h.id == null) return;
-    nightsByInstance[h.id] = calcNights(h.fechaInicio, h.fechaFin);
-    qtyByInstance[h.id] =
-      Number.isFinite(Number(h.qty)) && Number(h.qty) > 0 ? Number(h.qty) : 1;
-  });
+  // Cálculo de totales con la utilidad central.
+  const totals = useMemo(() => {
+    return calcCartTotal(selections);
+  }, [selections]); // Depende únicamente del resultado del hook memoizado
 
-  const selectedPackageIds = paquetes
-    .map((p) => (p && p.id != null ? p.id : null))
-    .filter((id) => id != null);
+  const handleReservation = () => {
+    // Aquí podrías agregar una validación final antes de la navegación
+    navigate('/reserva', { state: { totals, selections } });
+  };
 
-  const packageQtyMap = {};
-  paquetes.forEach((p) => {
-    if (!p || p.id == null) return;
-    packageQtyMap[p.id] =
-      Number.isFinite(Number(p.qty)) && Number(p.qty) > 0 ? Number(p.qty) : 1;
-  });
+  // Precios para la vista final
+  const safeFinal = Number(totals.final ?? 0);
+  const safeDescuento = Number(totals.descuento ?? 0);
 
-  const selections = [
-    {
-      hotel: {
-        temporada: {
-          porcentaje: effectiveHighSeason ? Number(porcentaje) || 0 : 0,
-        },
-      },
-      selectedInstanceIds,
-      selectedPackageIds,
-      options: {
-        nightsByInstance,
-        qtyByInstance,
-        packageQtyMap,
-      },
-    },
-  ];
-
-  const totals =
-    typeof calcCartTotal === 'function'
-      ? calcCartTotal(selections)
-      : { final: 0, original: 0 };
+  // Totales para la visualización rápida
+  const selectedRoomsCount = habitaciones.length;
+  const selectedPackagesCount = paquetes.length;
 
   return (
-    <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
-      <div className="flex items-center justify-between text-lg font-bold text-gray-800 dark:text-gray-100">
-        <span>Total a Pagar:</span>
-        <PriceTag precio={totals.final} original={totals.original} />
+    <div
+      className="mt-6 flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/30"
+      aria-label="Resumen de selección actual"
+    >
+      <div>
+        <p className="font-medium text-blue-900 dark:text-blue-100">
+          Seleccionados: {selectedRoomsCount} habitación
+          {selectedRoomsCount !== 1 ? 'es' : ''}, {selectedPackagesCount}{' '}
+          paquete
+          {selectedPackagesCount !== 1 ? 's' : ''}
+        </p>
+
+        <p className="mt-1 text-sm font-bold text-blue-700 dark:text-blue-300">
+          Total: ${safeFinal.toFixed(2)}
+        </p>
+
+        {safeDescuento > 0 && (
+          <p className="text-xs text-blue-600 dark:text-blue-300">
+            (Incluye ahorro por temporada: ${safeDescuento.toFixed(2)})
+          </p>
+        )}
       </div>
+      <button
+        onClick={handleReservation}
+        className="rounded-md bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
+      >
+        Reservar Selección
+      </button>
     </div>
   );
 }

@@ -1,76 +1,78 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Trash2, House, Users } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
-import { normalizeDiscount, roundTwo } from '@utils/pricingUtils';
-import { formatFecha, nightsBetween } from '@utils/dateUtils';
+import pricingUtils from '@utils/pricingUtils';
+import dateUtils from '@utils/dateUtils';
 import { useCarrito } from '@context/CarritoContext';
 
-function RoomCartItem({ room, hotel, onRemove = null }) {
+const { calcPackageTotal } = pricingUtils;
+const { formatFecha, nightsBetween } = dateUtils;
+
+// Se usa el alias 'pack' para el prop 'room' para mantener el JSX original intacto
+function PackageCartItem({ pack: room, hotel, onRemove = null }) {
   const {
     fechaInicio,
     fechaFin,
-    precio = 0,
     qty = 1,
     nombre,
     capacidad,
+    id, // Usamos 'id' para la remoción
+    noches = 1, // La duración del paquete
   } = room || {};
 
-  const nights = nightsBetween(fechaInicio, fechaFin, { useUTC: true });
+  // Las noches del paquete. Si no está definido, se calcula entre fechas.
+  const nights =
+    Number(noches) || nightsBetween(fechaInicio, fechaFin, { useUTC: true });
 
-  // Calcular precio con temporada (si existe). Ahora usamos hotel.temporada.porcentaje
-  let precioPorNoche = Number(precio);
-  let originalTotal = roundTwo(precioPorNoche * qty * nights);
-  let finalTotal = originalTotal;
+  // Cálculo de totales con la utilidad centralizada (memoizado)
+  const { original: originalTotal, final: finalTotal } = useMemo(() => {
+    const hotelSeasonDiscount = hotel?.temporada?.porcentaje ?? 0;
 
-  if (hotel?.temporada) {
-    const descTemporada = normalizeDiscount(hotel.temporada.porcentaje);
-    precioPorNoche = roundTwo(Number(precio) * (1 - descTemporada));
-    finalTotal = roundTwo(precioPorNoche * qty * nights);
-  }
+    // calcPackageTotal espera el objeto 'paquete' (room es el alias de pack)
+    return calcPackageTotal({
+      paquete: room,
+      qty,
+      hotelSeasonDiscount,
+    });
+  }, [room, hotel, qty, nights]);
 
   // Acciones del contexto
-  const { removerHabitacion } = useCarrito();
+  const { removerPaquete } = useCarrito(); // CAMBIO: Usamos removerPaquete
 
-  // Maneja la eliminación: si viene onRemove lo usa, sino usa el contexto.
+  // Maneja la eliminación
   const handleRemove = useCallback(() => {
-    if (typeof onRemove === 'function') {
-      onRemove(room);
-      return;
+    if (onRemove) {
+      onRemove(id);
+    } else if (hotel?.hotelId && id) {
+      // Eliminar del carrito global
+      removerPaquete(hotel.hotelId, id); // CAMBIO: Llama a removerPaquete
     }
-
-    if (!room?.id) {
-      console.warn(
-        'RoomCartItem: no se encontró room.id — la acción removerHabitacion requiere un id único.'
-      );
-      return;
-    }
-
-    // Llamada directa al contexto usando hotelId (nuevo nombre)
-    removerHabitacion(hotel?.hotelId ?? '', room.id);
-  }, [onRemove, room, removerHabitacion, hotel]);
-
-  if (!room) return null;
+  }, [onRemove, hotel?.hotelId, id, removerPaquete]);
 
   return (
-    <div className="mb-3 flex gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
-      {/* Columna 1: Datos habitación */}
-      <div className="min-w-0 flex-1">
-        <h4 className="flex items-center gap-2 truncate font-medium text-gray-900 dark:text-gray-100">
-          <House className="h-5 w-5 text-current" />
-          <span className="truncate">
-            {nombre ?? room.name ?? 'Habitación'}
-          </span>
-        </h4>
-
-        <div className="mt-1 flex flex-col text-sm text-gray-600 dark:text-gray-300 sm:flex-row sm:items-center sm:gap-4">
-          <p className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="font-medium">
-              {capacidad ?? room.capacity ?? '-'}
+    <div className="flex items-start gap-4 border-b border-gray-100 py-4 dark:border-gray-700">
+      {/* Columna 1: Info */}
+      <div className="flex flex-grow items-start gap-3">
+        {/* Ícono House */}
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+          <House size={20} aria-hidden="true" />
+        </div>
+        <div>
+          <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+            {nombre ?? room.name ?? 'Paquete'}
+          </h4>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+            {/* Capacidad (Etiqueta heredada, idealmente debería ser "Detalles") */}
+            <span className="inline-flex items-center gap-1">
+              <Users size={14} aria-hidden="true" />
+              <span className="font-medium">
+                {capacidad ?? room.capacity ?? '-'}
+              </span>
             </span>
           </p>
 
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 sm:mt-0">
+            {/* Fechas y Noches */}
             {formatFecha(fechaInicio)} — {formatFecha(fechaFin)} ({nights} noche
             {nights > 1 ? 's' : ''})
           </p>
@@ -90,16 +92,16 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
       <div className="flex items-center">
         <button
           onClick={handleRemove}
-          aria-label={`Eliminar habitación ${nombre ?? room.name ?? ''}`}
-          title="Eliminar habitación"
+          aria-label={`Eliminar paquete ${nombre ?? room.name ?? ''}`}
+          title="Eliminar paquete"
           disabled={!room?.id}
-          className={`flex h-8 w-8 transform items-center justify-center rounded-full text-red-600 transition duration-150 ease-in-out hover:scale-105 hover:bg-red-50 hover:text-red-700 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200 focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/10 dark:hover:text-red-300 dark:focus-visible:ring-red-700`}
+          className={`flex h-8 w-8 transform items-center justify-center rounded-full text-red-600 transition duration-150 ease-in-out hover:scale-105 hover:bg-red-50 hover:text-red-700 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200 focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:text-gray-400 disabled:shadow-none dark:hover:bg-red-900/10 dark:hover:text-red-500`}
         >
-          <Trash2 className="h-5 w-5 text-current" />
+          <Trash2 size={16} aria-hidden="true" />
         </button>
       </div>
     </div>
   );
 }
 
-export default RoomCartItem;
+export default PackageCartItem;

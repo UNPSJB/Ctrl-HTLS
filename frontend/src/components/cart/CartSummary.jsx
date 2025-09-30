@@ -5,6 +5,7 @@ import CartFooter from './CartFooter';
 import CartEmpty from './CartEmpty';
 
 function CartSummary() {
+  // Obtenemos el estado y el totalElementos para determinar si está vacío.
   const { carrito, totalElementos } = useCarrito();
 
   const isEmpty = Number(totalElementos ?? 0) === 0;
@@ -21,6 +22,7 @@ function CartSummary() {
         {isEmpty ? (
           <CartEmpty />
         ) : (
+          // Mapeamos los hoteles del carrito
           (carrito?.hoteles || []).map((hotel) => (
             <HotelCartSection
               key={hotel.hotelId ?? hotel.nombre}
