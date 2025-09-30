@@ -6,9 +6,6 @@ import ImageLoader from '@ui/ImageLoader';
 const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
   const navigate = useNavigate();
 
-  // Verificar si es temporada alta
-  const esTemporadaAlta = hotel.temporada?.tipo === 'alta';
-
   // Función para manejar la redirección al hotel
   const handleHotelRedirect = (e) => {
     e.stopPropagation(); // Evitar que se ejecute el toggle de expansión
@@ -53,7 +50,7 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
           </div>
         </div>
 
-        {esTemporadaAlta && (
+        {hotel.temporada?.tipo === 'alta' && (
           <Temporada porcentaje={hotel.temporada.porcentaje} />
         )}
 
