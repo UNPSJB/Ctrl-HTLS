@@ -2,7 +2,22 @@
     {
         "hotelId": 1,
         "nombre": "Hotel Paraíso",
-        "estrellas": "5",
+        "categoria": {
+            "estrellas": "3",
+            "servicios": [
+                "Wi-Fi gratuito",
+                "Servicio de limpieza diario",
+                "Recepción 24 horas",
+                "Desayuno continental básico",
+                "TV por cable",
+                "Artículos de tocador básicos",
+                "Aire acondicionado",
+                "Servicio de lavandería",
+                "Desayuno incluido",
+                "Gimnasio pequeño",
+                "Restaurante o cafetería en el hotel"
+            ]
+        },
         "descripcion": "Ubicado en el corazón de Mar del Plata, el Hotel Paraíso ofrece una experiencia de lujo inigualable. Con vistas panorámicas al océano y servicios de primera clase, es el destino perfecto para quienes buscan confort y elegancia. Disfruta de su spa, gastronomía gourmet y actividades exclusivas en un entorno sofisticado.",
         "temporada": {
             "tipo": "alta",
@@ -83,7 +98,22 @@
     {
         "hotelId": 2,
         "nombre": "Gran Hotel Mar del Plata",
-        "estrellas": "4",
+        "categoria": {
+            "estrellas": "3",
+            "servicios": [
+                "Wi-Fi gratuito",
+                "Servicio de limpieza diario",
+                "Recepción 24 horas",
+                "Desayuno continental básico",
+                "TV por cable",
+                "Artículos de tocador básicos",
+                "Aire acondicionado",
+                "Servicio de lavandería",
+                "Desayuno incluido",
+                "Gimnasio pequeño",
+                "Restaurante o cafetería en el hotel"
+            ]
+        },
         "descripcion": "El Gran Hotel Mar del Plata se destaca por su arquitectura clásica y su ambiente acogedor.",
         "temporada": null,
         "direccion": "Calle Güemes 567",
@@ -148,7 +178,22 @@
     {
         "hotelId": 3,
         "nombre": "Hotel Boutique Playa Grande",
-        "estrellas": "3",
+        "categoria": {
+            "estrellas": "3",
+            "servicios": [
+                "Wi-Fi gratuito",
+                "Servicio de limpieza diario",
+                "Recepción 24 horas",
+                "Desayuno continental básico",
+                "TV por cable",
+                "Artículos de tocador básicos",
+                "Aire acondicionado",
+                "Servicio de lavandería",
+                "Desayuno incluido",
+                "Gimnasio pequeño",
+                "Restaurante o cafetería en el hotel"
+            ]
+        },
         "descripcion": "El Hotel Boutique Playa Grande es una joya escondida en Mar del Plata.",
         "temporada": {
             "tipo": "baja",

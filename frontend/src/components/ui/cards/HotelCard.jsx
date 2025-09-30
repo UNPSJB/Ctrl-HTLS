@@ -1,140 +1,72 @@
 import { useState, useMemo } from 'react';
-import { Bed, Package, Percent } from 'lucide-react';
+import { Bed, Package } from 'lucide-react';
+import { transformHotel } from '@/hooks/hotelTransformer';
 import useHotelSelection from '@hooks/useHotelSelection';
 import HabitacionItem from '../../hotel/HabitacionItem';
 import PaqueteItem from '../../hotel/PaqueteItem';
 import HotelHeader from '@components/hotel/HotelHeader';
-import { useCarrito } from '@context/CarritoContext';
+import Descuento from '@ui/Descuento';
 
 function HotelCard({ hotel }) {
-  if (!hotel) return null;
+  const hotelTransformed = useMemo(() => {
+    return transformHotel(hotel);
+  }, [hotel]);
 
+  // Estado local: manejar la expansión/colapso de la tarjeta
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Hook para gestionar el estado de selección del carrito y cálculos
   const {
     selectedRooms,
+    selectedPackages,
     toggleRoomSelection,
     togglePackageSelection,
     totalPrice,
     discountCoefficient,
-  } = useHotelSelection(hotel);
+    hotelEnCarrito,
+  } = useHotelSelection(hotelTransformed);
 
-  // Si necesitas acceso directo al carrito
-  const { carrito } = useCarrito();
-
-  // hotelInCart para compatibilidad con otros componentes que usan esa variable
-  const hotelInCart = carrito.hoteles.find((h) => h.hotelId === hotel.hotelId);
-
-  // hotelData normalizado que pasamos a los child components (ligero)
-  const hotelData = useMemo(() => {
-    return {
-      hotelId: hotel.hotelId,
-      nombre: hotel.nombre,
-      temporada: hotel.temporada,
-      // si necesitas el coeficiente ya normalizado:
-      temporadaPercent: hotel.temporada
-        ? Number(hotel.temporada.porcentaje)
-        : 0,
-    };
-  }, [hotel.hotelId, hotel.nombre, hotel.temporada]);
-
-  // Agrupar habitaciones por tipo (igual que antes, compatible con hotels.json)
-  const groupedRooms = useMemo(() => {
-    if (!Array.isArray(hotel.habitaciones)) return [];
-
-    const result = [];
-
-    hotel.habitaciones.forEach((group) => {
-      const typeKey = Object.keys(group).find(
-        (k) => !['precio', 'capacidad'].includes(k)
-      );
-      if (!typeKey) {
-        console.warn(
-          `Grupo sin clave esperada en hotel ${hotel.hotelId}`,
-          group
-        );
-        return;
-      }
-
-      const instances = Array.isArray(group[typeKey]) ? group[typeKey] : [];
-      const precio = Number(group.precio) || 0;
-      const capacidad = Number(group.capacidad) || 0;
-
-      result.push({
-        tipo: typeKey,
-        precio,
-        capacidad,
-        instances,
-      });
-    });
-
-    return result;
-  }, [hotel.habitaciones, hotel.hotelId]);
-
-  // Formateo de descuentos por cantidad (para mostrar)
-  const formatearDescuentos = useMemo(() => {
-    if (!Array.isArray(hotel.descuentos) || hotel.descuentos.length === 0) {
-      return null;
-    }
-
-    return hotel.descuentos.map((descuento) => {
-      // descuento.porcentaje puede venir como "0.15" o 0.15 -> lo transformamos a porcentaje entero
-      const porcentaje = Math.round(Number(descuento.porcentaje) * 100);
-      return {
-        id: descuento.id,
-        porcentaje,
-        cantidad: descuento.cantidad_de_habitaciones,
-        texto: `${porcentaje}% OFF en ${descuento.cantidad_de_habitaciones}+ habitaciones`,
-      };
-    });
-  }, [hotel.descuentos]);
+  const hotelInCart = hotelEnCarrito;
 
   return (
     <article className="cursor-pointer overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-gradient-to-br hover:from-white hover:to-blue-50/30 hover:shadow-2xl dark:border-gray-700 dark:bg-gray-800 dark:hover:from-gray-800 dark:hover:to-blue-900/20">
       <HotelHeader
-        hotel={hotel}
+        hotel={hotelTransformed}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
-        // opcional: pasar totalPrice o discountCoefficient si quieres mostrarlos en el header
         totalPrice={totalPrice}
         discountCoefficient={discountCoefficient}
       />
 
+      {/* Contenido expandible (Habitaciones y Paquetes) */}
       {isExpanded && (
         <>
           <section
-            aria-labelledby={`rooms-${hotel.hotelId}-title`}
+            aria-labelledby={`rooms-${hotelTransformed.hotelId}-title`}
             className="border-t border-gray-200 p-4 dark:border-gray-700"
           >
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <h3
-                id={`rooms-${hotel.hotelId}-title`}
+                id={`rooms-${hotelTransformed.hotelId}-title`}
                 className="flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-100"
               >
                 <Bed className="h-5 w-5" />
                 Habitaciones Disponibles
               </h3>
 
-              {/* Mostrar descuentos por cantidad */}
-              {formatearDescuentos &&
-                formatearDescuentos.map((descuento) => (
-                  <span
-                    key={descuento.id}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400"
-                  >
-                    <Percent className="h-3 w-3" />
-                    {descuento.texto}
-                  </span>
+              {Array.isArray(hotelTransformed.formatearDescuentos) &&
+                hotelTransformed.formatearDescuentos.map((descuento) => (
+                  <Descuento key={descuento.id} descuento={descuento} />
                 ))}
             </div>
 
             <ul className="space-y-3">
-              {groupedRooms.map((group) => (
-                <li key={`${hotel.hotelId}-${group.tipo}`}>
+              {hotelTransformed.habitaciones.map((group) => (
+                <li key={`${hotelTransformed.hotelId}-${group.tipo}`}>
                   <HabitacionItem
-                    hotelData={hotelData}
+                    hotelData={hotelTransformed.hotelData}
                     habitacionGroup={group}
                     hotelInCart={hotelInCart}
-                    // pasamos selectedRooms y el toggle para que el item controle selección
                     selectedRooms={selectedRooms}
                     onToggleRoom={toggleRoomSelection}
                   />
@@ -144,26 +76,25 @@ function HotelCard({ hotel }) {
           </section>
 
           <section
-            aria-labelledby={`packages-${hotel.hotelId}-title`}
+            aria-labelledby={`packages-${hotelTransformed.hotelId}-title`}
             className="border-t border-gray-200 p-4 dark:border-gray-700"
           >
             <h3
-              id={`packages-${hotel.hotelId}-title`}
+              id={`packages-${hotelTransformed.hotelId}-title`}
               className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-100"
             >
               <Package className="h-5 w-5" />
               Paquetes Turísticos
             </h3>
             <ul className="space-y-3">
-              {Array.isArray(hotel.paquetes) && hotel.paquetes.length > 0 ? (
-                hotel.paquetes.map((paquete) => (
+              {Array.isArray(hotelTransformed.paquetes) &&
+              hotelTransformed.paquetes.length > 0 ? (
+                hotelTransformed.paquetes.map((paquete) => (
                   <li key={paquete.id}>
                     <PaqueteItem
-                      hotelData={hotelData}
+                      hotelData={hotelTransformed.hotelData}
                       paquete={paquete}
-                      isSelected={hotelInCart?.paquetes?.some(
-                        (p) => p.id === paquete.id
-                      )}
+                      isSelected={selectedPackages.includes(paquete.id)}
                       onSelect={() => togglePackageSelection(paquete.id)}
                     />
                   </li>

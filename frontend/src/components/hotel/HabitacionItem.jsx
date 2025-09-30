@@ -13,16 +13,14 @@ import Counter from '@ui/Counter';
 import RoomDetailsModal from './RoomDetailsModal';
 
 function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
-  if (!habitacionGroup) return null;
-
   const [showModal, setShowModal] = useState(false);
 
   const { agregarHabitacion, removerHabitacion } = useCarrito();
   const { filtros } = useBusqueda();
   const { fechaInicio, fechaFin } = filtros ?? {};
 
-  const instances = Array.isArray(habitacionGroup.instances)
-    ? habitacionGroup.instances
+  const instances = Array.isArray(habitacionGroup.habitaciones)
+    ? habitacionGroup.habitaciones
     : [];
   const maxAvailable = instances.length;
 
@@ -32,6 +30,7 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
 
   // Cuántas instancias de este grupo están seleccionadas
   const selectedCount = useMemo(() => {
+    // Cuenta cuántos IDs seleccionados corresponden a una instancia de este grupo.
     return selectedIds.filter((id) => instances.some((inst) => inst.id === id))
       .length;
   }, [selectedIds, instances]);
@@ -64,13 +63,16 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
 
   // Agregar: toma la primera instancia disponible que no esté ya seleccionada
   const handleIncrement = () => {
+    // Si ya se seleccionó el máximo disponible, no hace nada.
     if (selectedCount >= maxAvailable) return;
 
+    // Busca la primera instancia de habitación dentro del grupo que no esté en el carrito.
     const instanciaParaAgregar = instances.find(
       (inst) => !selectedIds.includes(inst.id)
     );
     if (!instanciaParaAgregar) return;
 
+    // Se construye el objeto de habitación a agregar al carrito.
     const habitacionAAgregar = {
       ...instanciaParaAgregar,
       tipo: habitacionGroup.tipo,
@@ -79,7 +81,7 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
       nombre: `${habitacionGroup.tipo} - ${instanciaParaAgregar.numero ?? ''}`,
     };
 
-    // Asumimos API del carrito en español (agregarHabitacion)
+    // Llama a la función del contexto para agregar al carrito.
     if (typeof agregarHabitacion === 'function') {
       agregarHabitacion(hotelData, habitacionAAgregar, {
         fechaInicio,
@@ -92,14 +94,18 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
 
   // Remover: elimina la última instancia seleccionada de este grupo
   const handleDecrement = () => {
+    // Si no hay seleccionadas, no hace nada.
     if (selectedCount <= 0) return;
 
+    // Filtra los IDs de las habitaciones seleccionadas que pertenecen a este grupo.
     const seleccionadasDelGrupo = selectedIds.filter((id) =>
       instances.some((inst) => inst.id === id)
     );
+    // Obtiene el ID de la última habitación agregada para este grupo.
     const idARemover = seleccionadasDelGrupo[seleccionadasDelGrupo.length - 1];
     if (!idARemover) return;
 
+    // Llama a la función del contexto para remover del carrito.
     if (typeof removerHabitacion === 'function') {
       removerHabitacion(hotelData.hotelId, idARemover);
     } else {
@@ -116,6 +122,7 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
     setShowModal(false);
   };
 
+  // Reserva desde el modal y luego cierra el modal.
   const handleReserveFromModal = () => {
     setShowModal(false);
     handleIncrement();
@@ -133,11 +140,13 @@ function HabitacionItem({ hotelData, habitacionGroup, hotelInCart }) {
 
             <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
               <Users className="h-4 w-4" />
+              {/* Capacidad */}
               <span>{habitacionGroup.capacidad ?? '—'}</span>
             </div>
 
             <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
               <Home className="h-4 w-4" />
+              {/* Disponibles (maxAvailable) */}
               <span>{maxAvailable}</span>
             </div>
 

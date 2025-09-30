@@ -6,25 +6,13 @@ import ImageLoader from '@ui/ImageLoader';
 const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
   const navigate = useNavigate();
 
-  // Extraer datos directamente del objeto hotel original
-  const estrellas = Number(hotel.estrellas) || 0;
-  const hotelId = hotel.hotelId ?? hotel.id;
-
-  // Obtener coeficiente de temporada
-  const coeficiente =
-    typeof hotel.coeficiente === 'number'
-      ? hotel.coeficiente
-      : hotel.temporada?.porcentaje
-        ? Number(hotel.temporada.porcentaje)
-        : 0;
-
   // Verificar si es temporada alta
   const esTemporadaAlta = hotel.temporada?.tipo === 'alta';
 
   // Función para manejar la redirección al hotel
   const handleHotelRedirect = (e) => {
     e.stopPropagation(); // Evitar que se ejecute el toggle de expansión
-    navigate(`/hotel/${hotelId}`);
+    navigate(`/hotel/${hotel.hotelId}`);
   };
 
   return (
@@ -53,21 +41,21 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
             <ExternalLink className="h-5 w-5 text-gray-500 transition-colors group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400" />
           </div>
 
-          {estrellas > 0 && (
-            <div
-              role="img"
-              aria-label={`${estrellas} estrellas`}
-              className="flex items-center gap-1"
-            >
-              <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                {estrellas}
-              </span>
-              <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />
-            </div>
-          )}
+          <div
+            role="img"
+            aria-label={`${hotel.estrellas} estrellas`}
+            className="flex items-center gap-1"
+          >
+            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+              {hotel.estrellas}
+            </span>
+            <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />
+          </div>
         </div>
 
-        {esTemporadaAlta && <Temporada porcentaje={coeficiente} />}
+        {esTemporadaAlta && (
+          <Temporada porcentaje={hotel.temporada.porcentaje} />
+        )}
 
         <address className="flex items-center gap-1 not-italic text-gray-600 dark:text-gray-400">
           <MapPin className="h-5 w-5 text-gray-500 dark:text-gray-400" />
