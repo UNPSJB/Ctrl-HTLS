@@ -1,15 +1,6 @@
 import { Percent } from 'lucide-react';
 
 function Descuento({ descuento }) {
-  // Comprobación de que tenemos los datos necesarios
-  if (
-    !descuento ||
-    descuento.porcentaje === undefined ||
-    descuento.cantidad === undefined
-  ) {
-    return null;
-  }
-
   const textoDescuento = `${descuento.porcentaje}% OFF en ${descuento.cantidad}+ habitaciones`;
 
   return (

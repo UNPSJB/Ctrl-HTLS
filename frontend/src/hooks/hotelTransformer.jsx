@@ -96,7 +96,7 @@ export const transformHotel = (hotel) => {
   return {
     ...transformed,
     hotelData, // Datos base para subcomponentes (HotelHeader, HabitacionItem)
-    formatearDescuentos: descuentosParaComponente, // Data limpia para Descuento.jsx
+    descuentos: descuentosParaComponente, // Data limpia para Descuento.jsx
   };
 };
 
