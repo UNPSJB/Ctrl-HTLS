@@ -40,11 +40,11 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
 
           <div
             role="img"
-            aria-label={`${hotel.estrellas} estrellas`}
+            aria-label={`${hotel.categoria.estrellas} estrellas`}
             className="flex items-center gap-1"
           >
             <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-              {hotel.estrellas}
+              {hotel.categoria.estrellas}
             </span>
             <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />
           </div>
