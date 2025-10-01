@@ -1,12 +1,18 @@
+// PackageCartItem.jsx
 import { useCallback, useMemo } from 'react';
 import { Trash2, Package as PackageIcon, Users } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
-import pricingUtils from '@utils/pricingUtils';
+import { calcPackageTotal } from '@utils/pricingUtils';
 import dateUtils from '@utils/dateUtils';
 import { useCarrito } from '@context/CarritoContext';
-const { calcPackageTotal } = pricingUtils;
+
 const { formatFecha, nightsBetween } = dateUtils;
 
+/**
+ * PackageCartItem
+ * - Recibe `pack` (desde carrito) y `hotel` (entrada del carrito).
+ * - Usa preferentemente removePackage (wrapper) y fallback a removerPaquete.
+ */
 function PackageCartItem({ pack, hotel, onRemove = null }) {
   const {
     fechaInicio,
@@ -18,12 +24,10 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
     capacidad = 2,
   } = pack || {};
 
-  // Calculamos las noches (usa 'noches' si está definido, sino calcula entre fechas)
   const nights =
     Number(noches) || nightsBetween(fechaInicio, fechaFin, { useUTC: true });
 
   const { original: originalTotal, final: finalTotal } = useMemo(() => {
-    // Tomamos el porcentaje de descuento de temporada del hotel (o 0 si no existe)
     const hotelSeasonDiscount = hotel?.temporada?.porcentaje ?? 0;
 
     return calcPackageTotal({
@@ -33,27 +37,36 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
     });
   }, [pack, hotel, qty]);
 
-  // Acciones del contexto
-  const { removerPaquete } = useCarrito();
+  const { removePackage, removerPaquete } = useCarrito();
 
   const handleRemove = useCallback(() => {
     if (onRemove) {
-      // Si se pasa una función onRemove, la usa. (Se asume que onRemove usa pack.id)
       onRemove(id);
-    } else if (hotel?.hotelId && id) {
-      // Si no, usa la acción del contexto
-      removerPaquete(hotel.hotelId, id);
+      return;
     }
-  }, [onRemove, hotel?.hotelId, id, removerPaquete]);
+
+    // Preferimos wrapper removePackage(hotelId, pkgId)
+    if (typeof removePackage === 'function') {
+      removePackage(hotel?.hotelId, id);
+      return;
+    }
+
+    // Fallback a la API antigua
+    if (typeof removerPaquete === 'function') {
+      removerPaquete(hotel?.hotelId, id);
+      return;
+    }
+
+    console.warn(
+      'No se encontró función para remover paquete en CarritoContext'
+    );
+  }, [onRemove, removePackage, removerPaquete, hotel?.hotelId, id]);
 
   if (!pack) return null;
 
   return (
-    // Contenedor principal con fondo redondeado y sombra ligera
     <div className="mb-3 flex gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
-      {/* Columna 1: Datos paquete (flex-1 para ocupar espacio) */}
       <div className="min-w-0 flex-1">
-        {/* Nombre del Paquete */}
         <h4 className="flex items-center gap-2 truncate font-medium text-gray-900 dark:text-gray-100">
           <PackageIcon className="h-5 w-5 text-current" />
           <span className="truncate">
@@ -62,7 +75,6 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
         </h4>
 
         <div className="mt-1 flex flex-col text-sm text-gray-600 dark:text-gray-300 sm:flex-row sm:items-center sm:gap-4">
-          {/* Capacidad (Para paridad estructural) */}
           <p className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span className="font-medium">
@@ -73,7 +85,6 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
             </span>
           </p>
 
-          {/* Fechas y Noches */}
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 sm:mt-0">
             {formatFecha(fechaInicio)} — {formatFecha(fechaFin)} ({nights} noche
             {nights > 1 ? 's' : ''})
@@ -81,7 +92,6 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
         </div>
       </div>
 
-      {/* Columna 2: Precio */}
       <div className="text-right">
         <PriceTag
           precio={finalTotal}
@@ -90,7 +100,6 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
         />
       </div>
 
-      {/* Columna 3: Botón eliminar */}
       <div className="flex items-center">
         <button
           onClick={handleRemove}
