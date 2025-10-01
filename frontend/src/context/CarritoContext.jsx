@@ -1,3 +1,4 @@
+// CarritoContext.jsx
 import {
   createContext,
   useContext,
@@ -12,12 +13,10 @@ import dateUtils from '../utils/dateUtils';
 const { normalizeDateValue } = dateUtils;
 const STORAGE_KEY = 'carritoState';
 
-// Estado inicial
 const estadoInicial = {
   hoteles: [],
 };
 
-// Tipos de acción
 const TIPOS = {
   AGREGAR_HOTEL: 'AGREGAR_HOTEL',
   AGREGAR_HABITACION: 'AGREGAR_HABITACION',
@@ -28,25 +27,42 @@ const TIPOS = {
   REEMPLAZAR_ESTADO: 'REEMPLAZAR_ESTADO',
 };
 
-// Reducer
 function carritoReducer(estado, accion) {
   switch (accion.type) {
     case TIPOS.AGREGAR_HOTEL: {
-      if (estado.hoteles.some((h) => h.hotelId === accion.payload.hotelId)) {
-        return estado;
+      const payload = accion.payload || {};
+      const exists = estado.hoteles.some((h) => h.hotelId === payload.hotelId);
+
+      if (!exists) {
+        return {
+          ...estado,
+          hoteles: [
+            ...estado.hoteles,
+            {
+              hotelId: payload.hotelId,
+              nombre: payload.nombre ?? null,
+              temporada: payload.temporada ?? null,
+              habitaciones: [],
+              paquetes: [],
+            },
+          ],
+        };
       }
+
+      // Si ya existe, hacemos merge: actualizamos sólo si vienen datos nuevos
       return {
         ...estado,
-        hoteles: [
-          ...estado.hoteles,
-          {
-            hotelId: accion.payload.hotelId,
-            nombre: accion.payload.nombre,
-            temporada: accion.payload.temporada,
-            habitaciones: [],
-            paquetes: [],
-          },
-        ],
+        hoteles: estado.hoteles.map((hotel) =>
+          hotel.hotelId === payload.hotelId
+            ? {
+                ...hotel,
+                // sólo setea nombre/temporada si no existen aún en el hotel o si vienen en el payload
+                nombre: hotel.nombre ?? payload.nombre ?? hotel.nombre,
+                temporada:
+                  hotel.temporada ?? payload.temporada ?? hotel.temporada,
+              }
+            : hotel
+        ),
       };
     }
 
@@ -145,10 +161,9 @@ function carritoReducer(estado, accion) {
   }
 }
 
-// Crear contexto
 const CarritoContext = createContext(undefined);
 
-/** Asegura que el hotel existe en el carrito. */
+/** Asegura que el hotel existe en el carrito. Si ya existe, no sobrescribe con nulls. */
 function asegurarHotel(dispatch, { hotelId, nombre, temporada }) {
   dispatch({
     type: TIPOS.AGREGAR_HOTEL,
@@ -156,10 +171,12 @@ function asegurarHotel(dispatch, { hotelId, nombre, temporada }) {
   });
 }
 
-/** Agrega elementos con normalización de fechas. */
+/** Agrega elemento (habitacion/paquete) normalizando fechas y seteando addedAt. */
 function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
+  // Aseguramos que la entrada del hotel exista y que al crearla se guarde metadata si viene
   asegurarHotel(dispatch, hotelInfo);
 
+  // Normalizamos fechas (si vienen) — si las ignorás por ahora, se dejarán null
   let fechaInicio = fechas.fechaInicio ?? elemento.fechaInicio ?? null;
   let fechaFin = fechas.fechaFin ?? elemento.fechaFin ?? null;
 
@@ -170,6 +187,8 @@ function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
     ...elemento,
     fechaInicio,
     fechaFin,
+    // timestamp para controlar orden de selección (LIFO si hace falta)
+    addedAt: Date.now(),
   };
 
   dispatch({
@@ -181,7 +200,6 @@ function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
   });
 }
 
-// Provider
 export function CarritoProvider({ children }) {
   const [persistedState, setPersistedState] = usePersistedState(
     STORAGE_KEY,
@@ -189,7 +207,7 @@ export function CarritoProvider({ children }) {
   );
   const [estado, dispatch] = useReducer(carritoReducer, persistedState);
 
-  // Al montar: normalizar persistedState (migración)
+  // Normalización / migración al montar
   useEffect(() => {
     const normalizeHoteles = (hoteles = []) =>
       (hoteles || []).map((h) => ({
@@ -199,11 +217,14 @@ export function CarritoProvider({ children }) {
           ...hab,
           fechaInicio: normalizeDateValue(hab.fechaInicio),
           fechaFin: normalizeDateValue(hab.fechaFin),
+          // preserve addedAt si existe o setear null (no forzamos new Date aquí)
+          addedAt: hab.addedAt ?? null,
         })),
         paquetes: (h.paquetes || []).map((p) => ({
           ...p,
           fechaInicio: normalizeDateValue(p.fechaInicio),
           fechaFin: normalizeDateValue(p.fechaFin),
+          addedAt: p.addedAt ?? null,
         })),
       }));
 
@@ -218,12 +239,12 @@ export function CarritoProvider({ children }) {
     }
   }, []);
 
-  // Sincronizar cambios del reducer con localStorage
+  // Persistir cambios
   useEffect(() => {
     setPersistedState(estado);
   }, [estado, setPersistedState]);
 
-  // Acciones memoizadas
+  // ---------- Acciones (API en español, retrocompatibilidad) ----------
   const agregarHabitacion = useCallback(
     (hotelInfo, habitacion, fechas) =>
       agregarElemento(
@@ -271,6 +292,65 @@ export function CarritoProvider({ children }) {
     [dispatch]
   );
 
+  // ---------- Wrappers con firma (hotelId, ...) para conveniencia ----------
+  const addRoom = useCallback(
+    (hotelId, roomObj, fechas) => {
+      return agregarHabitacion({ hotelId }, roomObj, fechas);
+    },
+    [agregarHabitacion]
+  );
+
+  const removeRoom = useCallback(
+    (hotelId, roomId) => {
+      return removerHabitacion(hotelId, roomId);
+    },
+    [removerHabitacion]
+  );
+
+  const addPackage = useCallback(
+    (hotelId, pkgObj, fechas) => {
+      return agregarPaquete({ hotelId }, pkgObj, fechas);
+    },
+    [agregarPaquete]
+  );
+
+  const removePackage = useCallback(
+    (hotelId, pkgId) => {
+      return removerPaquete(hotelId, pkgId);
+    },
+    [removerPaquete]
+  );
+
+  // ---------- Selectores por hotel (referencias estables) ----------
+  const getHotelEntry = useCallback(
+    (hotelId) => estado.hoteles.find((h) => h.hotelId === hotelId) || null,
+    [estado.hoteles]
+  );
+
+  const getSelectedRoomIdsForHotel = useCallback(
+    (hotelId) => {
+      const entry = getHotelEntry(hotelId);
+      return (entry?.habitaciones || []).map((r) => r.id).filter(Boolean);
+    },
+    [getHotelEntry]
+  );
+
+  const getSelectedRoomsForHotel = useCallback(
+    (hotelId) => {
+      const entry = getHotelEntry(hotelId);
+      return entry?.habitaciones ? [...entry.habitaciones] : [];
+    },
+    [getHotelEntry]
+  );
+
+  const getSelectedPackageIdsForHotel = useCallback(
+    (hotelId) => {
+      const entry = getHotelEntry(hotelId);
+      return (entry?.paquetes || []).map((p) => p.id).filter(Boolean);
+    },
+    [getHotelEntry]
+  );
+
   const totalElementos = useMemo(
     () =>
       estado.hoteles.reduce(
@@ -286,12 +366,24 @@ export function CarritoProvider({ children }) {
   const value = useMemo(
     () => ({
       carrito: estado,
+      // API en español (retrocompat)
       agregarHabitacion,
       agregarPaquete,
       removerHabitacion,
       removerPaquete,
       removerHotel,
       totalElementos,
+      // wrappers convenientes (firma: hotelId, ...)
+      addRoom,
+      removeRoom,
+      addPackage,
+      removePackage,
+      // selectores
+      getSelectedRoomIdsForHotel,
+      getSelectedRoomsForHotel,
+      getSelectedPackageIdsForHotel,
+      // entrada completa
+      getHotelEntry,
     }),
     [
       estado,
@@ -301,6 +393,14 @@ export function CarritoProvider({ children }) {
       removerPaquete,
       removerHotel,
       totalElementos,
+      addRoom,
+      removeRoom,
+      addPackage,
+      removePackage,
+      getSelectedRoomIdsForHotel,
+      getSelectedRoomsForHotel,
+      getSelectedPackageIdsForHotel,
+      getHotelEntry,
     ]
   );
 
@@ -309,7 +409,6 @@ export function CarritoProvider({ children }) {
   );
 }
 
-// Hook para consumir el contexto
 export function useCarrito() {
   const context = useContext(CarritoContext);
   if (context === undefined) {

@@ -75,7 +75,6 @@ export const transformHotel = (hotel) => {
     hotelId: transformed.hotelId,
     nombre: transformed.nombre,
     temporada: transformed.temporada,
-    temporadaPercent: transformed.temporada?.porcentaje || 0,
   };
 
   // 2.2. Descuentos Formateados para Componente Descuento.jsx

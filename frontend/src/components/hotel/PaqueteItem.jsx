@@ -1,75 +1,188 @@
-import { useState, useMemo } from 'react';
+// PaqueteItem.jsx
+import { memo, useState, useMemo, useCallback } from 'react';
 import { Calendar, Percent, Info } from 'lucide-react';
 import PaqueteDetailsModal from './PaqueteDetailsModal';
 import PriceTag from '@ui/PriceTag';
 import { useCarrito } from '@context/CarritoContext';
-import { useBusqueda } from '@context/BusquedaContext';
 import { calcPackageTotal, normalizeDiscount } from '@utils/pricingUtils';
 
-function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
+/*
+  PaqueteItem
+  - Recibe: hotelData (opcional) o hotelId (recomendado), paquete, isSelected, onSelect (callback del padre)
+  - Comportamiento:
+    * Si onSelect está presente -> lo notifica (HotelCard controlará agregar/quitar).
+    * Si onSelect NO está -> usa directamente addPackage / agregarPaquete del contexto.
+    * No se envían fechas (ignoradas por ahora).
+*/
+
+function PaqueteItem({
+  hotelData = null,
+  hotelId = null,
+  paquete,
+  isSelected = false,
+  onSelect = null,
+}) {
   if (!paquete) return null;
-
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const carrito = useCarrito();
-  const agregarPaquete = carrito?.agregarPaquete;
-  const removerPaquete = carrito?.removerPaquete;
-
-  const { filtros } = useBusqueda?.() ?? {};
-  const { fechaInicio, fechaFin } = filtros ?? {};
-
-  const manejarSeleccion = (e) => {
-    const checked = Boolean(e.target.checked);
-    // Notificar al padre (HotelCard) para mantener UI consistente
-    if (typeof onSelect === 'function') onSelect(paquete.id);
-
-    if (checked) {
-      if (typeof agregarPaquete === 'function') {
-        agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
-      } else {
-        console.warn('useCarrito no expone agregarPaquete');
-      }
-    } else {
-      if (typeof removerPaquete === 'function') {
-        removerPaquete(hotelData.hotelId, paquete.id);
-      } else {
-        console.warn('useCarrito no expone removerPaquete');
-      }
-    }
+  // Determinar hotelId y hotelInfo para compatibilidad con API antigua
+  const resolvedHotelId = hotelId ?? hotelData?.hotelId ?? null;
+  const hotelInfo = {
+    hotelId: resolvedHotelId,
+    nombre: hotelData?.nombre ?? null,
+    temporada: hotelData?.temporada ?? null,
   };
 
-  // --- Cálculo de precios del paquete SIMPLIFICADO ---
-  // Se usa useMemo para optimizar el cálculo llamando a la función centralizada.
+  // Contexto del carrito: preferimos los wrappers addPackage/removePackage
+  const carrito = useCarrito();
+  const addPackageWrapper =
+    carrito?.addPackage ?? carrito?.agregarPaquete ?? null;
+  const removePackageWrapper =
+    carrito?.removePackage ?? carrito?.removerPaquete ?? null;
+
+  const [mostrarModal, setMostrarModal] = useState(false);
+
+  // Cálculo de precios (memoizado)
   const calc = useMemo(() => {
     const hotelSeasonDiscount = hotelData?.temporada?.porcentaje ?? 0;
-
-    // calcPackageTotal devuelve los precios ya redondeados a ENTERO.
     return calcPackageTotal({
       paquete,
-      hotelSeasonDiscount: hotelSeasonDiscount,
-      qty: 1, // Se calcula para una unidad para mostrar el precio unitario
+      hotelSeasonDiscount,
+      qty: 1,
     });
-  }, [paquete, hotelData.temporada?.porcentaje]);
+  }, [paquete, hotelData?.temporada?.porcentaje]);
 
-  const { noches, final: precioFinal, original: precioOriginal } = calc;
+  const {
+    noches,
+    final: precioFinal,
+    original: precioOriginal,
+  } = calc || {
+    noches: paquete.noches ?? 0,
+    final: paquete.precio ?? 0,
+    original: paquete.precio ?? paquete.precio,
+  };
 
-  // Se calcula el descuento total combinado para mostrar el porcentaje correcto en la UI
+  // Cálculo de descuento combinado para mostrar en UI
   const descPaquete = normalizeDiscount(paquete.descuento);
   const descTemporada = normalizeDiscount(hotelData?.temporada?.porcentaje);
   const totalDisc = 1 - (1 - descPaquete) * (1 - descTemporada);
 
-  const handleShowDetails = () => setMostrarModal(true);
-  const handleCloseModal = () => setMostrarModal(false);
+  // Handlers: notificar padre y/o usar contexto
+  const manejarSeleccion = useCallback(
+    (e) => {
+      const checked = Boolean(e.target.checked);
 
-  const handleReserveFromModal = () => {
-    if (!isSelected) {
-      if (typeof agregarPaquete === 'function') {
-        agregarPaquete(hotelData, paquete, { fechaInicio, fechaFin });
+      // Notificar al padre para mantener UI controlada si provisto
+      if (typeof onSelect === 'function') {
+        onSelect(paquete.id);
+      }
+
+      // Si no hay onSelect, fallback a usar API del contexto directamente
+      if (typeof onSelect !== 'function') {
+        if (checked) {
+          if (typeof addPackageWrapper === 'function') {
+            // Si el wrapper es agregarPaquete (API antigua), acepta (hotelInfo, paquete)
+            // Si es addPackage (wrapper nuevo), firma (hotelId, pkgObj)
+            try {
+              if (typeof carrito?.addPackage === 'function') {
+                // wrapper nuevo: addPackage(hotelId, pkgObj)
+                carrito.addPackage(resolvedHotelId, paquete);
+              } else if (typeof carrito?.agregarPaquete === 'function') {
+                // API antigua: agregarPaquete(hotelInfo, paquete)
+                carrito.agregarPaquete(hotelInfo, paquete);
+              } else {
+                // si sólo tenemos el wrapper variable (fallback)
+                addPackageWrapper(
+                  resolvedHotelId ? resolvedHotelId : hotelInfo,
+                  paquete
+                );
+              }
+            } catch (err) {
+              console.warn('Error agregando paquete:', err);
+            }
+          } else {
+            console.warn(
+              'PaqueteItem: no existe función para agregar paquete en CarritoContext'
+            );
+          }
+        } else {
+          if (typeof removePackageWrapper === 'function') {
+            try {
+              if (typeof carrito?.removePackage === 'function') {
+                // wrapper nuevo: removePackage(hotelId, pkgId)
+                carrito.removePackage(resolvedHotelId, paquete.id);
+              } else if (typeof carrito?.removerPaquete === 'function') {
+                // API antigua: removerPaquete(hotelId, paqueteId)
+                carrito.removerPaquete(resolvedHotelId, paquete.id);
+              } else {
+                removePackageWrapper(
+                  resolvedHotelId ? resolvedHotelId : hotelInfo,
+                  paquete.id
+                );
+              }
+            } catch (err) {
+              console.warn('Error removiendo paquete:', err);
+            }
+          } else {
+            console.warn(
+              'PaqueteItem: no existe función para remover paquete en CarritoContext'
+            );
+          }
+        }
+      }
+    },
+    [
+      onSelect,
+      paquete,
+      addPackageWrapper,
+      removePackageWrapper,
+      carrito,
+      resolvedHotelId,
+      hotelInfo,
+    ]
+  );
+
+  const handleShowDetails = useCallback((e) => {
+    e?.stopPropagation();
+    setMostrarModal(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => setMostrarModal(false), []);
+
+  const handleReserveFromModal = useCallback(() => {
+    // Si padre controla selección, delegamos en onSelect; si no, usamos contexto directo
+    if (typeof onSelect === 'function') {
+      if (!isSelected) onSelect(paquete.id);
+    } else {
+      if (typeof addPackageWrapper === 'function') {
+        try {
+          if (typeof carrito?.addPackage === 'function') {
+            carrito.addPackage(resolvedHotelId, paquete);
+          } else if (typeof carrito?.agregarPaquete === 'function') {
+            carrito.agregarPaquete(hotelInfo, paquete);
+          } else {
+            addPackageWrapper(
+              resolvedHotelId ? resolvedHotelId : hotelInfo,
+              paquete
+            );
+          }
+        } catch (err) {
+          console.warn('Error agregando paquete desde modal:', err);
+        }
       } else {
-        console.warn('useCarrito no expone agregarPaquete');
+        console.warn(
+          'PaqueteItem: no existe función para agregar paquete en CarritoContext'
+        );
       }
     }
     setMostrarModal(false);
-  };
+  }, [
+    onSelect,
+    isSelected,
+    addPackageWrapper,
+    carrito,
+    resolvedHotelId,
+    paquete,
+    hotelInfo,
+  ]);
 
   return (
     <>
@@ -86,19 +199,16 @@ function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
           />
 
           <div className="flex flex-col gap-1">
-            {/* Primera fila: nombre + iconos */}
             <div className="flex items-center gap-4">
               <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                 {paquete.nombre}
               </div>
 
-              {/* Noches con icono */}
               <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
                 <Calendar className="h-4 w-4" />
                 <span>{noches}</span>
               </div>
 
-              {/* Descuento con icono */}
               {totalDisc > 0 && (
                 <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
                   <Percent className="h-4 w-4" />
@@ -106,7 +216,6 @@ function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
                 </div>
               )}
 
-              {/* Botón de detalles */}
               <button
                 onClick={handleShowDetails}
                 className="flex items-center gap-1.5 text-sm text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
@@ -117,7 +226,6 @@ function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
               </button>
             </div>
 
-            {/* Segunda fila: descripción */}
             <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
               {paquete.descripcion}
             </p>
@@ -137,7 +245,6 @@ function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
         </div>
       </article>
 
-      {/* Modal de detalles */}
       {mostrarModal && (
         <PaqueteDetailsModal
           paquete={paquete}
@@ -150,4 +257,4 @@ function PaqueteItem({ hotelData, paquete, isSelected, onSelect }) {
   );
 }
 
-export default PaqueteItem;
+export default memo(PaqueteItem);

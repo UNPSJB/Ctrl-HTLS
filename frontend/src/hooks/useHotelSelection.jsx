@@ -1,3 +1,4 @@
+// useHotelSelection.js
 import { useMemo, useCallback } from 'react';
 import { useCarrito } from '@context/CarritoContext';
 import {
@@ -5,109 +6,141 @@ import {
   normalizeDiscount,
 } from '@utils/pricingUtils';
 
+/**
+ * useHotelSelection
+ * - Llama a agregarHabitacion pasándole la metadata completa del hotel
+ * - Devuelve selectedRoomIds / Set y callbacks estables
+ * - Ignoramos fechas por ahora (se pueden añadir más tarde)
+ */
 function useHotelSelection(hotel) {
-  const carritoCtx = useCarrito();
-  const carrito = carritoCtx?.carrito || { hoteles: [] };
+  const {
+    getSelectedRoomIdsForHotel,
+    getSelectedRoomsForHotel,
+    getSelectedPackageIdsForHotel,
+    agregarHabitacion, // usamos la API en español para pasar metadata completa
+    removerHabitacion,
+    agregarPaquete,
+    removerPaquete,
+    getHotelEntry,
+  } = useCarrito();
 
-  // Buscar la entrada del hotel en el carrito por hotelId (coincide con HotelCard)
-  const hotelEnCarrito = useMemo(
-    () => carrito.hoteles.find((h) => h.hotelId === hotel?.hotelId) || null,
-    [carrito.hoteles, hotel?.hotelId]
+  const hotelId = hotel?.hotelId;
+
+  const selectedRoomIds = useMemo(
+    () =>
+      typeof getSelectedRoomIdsForHotel === 'function'
+        ? getSelectedRoomIdsForHotel(hotelId) || []
+        : [],
+    [getSelectedRoomIdsForHotel, hotelId]
   );
 
-  // IDs de habitaciones seleccionadas (si el carrito guarda instancias con { id })
-  const selectedRooms = useMemo(
-    () => (hotelEnCarrito?.habitaciones || []).map((h) => h.id),
-    [hotelEnCarrito]
+  const selectedRoomIdsSet = useMemo(
+    () => new Set(selectedRoomIds),
+    [selectedRoomIds]
   );
 
-  // IDs de paquetes seleccionados
   const selectedPackages = useMemo(
-    () => (hotelEnCarrito?.paquetes || []).map((p) => p.id),
-    [hotelEnCarrito]
+    () =>
+      typeof getSelectedPackageIdsForHotel === 'function'
+        ? getSelectedPackageIdsForHotel(hotelId) || []
+        : [],
+    [getSelectedPackageIdsForHotel, hotelId]
   );
 
-  // Total calculado usando pricingUtils (se calcula con el hotel original + selección)
+  const selectedRoomsObjects = useMemo(
+    () =>
+      typeof getSelectedRoomsForHotel === 'function'
+        ? getSelectedRoomsForHotel(hotelId) || []
+        : [],
+    [getSelectedRoomsForHotel, hotelId]
+  );
+
   const totalPrice = useMemo(() => {
     if (!hotel) return 0;
     const res = calcHotelTotalFromSelection(
       hotel,
-      selectedRooms,
+      selectedRoomIds,
       selectedPackages,
-      {
-        // si tu cart almacena nights/qty podrías pasarlas aquí
-      }
+      {}
     );
-    return res?.final || 0;
-  }, [hotel, selectedRooms, selectedPackages]);
+    return res?.final ?? 0;
+  }, [hotel, selectedRoomIds, selectedPackages]);
 
-  // Coeficiente de descuento de la temporada: normalizamos hotel.temporada.porcentaje
   const discountCoefficient = useMemo(() => {
     if (!hotel?.temporada) return 0;
     return normalizeDiscount(hotel.temporada.porcentaje);
   }, [hotel?.temporada]);
 
-  /**
-   * Toggle helpers: intentan llamar funciones del contexto con nombres comunes.
-   * Si tu CarritoContext expone otros nombres, agrégalos en los checks.
-   */
-
-  const toggleRoomSelection = useCallback(
-    (roomId) => {
-      // Intentamos varias API comunes del contexto
-      if (!carritoCtx) return;
-      if (typeof carritoCtx.toggleRoom === 'function')
-        return carritoCtx.toggleRoom(hotel.hotelId, roomId);
-      if (typeof carritoCtx.toggleRoomSelection === 'function')
-        return carritoCtx.toggleRoomSelection(hotel.hotelId, roomId);
-      if (
-        typeof carritoCtx.addRoom === 'function' &&
-        typeof carritoCtx.removeRoom === 'function'
-      ) {
-        // fallback simple: si ya está en selección, removemos, si no, agregamos
-        const isSelected = selectedRooms.includes(roomId);
-        return isSelected
-          ? carritoCtx.removeRoom(hotel.hotelId, roomId)
-          : carritoCtx.addRoom(hotel.hotelId, roomId);
+  // CALLBACKS: delegan a las funciones del contexto, pero usando la firma que acepta metadata completa
+  const addRoomToHotel = useCallback(
+    (roomObj) => {
+      // Llamamos a agregarHabitacion pasando metadata completa del hotel
+      if (typeof agregarHabitacion === 'function') {
+        agregarHabitacion(
+          {
+            hotelId: hotelId,
+            nombre: hotel?.nombre ?? null,
+            temporada: hotel?.temporada ?? null,
+          },
+          roomObj
+          // fechas ignoradas por ahora
+        );
       }
-      console.warn(
-        'toggleRoomSelection: el CarritoContext no expone una API conocida (toggleRoom/toggleRoomSelection/addRoom/removeRoom).'
-      );
     },
-    [carritoCtx, hotel?.hotelId, selectedRooms]
+    [agregarHabitacion, hotelId, hotel]
   );
 
-  const togglePackageSelection = useCallback(
-    (packageId) => {
-      if (!carritoCtx) return;
-      if (typeof carritoCtx.togglePackage === 'function')
-        return carritoCtx.togglePackage(hotel.hotelId, packageId);
-      if (typeof carritoCtx.togglePackageSelection === 'function')
-        return carritoCtx.togglePackageSelection(hotel.hotelId, packageId);
-      if (
-        typeof carritoCtx.addPackage === 'function' &&
-        typeof carritoCtx.removePackage === 'function'
-      ) {
-        const isSelected = selectedPackages.includes(packageId);
-        return isSelected
-          ? carritoCtx.removePackage(hotel.hotelId, packageId)
-          : carritoCtx.addPackage(hotel.hotelId, packageId);
+  const removeRoomFromHotel = useCallback(
+    (roomId) => {
+      if (typeof removerHabitacion === 'function') {
+        removerHabitacion(hotelId, roomId);
       }
-      console.warn(
-        'togglePackageSelection: el CarritoContext no expone una API conocida (togglePackage/togglePackageSelection/addPackage/removePackage).'
-      );
     },
-    [carritoCtx, hotel?.hotelId, selectedPackages]
+    [removerHabitacion, hotelId]
+  );
+
+  const addPackageToHotel = useCallback(
+    (pkgObj) => {
+      if (typeof agregarPaquete === 'function') {
+        agregarPaquete(
+          {
+            hotelId: hotelId,
+            nombre: hotel?.nombre ?? null,
+            temporada: hotel?.temporada ?? null,
+          },
+          pkgObj
+        );
+      }
+    },
+    [agregarPaquete, hotelId, hotel]
+  );
+
+  const removePackageFromHotel = useCallback(
+    (pkgId) => {
+      if (typeof removerPaquete === 'function') {
+        removerPaquete(hotelId, pkgId);
+      }
+    },
+    [removerPaquete, hotelId]
+  );
+
+  const hotelEnCarrito = useMemo(
+    () => (typeof getHotelEntry === 'function' ? getHotelEntry(hotelId) : null),
+    [getHotelEntry, hotelId]
   );
 
   return {
-    selectedRooms,
+    selectedRoomIds,
+    selectedRoomIdsSet,
+    selectedRoomsObjects,
     selectedPackages,
-    toggleRoomSelection,
-    togglePackageSelection,
+    addRoom: addRoomToHotel,
+    removeRoom: removeRoomFromHotel,
+    addPackage: addPackageToHotel,
+    removePackage: removePackageFromHotel,
     totalPrice,
     discountCoefficient,
-    hotelEnCarrito, // útil para componentes que quieran más info
+    hotelEnCarrito,
   };
 }
 
