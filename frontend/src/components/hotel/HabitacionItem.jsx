@@ -9,24 +9,35 @@ import {
   toNumber,
   calcSeasonalPrice,
 } from '@utils/pricingUtils';
+import { useCarrito } from '@context/CarritoContext';
+import useBookingDates from '@hooks/useBookingDates';
 
 function HabitacionItem({
   hotelData = null,
+  hotelId = null,
   habitacionGroup,
   selectedIds = [],
-  selectedIdsSet,
-  onAdd,
-  onRemove,
+  selectedIdsSet = null,
+  onAdd = null,
+  onRemove = null,
 }) {
   const [showModal, setShowModal] = useState(false);
 
-  // Instancias físicas de este grupo y disponibilidad
+  // Hook para obtener fechas normalizadas en ISO (o null) y nights si hace falta
+  const { isoFechaInicio, isoFechaFin } = useBookingDates();
+
+  // Carrito: fallback si no viene onAdd/onRemove desde el padre
+  const carrito = useCarrito();
+  const addRoomCtx = carrito?.addRoom ?? carrito?.agregarHabitacion;
+  const removeRoomCtx = carrito?.removeRoom ?? carrito?.removerHabitacion;
+
+  // Instancias físicas del grupo
   const instances = Array.isArray(habitacionGroup.habitaciones)
     ? habitacionGroup.habitaciones
     : [];
   const maxAvailable = instances.length;
 
-  // Set local de instancias para lookups O(1)
+  // Set local de instancias para búsquedas O(1)
   const instanceIdsSet = useMemo(
     () => new Set(instances.map((i) => i.id)),
     [instances]
@@ -42,35 +53,33 @@ function HabitacionItem({
     return count;
   }, [selectedIds, instanceIdsSet]);
 
-  // Precio base (del grupo). toNumber asegura que sea número aunque venga como string.
+  // Precio base (normalizar a número)
   const precioBase = toNumber(habitacionGroup.precio ?? 100);
 
-  // ---- Lógica de temporada / precio final ----
-  // Por defecto mostramos el precio redondeado
-  let precioFinal = roundToInteger(precioBase);
-  let precioOriginal = undefined;
+  // Calcular precio final/original según temporada (si existe)
+  const { precioFinal, precioOriginal } = useMemo(() => {
+    let final = roundToInteger(precioBase);
+    let original = undefined;
 
-  // Si existe temporada en el hotel, aplicamos la lógica de descuento (ejemplo: tipo 'alta')
-  if (hotelData?.temporada) {
-    const temporada = hotelData.temporada;
-    const porcentajeRaw = temporada?.porcentaje ?? 0;
-    const porcentaje = toNumber(porcentajeRaw);
+    if (hotelData?.temporada) {
+      const temporada = hotelData.temporada;
+      const porcentaje = toNumber(temporada?.porcentaje ?? 0);
 
-    // Ejemplo: cuando temporada.tipo === 'alta' aplicamos un "precio con descuento"
-    if (temporada?.tipo === 'alta' && porcentaje) {
-      const precioConDescuento = calcSeasonalPrice(precioBase, porcentaje);
-      precioFinal = roundToInteger(precioConDescuento);
-      // Guardamos precio original para que PriceTag pueda mostrarlo tachado
-      precioOriginal = roundToInteger(precioBase);
-    } else {
-      // si no es tipo 'alta' o no hay porcentaje, dejamos el precio base redondeado
-      precioFinal = roundToInteger(precioBase);
+      // Ejemplo: aplicar lógica cuando temporada.tipo === 'alta'
+      if (temporada?.tipo === 'alta' && porcentaje) {
+        const precioConDescuento = calcSeasonalPrice(precioBase, porcentaje);
+        final = roundToInteger(precioConDescuento);
+        original = roundToInteger(precioBase);
+      }
     }
-  }
 
-  // Handlers para agregar/remover (no enviamos fechas por ahora)
+    return { precioFinal: final, precioOriginal: original };
+  }, [precioBase, hotelData]);
+
+  // Handler para agregar una habitación
   const handleIncrement = useCallback(() => {
     if (selectedCount >= maxAvailable) return;
+
     const selectedSet = selectedIdsSet ?? new Set(selectedIds ?? []);
     const instanciaParaAgregar = instances.find(
       (inst) => !selectedSet.has(inst.id)
@@ -85,7 +94,49 @@ function HabitacionItem({
       nombre: `${habitacionGroup.tipo} - ${instanciaParaAgregar.numero ?? ''}`,
     };
 
-    onAdd?.(habitacionAAgregar);
+    const fechas = { fechaInicio: isoFechaInicio, fechaFin: isoFechaFin };
+
+    // Si el padre controla la selección, lo notificamos (recomendado)
+    if (typeof onAdd === 'function') {
+      onAdd(habitacionAAgregar, fechas);
+      return;
+    }
+
+    // Fallback: usar API del contexto. soporta agregarHabitacion(hotelInfo, habitacion, fechas)
+    if (typeof addRoomCtx === 'function') {
+      try {
+        // Si addRoomCtx es wrapper nuevo (hotelId, roomObj, fechas)
+        if (carrito?.addRoom) {
+          // wrapper nuevo
+          carrito.addRoom(
+            hotelId ?? hotelData?.hotelId,
+            habitacionAAgregar,
+            fechas
+          );
+        } else {
+          // API antigua
+          carrito.agregarHabitacion(
+            {
+              hotelId: hotelId ?? hotelData?.hotelId,
+              nombre: hotelData?.nombre ?? null,
+              temporada: hotelData?.temporada ?? null,
+            },
+            habitacionAAgregar,
+            fechas
+          );
+        }
+      } catch (err) {
+        console.warn(
+          'HabitacionItem: error agregando habitación via CarritoContext',
+          err
+        );
+      }
+      return;
+    }
+
+    console.warn(
+      'HabitacionItem: no existe onAdd ni función de carrito conocida para agregar.'
+    );
   }, [
     selectedCount,
     maxAvailable,
@@ -95,8 +146,15 @@ function HabitacionItem({
     habitacionGroup,
     precioBase,
     onAdd,
+    addRoomCtx,
+    carrito,
+    hotelId,
+    hotelData,
+    isoFechaInicio,
+    isoFechaFin,
   ]);
 
+  // Handler para remover la última seleccionada de este grupo
   const handleDecrement = useCallback(() => {
     if (selectedCount <= 0) return;
     const seleccionadasDelGrupo = (selectedIds || []).filter((id) =>
@@ -104,11 +162,46 @@ function HabitacionItem({
     );
     const idARemover = seleccionadasDelGrupo[seleccionadasDelGrupo.length - 1];
     if (!idARemover) return;
-    onRemove?.(idARemover);
-  }, [selectedCount, selectedIds, instanceIdsSet, onRemove]);
+
+    // Si padre controla, delegamos
+    if (typeof onRemove === 'function') {
+      onRemove(idARemover);
+      return;
+    }
+
+    // Fallback al contexto
+    if (typeof removeRoomCtx === 'function') {
+      try {
+        if (carrito?.removeRoom) {
+          carrito.removeRoom(hotelId ?? hotelData?.hotelId, idARemover);
+        } else {
+          carrito.removerHabitacion(hotelId ?? hotelData?.hotelId, idARemover);
+        }
+      } catch (err) {
+        console.warn(
+          'HabitacionItem: error removiendo habitación via CarritoContext',
+          err
+        );
+      }
+      return;
+    }
+
+    console.warn(
+      'HabitacionItem: no existe onRemove ni función de carrito conocida para remover.'
+    );
+  }, [
+    selectedCount,
+    selectedIds,
+    instanceIdsSet,
+    onRemove,
+    removeRoomCtx,
+    carrito,
+    hotelId,
+    hotelData,
+  ]);
 
   const handleShowDetails = (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setShowModal(true);
   };
   const handleCloseModal = () => setShowModal(false);
@@ -158,7 +251,7 @@ function HabitacionItem({
           />
         </div>
 
-        {/* Precio: ahora pasamos precioFinal y original (si aplica) */}
+        {/* Precio */}
         <div className="flex justify-end">
           <div className="text-right">
             <PriceTag precio={precioFinal} original={precioOriginal} />

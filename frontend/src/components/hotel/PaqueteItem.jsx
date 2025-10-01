@@ -1,19 +1,10 @@
-// PaqueteItem.jsx
 import { memo, useState, useMemo, useCallback } from 'react';
 import { Calendar, Percent, Info } from 'lucide-react';
 import PaqueteDetailsModal from './PaqueteDetailsModal';
 import PriceTag from '@ui/PriceTag';
-import { useCarrito } from '@context/CarritoContext';
 import { calcPackageTotal, normalizeDiscount } from '@utils/pricingUtils';
-
-/*
-  PaqueteItem
-  - Recibe: hotelData (opcional) o hotelId (recomendado), paquete, isSelected, onSelect (callback del padre)
-  - Comportamiento:
-    * Si onSelect está presente -> lo notifica (HotelCard controlará agregar/quitar).
-    * Si onSelect NO está -> usa directamente addPackage / agregarPaquete del contexto.
-    * No se envían fechas (ignoradas por ahora).
-*/
+import { useCarrito } from '@context/CarritoContext';
+import useBookingDates from '@hooks/useBookingDates';
 
 function PaqueteItem({
   hotelData = null,
@@ -23,30 +14,22 @@ function PaqueteItem({
   onSelect = null,
 }) {
   if (!paquete) return null;
-  // Determinar hotelId y hotelInfo para compatibilidad con API antigua
-  const resolvedHotelId = hotelId ?? hotelData?.hotelId ?? null;
-  const hotelInfo = {
-    hotelId: resolvedHotelId,
-    nombre: hotelData?.nombre ?? null,
-    temporada: hotelData?.temporada ?? null,
-  };
-
-  // Contexto del carrito: preferimos los wrappers addPackage/removePackage
-  const carrito = useCarrito();
-  const addPackageWrapper =
-    carrito?.addPackage ?? carrito?.agregarPaquete ?? null;
-  const removePackageWrapper =
-    carrito?.removePackage ?? carrito?.removerPaquete ?? null;
 
   const [mostrarModal, setMostrarModal] = useState(false);
 
-  // Cálculo de precios (memoizado)
+  // Fechas desde hook central (ISO strings o null)
+  const { isoFechaInicio, isoFechaFin } = useBookingDates();
+
+  // Carrito (fallback si no hay onSelect)
+  const carrito = useCarrito();
+
+  // Calculo de precios (memo)
   const calc = useMemo(() => {
     const hotelSeasonDiscount = hotelData?.temporada?.porcentaje ?? 0;
     return calcPackageTotal({
       paquete,
       hotelSeasonDiscount,
-      qty: 1,
+      qty: paquete.qty ?? 1,
     });
   }, [paquete, hotelData?.temporada?.porcentaje]);
 
@@ -55,88 +38,72 @@ function PaqueteItem({
     final: precioFinal,
     original: precioOriginal,
   } = calc || {
-    noches: paquete.noches ?? 0,
+    noches: paquete.noches ?? 1,
     final: paquete.precio ?? 0,
     original: paquete.precio ?? paquete.precio,
   };
 
-  // Cálculo de descuento combinado para mostrar en UI
   const descPaquete = normalizeDiscount(paquete.descuento);
   const descTemporada = normalizeDiscount(hotelData?.temporada?.porcentaje);
   const totalDisc = 1 - (1 - descPaquete) * (1 - descTemporada);
 
-  // Handlers: notificar padre y/o usar contexto
+  // Toggle selection (invocado por el checkbox)
   const manejarSeleccion = useCallback(
     (e) => {
       const checked = Boolean(e.target.checked);
 
-      // Notificar al padre para mantener UI controlada si provisto
+      // Notificamos al padre siempre (si existe) para UI controlada
       if (typeof onSelect === 'function') {
         onSelect(paquete.id);
+        return;
       }
 
-      // Si no hay onSelect, fallback a usar API del contexto directamente
-      if (typeof onSelect !== 'function') {
+      // Si no hay onSelect, fallback al contexto
+      const fechas = { fechaInicio: isoFechaInicio, fechaFin: isoFechaFin };
+      try {
         if (checked) {
-          if (typeof addPackageWrapper === 'function') {
-            // Si el wrapper es agregarPaquete (API antigua), acepta (hotelInfo, paquete)
-            // Si es addPackage (wrapper nuevo), firma (hotelId, pkgObj)
-            try {
-              if (typeof carrito?.addPackage === 'function') {
-                // wrapper nuevo: addPackage(hotelId, pkgObj)
-                carrito.addPackage(resolvedHotelId, paquete);
-              } else if (typeof carrito?.agregarPaquete === 'function') {
-                // API antigua: agregarPaquete(hotelInfo, paquete)
-                carrito.agregarPaquete(hotelInfo, paquete);
-              } else {
-                // si sólo tenemos el wrapper variable (fallback)
-                addPackageWrapper(
-                  resolvedHotelId ? resolvedHotelId : hotelInfo,
-                  paquete
-                );
-              }
-            } catch (err) {
-              console.warn('Error agregando paquete:', err);
-            }
+          // Preferir wrapper nuevo addPackage(hotelId, pkgObj, fechas)
+          if (typeof carrito?.addPackage === 'function') {
+            carrito.addPackage(hotelId ?? hotelData?.hotelId, paquete, fechas);
+          } else if (typeof carrito?.agregarPaquete === 'function') {
+            carrito.agregarPaquete(
+              {
+                hotelId: hotelId ?? hotelData?.hotelId,
+                nombre: hotelData?.nombre ?? null,
+                temporada: hotelData?.temporada ?? null,
+              },
+              paquete,
+              fechas
+            );
           } else {
             console.warn(
-              'PaqueteItem: no existe función para agregar paquete en CarritoContext'
+              'PaqueteItem: no hay función para agregar paquete en CarritoContext'
             );
           }
         } else {
-          if (typeof removePackageWrapper === 'function') {
-            try {
-              if (typeof carrito?.removePackage === 'function') {
-                // wrapper nuevo: removePackage(hotelId, pkgId)
-                carrito.removePackage(resolvedHotelId, paquete.id);
-              } else if (typeof carrito?.removerPaquete === 'function') {
-                // API antigua: removerPaquete(hotelId, paqueteId)
-                carrito.removerPaquete(resolvedHotelId, paquete.id);
-              } else {
-                removePackageWrapper(
-                  resolvedHotelId ? resolvedHotelId : hotelInfo,
-                  paquete.id
-                );
-              }
-            } catch (err) {
-              console.warn('Error removiendo paquete:', err);
-            }
+          // Remover paquete
+          if (typeof carrito?.removePackage === 'function') {
+            carrito.removePackage(hotelId ?? hotelData?.hotelId, paquete.id);
+          } else if (typeof carrito?.removerPaquete === 'function') {
+            carrito.removerPaquete(hotelId ?? hotelData?.hotelId, paquete.id);
           } else {
             console.warn(
-              'PaqueteItem: no existe función para remover paquete en CarritoContext'
+              'PaqueteItem: no hay función para remover paquete en CarritoContext'
             );
           }
         }
+      } catch (err) {
+        console.warn('PaqueteItem: error manipulando paquete en carrito', err);
       }
     },
     [
       onSelect,
       paquete,
-      addPackageWrapper,
-      removePackageWrapper,
       carrito,
-      resolvedHotelId,
-      hotelInfo,
+      hotelId,
+      hotelData,
+      isoFechaInicio,
+      isoFechaFin,
     ]
   );
 
@@ -148,28 +115,26 @@ function PaqueteItem({
   const handleCloseModal = useCallback(() => setMostrarModal(false), []);
 
   const handleReserveFromModal = useCallback(() => {
-    // Si padre controla selección, delegamos en onSelect; si no, usamos contexto directo
+    // Intentamos delegar al padre si existe
     if (typeof onSelect === 'function') {
       if (!isSelected) onSelect(paquete.id);
     } else {
-      if (typeof addPackageWrapper === 'function') {
-        try {
-          if (typeof carrito?.addPackage === 'function') {
-            carrito.addPackage(resolvedHotelId, paquete);
-          } else if (typeof carrito?.agregarPaquete === 'function') {
-            carrito.agregarPaquete(hotelInfo, paquete);
-          } else {
-            addPackageWrapper(
-              resolvedHotelId ? resolvedHotelId : hotelInfo,
-              paquete
-            );
-          }
-        } catch (err) {
-          console.warn('Error agregando paquete desde modal:', err);
-        }
+      const fechas = { fechaInicio: isoFechaInicio, fechaFin: isoFechaFin };
+      if (typeof carrito?.addPackage === 'function') {
+        carrito.addPackage(hotelId ?? hotelData?.hotelId, paquete, fechas);
+      } else if (typeof carrito?.agregarPaquete === 'function') {
+        carrito.agregarPaquete(
+          {
+            hotelId: hotelId ?? hotelData?.hotelId,
+            nombre: hotelData?.nombre ?? null,
+            temporada: hotelData?.temporada ?? null,
+          },
+          paquete,
+          fechas
+        );
       } else {
         console.warn(
-          'PaqueteItem: no existe función para agregar paquete en CarritoContext'
+          'PaqueteItem: no hay función para agregar paquete en CarritoContext'
         );
       }
     }
@@ -177,17 +142,17 @@ function PaqueteItem({
   }, [
     onSelect,
     isSelected,
-    addPackageWrapper,
-    carrito,
-    resolvedHotelId,
     paquete,
-    hotelInfo,
+    carrito,
+    hotelId,
+    hotelData,
+    isoFechaInicio,
+    isoFechaFin,
   ]);
 
   return (
     <>
       <article className="grid grid-cols-3 items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
-        {/* Columna 1: info del paquete (ocupa 2 espacios) */}
         <div className="col-span-2 flex items-center gap-4">
           <input
             type="checkbox"
@@ -218,7 +183,7 @@ function PaqueteItem({
 
               <button
                 onClick={handleShowDetails}
-                className="flex items-center gap-1.5 text-sm text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
                 type="button"
               >
                 <Info className="h-4 w-4" />
@@ -232,7 +197,6 @@ function PaqueteItem({
           </div>
         </div>
 
-        {/* Columna 3: precio */}
         <div className="flex justify-end">
           <div className="text-right">
             <PriceTag

@@ -1,4 +1,3 @@
-// CarritoContext.jsx
 import {
   createContext,
   useContext,
@@ -12,6 +11,7 @@ import dateUtils from '../utils/dateUtils';
 
 const { normalizeDateValue } = dateUtils;
 const STORAGE_KEY = 'carritoState';
+const SEARCH_FILTERS_KEY = 'busquedaFilters'; // clave donde guardamos los filtros de búsqueda
 
 const estadoInicial = {
   hoteles: [],
@@ -49,14 +49,12 @@ function carritoReducer(estado, accion) {
         };
       }
 
-      // Si ya existe, hacemos merge: actualizamos sólo si vienen datos nuevos
       return {
         ...estado,
         hoteles: estado.hoteles.map((hotel) =>
           hotel.hotelId === payload.hotelId
             ? {
                 ...hotel,
-                // sólo setea nombre/temporada si no existen aún en el hotel o si vienen en el payload
                 nombre: hotel.nombre ?? payload.nombre ?? hotel.nombre,
                 temporada:
                   hotel.temporada ?? payload.temporada ?? hotel.temporada,
@@ -163,7 +161,7 @@ function carritoReducer(estado, accion) {
 
 const CarritoContext = createContext(undefined);
 
-/** Asegura que el hotel existe en el carrito. Si ya existe, no sobrescribe con nulls. */
+/** Asegura que el hotel existe en el carrito. */
 function asegurarHotel(dispatch, { hotelId, nombre, temporada }) {
   dispatch({
     type: TIPOS.AGREGAR_HOTEL,
@@ -171,23 +169,58 @@ function asegurarHotel(dispatch, { hotelId, nombre, temporada }) {
   });
 }
 
-/** Agrega elemento (habitacion/paquete) normalizando fechas y seteando addedAt. */
-function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
-  // Aseguramos que la entrada del hotel exista y que al crearla se guarde metadata si viene
-  asegurarHotel(dispatch, hotelInfo);
-
-  // Normalizamos fechas (si vienen) — si las ignorás por ahora, se dejarán null
+/**
+ * Intenta obtener fechas desde varias fuentes en este orden:
+ * 1) fechas pasadas explícitamente en el parámetro `fechas`
+ * 2) fechas existentes en el elemento (elemento.fechaInicio/fechaFin)
+ * 3) persisted search filters (localStorage 'busquedaFilters')
+ * 4) null
+ */
+function resolveDates(fechas = {}, elemento = {}) {
   let fechaInicio = fechas.fechaInicio ?? elemento.fechaInicio ?? null;
   let fechaFin = fechas.fechaFin ?? elemento.fechaFin ?? null;
 
+  // Si ambos nulos, intentamos leer persisted search filters
+  if (
+    (fechaInicio == null || fechaInicio === '') &&
+    (fechaFin == null || fechaFin === '')
+  ) {
+    try {
+      const raw =
+        typeof window !== 'undefined'
+          ? window.localStorage.getItem(SEARCH_FILTERS_KEY)
+          : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed) {
+          fechaInicio = fechaInicio ?? parsed.fechaInicio ?? null;
+          fechaFin = fechaFin ?? parsed.fechaFin ?? null;
+        }
+      }
+    } catch (err) {
+      // si falla la lectura no hacemos nada (dejamos nulls)
+      // console.warn('CarritoContext: no se pudo leer filtros de búsqueda persistidos', err);
+    }
+  }
+
+  // Normalización final
   fechaInicio = normalizeDateValue(fechaInicio);
   fechaFin = normalizeDateValue(fechaFin);
+
+  return { fechaInicio, fechaFin };
+}
+
+/** Agrega elementos con normalización de fechas y addedAt. */
+function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
+  asegurarHotel(dispatch, hotelInfo);
+
+  // Resolvemos las fechas (respaldo en persisted search filters)
+  const { fechaInicio, fechaFin } = resolveDates(fechas, elemento);
 
   const item = {
     ...elemento,
     fechaInicio,
     fechaFin,
-    // timestamp para controlar orden de selección (LIFO si hace falta)
     addedAt: Date.now(),
   };
 
@@ -207,7 +240,6 @@ export function CarritoProvider({ children }) {
   );
   const [estado, dispatch] = useReducer(carritoReducer, persistedState);
 
-  // Normalización / migración al montar
   useEffect(() => {
     const normalizeHoteles = (hoteles = []) =>
       (hoteles || []).map((h) => ({
@@ -217,7 +249,6 @@ export function CarritoProvider({ children }) {
           ...hab,
           fechaInicio: normalizeDateValue(hab.fechaInicio),
           fechaFin: normalizeDateValue(hab.fechaFin),
-          // preserve addedAt si existe o setear null (no forzamos new Date aquí)
           addedAt: hab.addedAt ?? null,
         })),
         paquetes: (h.paquetes || []).map((p) => ({
@@ -239,12 +270,11 @@ export function CarritoProvider({ children }) {
     }
   }, []);
 
-  // Persistir cambios
   useEffect(() => {
     setPersistedState(estado);
   }, [estado, setPersistedState]);
 
-  // ---------- Acciones (API en español, retrocompatibilidad) ----------
+  // Acciones
   const agregarHabitacion = useCallback(
     (hotelInfo, habitacion, fechas) =>
       agregarElemento(
@@ -292,36 +322,29 @@ export function CarritoProvider({ children }) {
     [dispatch]
   );
 
-  // ---------- Wrappers con firma (hotelId, ...) para conveniencia ----------
+  // Wrappers con firma (hotelId, ...) que aceptan fechas opcionales
   const addRoom = useCallback(
-    (hotelId, roomObj, fechas) => {
-      return agregarHabitacion({ hotelId }, roomObj, fechas);
-    },
+    (hotelId, roomObj, fechas) =>
+      agregarHabitacion({ hotelId }, roomObj, fechas),
     [agregarHabitacion]
   );
 
   const removeRoom = useCallback(
-    (hotelId, roomId) => {
-      return removerHabitacion(hotelId, roomId);
-    },
+    (hotelId, roomId) => removerHabitacion(hotelId, roomId),
     [removerHabitacion]
   );
 
   const addPackage = useCallback(
-    (hotelId, pkgObj, fechas) => {
-      return agregarPaquete({ hotelId }, pkgObj, fechas);
-    },
+    (hotelId, pkgObj, fechas) => agregarPaquete({ hotelId }, pkgObj, fechas),
     [agregarPaquete]
   );
 
   const removePackage = useCallback(
-    (hotelId, pkgId) => {
-      return removerPaquete(hotelId, pkgId);
-    },
+    (hotelId, pkgId) => removerPaquete(hotelId, pkgId),
     [removerPaquete]
   );
 
-  // ---------- Selectores por hotel (referencias estables) ----------
+  // Selectores
   const getHotelEntry = useCallback(
     (hotelId) => estado.hoteles.find((h) => h.hotelId === hotelId) || null,
     [estado.hoteles]
@@ -366,23 +389,19 @@ export function CarritoProvider({ children }) {
   const value = useMemo(
     () => ({
       carrito: estado,
-      // API en español (retrocompat)
       agregarHabitacion,
       agregarPaquete,
       removerHabitacion,
       removerPaquete,
       removerHotel,
       totalElementos,
-      // wrappers convenientes (firma: hotelId, ...)
       addRoom,
       removeRoom,
       addPackage,
       removePackage,
-      // selectores
       getSelectedRoomIdsForHotel,
       getSelectedRoomsForHotel,
       getSelectedPackageIdsForHotel,
-      // entrada completa
       getHotelEntry,
     }),
     [

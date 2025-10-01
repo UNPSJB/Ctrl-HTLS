@@ -1,18 +1,29 @@
-/**
- * parseDate(value) -> Date | null
- * - Acepta: Date, timestamp, string ISO, string legible por Date.
- * - Devuelve null si no puede parsear.
- */
 export function parseDate(value) {
   if (value == null) return null;
+
+  // Si ya es Date
   if (value instanceof Date) {
-    return Number.isFinite(value.getTime()) ? new Date(value) : null;
+    return Number.isFinite(value.getTime()) ? new Date(value.getTime()) : null;
   }
-  const d = new Date(value);
+
+  const s = String(value).trim();
+
+  // Detectar formato "YYYY-MM-DD" (fecha sin tiempo) — lo interpretamos como **local**.
+  // Esto evita que 'new Date("2025-10-02")' se trate como UTC y luego devuelva la fecha anterior en zonas negativas.
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (dateOnlyMatch) {
+    const y = Number(dateOnlyMatch[1]);
+    const m = Number(dateOnlyMatch[2]) - 1; // monthIndex
+    const d = Number(dateOnlyMatch[3]);
+    const localDate = new Date(y, m, d);
+    return Number.isFinite(localDate.getTime()) ? localDate : null;
+  }
+
+  // Para el resto de formatos (ISO con zona, timestamp, legibles por Date)
+  const d = new Date(s);
   return Number.isFinite(d.getTime()) ? d : null;
 }
 
-/** isValidDate(d) -> boolean */
 export function isValidDate(d) {
   return d instanceof Date && Number.isFinite(d.getTime());
 }

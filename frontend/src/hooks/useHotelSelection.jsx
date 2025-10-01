@@ -1,4 +1,3 @@
-// useHotelSelection.js
 import { useMemo, useCallback } from 'react';
 import { useCarrito } from '@context/CarritoContext';
 import {
@@ -6,54 +5,31 @@ import {
   normalizeDiscount,
 } from '@utils/pricingUtils';
 
-/**
- * useHotelSelection
- * - Llama a agregarHabitacion pasándole la metadata completa del hotel
- * - Devuelve selectedRoomIds / Set y callbacks estables
- * - Ignoramos fechas por ahora (se pueden añadir más tarde)
- */
 function useHotelSelection(hotel) {
-  const {
-    getSelectedRoomIdsForHotel,
-    getSelectedRoomsForHotel,
-    getSelectedPackageIdsForHotel,
-    agregarHabitacion, // usamos la API en español para pasar metadata completa
-    removerHabitacion,
-    agregarPaquete,
-    removerPaquete,
-    getHotelEntry,
-  } = useCarrito();
+  const carritoCtx = useCarrito();
 
   const hotelId = hotel?.hotelId;
 
-  const selectedRoomIds = useMemo(
-    () =>
-      typeof getSelectedRoomIdsForHotel === 'function'
-        ? getSelectedRoomIdsForHotel(hotelId) || []
-        : [],
-    [getSelectedRoomIdsForHotel, hotelId]
-  );
+  const hotelEnCarrito = useMemo(() => {
+    return carritoCtx?.getHotelEntry
+      ? carritoCtx.getHotelEntry(hotelId)
+      : carritoCtx?.carrito?.hoteles?.find((h) => h.hotelId === hotelId) ||
+          null;
+  }, [carritoCtx, hotelId]);
 
-  const selectedRoomIdsSet = useMemo(
-    () => new Set(selectedRoomIds),
-    [selectedRoomIds]
-  );
+  const selectedRoomIds = useMemo(() => {
+    if (typeof carritoCtx?.getSelectedRoomIdsForHotel === 'function') {
+      return carritoCtx.getSelectedRoomIdsForHotel(hotelId) || [];
+    }
+    return hotelEnCarrito?.habitaciones?.map((h) => h.id) || [];
+  }, [carritoCtx, hotelEnCarrito, hotelId]);
 
-  const selectedPackages = useMemo(
-    () =>
-      typeof getSelectedPackageIdsForHotel === 'function'
-        ? getSelectedPackageIdsForHotel(hotelId) || []
-        : [],
-    [getSelectedPackageIdsForHotel, hotelId]
-  );
-
-  const selectedRoomsObjects = useMemo(
-    () =>
-      typeof getSelectedRoomsForHotel === 'function'
-        ? getSelectedRoomsForHotel(hotelId) || []
-        : [],
-    [getSelectedRoomsForHotel, hotelId]
-  );
+  const selectedPackages = useMemo(() => {
+    if (typeof carritoCtx?.getSelectedPackageIdsForHotel === 'function') {
+      return carritoCtx.getSelectedPackageIdsForHotel(hotelId) || [];
+    }
+    return hotelEnCarrito?.paquetes?.map((p) => p.id) || [];
+  }, [carritoCtx, hotelEnCarrito, hotelId]);
 
   const totalPrice = useMemo(() => {
     if (!hotel) return 0;
@@ -71,73 +47,91 @@ function useHotelSelection(hotel) {
     return normalizeDiscount(hotel.temporada.porcentaje);
   }, [hotel?.temporada]);
 
-  // CALLBACKS: delegan a las funciones del contexto, pero usando la firma que acepta metadata completa
-  const addRoomToHotel = useCallback(
-    (roomObj) => {
-      // Llamamos a agregarHabitacion pasando metadata completa del hotel
-      if (typeof agregarHabitacion === 'function') {
-        agregarHabitacion(
+  // Callbacks: pass through fechas
+  const addRoom = useCallback(
+    (roomObj, fechas) => {
+      if (typeof carritoCtx?.addRoom === 'function') {
+        return carritoCtx.addRoom(hotelId, roomObj, fechas);
+      }
+      if (typeof carritoCtx?.agregarHabitacion === 'function') {
+        // compatibilidad: agregarHabitacion(hotelInfo, habitacion, fechas)
+        return carritoCtx.agregarHabitacion(
           {
             hotelId: hotelId,
             nombre: hotel?.nombre ?? null,
             temporada: hotel?.temporada ?? null,
           },
-          roomObj
-          // fechas ignoradas por ahora
+          roomObj,
+          fechas
         );
       }
+      console.warn(
+        'useHotelSelection.addRoom: no hay función conocida en CarritoContext'
+      );
     },
-    [agregarHabitacion, hotelId, hotel]
+    [carritoCtx, hotelId, hotel]
   );
 
-  const removeRoomFromHotel = useCallback(
+  const removeRoom = useCallback(
     (roomId) => {
-      if (typeof removerHabitacion === 'function') {
-        removerHabitacion(hotelId, roomId);
+      if (typeof carritoCtx?.removeRoom === 'function') {
+        return carritoCtx.removeRoom(hotelId, roomId);
       }
+      if (typeof carritoCtx?.removerHabitacion === 'function') {
+        return carritoCtx.removerHabitacion(hotelId, roomId);
+      }
+      console.warn(
+        'useHotelSelection.removeRoom: no hay función conocida en CarritoContext'
+      );
     },
-    [removerHabitacion, hotelId]
+    [carritoCtx, hotelId]
   );
 
-  const addPackageToHotel = useCallback(
-    (pkgObj) => {
-      if (typeof agregarPaquete === 'function') {
-        agregarPaquete(
+  const addPackage = useCallback(
+    (pkgObj, fechas) => {
+      if (typeof carritoCtx?.addPackage === 'function') {
+        return carritoCtx.addPackage(hotelId, pkgObj, fechas);
+      }
+      if (typeof carritoCtx?.agregarPaquete === 'function') {
+        return carritoCtx.agregarPaquete(
           {
             hotelId: hotelId,
             nombre: hotel?.nombre ?? null,
             temporada: hotel?.temporada ?? null,
           },
-          pkgObj
+          pkgObj,
+          fechas
         );
       }
+      console.warn(
+        'useHotelSelection.addPackage: no hay función conocida en CarritoContext'
+      );
     },
-    [agregarPaquete, hotelId, hotel]
+    [carritoCtx, hotelId, hotel]
   );
 
-  const removePackageFromHotel = useCallback(
+  const removePackage = useCallback(
     (pkgId) => {
-      if (typeof removerPaquete === 'function') {
-        removerPaquete(hotelId, pkgId);
+      if (typeof carritoCtx?.removePackage === 'function') {
+        return carritoCtx.removePackage(hotelId, pkgId);
       }
+      if (typeof carritoCtx?.removerPaquete === 'function') {
+        return carritoCtx.removerPaquete(hotelId, pkgId);
+      }
+      console.warn(
+        'useHotelSelection.removePackage: no hay función conocida en CarritoContext'
+      );
     },
-    [removerPaquete, hotelId]
-  );
-
-  const hotelEnCarrito = useMemo(
-    () => (typeof getHotelEntry === 'function' ? getHotelEntry(hotelId) : null),
-    [getHotelEntry, hotelId]
+    [carritoCtx, hotelId]
   );
 
   return {
     selectedRoomIds,
-    selectedRoomIdsSet,
-    selectedRoomsObjects,
     selectedPackages,
-    addRoom: addRoomToHotel,
-    removeRoom: removeRoomFromHotel,
-    addPackage: addPackageToHotel,
-    removePackage: removePackageFromHotel,
+    addRoom,
+    removeRoom,
+    addPackage,
+    removePackage,
     totalPrice,
     discountCoefficient,
     hotelEnCarrito,
