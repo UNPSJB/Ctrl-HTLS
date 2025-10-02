@@ -1,0 +1,98 @@
+// Datos enviados al backend para reservar
+[
+    {
+        "hotelId": 1,
+        "vendedorId": 3,
+        "clienteId": 12,
+        "alquiler": [
+            {
+                "fechaInicio": "2024-07-01",
+                "fechaFin": "2024-07-07",
+                "pasajeros": 2,
+                "montoTotal": 700.00,
+                "habitaciones": [
+                    101,
+                    102
+                ],
+                "paquetes": []
+            },
+            {
+                "fechaInicio": "2024-08-15",
+                "fechaFin": "2024-08-20",
+                "montoTotal": 500.00,
+                "pasajeros": 1,
+                "habitaciones": [
+                    201
+                ],
+                "paquetes": [
+                    3
+                ]
+            }
+        ]
+    }
+]
+// Respuesta de backend despues de disponivilidad y confirmacion
+[
+    {
+        "hotelId": 1,
+        "vendedorId": 3,
+        "clienteId": 12,
+        "alquiler": [
+            {
+                "alquilerId": 45,
+                "fechaInicio": "2024-07-01",
+                "fechaFin": "2024-07-07",
+                "pasajeros": 2,
+                "montoTotal": 700.00,
+                "habitaciones": [
+                    101,
+                    102
+                ],
+                "paquetes": []
+            },
+            {
+                "alquilerId": 46,
+                "fechaInicio": "2024-08-15",
+                "fechaFin": "2024-08-20",
+                "montoTotal": 500.00,
+                "pasajeros": 1,
+                "habitaciones": [
+                    201
+                ],
+                "paquetes": [
+                    3
+                ]
+            }
+        ]
+    }
+]
+// Modificar datos enviados al backend
+{
+    "alquileres": [
+        {
+            "alquilerId": 45,
+            "fechaInicio": "2024-07-01",
+            "fechaFin": "2024-07-07",
+            "pasajeros": 2,
+            "montoTotal": 700.00,
+            "habitaciones": [
+                101,
+                102
+            ],
+            "paquetes": []
+        },
+        {
+            "alquilerId": 46,
+            "fechaInicio": "2024-08-15",
+            "fechaFin": "2024-08-20",
+            "montoTotal": 500.00,
+            "pasajeros": 1,
+            "habitaciones": [
+                201
+            ],
+            "paquetes": [
+                3
+            ]
+        }
+    ]
+}
