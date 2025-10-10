@@ -1,9 +1,34 @@
 {
   "compilerOptions": {
-    "baseUrl": ".", // Define la raíz como base para las rutas
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["src/*"] // Configura el alias @ para apuntar a src
-    }
+      "@/*": ["./*"],
+      "@api/*": ["api/*"],
+      "@components/*": ["components/*"],
+      "@hooks/*": ["hooks/*"],
+      "@context/*": ["context/*"],
+      "@utils/*": ["utils/*"],
+      "@assets/*": ["assets/*"],
+      "@ui/*": ["components/ui/*"],
+      "@layouts/*": ["layouts/*"],
+      "@pages/*": ["pages/*"],
+      "@routes/*": ["routes/*"],
+      "@hotel/*": ["components/hotel/*"],
+      "@client/*": ["components/client/*"],
+      "@cart/*": ["components/cart/*"],
+      "@data/*": ["data/*"],
+      "@checkout/*": ["components/checkout/*"]
+    },
+    // Opciones recomendadas para un proyecto React moderno
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"] // Asegura que todas las rutas dentro de src sean reconocidas
+  "include": ["src/**/*"]
 }
