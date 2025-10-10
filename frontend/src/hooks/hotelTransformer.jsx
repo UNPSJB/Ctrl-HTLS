@@ -13,10 +13,10 @@ export const transformHotel = (hotel) => {
   const transformed = {
     ...hotel,
     // Categoría: Asegurar que las estrellas sean Number
-    categoria: {
-      ...hotel.categoria,
-      estrellas: Number(hotel.categoria?.estrellas) || 0,
-    },
+    // categoria: {
+    //   ...hotel.categoria,
+    //   estrellas: Number(hotel.categoria?.estrellas) || 0,
+    // },
     // Temporada: Asegurar tipos y manejar nulos
     temporada: hotel.temporada
       ? {

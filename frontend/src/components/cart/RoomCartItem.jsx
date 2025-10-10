@@ -1,4 +1,3 @@
-// RoomCartItem.jsx
 import { useCallback, useMemo } from 'react';
 import { Trash2, House, Users } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
@@ -8,11 +7,6 @@ import { useCarrito } from '@context/CarritoContext';
 
 const { formatFecha, nightsBetween } = dateUtils;
 
-/**
- * RoomCartItem
- * - Recibe `room` (entrada del carrito) y `hotel`.
- * - Usa removeRoom (wrapper) preferentemente y fallback a removerHabitacion.
- */
 function RoomCartItem({ room, hotel, onRemove = null }) {
   const {
     fechaInicio,
@@ -38,6 +32,13 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
     });
   }, [room, hotel, nights, qty, precio]);
 
+  console.log(
+    'RoomCartItem - originalTotal:',
+    originalTotal,
+    'finalTotal:',
+    finalTotal
+  );
+
   const { removeRoom, removerHabitacion } = useCarrito();
 
   const handleRemove = useCallback(() => {
@@ -55,10 +56,6 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
       removerHabitacion(hotel?.hotelId, room.id);
       return;
     }
-
-    console.warn(
-      'No se encontró función para remover habitación en CarritoContext'
-    );
   }, [onRemove, removeRoom, removerHabitacion, hotel?.hotelId, room?.id]);
 
   if (!room) return null;

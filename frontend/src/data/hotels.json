@@ -23,7 +23,7 @@
             "tipo": "alta",
             "fechaInicio": "2025-01-01T00:00:00.000Z",
             "fechaFin": "2025-03-31T00:00:00.000Z",
-            "porcentaje": "0.15"
+            "porcentaje": "-0.15"
         },
         "descuentos": [
             {
@@ -99,7 +99,7 @@
         "hotelId": 2,
         "nombre": "Gran Hotel Mar del Plata",
         "categoria": {
-            "estrellas": "3",
+            "estrellas": "A",
             "servicios": [
                 "Wi-Fi gratuito",
                 "Servicio de limpieza diario",
