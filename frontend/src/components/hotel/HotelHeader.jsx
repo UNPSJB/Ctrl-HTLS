@@ -1,14 +1,14 @@
-import { Star, MapPin, ExternalLink } from 'lucide-react';
+import { MapPin, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Temporada from './Temporada';
 import ImageLoader from '@ui/ImageLoader';
+import Calificacion from './Calificacion';
 
 const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
   const navigate = useNavigate();
 
-  // Función para manejar la redirección al hotel
   const handleHotelRedirect = (e) => {
-    e.stopPropagation(); // Evitar que se ejecute el toggle de expansión
+    e.stopPropagation();
     navigate(`/hotel/${hotel.hotelId}`);
   };
 
@@ -37,17 +37,7 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
             </h2>
             <ExternalLink className="h-5 w-5 text-gray-500 transition-colors group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400" />
           </div>
-
-          <div
-            role="img"
-            aria-label={`${hotel.categoria.estrellas} estrellas`}
-            className="flex items-center gap-1"
-          >
-            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-              {hotel.categoria.estrellas}
-            </span>
-            <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />
-          </div>
+          <Calificacion estrellas={hotel.categoria.estrellas} />
         </div>
 
         {hotel.temporada?.tipo === 'alta' && (

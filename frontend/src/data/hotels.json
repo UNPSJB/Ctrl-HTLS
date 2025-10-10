@@ -99,7 +99,7 @@
         "hotelId": 2,
         "nombre": "Gran Hotel Mar del Plata",
         "categoria": {
-            "estrellas": "3",
+            "estrellas": "A",
             "servicios": [
                 "Wi-Fi gratuito",
                 "Servicio de limpieza diario",
