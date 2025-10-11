@@ -4,11 +4,7 @@ import { Users, Home, Info } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import Counter from '@ui/Counter';
 import RoomDetailsModal from './RoomDetailsModal';
-import {
-  roundToInteger,
-  toNumber,
-  calcSeasonalPrice,
-} from '@utils/pricingUtils';
+import { toNumber, calcSeasonalPrice } from '@utils/pricingUtils';
 import { useCarrito } from '@context/CarritoContext';
 import useBookingDates from '@hooks/useBookingDates';
 
@@ -58,22 +54,13 @@ function HabitacionItem({
 
   // Calcular precio final/original según temporada (si existe)
   const { precioFinal, precioOriginal } = useMemo(() => {
-    let final = roundToInteger(precioBase);
-    let original = undefined;
+    let final;
 
     if (hotelData?.temporada) {
-      const temporada = hotelData.temporada;
-      const porcentaje = toNumber(temporada?.porcentaje ?? 0);
-
-      // Ejemplo: aplicar lógica cuando temporada.tipo === 'alta'
-      if (temporada?.tipo === 'alta' && porcentaje) {
-        const precioConDescuento = calcSeasonalPrice(precioBase, porcentaje);
-        final = roundToInteger(precioConDescuento);
-        original = roundToInteger(precioBase);
-      }
+      final = calcSeasonalPrice(precioBase, hotelData.temporada.porcentaje);
     }
 
-    return { precioFinal: final, precioOriginal: original };
+    return { precioFinal: final, precioOriginal: precioBase };
   }, [precioBase, hotelData]);
 
   // Handler para agregar una habitación

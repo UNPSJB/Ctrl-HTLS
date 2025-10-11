@@ -32,13 +32,6 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
     });
   }, [room, hotel, nights, qty, precio]);
 
-  console.log(
-    'RoomCartItem - originalTotal:',
-    originalTotal,
-    'finalTotal:',
-    finalTotal
-  );
-
   const { removeRoom, removerHabitacion } = useCarrito();
 
   const handleRemove = useCallback(() => {

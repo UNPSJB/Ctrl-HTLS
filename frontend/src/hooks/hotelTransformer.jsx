@@ -12,22 +12,11 @@ export const transformHotel = (hotel) => {
   // 1. Aplicar transformaciones básicas de coerción de tipos y estructuras
   const transformed = {
     ...hotel,
-    // Categoría: Asegurar que las estrellas sean Number
-    // categoria: {
-    //   ...hotel.categoria,
-    //   estrellas: Number(hotel.categoria?.estrellas) || 0,
-    // },
     // Temporada: Asegurar tipos y manejar nulos
     temporada: hotel.temporada
       ? {
           ...hotel.temporada,
           porcentaje: Number(hotel.temporada.porcentaje) || 0,
-          fechaInicio: hotel.temporada.fechaInicio
-            ? new Date(hotel.temporada.fechaInicio)
-            : null,
-          fechaFin: hotel.temporada.fechaFin
-            ? new Date(hotel.temporada.fechaFin)
-            : null,
         }
       : null,
     // Descuentos: Coerción de tipos

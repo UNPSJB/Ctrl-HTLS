@@ -294,10 +294,7 @@ export function normalizeHotelForBooking(hotelOriginal) {
 
 /* Calcular el precio final por temporada alta, realizar el porcentaje de descuento del precio base */
 export function calcSeasonalPrice(precioBase, porcentaje) {
-  const base = Math.max(0, Math.floor(toNumber(precioBase)));
-  const perc = normalizeDiscount(porcentaje);
-  const final = roundToInteger(base * (1 - perc));
-  return final;
+  return roundToInteger(precioBase * (1 + porcentaje));
 }
 
 const DEFAULT = {
