@@ -64,20 +64,16 @@ export function flattenRoomInstances(hotel) {
 /* Cálculo por instancia (habitaciones) */
 
 /** Calcula el precio total final para una instancia de habitación. */
-export function calcRoomInstanceTotal({
-  roomInstance,
-  nights = 1,
-  qty = 1,
-  hotelSeasonDiscount = 0,
-}) {
-  const pricePerNight = toNumber(roomInstance.price);
+export function calcRoomInstanceTotal({ precio, nights = 1, porcentaje }) {
+  //console.log(precio, nights, porcentaje);
+
+  const pricePerNight = toNumber(precio);
   const nightsNum = Math.max(1, Math.floor(toNumber(nights)));
-  const qtyNum = Math.max(1, Math.floor(toNumber(qty)));
 
   const unitOriginal = roundTwo(pricePerNight * nightsNum);
-  const totalOriginalIntermediate = roundTwo(unitOriginal * qtyNum);
+  const totalOriginalIntermediate = roundTwo(unitOriginal);
 
-  const hDisc = normalizeDiscount(hotelSeasonDiscount);
+  const hDisc = normalizeDiscount(porcentaje);
   const final = roundToInteger(totalOriginalIntermediate * (1 - hDisc));
 
   const totalOriginal = roundToInteger(totalOriginalIntermediate);
@@ -88,7 +84,6 @@ export function calcRoomInstanceTotal({
     final,
     descuento: descuentoTotal,
     nights: nightsNum,
-    qty: qtyNum,
   };
 }
 

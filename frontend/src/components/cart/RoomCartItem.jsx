@@ -8,29 +8,19 @@ import { useCarrito } from '@context/CarritoContext';
 const { formatFecha, nightsBetween } = dateUtils;
 
 function RoomCartItem({ room, hotel, onRemove = null }) {
-  const {
-    fechaInicio,
-    fechaFin,
-    precio = 0,
-    qty = 1,
-    nombre,
-    capacidad,
-  } = room || {};
+  const { fechaInicio, fechaFin, precio = 0, nombre, capacidad } = room || {};
 
   const nights = nightsBetween(fechaInicio, fechaFin, { useUTC: true });
 
   const { original: originalTotal, final: finalTotal } = useMemo(() => {
-    const hotelSeasonDiscount = hotel?.temporada?.porcentaje ?? 0;
-
-    const roomInstance = { ...room, price: precio };
+    // console.log(hotel);
 
     return calcRoomInstanceTotal({
-      roomInstance,
+      precio: room.precio,
       nights,
-      qty,
-      hotelSeasonDiscount,
+      porcentaje: hotel?.temporada?.porcentaje,
     });
-  }, [room, hotel, nights, qty, precio]);
+  }, [room, hotel, nights, precio]);
 
   const { removeRoom, removerHabitacion } = useCarrito();
 

@@ -95,13 +95,18 @@ function HabitacionItem({
         // Si addRoomCtx es wrapper nuevo (hotelId, roomObj, fechas)
         if (carrito?.addRoom) {
           // wrapper nuevo
+          // CAMBIO: Pasa el objeto completo con la información del hotel
           carrito.addRoom(
-            hotelId ?? hotelData?.hotelId,
+            {
+              hotelId: hotelId ?? hotelData?.hotelId,
+              nombre: hotelData?.nombre ?? null,
+              temporada: hotelData?.temporada ?? null,
+            },
             habitacionAAgregar,
             fechas
           );
         } else {
-          // API antigua
+          // API antigua (esta ya estaba correcta y sirve de modelo)
           carrito.agregarHabitacion(
             {
               hotelId: hotelId ?? hotelData?.hotelId,

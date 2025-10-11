@@ -324,8 +324,8 @@ export function CarritoProvider({ children }) {
 
   // Wrappers con firma (hotelId, ...) que aceptan fechas opcionales
   const addRoom = useCallback(
-    (hotelId, roomObj, fechas) =>
-      agregarHabitacion({ hotelId }, roomObj, fechas),
+    (hotelInfo, roomObj, fechas) =>
+      agregarHabitacion(hotelInfo, roomObj, fechas),
     [agregarHabitacion]
   );
 
@@ -335,7 +335,8 @@ export function CarritoProvider({ children }) {
   );
 
   const addPackage = useCallback(
-    (hotelId, pkgObj, fechas) => agregarPaquete({ hotelId }, pkgObj, fechas),
+    // CAMBIO: Acepta hotelInfo completo en lugar de solo hotelId
+    (hotelInfo, pkgObj, fechas) => agregarPaquete(hotelInfo, pkgObj, fechas),
     [agregarPaquete]
   );
 
