@@ -95,11 +95,7 @@ export function calcRoomInstanceTotal({
 /* Paquetes */
 
 /** Calcula el precio total final para un paquete. */
-export function calcPackageTotal({
-  paquete,
-  hotelSeasonDiscount = 0,
-  qty = 1,
-}) {
+export function calcPackageTotal({ paquete, porcentaje = 0 }) {
   const habitaciones = Array.isArray(paquete.habitaciones)
     ? paquete.habitaciones
     : [];
@@ -107,29 +103,19 @@ export function calcPackageTotal({
     (acc, h) => acc + toNumber(h.precio),
     0
   );
-  const nochesNum = Math.max(1, Math.floor(toNumber(paquete.noches)));
-  const qtyNum = Math.max(1, Math.floor(toNumber(qty)));
 
-  const originalPerPackage = roundTwo(sumPerNight * nochesNum);
-  const originalTotalIntermediate = roundTwo(originalPerPackage * qtyNum);
-
-  const packageDisc = normalizeDiscount(paquete.descuento);
-  const afterPackageDisc = roundTwo(
-    originalTotalIntermediate * (1 - packageDisc)
+  const precioTemporada = calcSeasonalPrice(
+    sumPerNight * paquete.noches,
+    porcentaje
+  );
+  const precioDescuento = calcSeasonalPrice(
+    precioTemporada,
+    -paquete.descuento
   );
 
-  const hotelDisc = normalizeDiscount(hotelSeasonDiscount);
-  const final = roundToInteger(afterPackageDisc * (1 - hotelDisc));
-
-  const totalOriginal = roundToInteger(originalTotalIntermediate);
-  const descuentoTotal = roundToInteger(originalTotalIntermediate - final);
-
   return {
-    original: totalOriginal,
-    final,
-    descuento: descuentoTotal,
-    noches: nochesNum,
-    qty: qtyNum,
+    precioTemporada,
+    precioDescuento,
   };
 }
 

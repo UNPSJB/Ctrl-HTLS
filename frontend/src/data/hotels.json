@@ -46,7 +46,7 @@
         "imagen": "Hotel Paraíso.webp",
         "habitaciones": [
             {
-                "Deluxe": [
+                "Triple": [
                     {
                         "id": 101,
                         "numero": 101,
@@ -62,7 +62,7 @@
                 "capacidad": 2
             },
             {
-                "Suite Ejecutiva": [
+                "Doble": [
                     {
                         "id": 103,
                         "numero": 201,
@@ -84,12 +84,12 @@
                     {
                         "nombre": "Triples",
                         "capacidad": 3,
-                        "precio": 24500
+                        "precio": 250
                     },
                     {
                         "nombre": "Dobles",
                         "capacidad": 2,
-                        "precio": 123123
+                        "precio": 400
                     }
                 ]
             }
@@ -164,7 +164,7 @@
                     {
                         "nombre": "Triples",
                         "capacidad": 3,
-                        "precio": 24500
+                        "precio": 245
                     },
                     {
                         "nombre": "Dobles",

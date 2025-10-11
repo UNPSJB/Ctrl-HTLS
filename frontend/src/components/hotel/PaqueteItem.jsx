@@ -2,7 +2,7 @@ import { memo, useState, useMemo, useCallback } from 'react';
 import { Calendar, Percent, Info } from 'lucide-react';
 import PaqueteDetailsModal from './PaqueteDetailsModal';
 import PriceTag from '@ui/PriceTag';
-import { calcPackageTotal, normalizeDiscount } from '@utils/pricingUtils';
+import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@context/CarritoContext';
 import useBookingDates from '@hooks/useBookingDates';
 
@@ -24,28 +24,12 @@ function PaqueteItem({
   const carrito = useCarrito();
 
   // Calculo de precios (memo)
-  const calc = useMemo(() => {
-    const hotelSeasonDiscount = hotelData?.temporada?.porcentaje ?? 0;
+  const { precioTemporada: precioBase, precioDescuento } = useMemo(() => {
     return calcPackageTotal({
       paquete,
-      hotelSeasonDiscount,
-      qty: paquete.qty ?? 1,
+      porcentaje: hotelData?.temporada?.porcentaje,
     });
   }, [paquete, hotelData?.temporada?.porcentaje]);
-
-  const {
-    noches,
-    final: precioFinal,
-    original: precioOriginal,
-  } = calc || {
-    noches: paquete.noches ?? 1,
-    final: paquete.precio ?? 0,
-    original: paquete.precio ?? paquete.precio,
-  };
-
-  const descPaquete = normalizeDiscount(paquete.descuento);
-  const descTemporada = normalizeDiscount(hotelData?.temporada?.porcentaje);
-  const totalDisc = 1 - (1 - descPaquete) * (1 - descTemporada);
 
   // Toggle selection (invocado por el checkbox)
   const manejarSeleccion = useCallback(
@@ -171,13 +155,13 @@ function PaqueteItem({
 
               <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
                 <Calendar className="h-4 w-4" />
-                <span>{noches}</span>
+                <span>{paquete.noches}</span>
               </div>
 
-              {totalDisc > 0 && (
+              {paquete.descuento > 0 && (
                 <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
                   <Percent className="h-4 w-4" />
-                  <span>{(totalDisc * 100).toFixed(0)}%</span>
+                  <span>{(paquete.descuento * 100).toFixed(0)}%</span>
                 </div>
               )}
 
@@ -199,12 +183,7 @@ function PaqueteItem({
 
         <div className="flex justify-end">
           <div className="text-right">
-            <PriceTag
-              precio={precioFinal}
-              original={
-                precioFinal < precioOriginal ? precioOriginal : undefined
-              }
-            />
+            <PriceTag precio={precioDescuento} original={precioBase} />
           </div>
         </div>
       </article>
