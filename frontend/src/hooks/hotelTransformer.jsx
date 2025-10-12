@@ -1,10 +1,7 @@
 /**
  * Transforma un objeto hotel del formato de backend a una estructura optimizada para el frontend.
- * Realiza dos tareas principales:
- * 1. Coerción de tipos: Convierte strings a Numbers.
- * 2. Reestructuración de datos: Simplifica la estructura del array de habitaciones para un consumo más fácil en la UI.
- *
- * Esta función es idempotente: si se le pasa un hotel ya transformado, no lo volverá a transformar.
+ * - Coerción de tipos: Convierte strings a Numbers.
+ * - Reestructuración de datos: Agrupa habitaciones y paquetes por tipo/nombre.
  *
  * @param {Object} hotel - Objeto hotel crudo.
  * @returns {Object|null} - Objeto hotel transformado.
@@ -14,23 +11,51 @@ export const transformHotel = (hotel) => {
     return null;
   }
 
-  // Comprueba si la transformación ya se aplicó buscando la propiedad 'tipo'.
-  const isAlreadyTransformed =
-    hotel.habitaciones?.[0] && Object.hasOwn(hotel.habitaciones[0], 'tipo');
+  // Si el hotel ya fue transformado, lo retornamos para evitar trabajo doble.
+  if (hotel._isTransformed) {
+    return hotel;
+  }
 
-  const habitacionesTransformadas = isAlreadyTransformed
-    ? hotel.habitaciones
-    : (hotel.habitaciones || []).map((group) => {
-        const tipoHabitacion = Object.keys(group).find((key) =>
-          Array.isArray(group[key])
-        );
-        return {
-          tipo: tipoHabitacion,
-          habitaciones: group[tipoHabitacion] || [],
-          precio: Number(group.precio) || 0,
-          capacidad: Number(group.capacidad) || 0,
-        };
+  // 1. Transformar y agrupar habitaciones
+  const habitacionesTransformadas = (hotel.habitaciones || []).map((group) => {
+    const tipoHabitacion = Object.keys(group).find((key) =>
+      Array.isArray(group[key])
+    );
+    return {
+      tipo: tipoHabitacion,
+      habitaciones: group[tipoHabitacion] || [],
+      precio: Number(group.precio) || 0,
+      capacidad: Number(group.capacidad) || 0,
+    };
+  });
+
+  // 2. Transformar y agrupar paquetes
+  const paquetesAgrupados = (hotel.paquetes || []).reduce((acc, paquete) => {
+    const grupoExistente = acc.find((g) => g.nombre === paquete.nombre);
+
+    // Transformar la instancia actual del paquete
+    const instanciaPaquete = {
+      ...paquete,
+      id: Number(paquete.id),
+      noches: Number(paquete.noches) || 0,
+      descuento: Number(paquete.descuento) || 0,
+      habitaciones: (paquete.habitaciones || []).map((hab) => ({
+        ...hab,
+        capacidad: Number(hab.capacidad) || 0,
+        precio: Number(hab.precio) || 0,
+      })),
+    };
+
+    if (grupoExistente) {
+      grupoExistente.instancias.push(instanciaPaquete);
+    } else {
+      acc.push({
+        ...instanciaPaquete, // Usamos la primera instancia como base
+        instancias: [instanciaPaquete], // Creamos el array de instancias
       });
+    }
+    return acc;
+  }, []);
 
   return {
     ...hotel,
@@ -42,24 +67,14 @@ export const transformHotel = (hotel) => {
           porcentaje: Number(hotel.temporada.porcentaje) || 0,
         }
       : null,
-    descuentos: (hotel.descuentos || []).map((descuento) => ({
-      ...descuento,
-      id: Number(descuento.id),
-      porcentaje: Number(descuento.porcentaje) || 0,
-      cantidad_de_habitaciones: Number(descuento.cantidad_de_habitaciones) || 0,
+    descuentos: (hotel.descuentos || []).map((d) => ({
+      ...d,
+      porcentaje: Number(d.porcentaje) || 0,
+      cantidad_de_habitaciones: Number(d.cantidad_de_habitaciones) || 0,
     })),
     habitaciones: habitacionesTransformadas,
-    paquetes: (hotel.paquetes || []).map((paquete) => ({
-      ...paquete,
-      id: Number(paquete.id),
-      noches: Number(paquete.noches) || 0,
-      descuento: Number(paquete.descuento) || 0,
-      habitaciones: (paquete.habitaciones || []).map((hab) => ({
-        ...hab,
-        capacidad: Number(hab.capacidad) || 0,
-        precio: Number(hab.precio) || 0,
-      })),
-    })),
+    paquetes: paquetesAgrupados, // Usamos los paquetes ya agrupados
+    _isTransformed: true, // Bandera para evitar re-transformación
   };
 };
 

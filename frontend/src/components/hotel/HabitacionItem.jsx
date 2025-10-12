@@ -131,7 +131,6 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
             value={selectedCount}
             onIncrement={handleIncrement}
             onDecrement={handleDecrement}
-            min={0}
             max={maxAvailable}
           />
         </div>

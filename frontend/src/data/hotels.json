@@ -3,22 +3,21 @@
         "hotelId": 1,
         "nombre": "Hotel Paraíso",
         "categoria": {
-            "estrellas": "3",
+            "estrellas": "4",
             "servicios": [
                 "Wi-Fi gratuito",
                 "Servicio de limpieza diario",
                 "Recepción 24 horas",
-                "Desayuno continental básico",
+                "Desayuno buffet",
                 "TV por cable",
-                "Artículos de tocador básicos",
+                "Artículos de tocador de lujo",
                 "Aire acondicionado",
                 "Servicio de lavandería",
-                "Desayuno incluido",
-                "Gimnasio pequeño",
-                "Restaurante o cafetería en el hotel"
+                "Gimnasio",
+                "Restaurante y bar"
             ]
         },
-        "descripcion": "Ubicado en el corazón de Mar del Plata, el Hotel Paraíso ofrece una experiencia de lujo inigualable. Con vistas panorámicas al océano y servicios de primera clase, es el destino perfecto para quienes buscan confort y elegancia. Disfruta de su spa, gastronomía gourmet y actividades exclusivas en un entorno sofisticado.",
+        "descripcion": "Ubicado en el corazón de Mar del Plata, el Hotel Paraíso ofrece una experiencia de lujo inigualable. Con vistas panorámicas al océano y servicios de primera clase, es el destino perfecto para quienes buscan confort y elegancia.",
         "temporada": {
             "tipo": "alta",
             "fechaInicio": "2025-01-01T00:00:00.000Z",
@@ -58,8 +57,8 @@
                         "piso": 1
                     }
                 ],
-                "precio": 250,
-                "capacidad": 2
+                "precio": "350",
+                "capacidad": "3"
             },
             {
                 "Doble": [
@@ -69,27 +68,41 @@
                         "piso": 2
                     }
                 ],
-                "precio": 400,
-                "capacidad": 3
+                "precio": "280",
+                "capacidad": "2"
             }
         ],
         "paquetes": [
             {
                 "id": 1,
                 "nombre": "Escapada Romántica",
-                "noches": 3,
+                "noches": "3",
                 "descuento": "0.10",
-                "descripcion": "Paquete romántico de tres noches. Incluye cena para dos.",
+                "descripcion": "Un paquete ideal para parejas. Incluye una cena romántica para dos en nuestro restaurante exclusivo, una botella de champagne de bienvenida y late check-out.",
                 "habitaciones": [
                     {
-                        "nombre": "Triples",
+                        "nombre": "Doble",
+                        "capacidad": 2,
+                        "precio": "280"
+                    }
+                ]
+            },
+            {
+                "id": 10,
+                "nombre": "Aventura Familiar",
+                "noches": "5",
+                "descuento": "0.15",
+                "descripcion": "Disfruta de 5 noches en familia. El paquete incluye dos habitaciones triples conectadas, desayuno para todos y entradas para el acuario de la ciudad.",
+                "habitaciones": [
+                    {
+                        "nombre": "Triple",
                         "capacidad": 3,
-                        "precio": 250
+                        "precio": "350"
                     },
                     {
-                        "nombre": "Dobles",
-                        "capacidad": 2,
-                        "precio": 400
+                        "nombre": "Triple",
+                        "capacidad": 3,
+                        "precio": "350"
                     }
                 ]
             }
@@ -104,17 +117,11 @@
                 "Wi-Fi gratuito",
                 "Servicio de limpieza diario",
                 "Recepción 24 horas",
-                "Desayuno continental básico",
-                "TV por cable",
-                "Artículos de tocador básicos",
-                "Aire acondicionado",
-                "Servicio de lavandería",
-                "Desayuno incluido",
-                "Gimnasio pequeño",
-                "Restaurante o cafetería en el hotel"
+                "Desayuno continental",
+                "TV por cable"
             ]
         },
-        "descripcion": "El Gran Hotel Mar del Plata se destaca por su arquitectura clásica y su ambiente acogedor.",
+        "descripcion": "El Gran Hotel Mar del Plata se destaca por su arquitectura clásica y su ambiente acogedor. Ideal para viajeros que buscan una excelente relación calidad-precio en una ubicación céntrica.",
         "temporada": null,
         "direccion": "Calle Güemes 567",
         "ubicacion": {
@@ -138,8 +145,8 @@
                         "piso": 1
                     }
                 ],
-                "precio": 150,
-                "capacidad": 2
+                "precio": "180",
+                "capacidad": "2"
             },
             {
                 "Suite Familiar": [
@@ -149,8 +156,8 @@
                         "piso": 3
                     }
                 ],
-                "precio": 300,
-                "capacidad": 4
+                "precio": "320",
+                "capacidad": "4"
             }
         ],
         "paquetes": [
@@ -158,18 +165,13 @@
                 "id": 2,
                 "nombre": "Fin de Semana Relax",
                 "descuento": "0.05",
-                "noches": 2,
-                "descripcion": "Fin de semana relajante.",
+                "noches": "2",
+                "descripcion": "Desconecta de la rutina con nuestro paquete de fin de semana. Incluye dos noches de alojamiento y desayuno completo.",
                 "habitaciones": [
                     {
-                        "nombre": "Triples",
-                        "capacidad": 3,
-                        "precio": 245
-                    },
-                    {
-                        "nombre": "Dobles",
+                        "nombre": "Estándar",
                         "capacidad": 2,
-                        "precio": 123123
+                        "precio": "180"
                     }
                 ]
             }
@@ -181,54 +183,47 @@
         "categoria": {
             "estrellas": "3",
             "servicios": [
-                "Wi-Fi gratuito",
-                "Servicio de limpieza diario",
-                "Recepción 24 horas",
-                "Desayuno continental básico",
-                "TV por cable",
-                "Artículos de tocador básicos",
-                "Aire acondicionado",
-                "Servicio de lavandería",
-                "Desayuno incluido",
-                "Gimnasio pequeño",
-                "Restaurante o cafetería en el hotel"
+                "Wi-Fi de alta velocidad",
+                "Desayuno artesanal",
+                "Piscina climatizada",
+                "Servicio de conserjería"
             ]
         },
-        "descripcion": "El Hotel Boutique Playa Grande es una joya escondida en Mar del Plata.",
+        "descripcion": "El Hotel Boutique Playa Grande es una joya escondida. Ofrece un ambiente íntimo y un servicio personalizado para una estancia inolvidable cerca de las mejores playas.",
         "temporada": {
             "tipo": "baja",
             "fechaInicio": "2025-04-01T00:00:00.000Z",
             "fechaFin": "2025-08-31T00:00:00.000Z",
             "porcentaje": "0.08"
         },
+        "descuentos": [
+            {
+                "id": 3,
+                "porcentaje": "0.20",
+                "cantidad_de_habitaciones": 3
+            }
+        ],
+        "imagen": "Hotel Boutique Playa Grande.webp",
         "direccion": "Calle 11 de Septiembre 2345",
         "ubicacion": {
             "nombrePais": "Argentina",
             "nombreProvincia": "Buenos Aires",
             "nombreCiudad": "Mar del Plata"
         },
-        "descuentos": [
-            {
-                "id": 1,
-                "porcentaje": "0.20",
-                "cantidad_de_habitaciones": 3
-            }
-        ],
-        "imagen": "Hotel Boutique Playa Grande.webp",
         "habitaciones": [
             {
-                "Habitación Simple": [
+                "Simple": [
                     {
                         "id": 301,
                         "numero": 1,
                         "piso": 1
                     }
                 ],
-                "precio": 100,
-                "capacidad": 1
+                "precio": "150",
+                "capacidad": "1"
             },
             {
-                "Habitación Doble": [
+                "Doble Superior": [
                     {
                         "id": 302,
                         "numero": 2,
@@ -240,10 +235,25 @@
                         "piso": 1
                     }
                 ],
-                "precio": 180,
-                "capacidad": 2
+                "precio": "220",
+                "capacidad": "2"
             }
         ],
-        "paquetes": []
+        "paquetes": [
+            {
+                "id": 4,
+                "nombre": "Retiro de Spa",
+                "descuento": "0.12",
+                "noches": "2",
+                "descripcion": "Relájate con dos noches en una Habitación Doble Superior, acceso completo a nuestro spa y un masaje relajante por persona.",
+                "habitaciones": [
+                    {
+                        "nombre": "Doble Superior",
+                        "capacidad": 2,
+                        "precio": "220"
+                    }
+                ]
+            }
+        ]
     }
 ]

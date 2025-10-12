@@ -72,7 +72,7 @@ function carritoReducer(estado, accion) {
             ? hotel.habitaciones.some(
                 (room) => room.id === accion.payload.habitacion.id
               )
-              ? hotel
+              ? hotel // Evita duplicados de la misma instancia de habitación
               : {
                   ...hotel,
                   habitaciones: [
@@ -86,16 +86,15 @@ function carritoReducer(estado, accion) {
     }
 
     case TIPOS.AGREGAR_PAQUETE: {
+      // PERMITE AGREGAR MÚLTIPLES INSTANCIAS DEL MISMO PAQUETE
       return {
         ...estado,
         hoteles: estado.hoteles.map((hotel) =>
           hotel.hotelId === accion.payload.hotelId
-            ? hotel.paquetes.some((pkg) => pkg.id === accion.payload.paquete.id)
-              ? hotel
-              : {
-                  ...hotel,
-                  paquetes: [...hotel.paquetes, accion.payload.paquete],
-                }
+            ? {
+                ...hotel,
+                paquetes: [...hotel.paquetes, accion.payload.paquete],
+              }
             : hotel
         ),
       };
@@ -112,7 +111,7 @@ function carritoReducer(estado, accion) {
               updatedHabitaciones.length === 0 &&
               hotel.paquetes.length === 0
             ) {
-              return null;
+              return null; // Elimina el hotel si queda vacío
             }
             return { ...hotel, habitaciones: updatedHabitaciones };
           }
@@ -123,19 +122,23 @@ function carritoReducer(estado, accion) {
     }
 
     case TIPOS.REMOVER_PAQUETE: {
+      // ELIMINA SOLO LA ÚLTIMA INSTANCIA DEL PAQUETE ENCONTRADO
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
           if (hotel.hotelId === accion.payload.hotelId) {
-            const updatedPaquetes = hotel.paquetes.filter(
-              (pkg) => pkg.id !== accion.payload.paqueteId
-            );
-            if (
-              hotel.habitaciones.length === 0 &&
-              updatedPaquetes.length === 0
-            ) {
-              return null;
+            const paquetes = [...hotel.paquetes];
+            const indexToRemove = paquetes
+              .map((pkg) => pkg.id)
+              .lastIndexOf(accion.payload.paqueteId); // Encuentra el último índice
+
+            if (indexToRemove !== -1) {
+              paquetes.splice(indexToRemove, 1); // Elimina solo ese elemento
             }
-            return { ...hotel, paquetes: updatedPaquetes };
+
+            if (hotel.habitaciones.length === 0 && paquetes.length === 0) {
+              return null; // Elimina el hotel si queda vacío
+            }
+            return { ...hotel, paquetes: paquetes };
           }
           return hotel;
         })
