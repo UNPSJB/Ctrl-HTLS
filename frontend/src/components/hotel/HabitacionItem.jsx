@@ -4,198 +4,96 @@ import { Users, Home, Info } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import Counter from '@ui/Counter';
 import RoomDetailsModal from './RoomDetailsModal';
-import { toNumber, calcSeasonalPrice } from '@utils/pricingUtils';
+import { calcSeasonalPrice } from '@utils/pricingUtils';
 import { useCarrito } from '@context/CarritoContext';
 import useBookingDates from '@hooks/useBookingDates';
 
-function HabitacionItem({
-  hotelData = null,
-  hotelId = null,
-  habitacionGroup,
-  selectedIds = [],
-  selectedIdsSet = null,
-  onAdd = null,
-  onRemove = null,
-}) {
+function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
   const [showModal, setShowModal] = useState(false);
-
-  // Hook para obtener fechas normalizadas en ISO (o null) y nights si hace falta
   const { isoFechaInicio, isoFechaFin } = useBookingDates();
+  const { carrito } = useCarrito();
 
-  // Carrito: fallback si no viene onAdd/onRemove desde el padre
-  const carrito = useCarrito();
-  const addRoomCtx = carrito?.addRoom ?? carrito?.agregarHabitacion;
-  const removeRoomCtx = carrito?.removeRoom ?? carrito?.removerHabitacion;
+  // Desestructuramos la prop `habitacionTipo` que ya viene con la estructura limpia
+  const {
+    tipo,
+    capacidad,
+    precio: precioBase,
+    habitaciones: instanciasDisponibles,
+  } = habitacionTipo;
 
-  // Instancias físicas del grupo
-  const instances = Array.isArray(habitacionGroup.habitaciones)
-    ? habitacionGroup.habitaciones
-    : [];
-  const maxAvailable = instances.length;
+  const maxAvailable = instanciasDisponibles.length;
 
-  // Set local de instancias para búsquedas O(1)
-  const instanceIdsSet = useMemo(
-    () => new Set(instances.map((i) => i.id)),
-    [instances]
-  );
+  const hotelEnCarrito = useMemo(() => {
+    return carrito.hoteles.find((h) => h.hotelId === hotelData?.hotelId);
+  }, [carrito.hoteles, hotelData?.hotelId]);
 
-  // Contar cuántas instancias de este grupo están seleccionadas
   const selectedCount = useMemo(() => {
-    const ids = selectedIds || [];
-    let count = 0;
-    for (const id of ids) {
-      if (instanceIdsSet.has(id)) count++;
-    }
-    return count;
-  }, [selectedIds, instanceIdsSet]);
+    if (!hotelEnCarrito) return 0;
+    const idsEnCarrito = new Set(hotelEnCarrito.habitaciones.map((h) => h.id));
+    return instanciasDisponibles.filter((inst) => idsEnCarrito.has(inst.id))
+      .length;
+  }, [hotelEnCarrito, instanciasDisponibles]);
 
-  // Precio base (normalizar a número)
-  const precioBase = toNumber(habitacionGroup.precio ?? 100);
-
-  // Calcular precio final/original según temporada (si existe)
   const { precioFinal, precioOriginal } = useMemo(() => {
-    let final;
-
-    if (hotelData?.temporada) {
-      final = calcSeasonalPrice(precioBase, hotelData.temporada.porcentaje);
-    }
-
+    const final = hotelData?.temporada
+      ? calcSeasonalPrice(precioBase, hotelData.temporada.porcentaje)
+      : precioBase;
     return { precioFinal: final, precioOriginal: precioBase };
   }, [precioBase, hotelData]);
 
-  // Handler para agregar una habitación
   const handleIncrement = useCallback(() => {
-    if (selectedCount >= maxAvailable) return;
+    if (selectedCount >= maxAvailable || !onAdd) return;
 
-    const selectedSet = selectedIdsSet ?? new Set(selectedIds ?? []);
-    const instanciaParaAgregar = instances.find(
-      (inst) => !selectedSet.has(inst.id)
+    const idsEnCarrito = new Set(
+      hotelEnCarrito?.habitaciones.map((h) => h.id) || []
     );
+    const instanciaParaAgregar = instanciasDisponibles.find(
+      (inst) => !idsEnCarrito.has(inst.id)
+    );
+
     if (!instanciaParaAgregar) return;
 
-    const habitacionAAgregar = {
+    const habitacionCompleta = {
       ...instanciaParaAgregar,
-      tipo: habitacionGroup.tipo,
-      capacidad: habitacionGroup.capacidad,
+      tipo,
+      capacidad,
       precio: precioBase,
-      nombre: `${habitacionGroup.tipo} - ${instanciaParaAgregar.numero ?? ''}`,
+      nombre: `${tipo} - ${instanciaParaAgregar.numero ?? ''}`,
     };
 
     const fechas = { fechaInicio: isoFechaInicio, fechaFin: isoFechaFin };
-
-    // Si el padre controla la selección, lo notificamos (recomendado)
-    if (typeof onAdd === 'function') {
-      onAdd(habitacionAAgregar, fechas);
-      return;
-    }
-
-    // Fallback: usar API del contexto. soporta agregarHabitacion(hotelInfo, habitacion, fechas)
-    if (typeof addRoomCtx === 'function') {
-      try {
-        // Si addRoomCtx es wrapper nuevo (hotelId, roomObj, fechas)
-        if (carrito?.addRoom) {
-          // wrapper nuevo
-          // CAMBIO: Pasa el objeto completo con la información del hotel
-          carrito.addRoom(
-            {
-              hotelId: hotelId ?? hotelData?.hotelId,
-              nombre: hotelData?.nombre ?? null,
-              temporada: hotelData?.temporada ?? null,
-            },
-            habitacionAAgregar,
-            fechas
-          );
-        } else {
-          // API antigua (esta ya estaba correcta y sirve de modelo)
-          carrito.agregarHabitacion(
-            {
-              hotelId: hotelId ?? hotelData?.hotelId,
-              nombre: hotelData?.nombre ?? null,
-              temporada: hotelData?.temporada ?? null,
-            },
-            habitacionAAgregar,
-            fechas
-          );
-        }
-      } catch (err) {
-        console.warn(
-          'HabitacionItem: error agregando habitación via CarritoContext',
-          err
-        );
-      }
-      return;
-    }
-
-    console.warn(
-      'HabitacionItem: no existe onAdd ni función de carrito conocida para agregar.'
-    );
+    onAdd(habitacionCompleta, fechas);
   }, [
     selectedCount,
     maxAvailable,
-    instances,
-    selectedIdsSet,
-    selectedIds,
-    habitacionGroup,
+    instanciasDisponibles,
+    hotelEnCarrito,
+    tipo,
+    capacidad,
     precioBase,
     onAdd,
-    addRoomCtx,
-    carrito,
-    hotelId,
-    hotelData,
     isoFechaInicio,
     isoFechaFin,
   ]);
 
-  // Handler para remover la última seleccionada de este grupo
   const handleDecrement = useCallback(() => {
-    if (selectedCount <= 0) return;
-    const seleccionadasDelGrupo = (selectedIds || []).filter((id) =>
-      instanceIdsSet.has(id)
-    );
-    const idARemover = seleccionadasDelGrupo[seleccionadasDelGrupo.length - 1];
-    if (!idARemover) return;
+    if (selectedCount <= 0 || !onRemove) return;
 
-    // Si padre controla, delegamos
-    if (typeof onRemove === 'function') {
+    const idsEnCarrito = new Set(
+      hotelEnCarrito?.habitaciones.map((h) => h.id) || []
+    );
+    const instanciasSeleccionadas = instanciasDisponibles.filter((inst) =>
+      idsEnCarrito.has(inst.id)
+    );
+
+    if (instanciasSeleccionadas.length > 0) {
+      const idARemover =
+        instanciasSeleccionadas[instanciasSeleccionadas.length - 1].id;
       onRemove(idARemover);
-      return;
     }
+  }, [selectedCount, onRemove, hotelEnCarrito, instanciasDisponibles]);
 
-    // Fallback al contexto
-    if (typeof removeRoomCtx === 'function') {
-      try {
-        if (carrito?.removeRoom) {
-          carrito.removeRoom(hotelId ?? hotelData?.hotelId, idARemover);
-        } else {
-          carrito.removerHabitacion(hotelId ?? hotelData?.hotelId, idARemover);
-        }
-      } catch (err) {
-        console.warn(
-          'HabitacionItem: error removiendo habitación via CarritoContext',
-          err
-        );
-      }
-      return;
-    }
-
-    console.warn(
-      'HabitacionItem: no existe onRemove ni función de carrito conocida para remover.'
-    );
-  }, [
-    selectedCount,
-    selectedIds,
-    instanceIdsSet,
-    onRemove,
-    removeRoomCtx,
-    carrito,
-    hotelId,
-    hotelData,
-  ]);
-
-  const handleShowDetails = (e) => {
-    e?.stopPropagation();
-    setShowModal(true);
-  };
+  const handleShowDetails = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
   const handleReserveFromModal = () => {
     setShowModal(false);
@@ -205,23 +103,19 @@ function HabitacionItem({
   return (
     <>
       <article className="grid grid-cols-4 items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
-        {/* Columna 1: info del tipo */}
         <div className="col-span-2 flex items-center gap-4">
           <div className="flex items-center gap-4">
             <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {habitacionGroup.tipo}
+              {tipo}
             </div>
-
             <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
               <Users className="h-4 w-4" />
-              <span>{habitacionGroup.capacidad ?? '—'}</span>
+              <span>{capacidad ?? '—'}</span>
             </div>
-
             <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
               <Home className="h-4 w-4" />
               <span>{maxAvailable}</span>
             </div>
-
             <button
               onClick={handleShowDetails}
               className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
@@ -232,7 +126,6 @@ function HabitacionItem({
           </div>
         </div>
 
-        {/* Contador */}
         <div className="flex justify-center">
           <Counter
             value={selectedCount}
@@ -243,11 +136,8 @@ function HabitacionItem({
           />
         </div>
 
-        {/* Precio */}
         <div className="flex justify-end">
-          <div className="text-right">
-            <PriceTag precio={precioFinal} original={precioOriginal} />
-          </div>
+          <PriceTag precio={precioFinal} original={precioOriginal} />
         </div>
       </article>
 
@@ -255,10 +145,10 @@ function HabitacionItem({
         createPortal(
           <RoomDetailsModal
             habitacion={{
-              nombre: habitacionGroup.tipo,
-              capacidad: habitacionGroup.capacidad,
+              nombre: tipo,
+              capacidad,
               precio: precioBase,
-              ...instances[0],
+              ...instanciasDisponibles[0],
             }}
             temporada={hotelData?.temporada ?? null}
             onClose={handleCloseModal}

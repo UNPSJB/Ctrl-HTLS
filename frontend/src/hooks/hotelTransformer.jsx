@@ -1,52 +1,57 @@
 /**
- * Transforma un objeto hotel del formato de backend (crudo) al formato optimizado para el frontend.
+ * Transforma un objeto hotel del formato de backend a una estructura optimizada para el frontend.
+ * Realiza dos tareas principales:
+ * 1. Coerción de tipos: Convierte strings a Numbers.
+ * 2. Reestructuración de datos: Simplifica la estructura del array de habitaciones para un consumo más fácil en la UI.
  *
- * El único objetivo de esta función es la coerción de tipos: asegurarse de que
- * todos los valores que deben ser numéricos (precios, porcentajes, IDs, etc.)
- * se conviertan de string a Number.
+ * Esta función es idempotente: si se le pasa un hotel ya transformado, no lo volverá a transformar.
  *
- * Mantiene la estructura original del objeto recibido.
- *
- * @param {Object} hotel - Objeto hotel crudo desde la API.
- * @returns {Object|null} - Objeto hotel transformado con los tipos de datos numéricos correctos.
+ * @param {Object} hotel - Objeto hotel crudo.
+ * @returns {Object|null} - Objeto hotel transformado.
  */
 export const transformHotel = (hotel) => {
   if (!hotel) {
     return null;
   }
 
-  // Se devuelve el hotel original, pero sobreescribiendo las propiedades
-  // que necesitan ser convertidas a números.
+  // Comprueba si la transformación ya se aplicó buscando la propiedad 'tipo'.
+  const isAlreadyTransformed =
+    hotel.habitaciones?.[0] && Object.hasOwn(hotel.habitaciones[0], 'tipo');
+
+  const habitacionesTransformadas = isAlreadyTransformed
+    ? hotel.habitaciones
+    : (hotel.habitaciones || []).map((group) => {
+        const tipoHabitacion = Object.keys(group).find((key) =>
+          Array.isArray(group[key])
+        );
+        return {
+          tipo: tipoHabitacion,
+          habitaciones: group[tipoHabitacion] || [],
+          precio: Number(group.precio) || 0,
+          capacidad: Number(group.capacidad) || 0,
+        };
+      });
+
   return {
     ...hotel,
-    // Coerción de número para las estrellas
+    hotelId: Number(hotel.hotelId) || null,
     estrellas: Number(hotel.estrellas) || 0,
-
-    // Temporada: Asegurar que el porcentaje sea numérico
     temporada: hotel.temporada
       ? {
           ...hotel.temporada,
           porcentaje: Number(hotel.temporada.porcentaje) || 0,
         }
       : null,
-
-    // Descuentos: Coerción de tipos para cada descuento
     descuentos: (hotel.descuentos || []).map((descuento) => ({
       ...descuento,
+      id: Number(descuento.id),
       porcentaje: Number(descuento.porcentaje) || 0,
       cantidad_de_habitaciones: Number(descuento.cantidad_de_habitaciones) || 0,
     })),
-
-    // Habitaciones: Coerción de precio y capacidad
-    habitaciones: (hotel.habitaciones || []).map((habitacion) => ({
-      ...habitacion,
-      precio: Number(habitacion.precio) || 0,
-      capacidad: Number(habitacion.capacidad) || 0,
-    })),
-
-    // Paquetes: Coerción de noches, descuento y precios/capacidad de las habitaciones internas
+    habitaciones: habitacionesTransformadas,
     paquetes: (hotel.paquetes || []).map((paquete) => ({
       ...paquete,
+      id: Number(paquete.id),
       noches: Number(paquete.noches) || 0,
       descuento: Number(paquete.descuento) || 0,
       habitaciones: (paquete.habitaciones || []).map((hab) => ({
@@ -59,7 +64,7 @@ export const transformHotel = (hotel) => {
 };
 
 /**
- * Transforma un array de hoteles utilizando la función transformHotel.
+ * Transforma un array de hoteles.
  * @param {Array<Object>} hoteles - Array de objetos hotel crudos.
  * @returns {Array<Object>} - Array de hoteles transformados.
  */
