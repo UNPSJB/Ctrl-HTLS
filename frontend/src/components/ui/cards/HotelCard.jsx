@@ -78,8 +78,10 @@ function HotelCard({ hotel }) {
             <ul className="space-y-3">
               {Array.isArray(hotelTransformed.habitaciones) &&
               hotelTransformed.habitaciones.length > 0 ? (
-                hotelTransformed.habitaciones.map((group) => (
-                  <li key={`${hotelTransformed.hotelId}-${group.tipo}`}>
+                hotelTransformed.habitaciones.map((group, index) => (
+                  <li
+                    key={`${hotelTransformed.hotelId}-${group.tipo}-${index}`}
+                  >
                     <HabitacionItem
                       hotelData={hotelTransformed}
                       habitacionGroup={group}
