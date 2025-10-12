@@ -12,8 +12,6 @@ const { nightsBetween } = dateUtils;
 function CartSummary() {
   const { carrito = { hoteles: [] }, totalElementos } = useCarrito();
 
-  console.log(carrito);
-
   const isEmpty = Number(totalElementos ?? 0) === 0;
 
   // Calcular total global (usamos pricingUtils para mantener consistencia)
