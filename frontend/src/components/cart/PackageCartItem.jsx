@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from 'react';
-import { Trash2, Package as PackageIcon, Bed } from 'lucide-react';
+import { Trash2, Package as PackageIcon } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@context/CarritoContext';
 import DateDisplay from '@ui/DateDisplay';
 
 function PackageCartItem({ pack, hotel, onRemove = null }) {
-  const { fechaInicio, fechaFin, nombre, id, habitaciones } = pack || {};
+  const { fechaInicio, fechaFin, nombre, id } = pack || {};
 
   const { final: finalTotal } = useMemo(() => {
     return calcPackageTotal({
