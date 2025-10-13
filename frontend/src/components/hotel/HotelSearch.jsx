@@ -1,95 +1,74 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useBusqueda } from '@context/BusquedaContext';
 import dateUtils from '@utils/dateUtils';
 import { Search, MapPin, Calendar, Users, Globe, Building } from 'lucide-react';
+import useUbicacion from '@hooks/useUbicacion';
 
 const { toISODate } = dateUtils;
 
-function HotelSearch() {
+// Recibe onSearch y isLoading como props desde HomePage
+function HotelSearch({ onSearch, isLoading }) {
   const { filtros, actualizarFiltros } = useBusqueda();
+  const {
+    paises,
+    provincias,
+    ciudades,
+    paisId,
+    provinciaId,
+    ciudadId,
+    handlePaisChange,
+    handleProvinciaChange,
+    handleCiudadChange,
+    isProvinciasDisabled,
+    isCiudadesDisabled,
+  } = useUbicacion();
 
-  // Inicializar fechas a partir del contexto (persisted). Convertimos a "YYYY-MM-DD" para inputs.
-  const fechaInicioInicial = toISODate(filtros?.fechaInicio) ?? '';
-  const fechaFinInicial = toISODate(filtros?.fechaFin) ?? '';
-
-  // Estado local para almacenar los filtros del formulario
   const [localFilters, setLocalFilters] = useState({
-    nombre: '',
-    pais: '',
-    provincia: '',
-    ciudad: '',
-    fechaInicio: fechaInicioInicial,
-    fechaFin: fechaFinInicial,
-    capacidad: 1,
+    nombre: filtros?.nombre || '',
+    fechaInicio: toISODate(filtros?.fechaInicio) ?? '',
+    fechaFin: toISODate(filtros?.fechaFin) ?? '',
+    capacidad: filtros?.capacidad || 2,
   });
 
-  // Si el contexto cambia desde otro lugar (ej: restauración), sincronizamos localmente.
-  useEffect(() => {
-    const nuevaInicio = toISODate(filtros?.fechaInicio) ?? '';
-    const nuevaFin = toISODate(filtros?.fechaFin) ?? '';
-
-    setLocalFilters((prev) => {
-      if (prev.fechaInicio === nuevaInicio && prev.fechaFin === nuevaFin)
-        return prev;
-      return { ...prev, fechaInicio: nuevaInicio, fechaFin: nuevaFin };
-    });
-  }, [filtros?.fechaInicio, filtros?.fechaFin]);
-
-  const getToday = useCallback(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  }, []);
-
-  // Validación sencilla de rango de fechas
-  const validateDates = useCallback(
-    (values) => {
-      const { fechaInicio, fechaFin } = values ?? localFilters;
-      if (fechaInicio && fechaFin) {
-        return new Date(fechaInicio) <= new Date(fechaFin);
-      }
-      return true;
-    },
-    [localFilters]
+  const getToday = useCallback(
+    () => new Date().toISOString().split('T')[0],
+    []
   );
 
-  // Submit (botón Buscar)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateDates(localFilters)) {
-      alert('La fecha de inicio debe ser menor o igual a la fecha de fin');
+    actualizarFiltros({ ...localFilters, paisId, provinciaId, ciudadId });
+
+    if (!ciudadId || !localFilters.fechaInicio || !localFilters.fechaFin) {
+      alert(
+        'Por favor, seleccione una ciudad y un rango de fechas para la búsqueda.'
+      );
       return;
     }
-    // Aquí actualizamos todo el contexto de filtros de una sola vez
-    actualizarFiltros(localFilters);
-    console.log('Filtros actualizados (submit):', localFilters);
-  };
 
-  // Handler cuando se presiona Enter en cualquier input: validamos y aplicamos (sin tocar onChange)
-  const handleKeyDown = (e) => {
-    if (e.key !== 'Enter') return;
-    // Evitamos que el navegador haga un submit por defecto si estamos manejando aquí
-    e.preventDefault();
-    if (!validateDates(localFilters)) {
-      alert('La fecha de inicio debe ser menor o igual a la fecha de fin');
-      return;
+    const params = {
+      ubicacion: ciudadId,
+      fechaInicio: new Date(localFilters.fechaInicio).toISOString(),
+      fechaFin: new Date(localFilters.fechaFin).toISOString(),
+      pasajeros: localFilters.capacidad,
+      nombreHotel: localFilters.nombre || 'null',
+      vendedorId: 2,
+    };
+
+    // Llama a la función del padre para iniciar la búsqueda
+    if (typeof onSearch === 'function') {
+      await onSearch(params);
     }
-    actualizarFiltros(localFilters);
-    console.log('Filtros actualizados (Enter):', localFilters);
   };
 
-  // Cambios locales: actualizan sólo el estado local, NO el contexto
   const handleChange = (field, value) => {
     setLocalFilters((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
     <div className="shadow-search mb-8 rounded-lg bg-white p-6 dark:bg-gray-800">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6"
-        onKeyDown={handleKeyDown}
-      >
-        {/* Primera fila: Nombre del Hotel, País, Provincia, Ciudad */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Fila 1: Nombre y Ubicación */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -112,14 +91,19 @@ function HotelSearch() {
               País
             </label>
             <div className="relative">
-              <Globe className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={localFilters.pais}
-                onChange={(e) => handleChange('pais', e.target.value)}
-                placeholder="Ej: Argentina"
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-              />
+              <Globe className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <select
+                value={paisId}
+                onChange={(e) => handlePaisChange(e.target.value)}
+                className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+              >
+                <option value="">Seleccionar país</option>
+                {paises.map((pais) => (
+                  <option key={pais.id} value={pais.id}>
+                    {pais.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -128,14 +112,20 @@ function HotelSearch() {
               Provincia
             </label>
             <div className="relative">
-              <Building className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={localFilters.provincia}
-                onChange={(e) => handleChange('provincia', e.target.value)}
-                placeholder="Ej: Buenos Aires"
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-              />
+              <Building className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <select
+                value={provinciaId}
+                onChange={(e) => handleProvinciaChange(e.target.value)}
+                disabled={isProvinciasDisabled}
+                className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:disabled:bg-gray-600"
+              >
+                <option value="">Seleccionar provincia</option>
+                {provincias.map((prov) => (
+                  <option key={prov.id} value={prov.id}>
+                    {prov.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -144,19 +134,25 @@ function HotelSearch() {
               Ciudad
             </label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={localFilters.ciudad}
-                onChange={(e) => handleChange('ciudad', e.target.value)}
-                placeholder="Ej: Mar del Plata"
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-              />
+              <MapPin className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <select
+                value={ciudadId}
+                onChange={(e) => handleCiudadChange(e.target.value)}
+                disabled={isCiudadesDisabled}
+                className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:disabled:bg-gray-600"
+              >
+                <option value="">Seleccionar ciudad</option>
+                {ciudades.map((ciudad) => (
+                  <option key={ciudad.id} value={ciudad.id}>
+                    {ciudad.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
 
-        {/* Segunda fila: Fechas, Capacidad y Botón de Búsqueda */}
+        {/* Fila 2: Fechas, Capacidad y Botón */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -192,7 +188,7 @@ function HotelSearch() {
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Capacidad
+              Huéspedes
             </label>
             <div className="relative">
               <Users className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -204,7 +200,7 @@ function HotelSearch() {
                 onChange={(e) =>
                   handleChange('capacidad', Number(e.target.value))
                 }
-                placeholder="Número de personas"
+                placeholder="Huéspedes"
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
@@ -213,10 +209,24 @@ function HotelSearch() {
           <div className="flex items-end py-1">
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors duration-200 hover:bg-blue-700"
+              disabled={isLoading}
+              className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium text-white transition-colors duration-200 ${
+                isLoading
+                  ? 'cursor-not-allowed bg-gray-400'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
-              <Search className="h-5 w-5" />
-              Buscar
+              {isLoading ? (
+                <>
+                  <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
+                  Buscando...
+                </>
+              ) : (
+                <>
+                  <Search className="h-5 w-5" />
+                  Buscar
+                </>
+              )}
             </button>
           </div>
         </div>
