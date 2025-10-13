@@ -41,40 +41,37 @@ export function calcSeasonalPrice(precioBase, porcentaje) {
  */
 export function calcRoomInstanceTotal({
   precio,
-  porcentaje,
+  porcentaje = 0,
   alquiler,
   limite,
 }) {
   const pricePerNight = toNumber(precio);
 
-  // 1. Calcular el total de noches del alquiler
   const totalNights = nightsBetween(alquiler?.fechaInicio, alquiler?.fechaFin, {
     useUTC: true,
   });
-
-  // 2. Calcular cuántas de esas noches caen dentro de la temporada
   const seasonalNights = limite ? calculateOverlapNights(alquiler, limite) : 0;
-
-  // 3. Las noches restantes son a precio normal
   const normalNights = totalNights - seasonalNights;
 
-  // 4. Calcular el costo de las noches normales
   const normalPriceTotal = pricePerNight * normalNights;
 
-  // 5. Calcular el costo de las noches de temporada
-  const seasonalPriceBase = pricePerNight * seasonalNights;
-  const seasonalPriceFinal = calcSeasonalPrice(seasonalPriceBase, porcentaje);
+  // Calculamos el precio por noche con el ajuste de temporada
+  const seasonalPricePerNight = calcSeasonalPrice(pricePerNight, porcentaje);
+  const seasonalPriceTotal = seasonalPricePerNight * seasonalNights;
 
-  // 6. Sumar ambos costos para el total final
-  const final = roundToInteger(normalPriceTotal + seasonalPriceFinal);
+  const final = roundToInteger(normalPriceTotal + seasonalPriceTotal);
   const original = roundToInteger(pricePerNight * totalNights);
   const descuento = roundToInteger(original - final);
 
+  // Devolvemos el objeto enriquecido
   return {
     original,
     final,
     descuento,
     nights: totalNights,
+    pricePerNight: pricePerNight, // Precio base por noche
+    seasonalPricePerNight: seasonalPricePerNight, // Precio por noche con temporada
+    hasSeasonalAdjustment: seasonalNights > 0 && porcentaje !== 0,
   };
 }
 
@@ -88,14 +85,25 @@ export function calcPackageTotal({ paquete, porcentaje = 0 }) {
     0
   );
 
-  const precioTotalBase = sumPerNight * noches;
-  const precioConTemporada = calcSeasonalPrice(precioTotalBase, porcentaje);
-  const precioFinal =
-    precioConTemporada * (1 - normalizeDiscount(paquete.descuento));
+  const totalOriginal = roundToInteger(sumPerNight * noches);
+
+  const descuentoPaquetePorcentaje = normalizeDiscount(paquete.descuento);
+  const descuentoPaqueteMonto = roundToInteger(
+    totalOriginal * descuentoPaquetePorcentaje
+  );
+  const totalConDescuentoPaquete = totalOriginal - descuentoPaqueteMonto;
+
+  const final = calcSeasonalPrice(totalConDescuentoPaquete, porcentaje);
+  const ajusteTemporadaMonto = final - totalConDescuentoPaquete;
 
   return {
-    original: roundToInteger(precioTotalBase),
-    final: roundToInteger(precioFinal),
+    original: totalOriginal, // Precio total sin ningún descuento
+    final, // Precio final con todos los ajustes
+    sumPerNight: roundToInteger(sumPerNight),
+    noches,
+    descuentoPaqueteMonto,
+    ajusteTemporadaMonto,
+    descuentoPaquetePorcentaje: paquete.descuento, // El porcentaje crudo
   };
 }
 
