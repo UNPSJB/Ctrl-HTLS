@@ -1,27 +1,30 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import HotelCard from '@ui/cards/HotelCard';
-import hotelsData from '@/data/hotels.json';
 import HotelFilter from './HotelFilter';
+import { useHotelsData } from '@/hooks/useHotelsData';
 
 const HotelList = () => {
+  const { hoteles, loading, error } = useHotelsData();
+
   const [estrellasSeleccionadas, setEstrellasSeleccionadas] = useState([]);
 
-  // Normalizar los hoteles para que la propiedad "estrellas" sea número
-  const hotelesNormalizados = useMemo(
-    () => hotelsData.map((h) => ({ ...h, estrellas: Number(h.estrellas) })),
-    []
-  );
-
-  // Filtrar hoteles según las estrellas seleccionadas
   const filteredHotels =
     estrellasSeleccionadas.length === 0
-      ? hotelesNormalizados
-      : hotelesNormalizados.filter((hotel) =>
+      ? hoteles
+      : hoteles.filter((hotel) =>
           estrellasSeleccionadas.includes(hotel.estrellas)
         );
 
-  // Mostrar el filtro mientras haya hoteles
-  const hayHoteles = hotelesNormalizados.length > 0;
+  // Lógica de renderizado condicional (preparada para el futuro)
+  if (loading) {
+    return <p>Cargando hoteles...</p>;
+  }
+
+  if (error) {
+    return <p>Error al cargar los hoteles.</p>;
+  }
+
+  const hayHoteles = hoteles.length > 0;
 
   return (
     <section aria-labelledby="hotel-list-title" className="flex flex-col">

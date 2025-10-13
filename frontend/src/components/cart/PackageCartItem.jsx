@@ -1,115 +1,59 @@
-// PackageCartItem.jsx
 import { useCallback, useMemo } from 'react';
-import { Trash2, Package as PackageIcon, Users } from 'lucide-react';
+import { Trash2, Package as PackageIcon } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import { calcPackageTotal } from '@utils/pricingUtils';
-import dateUtils from '@utils/dateUtils';
 import { useCarrito } from '@context/CarritoContext';
+import DateDisplay from '@ui/DateDisplay';
 
-const { formatFecha, nightsBetween } = dateUtils;
-
-/**
- * PackageCartItem
- * - Recibe `pack` (desde carrito) y `hotel` (entrada del carrito).
- * - Usa preferentemente removePackage (wrapper) y fallback a removerPaquete.
- */
 function PackageCartItem({ pack, hotel, onRemove = null }) {
-  const {
-    fechaInicio,
-    fechaFin,
-    qty = 1,
-    nombre,
-    id,
-    noches,
-    capacidad = 2,
-  } = pack || {};
+  const { fechaInicio, fechaFin, nombre, id } = pack || {};
 
-  const nights =
-    Number(noches) || nightsBetween(fechaInicio, fechaFin, { useUTC: true });
-
-  const { original: originalTotal, final: finalTotal } = useMemo(() => {
-    const hotelSeasonDiscount = hotel?.temporada?.porcentaje ?? 0;
-
+  const { final: finalTotal } = useMemo(() => {
     return calcPackageTotal({
       paquete: pack,
-      qty,
-      hotelSeasonDiscount,
+      porcentaje: hotel?.temporada?.porcentaje,
     });
-  }, [pack, hotel, qty]);
+  }, [pack, hotel]);
 
-  const { removePackage, removerPaquete } = useCarrito();
+  const { removerPaquete } = useCarrito();
 
   const handleRemove = useCallback(() => {
     if (onRemove) {
       onRemove(id);
       return;
     }
-
-    // Preferimos wrapper removePackage(hotelId, pkgId)
-    if (typeof removePackage === 'function') {
-      removePackage(hotel?.hotelId, id);
-      return;
-    }
-
-    // Fallback a la API antigua
     if (typeof removerPaquete === 'function') {
       removerPaquete(hotel?.hotelId, id);
-      return;
     }
-
-    console.warn(
-      'No se encontró función para remover paquete en CarritoContext'
-    );
-  }, [onRemove, removePackage, removerPaquete, hotel?.hotelId, id]);
+  }, [onRemove, removerPaquete, hotel?.hotelId, id]);
 
   if (!pack) return null;
 
   return (
-    <div className="mb-3 flex gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
+    <div className="mb-3 flex items-center gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
       <div className="min-w-0 flex-1">
-        <h4 className="flex items-center gap-2 truncate font-medium text-gray-900 dark:text-gray-100">
-          <PackageIcon className="h-5 w-5 text-current" />
-          <span className="truncate">
-            {nombre ?? pack.name ?? 'Paquete de Viaje'}
-          </span>
-        </h4>
-
-        <div className="mt-1 flex flex-col text-sm text-gray-600 dark:text-gray-300 sm:flex-row sm:items-center sm:gap-4">
-          <p className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="font-medium">
-              {capacidad ?? pack.capacity ?? '-'}
-            </span>
-            <span className="text-xs text-gray-400 dark:text-gray-500">
-              ({qty} unidad{qty > 1 ? 'es' : ''})
-            </span>
-          </p>
-
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 sm:mt-0">
-            {formatFecha(fechaInicio)} — {formatFecha(fechaFin)} ({nights} noche
-            {nights > 1 ? 's' : ''})
-          </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h4 className="flex items-center gap-2 truncate font-semibold text-gray-900 dark:text-gray-100">
+              <PackageIcon className="h-5 w-5 flex-shrink-0 text-current" />
+              <span className="truncate">{nombre ?? 'Paquete'}</span>
+            </h4>
+          </div>
+          <PriceTag precio={finalTotal} />
         </div>
-      </div>
 
-      <div className="text-right">
-        <PriceTag
-          precio={finalTotal}
-          original={finalTotal < originalTotal ? originalTotal : undefined}
-          seasonLayout="column"
-        />
-      </div>
-
-      <div className="flex items-center">
-        <button
-          onClick={handleRemove}
-          aria-label={`Eliminar paquete ${nombre ?? pack.name ?? ''}`}
-          title="Eliminar paquete"
-          disabled={!pack?.id}
-          className={`flex h-8 w-8 transform items-center justify-center rounded-full text-red-600 transition duration-150 ease-in-out hover:scale-105 hover:bg-red-50 hover:text-red-700 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200 focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/10 dark:hover:text-red-300 dark:focus-visible:ring-red-700`}
-        >
-          <Trash2 className="h-5 w-5 text-current" />
-        </button>
+        <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-600">
+          <DateDisplay fechaInicio={fechaInicio} fechaFin={fechaFin} />
+          <button
+            onClick={handleRemove}
+            aria-label={`Eliminar paquete ${nombre ?? ''}`}
+            title="Eliminar paquete"
+            disabled={!pack?.id}
+            className="group rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

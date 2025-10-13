@@ -1,25 +1,17 @@
 export function parseDate(value) {
   if (value == null) return null;
-
-  // Si ya es Date
   if (value instanceof Date) {
     return Number.isFinite(value.getTime()) ? new Date(value.getTime()) : null;
   }
-
   const s = String(value).trim();
-
-  // Detectar formato "YYYY-MM-DD" (fecha sin tiempo) — lo interpretamos como **local**.
-  // Esto evita que 'new Date("2025-10-02")' se trate como UTC y luego devuelva la fecha anterior en zonas negativas.
   const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
   if (dateOnlyMatch) {
     const y = Number(dateOnlyMatch[1]);
-    const m = Number(dateOnlyMatch[2]) - 1; // monthIndex
+    const m = Number(dateOnlyMatch[2]) - 1;
     const d = Number(dateOnlyMatch[3]);
     const localDate = new Date(y, m, d);
     return Number.isFinite(localDate.getTime()) ? localDate : null;
   }
-
-  // Para el resto de formatos (ISO con zona, timestamp, legibles por Date)
   const d = new Date(s);
   return Number.isFinite(d.getTime()) ? d : null;
 }
@@ -28,7 +20,6 @@ export function isValidDate(d) {
   return d instanceof Date && Number.isFinite(d.getTime());
 }
 
-/** Normaliza la fecha a la "medianoche" (00:00) local o UTC. */
 export function startOfDay(date, { useUTC = false } = {}) {
   const d = parseDate(date);
   if (!d) return null;
@@ -40,7 +31,6 @@ export function startOfDay(date, { useUTC = false } = {}) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-/** Formatea a "dd/mm/aaaa". Si inválida devuelve '-'. */
 export function formatFecha(value) {
   const d = parseDate(value);
   if (!d) return '-';
@@ -50,7 +40,6 @@ export function formatFecha(value) {
   return `${dia}/${mes}/${anio}`;
 }
 
-/** Útil para inputs o comparaciones legibles: "YYYY-MM-DD" | null. */
 export function toISODate(value) {
   const d = parseDate(value);
   if (!d) return null;
@@ -60,14 +49,6 @@ export function toISODate(value) {
   return `${y}-${m}-${da}`;
 }
 
-/** Suma (o resta si n negativo) días, respetando la misma zona. */
-export function addDays(value, n = 0) {
-  const d = parseDate(value);
-  if (!d) return null;
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + Number(n));
-}
-
-/** Calcula noches entre start y end (end > start). */
 export function nightsBetween(
   start,
   end,
@@ -82,7 +63,40 @@ export function nightsBetween(
   return Math.max(1, nights);
 }
 
-/** Normaliza un valor de fecha (string, Date, null, undefined) a string o null. */
+/**
+ * --- NUEVA FUNCIÓN ---
+ * Calcula el número de noches de un alquiler que se superponen con un rango de fechas de temporada.
+ * @param {object} alquiler - Rango de fechas del alquiler { fechaInicio, fechaFin }.
+ * @param {object} limite - Rango de fechas de la temporada { fechaInicio, fechaFin }.
+ * @returns {number} - El número de noches que están dentro de la temporada.
+ */
+export function calculateOverlapNights(alquiler, limite) {
+  if (!alquiler || !limite) return 0;
+
+  const alquilerInicio = parseDate(alquiler.fechaInicio);
+  const alquilerFin = parseDate(alquiler.fechaFin);
+  const limiteInicio = parseDate(limite.fechaInicio);
+  const limiteFin = parseDate(limite.fechaFin);
+
+  if (!alquilerInicio || !alquilerFin || !limiteInicio || !limiteFin) return 0;
+
+  // Encontrar el punto de inicio de la superposición
+  const overlapStart = new Date(Math.max(alquilerInicio, limiteInicio));
+  // Encontrar el punto final de la superposición
+  const overlapEnd = new Date(Math.min(alquilerFin, limiteFin));
+
+  // Si el inicio de la superposición es después del final, no hay superposición
+  if (overlapStart >= overlapEnd) {
+    return 0;
+  }
+
+  // Calculamos las noches dentro del período de superposición
+  return nightsBetween(overlapStart, overlapEnd, {
+    useUTC: true,
+    minNights: 0,
+  });
+}
+
 export function normalizeDateValue(v) {
   if (v === undefined || v === null) return null;
   const s = String(v).trim();
@@ -95,8 +109,8 @@ const DEFAULT = {
   startOfDay,
   formatFecha,
   toISODate,
-  addDays,
   nightsBetween,
+  calculateOverlapNights, // <-- Exportamos la nueva función
   normalizeDateValue,
 };
 export default DEFAULT;

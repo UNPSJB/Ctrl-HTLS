@@ -1,9 +1,9 @@
-function Counter({ value = 0, onIncrement, onDecrement, min = 0, max = 1 }) {
+function Counter({ value = 0, onIncrement, onDecrement, max = 1 }) {
   return (
     <div className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={onDecrement}
-        disabled={value <= min}
+        disabled={value <= 0}
         className="h-8 w-8 rounded-md bg-transparent px-2 text-lg font-bold text-gray-700 disabled:opacity-50 dark:text-gray-200"
         aria-label="Decrementar"
       >

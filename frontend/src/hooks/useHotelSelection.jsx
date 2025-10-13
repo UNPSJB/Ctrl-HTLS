@@ -6,30 +6,32 @@ import {
 } from '@utils/pricingUtils';
 
 function useHotelSelection(hotel) {
-  const carritoCtx = useCarrito();
+  const {
+    getHotelEntry,
+    getSelectedRoomIdsForHotel,
+    getSelectedPackageIdsForHotel,
+    agregarHabitacion,
+    removerHabitacion,
+    agregarPaquete,
+    removerPaquete,
+  } = useCarrito();
 
   const hotelId = hotel?.hotelId;
 
-  const hotelEnCarrito = useMemo(() => {
-    return carritoCtx?.getHotelEntry
-      ? carritoCtx.getHotelEntry(hotelId)
-      : carritoCtx?.carrito?.hoteles?.find((h) => h.hotelId === hotelId) ||
-          null;
-  }, [carritoCtx, hotelId]);
+  const hotelEnCarrito = useMemo(
+    () => getHotelEntry(hotelId),
+    [getHotelEntry, hotelId]
+  );
 
-  const selectedRoomIds = useMemo(() => {
-    if (typeof carritoCtx?.getSelectedRoomIdsForHotel === 'function') {
-      return carritoCtx.getSelectedRoomIdsForHotel(hotelId) || [];
-    }
-    return hotelEnCarrito?.habitaciones?.map((h) => h.id) || [];
-  }, [carritoCtx, hotelEnCarrito, hotelId]);
+  const selectedRoomIds = useMemo(
+    () => getSelectedRoomIdsForHotel(hotelId) || [],
+    [getSelectedRoomIdsForHotel, hotelId]
+  );
 
-  const selectedPackages = useMemo(() => {
-    if (typeof carritoCtx?.getSelectedPackageIdsForHotel === 'function') {
-      return carritoCtx.getSelectedPackageIdsForHotel(hotelId) || [];
-    }
-    return hotelEnCarrito?.paquetes?.map((p) => p.id) || [];
-  }, [carritoCtx, hotelEnCarrito, hotelId]);
+  const selectedPackages = useMemo(
+    () => getSelectedPackageIdsForHotel(hotelId) || [],
+    [getSelectedPackageIdsForHotel, hotelId]
+  );
 
   const totalPrice = useMemo(() => {
     if (!hotel) return 0;
@@ -47,88 +49,68 @@ function useHotelSelection(hotel) {
     return normalizeDiscount(hotel.temporada.porcentaje);
   }, [hotel?.temporada]);
 
-  // Callbacks: pass through fechas
   const addRoom = useCallback(
     (roomObj, fechas) => {
-      if (typeof carritoCtx?.addRoom === 'function') {
-        return carritoCtx.addRoom(hotelId, roomObj, fechas);
-      }
-      if (typeof carritoCtx?.agregarHabitacion === 'function') {
-        // compatibilidad: agregarHabitacion(hotelInfo, habitacion, fechas)
-        return carritoCtx.agregarHabitacion(
-          {
-            hotelId: hotelId,
-            nombre: hotel?.nombre ?? null,
-            temporada: hotel?.temporada ?? null,
-          },
-          roomObj,
-          fechas
-        );
+      if (typeof agregarHabitacion === 'function') {
+        const hotelInfo = {
+          hotelId: hotelId,
+          nombre: hotel?.nombre ?? null,
+          temporada: hotel?.temporada ?? null,
+        };
+        return agregarHabitacion(hotelInfo, roomObj, fechas);
       }
       console.warn(
-        'useHotelSelection.addRoom: no hay función conocida en CarritoContext'
+        'useHotelSelection.addRoom: agregarHabitacion no está disponible en CarritoContext'
       );
     },
-    [carritoCtx, hotelId, hotel]
+    [agregarHabitacion, hotelId, hotel]
   );
 
   const removeRoom = useCallback(
     (roomId) => {
-      if (typeof carritoCtx?.removeRoom === 'function') {
-        return carritoCtx.removeRoom(hotelId, roomId);
-      }
-      if (typeof carritoCtx?.removerHabitacion === 'function') {
-        return carritoCtx.removerHabitacion(hotelId, roomId);
+      if (typeof removerHabitacion === 'function') {
+        return removerHabitacion(hotelId, roomId);
       }
       console.warn(
-        'useHotelSelection.removeRoom: no hay función conocida en CarritoContext'
+        'useHotelSelection.removeRoom: removerHabitacion no está disponible en CarritoContext'
       );
     },
-    [carritoCtx, hotelId]
+    [removerHabitacion, hotelId]
   );
 
   const addPackage = useCallback(
     (pkgObj, fechas) => {
-      if (typeof carritoCtx?.addPackage === 'function') {
-        return carritoCtx.addPackage(hotelId, pkgObj, fechas);
-      }
-      if (typeof carritoCtx?.agregarPaquete === 'function') {
-        return carritoCtx.agregarPaquete(
-          {
-            hotelId: hotelId,
-            nombre: hotel?.nombre ?? null,
-            temporada: hotel?.temporada ?? null,
-          },
-          pkgObj,
-          fechas
-        );
+      if (typeof agregarPaquete === 'function') {
+        const hotelInfo = {
+          hotelId: hotelId,
+          nombre: hotel?.nombre ?? null,
+          temporada: hotel?.temporada ?? null,
+        };
+        return agregarPaquete(hotelInfo, pkgObj, fechas);
       }
       console.warn(
-        'useHotelSelection.addPackage: no hay función conocida en CarritoContext'
+        'useHotelSelection.addPackage: agregarPaquete no está disponible en CarritoContext'
       );
     },
-    [carritoCtx, hotelId, hotel]
+    [agregarPaquete, hotelId, hotel]
   );
 
   const removePackage = useCallback(
     (pkgId) => {
-      if (typeof carritoCtx?.removePackage === 'function') {
-        return carritoCtx.removePackage(hotelId, pkgId);
-      }
-      if (typeof carritoCtx?.removerPaquete === 'function') {
-        return carritoCtx.removerPaquete(hotelId, pkgId);
+      if (typeof removerPaquete === 'function') {
+        return removerPaquete(hotelId, pkgId);
       }
       console.warn(
-        'useHotelSelection.removePackage: no hay función conocida en CarritoContext'
+        'useHotelSelection.removePackage: removerPaquete no está disponible en CarritoContext'
       );
     },
-    [carritoCtx, hotelId]
+    [removerPaquete, hotelId]
   );
 
   return {
     selectedRoomIds,
     selectedPackages,
-    addRoom,
+    addRoom, // Mantenemos los nombres en inglés aquí para no romper los componentes que lo usan
     removeRoom,
     addPackage,
     removePackage,
