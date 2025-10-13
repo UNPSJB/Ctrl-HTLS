@@ -73,7 +73,7 @@ function CartFooter({ hotels = [], onClose }) {
 
   return (
     <>
-      <div className="border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/50">
+      <div className="rounded-lg border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/50">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -83,7 +83,6 @@ function CartFooter({ hotels = [], onClose }) {
               {currencyFormatter.format(totals.final)}
             </div>
             {totals.descuento > 0 && (
-              // --- CAMBIO AQUÍ ---
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 Ahorrás: {currencyFormatter.format(totals.descuento)}
               </div>
