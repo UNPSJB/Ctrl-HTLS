@@ -1,6 +1,6 @@
 function CartHeader() {
   return (
-    <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
       <h2
         id="cart-title"
         className="text-lg font-semibold text-gray-900 dark:text-gray-100"

@@ -5,41 +5,44 @@ import { calcRoomInstanceTotal } from '@utils/pricingUtils';
 import dateUtils from '@utils/dateUtils';
 import { useCarrito } from '@context/CarritoContext';
 
-const { formatFecha, nightsBetween } = dateUtils;
+const { formatFecha } = dateUtils;
 
 function RoomCartItem({ room, hotel, onRemove = null }) {
   const { fechaInicio, fechaFin, precio = 0, nombre, capacidad } = room || {};
 
-  const nights = nightsBetween(fechaInicio, fechaFin, { useUTC: true });
-
-  const { original: originalTotal, final: finalTotal } = useMemo(() => {
-    // console.log(hotel);
+  const {
+    original: originalTotal,
+    final: finalTotal,
+    nights,
+  } = useMemo(() => {
+    // Definimos el objeto 'limite' con las fechas de la temporada del hotel.
+    // Si no hay temporada, será null y la función de cálculo lo manejará.
+    const limiteTemporada = hotel?.temporada
+      ? {
+          fechaInicio: hotel.temporada.fechaInicio,
+          fechaFin: hotel.temporada.fechaFin,
+        }
+      : null;
 
     return calcRoomInstanceTotal({
-      precio: room.precio,
-      nights,
+      precio: precio,
       porcentaje: hotel?.temporada?.porcentaje,
+      alquiler: { fechaInicio, fechaFin },
+      limite: limiteTemporada, // Pasamos el nuevo parámetro 'limite'
     });
-  }, [room, hotel, nights, precio]);
+  }, [precio, hotel?.temporada, fechaInicio, fechaFin]);
 
-  const { removeRoom, removerHabitacion } = useCarrito();
+  const { removerHabitacion } = useCarrito();
 
   const handleRemove = useCallback(() => {
     if (onRemove) {
       onRemove(room.id);
       return;
     }
-
-    if (typeof removeRoom === 'function') {
-      removeRoom(hotel?.hotelId, room.id);
-      return;
-    }
-
     if (typeof removerHabitacion === 'function') {
       removerHabitacion(hotel?.hotelId, room.id);
-      return;
     }
-  }, [onRemove, removeRoom, removerHabitacion, hotel?.hotelId, room?.id]);
+  }, [onRemove, removerHabitacion, hotel?.hotelId, room?.id]);
 
   if (!room) return null;
 
@@ -48,19 +51,14 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
       <div className="min-w-0 flex-1">
         <h4 className="flex items-center gap-2 truncate font-medium text-gray-900 dark:text-gray-100">
           <House className="h-5 w-5 text-current" />
-          <span className="truncate">
-            {nombre ?? room.name ?? 'Habitación'}
-          </span>
+          <span className="truncate">{nombre ?? 'Habitación'}</span>
         </h4>
 
         <div className="mt-1 flex flex-col text-sm text-gray-600 dark:text-gray-300 sm:flex-row sm:items-center sm:gap-4">
           <p className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            <span className="font-medium">
-              {capacidad ?? room.capacity ?? '-'}
-            </span>
+            <span className="font-medium">{capacidad ?? '-'}</span>
           </p>
-
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 sm:mt-0">
             {formatFecha(fechaInicio)} — {formatFecha(fechaFin)} ({nights} noche
             {nights > 1 ? 's' : ''})
@@ -71,7 +69,7 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
       <div className="text-right">
         <PriceTag
           precio={finalTotal}
-          original={finalTotal < originalTotal ? originalTotal : undefined}
+          original={finalTotal !== originalTotal ? originalTotal : undefined}
           seasonLayout="column"
         />
       </div>
