@@ -1,4 +1,3 @@
-// PackageCartItem.jsx
 import { useCallback, useMemo } from 'react';
 import { Trash2, Package as PackageIcon, Users } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
@@ -8,11 +7,6 @@ import { useCarrito } from '@context/CarritoContext';
 
 const { formatFecha, nightsBetween } = dateUtils;
 
-/**
- * PackageCartItem
- * - Recibe `pack` (desde carrito) y `hotel` (entrada del carrito).
- * - Usa preferentemente removePackage (wrapper) y fallback a removerPaquete.
- */
 function PackageCartItem({ pack, hotel, onRemove = null }) {
   const {
     fechaInicio,
@@ -27,40 +21,32 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
   const nights =
     Number(noches) || nightsBetween(fechaInicio, fechaFin, { useUTC: true });
 
+  // --- CORRECCIÓN EN EL CÁLCULO DE PRECIOS ---
+  // Usamos 'original' y 'final' que son los valores devueltos por la función.
   const { original: originalTotal, final: finalTotal } = useMemo(() => {
     const hotelSeasonDiscount = hotel?.temporada?.porcentaje ?? 0;
 
     return calcPackageTotal({
       paquete: pack,
       qty,
-      hotelSeasonDiscount,
+      porcentaje: hotelSeasonDiscount,
     });
   }, [pack, hotel, qty]);
 
-  const { removePackage, removerPaquete } = useCarrito();
+  // --- CORRECCIÓN EN LA LÓGICA DE ELIMINACIÓN ---
+  // Obtenemos solo la función 'removerPaquete' del contexto.
+  const { removerPaquete } = useCarrito();
 
+  // Simplificamos el handler para usar la API unificada del contexto.
   const handleRemove = useCallback(() => {
     if (onRemove) {
       onRemove(id);
       return;
     }
-
-    // Preferimos wrapper removePackage(hotelId, pkgId)
-    if (typeof removePackage === 'function') {
-      removePackage(hotel?.hotelId, id);
-      return;
-    }
-
-    // Fallback a la API antigua
     if (typeof removerPaquete === 'function') {
       removerPaquete(hotel?.hotelId, id);
-      return;
     }
-
-    console.warn(
-      'No se encontró función para remover paquete en CarritoContext'
-    );
-  }, [onRemove, removePackage, removerPaquete, hotel?.hotelId, id]);
+  }, [onRemove, removerPaquete, hotel?.hotelId, id]);
 
   if (!pack) return null;
 

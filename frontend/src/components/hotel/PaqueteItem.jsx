@@ -26,7 +26,9 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
     return instancias.filter((inst) => idsEnCarrito.has(inst.id)).length;
   }, [hotelEnCarrito, instancias]);
 
-  const { precioTemporada: precioBase, precioDescuento } = useMemo(() => {
+  // --- CORRECCIÓN AQUÍ ---
+  // Desestructuramos 'original' y 'final' que son los valores correctos que devuelve la función.
+  const { original: precioBase, final: precioDescuento } = useMemo(() => {
     return calcPackageTotal({
       paquete: instancias[0],
       porcentaje: hotelData?.temporada?.porcentaje,
@@ -41,7 +43,6 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
     const instanciaParaAgregar = instancias.find(
       (inst) => !idsEnCarrito.has(inst.id)
     );
-
     if (instanciaParaAgregar) {
       const fechas = { fechaInicio: isoFechaInicio, fechaFin: isoFechaFin };
       onAdd(instanciaParaAgregar, fechas);
@@ -64,7 +65,6 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
     const instanciasSeleccionadas = instancias.filter((inst) =>
       idsEnCarrito.has(inst.id)
     );
-
     if (instanciasSeleccionadas.length > 0) {
       const idARemover =
         instanciasSeleccionadas[instanciasSeleccionadas.length - 1].id;
@@ -82,15 +82,11 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
   return (
     <>
       <article className="flex flex-col rounded-lg border border-gray-200 bg-gray-50 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
-        {/* --- PRIMERA FILA --- */}
         <div className="grid grid-cols-4 items-center px-4 py-3">
-          {/* Columna 1: Nombre y Detalles */}
           <div className="col-span-2 flex flex-col gap-2">
-            {/* Sub-fila 1: Nombre */}
             <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
               {nombre}
             </div>
-            {/* Sub-fila 2: Iconos de detalles */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
                 <Calendar className="h-4 w-4" />
@@ -113,7 +109,6 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
             </div>
           </div>
 
-          {/* Columna 2: Contador */}
           <div className="flex justify-center">
             <Counter
               value={selectedCount}
@@ -123,13 +118,11 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
             />
           </div>
 
-          {/* Columna 3: Precio */}
           <div className="flex justify-end">
             <PriceTag precio={precioDescuento} original={precioBase} />
           </div>
         </div>
 
-        {/* --- SEGUNDA FILA --- */}
         <div className="border-t border-gray-200 px-4 py-2 dark:border-gray-700">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {descripcion}
