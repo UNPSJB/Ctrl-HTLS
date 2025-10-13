@@ -13,7 +13,6 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
   const { isoFechaInicio, isoFechaFin } = useBookingDates();
   const { carrito } = useCarrito();
 
-  // Desestructuramos la prop `habitacionTipo` que ya viene con la estructura limpia
   const {
     tipo,
     capacidad,
@@ -53,12 +52,14 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
 
     if (!instanciaParaAgregar) return;
 
+    // --- CORRECCIÓN AQUÍ ---
+    // El nombre ahora es simplemente el tipo de la habitación.
     const habitacionCompleta = {
       ...instanciaParaAgregar,
       tipo,
       capacidad,
       precio: precioBase,
-      nombre: `${tipo} - ${instanciaParaAgregar.numero ?? ''}`,
+      nombre: tipo,
     };
 
     const fechas = { fechaInicio: isoFechaInicio, fechaFin: isoFechaFin };
