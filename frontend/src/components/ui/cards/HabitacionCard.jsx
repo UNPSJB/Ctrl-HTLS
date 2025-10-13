@@ -1,10 +1,8 @@
 import PriceTag from '@ui/PriceTag';
 import { Users, Hash, Layers3 } from 'lucide-react';
 import { useMemo } from 'react';
-import dateUtils from '@utils/dateUtils';
 import { calcRoomInstanceTotal } from '@utils/pricingUtils';
-
-const { formatFecha } = dateUtils;
+import DateDisplay from '@ui/DateDisplay'; // Importamos el nuevo componente
 
 function HabitacionCard({ habitacion, hotel }) {
   if (!habitacion) return null;
@@ -61,7 +59,7 @@ function HabitacionCard({ habitacion, hotel }) {
         </div>
         {priceInfo.hasSeasonalAdjustment && (
           <div className="flex justify-between text-gray-500 dark:text-gray-400">
-            <span>Precio por noche (descuento por temporada):</span>
+            <span>Precio noche (temporada):</span>
             <span className="font-medium">
               ${priceInfo.seasonalPricePerNight}
             </span>
@@ -75,11 +73,12 @@ function HabitacionCard({ habitacion, hotel }) {
 
       <hr className="my-3 border-gray-200 dark:border-gray-600" />
 
+      {/* --- SECCIÓN DE FECHAS ACTUALIZADA --- */}
       <div className="flex items-center justify-end">
-        <div className="text-xs text-gray-500 dark:text-gray-400">
-          {formatFecha(habitacion.fechaInicio)} —{' '}
-          {formatFecha(habitacion.fechaFin)}
-        </div>
+        <DateDisplay
+          fechaInicio={habitacion.fechaInicio}
+          fechaFin={habitacion.fechaFin}
+        />
       </div>
     </div>
   );
