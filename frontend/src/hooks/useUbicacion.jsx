@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from '../api/axiosInstance';
 
-// Pequeña función de ayuda para capitalizar la primera letra de un string
 const capitalize = (str) => {
   if (typeof str !== 'string' || str.length === 0) {
     return '';
@@ -17,12 +16,10 @@ const useUbicacion = () => {
   const [provinciaId, setProvinciaId] = useState('');
   const [ciudadId, setCiudadId] = useState('');
 
-  // Cargar países
   useEffect(() => {
     axios
       .get('/paises')
       .then((res) => {
-        // Capitalizamos el nombre de cada país
         const capitalizedData = res.data.map((item) => ({
           ...item,
           nombre: capitalize(item.nombre),
@@ -32,18 +29,15 @@ const useUbicacion = () => {
       .catch((err) => console.error('Error cargando países:', err));
   }, []);
 
-  // Cargar provincias cuando cambia el país
   useEffect(() => {
     if (!paisId) {
       setProvincias([]);
       setProvinciaId('');
       return;
     }
-
     axios
       .get(`/provincias/${paisId}`)
       .then((res) => {
-        // Capitalizamos el nombre de cada provincia
         const capitalizedData = res.data.map((item) => ({
           ...item,
           nombre: capitalize(item.nombre),
@@ -53,18 +47,15 @@ const useUbicacion = () => {
       .catch((err) => console.error('Error cargando provincias:', err));
   }, [paisId]);
 
-  // Cargar ciudades cuando cambia la provincia
   useEffect(() => {
     if (!provinciaId) {
       setCiudades([]);
       setCiudadId('');
       return;
     }
-
     axios
       .get(`/ciudades/${provinciaId}`)
       .then((res) => {
-        // Capitalizamos el nombre de cada ciudad
         const capitalizedData = res.data.map((item) => ({
           ...item,
           nombre: capitalize(item.nombre),
@@ -76,13 +67,13 @@ const useUbicacion = () => {
 
   const handlePaisChange = (newPaisId) => {
     setPaisId(newPaisId);
-    setProvinciaId(''); // Reseteamos la provincia y ciudad al cambiar de país
+    setProvinciaId('');
     setCiudadId('');
   };
 
   const handleProvinciaChange = (newProvinciaId) => {
     setProvinciaId(newProvinciaId);
-    setCiudadId(''); // Reseteamos la ciudad al cambiar de provincia
+    setCiudadId('');
   };
 
   const handleCiudadChange = (newCiudadId) => {
