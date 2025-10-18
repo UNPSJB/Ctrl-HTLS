@@ -28,13 +28,13 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
 
   const handleRemove = useCallback(() => {
     if (onRemove) {
-      onRemove(room.id);
+      onRemove(room._cartId);
       return;
     }
     if (typeof removerHabitacion === 'function') {
-      removerHabitacion(hotel?.hotelId, room.id);
+      removerHabitacion(hotel?.hotelId, room._cartId);
     }
-  }, [onRemove, removerHabitacion, hotel?.hotelId, room?.id]);
+  }, [onRemove, removerHabitacion, hotel?.hotelId, room?._cartId]);
 
   if (!room) return null;
 
@@ -69,7 +69,7 @@ function RoomCartItem({ room, hotel, onRemove = null }) {
             onClick={handleRemove}
             aria-label={`Eliminar habitación ${nombre ?? ''}`}
             title="Eliminar habitación"
-            disabled={!room?.id}
+            disabled={!room?._cartId}
             className="group rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:hover:bg-red-900/20 dark:hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
