@@ -26,6 +26,18 @@ const setReserva = async (req, res) => {
   }
 };
 
+const updateReserva = async (req, res) => {
+  const reservas = req.body;
+  try {
+    let reservasActualizada =
+      await alquilerServices.actualizarReserva(reservas);
+    res.status(200).json(reservasActualizada);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const deleteReserva = async (req, res) => {
   const { alquilerIds } = req.body; // Recibe un arreglo de IDs de alquileres
 
@@ -39,4 +51,9 @@ const deleteReserva = async (req, res) => {
   }
 };
 
-module.exports = { getDisponibilidad, setReserva, deleteReserva };
+module.exports = {
+  getDisponibilidad,
+  setReserva,
+  updateReserva,
+  deleteReserva,
+};

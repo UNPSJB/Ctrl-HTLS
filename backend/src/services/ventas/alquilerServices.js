@@ -10,8 +10,6 @@ const verificarDisponibilidad = require('./verificarDisponibilidad');
 
 const habitacionServices = require('../hotel/habitacionServices');
 const paquetePromocionalServices = require('../hotel/paquetePromocionalServices');
-const personaServices = require('../core/personaServices');
-
 const Alquiler = require('../../models/ventas/Alquiler');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
@@ -146,122 +144,144 @@ const crearReserva = async (reservas) => {
   }
 };
 
-// const crearReserva = async (reserva) => {
-//   const { hoteles, numeroDocumento, puntos } = reserva;
+const actualizarReserva = async (reservas) => {
+  const transaction = await sequelize.transaction();
 
-//   // Iniciar una transacción
-//   const transaction = await sequelize.transaction();
-//   const alquileresCreados = []; // Arreglo para almacenar los alquileres creados
+  try {
+    for (const alquiler of reservas.alquileres) {
+      const {
+        alquilerId,
+        fechaInicio,
+        fechaFin,
+        pasajeros,
+        montoTotal,
+        habitaciones, // Array de IDs: [1, 3, 5, 7]
+        paquetes, // Array de IDs: [2, 4]
+      } = alquiler;
 
-//   try {
-//     const cliente =
-//       await personaServices.obtenerClientePorDocumento(numeroDocumento);
+      // 1. Actualizar los datos básicos del alquiler
+      await Alquiler.update(
+        {
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          pasajeros: pasajeros,
+          importe_total: montoTotal,
+        },
+        {
+          where: { id: alquilerId },
+          transaction,
+        },
+      );
 
-//     for (const hotel of hoteles) {
-//       const { alquileres } = hotel;
+      // ========== SINCRONIZAR HABITACIONES ==========
+      if (habitaciones && Array.isArray(habitaciones)) {
+        // Paso 1: Obtener qué habitaciones tiene actualmente el alquiler en la BD
+        const habitacionesActuales = await AlquilerHabitacion.findAll({
+          where: { alquilerId },
+          attributes: ['habitacionId'],
+          transaction,
+        });
 
-//       for (const alquiler of alquileres) {
-//         const {
-//           habitaciones,
-//           paquetesPromocionales,
-//           fechaInicio,
-//           fechaFin,
-//           pasajeros,
-//           importe_total,
-//         } = alquiler;
+        const habitacionesActualesIds = habitacionesActuales.map(
+          (h) => h.habitacionId,
+        );
 
-//         // Verificar disponibilidad
-//         const habitacionesDisponibles =
-//           await verificarDisponibilidad.verificarDisponibilidadHabitaciones(
-//             habitaciones,
-//             fechaInicio,
-//             fechaFin,
-//           );
-//         if (habitacionesDisponibles.length > 0) {
-//           throw new CustomError(
-//             'Algunas habitaciones no están disponibles en las fechas seleccionadas',
-//             400,
-//           );
-//         }
+        // Paso 2: Identificar las habitaciones NUEVAS que hay que AGREGAR
+        const habitacionesAgregar = habitaciones.filter(
+          (id) => !habitacionesActualesIds.includes(id),
+        );
 
-//         const paquetesDisponibles =
-//           await verificarDisponibilidad.verificarDisponibilidadPaquetes(
-//             paquetesPromocionales,
-//             fechaInicio,
-//             fechaFin,
-//           );
-//         if (paquetesDisponibles.length > 0) {
-//           throw new CustomError(
-//             'Algunos paquetes no están disponibles en las fechas seleccionadas',
-//             400,
-//           );
-//         }
-//         // Guardar alquiler
-//         const nuevoAlquiler = await guardarAlquiler(
-//           cliente.id,
-//           {
-//             fechaInicio,
-//             fechaFin,
-//             pasajeros,
-//             importe_total,
-//           },
-//           transaction, // Pasar la transacción
-//         );
-//         // Guardar habitaciones y paquetes
-//         if (habitaciones && habitaciones.length > 0) {
-//           await habitacionServices.guardarHabitaciones(
-//             nuevoAlquiler.id,
-//             habitaciones,
-//             fechaInicio,
-//             fechaFin,
-//             transaction, // Pasar la transacción
-//           );
-//         }
+        // Paso 3: Identificar las habitaciones VIEJAS que hay que ELIMINAR
+        // Habitaciones a eliminar = las que están en la BD pero NO en el front
+        // habitacionesEliminar = [2, 4]
+        const habitacionesEliminar = habitacionesActualesIds.filter(
+          (id) => !habitaciones.includes(id),
+        );
 
-//         if (paquetesPromocionales && paquetesPromocionales.length > 0) {
-//           await paquetePromocionalServices.guardarPaquetes(
-//             nuevoAlquiler.id,
-//             paquetesPromocionales,
-//             fechaInicio,
-//             fechaFin,
-//             transaction, // Pasar la transacción
-//           );
-//         }
+        // Paso 4: AGREGAR las habitaciones nuevas
+        if (habitacionesAgregar.length > 0) {
+          await AlquilerHabitacion.bulkCreate(
+            habitacionesAgregar.map((habitacionId) => ({
+              alquilerId,
+              habitacionId,
+              fechaInicio,
+              fechaFin,
+            })),
+            { transaction },
+          );
+        }
 
-//         // Agregar información del alquiler creado al arreglo
-//         alquileresCreados.push({
-//           alquilerId: nuevoAlquiler.id,
-//           hotelId: hotel.hotelId,
-//           fechaInicio,
-//           fechaFin,
-//           importe_total,
-//           habitaciones: habitaciones || [],
-//           paquetesPromocionales: paquetesPromocionales || [],
-//         });
-//       }
-//     }
+        // Paso 5: ELIMINAR las habitaciones que ya no están
+        if (habitacionesEliminar.length > 0) {
+          await AlquilerHabitacion.destroy({
+            where: {
+              alquilerId,
+              habitacionId: habitacionesEliminar,
+            },
+            transaction,
+          });
+        }
+      }
 
-//     // Actualizar puntos del cliente
-//     await personaServices.actualizarPuntosCliente(
-//       cliente.id,
-//       puntos,
-//       transaction,
-//     );
+      // ========== SINCRONIZAR PAQUETES (misma lógica) ==========
+      if (paquetes && Array.isArray(paquetes)) {
+        const paquetesActuales = await AlquilerPaquetePromocional.findAll({
+          where: { alquilerId },
+          attributes: ['paquetePromocionalId'],
+          transaction,
+        });
 
-//     // Confirmar la transacción
-//     await transaction.commit();
+        const paquetesActualesIds = paquetesActuales.map(
+          (p) => p.paquetePromocionalId,
+        );
 
-//     // Devolver los alquileres creados
-//     return alquileresCreados;
-//   } catch (error) {
-//     // Revertir la transacción si algo falla
-//     await transaction.rollback();
-//     throw new CustomError(
-//       `Error al crear la reserva: ${error.message}`,
-//       error.statusCode || 500,
-//     ); // Internal Server Error
-//   }
-// };
+        // Identificar paquetes a agregar
+        const paquetesAgregar = paquetes.filter(
+          (id) => !paquetesActualesIds.includes(id),
+        );
+
+        // Identificar paquetes a eliminar
+        const paquetesEliminar = paquetesActualesIds.filter(
+          (id) => !paquetes.includes(id),
+        );
+
+        // Agregar nuevos paquetes
+        if (paquetesAgregar.length > 0) {
+          await AlquilerPaquetePromocional.bulkCreate(
+            paquetesAgregar.map((paquetePromocionalId) => ({
+              alquilerId,
+              paquetePromocionalId,
+              fechaInicio,
+              fechaFin,
+            })),
+            { transaction },
+          );
+        }
+
+        // Eliminar paquetes viejos
+        if (paquetesEliminar.length > 0) {
+          await AlquilerPaquetePromocional.destroy({
+            where: {
+              alquilerId,
+              paquetePromocionalId: paquetesEliminar,
+            },
+            transaction,
+          });
+        }
+      }
+    }
+
+    await transaction.commit();
+    return reservas;
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Error al actualizar reserva:', error);
+    throw new CustomError(
+      `Error al actualizar la reserva: ${error.message}`,
+      500,
+    );
+  }
+};
 
 const cancelarReserva = async (alquilerIds) => {
   // Iniciar una transacción
@@ -325,5 +345,6 @@ module.exports = {
   obtenerDisponibilidad,
   crearReserva,
   guardarAlquiler,
+  actualizarReserva,
   cancelarReserva,
 };
