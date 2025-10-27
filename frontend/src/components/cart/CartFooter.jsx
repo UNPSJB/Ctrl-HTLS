@@ -1,85 +1,47 @@
-// CartFooter.jsx
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
-import dateUtils from '@utils/dateUtils';
 import ClienteModal from '../client/ClienteModal';
+import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
 
-const { nightsBetween } = dateUtils;
-
-/**
- * CartFooter corregido:
- * - Calcula totales iterando sobre las entradas del carrito (hotel.habitaciones son instancias).
- * - Usa calcRoomInstanceTotal / calcPackageTotal directamente.
- */
 function CartFooter({ hotels = [], onClose }) {
   const navigate = useNavigate();
   const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
 
-  // Calcular totales directamente a partir del carrito (entradas ya contienen instancias)
   const totals = useMemo(() => {
-    let originalSum = 0;
     let finalSum = 0;
+    let originalSum = 0;
 
     (hotels || []).forEach((hotel) => {
-      const hotelSeasonDiscount = hotel?.temporada?.porcentaje ?? 0;
+      const porcentajeTemporada = hotel?.temporada?.porcentaje ?? 0;
 
-      // habitaciones (cada 'room' es una instancia agregada al carrito)
       (hotel.habitaciones || []).forEach((room) => {
-        // nightsBetween puede devolver NaN si fechas inválidas => fallback a 1
-        let nights = 1;
-        try {
-          const maybe = nightsBetween(room.fechaInicio, room.fechaFin, {
-            useUTC: true,
-          });
-          nights =
-            Number.isFinite(Number(maybe)) && Number(maybe) > 0
-              ? Math.floor(Number(maybe))
-              : 1;
-        } catch (err) {
-          nights = 1;
-        }
-
-        const qty = room.qty ?? 1;
-        // calcRoomInstanceTotal espera roomInstance.price
-        const roomInstance = {
-          ...room,
-          price: room.precio ?? room.price ?? 0,
-        };
-        const { original = 0, final = 0 } = calcRoomInstanceTotal({
-          roomInstance,
-          nights,
-          qty,
-          hotelSeasonDiscount,
+        const calc = calcRoomInstanceTotal({
+          precio: room.precio,
+          porcentaje: porcentajeTemporada,
+          alquiler: {
+            fechaInicio: room.fechaInicio,
+            fechaFin: room.fechaFin,
+          },
+          limite: hotel.temporada,
         });
-
-        originalSum += Number(original ?? 0);
-        finalSum += Number(final ?? 0);
+        originalSum += calc.original;
+        finalSum += calc.final;
       });
 
-      // paquetes
       (hotel.paquetes || []).forEach((pack) => {
-        const qty = pack.qty ?? 1;
-        const { original = 0, final = 0 } = calcPackageTotal({
+        const calc = calcPackageTotal({
           paquete: pack,
-          qty,
-          hotelSeasonDiscount,
+          porcentaje: porcentajeTemporada,
         });
-
-        originalSum += Number(original ?? 0);
-        finalSum += Number(final ?? 0);
+        originalSum += calc.original;
+        finalSum += calc.final;
       });
     });
 
-    const descuento = Math.max(
-      0,
-      Math.round(Number(originalSum) - Number(finalSum))
-    );
-
     return {
-      original: Math.round(Number(originalSum)),
-      final: Math.round(Number(finalSum)),
-      descuento,
+      final: finalSum,
+      original: originalSum,
+      descuento: originalSum - finalSum,
     };
   }, [hotels]);
 
@@ -94,7 +56,7 @@ function CartFooter({ hotels = [], onClose }) {
     []
   );
 
-  const isDisabled = !Array.isArray(hotels) || hotels.length === 0;
+  const isDisabled = hotels.length === 0;
 
   const handleReservar = () => {
     if (isDisabled) return;
@@ -111,25 +73,21 @@ function CartFooter({ hotels = [], onClose }) {
 
   return (
     <>
-      <div className="border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/50">
+      <div className="rounded-lg border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/50">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
               Total
             </div>
-
             <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
-              {currencyFormatter.format(Number(totals.final ?? 0))}
+              {currencyFormatter.format(totals.final)}
             </div>
-
-            {Number(totals.descuento ?? 0) > 0 && (
+            {totals.descuento > 0 && (
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                Ahorrás:{' '}
-                {currencyFormatter.format(Number(totals.descuento ?? 0))}
+                Ahorrás: {currencyFormatter.format(totals.descuento)}
               </div>
             )}
           </div>
-
           <button
             onClick={handleReservar}
             disabled={isDisabled}
@@ -138,9 +96,6 @@ function CartFooter({ hotels = [], onClose }) {
                 ? 'cursor-not-allowed bg-gray-400'
                 : 'bg-blue-600 hover:bg-blue-700'
             }`}
-            aria-disabled={isDisabled}
-            title="Reservar / Pagar"
-            type="button"
           >
             Reservar
           </button>

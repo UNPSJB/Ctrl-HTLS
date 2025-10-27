@@ -5,7 +5,7 @@ const Temporada = ({ porcentaje }) => {
     <div className="flex items-center gap-2">
       <Tag className="h-4 w-4 text-green-500" />
       <span className="text-sm font-medium text-green-500">
-        {porcentaje * 100}% descuento en temporada alta
+        {Math.abs(porcentaje) * 100}% descuento por temporada
       </span>
     </div>
   );

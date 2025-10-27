@@ -1,109 +1,91 @@
 /**
- * Transforma un objeto hotel del formato de backend (crudo) al formato optimizado para el frontend (limpio y estructurado).
+ * Transforma un objeto hotel del formato de backend a una estructura optimizada para el frontend.
+ * - Coerción de tipos: Convierte strings a Numbers.
+ * - Reestructuración de datos: Agrupa habitaciones y paquetes por tipo/nombre.
  *
- * Objetivo: Coercionar tipos de datos (strings a Number/Date) y pre-calcular data común (hotelData, descuentos).
- *
- * @param {Object} hotel - Objeto hotel crudo desde la API.
- * @returns {Object} - Objeto hotel transformado con tipos de datos correctos y estructuras pre-calculadas.
+ * @param {Object} hotel - Objeto hotel crudo.
+ * @returns {Object|null} - Objeto hotel transformado.
  */
 export const transformHotel = (hotel) => {
-  if (!hotel) return null;
+  if (!hotel) {
+    return null;
+  }
 
-  // 1. Aplicar transformaciones básicas de coerción de tipos y estructuras
-  const transformed = {
+  // Si el hotel ya fue transformado, lo retornamos para evitar trabajo doble.
+  if (hotel._isTransformed) {
+    return hotel;
+  }
+
+  // 1. Transformar y agrupar habitaciones
+  const habitacionesTransformadas = (hotel.habitaciones || []).map((group) => {
+    const tipoHabitacion = Object.keys(group).find((key) =>
+      Array.isArray(group[key])
+    );
+    return {
+      tipo: tipoHabitacion,
+      habitaciones: group[tipoHabitacion] || [],
+      precio: Number(group.precio) || 0,
+      capacidad: Number(group.capacidad) || 0,
+    };
+  });
+
+  // 2. Transformar y agrupar paquetes
+  const paquetesAgrupados = (hotel.paquetes || []).reduce((acc, paquete) => {
+    const grupoExistente = acc.find((g) => g.nombre === paquete.nombre);
+
+    // Transformar la instancia actual del paquete
+    const instanciaPaquete = {
+      ...paquete,
+      id: Number(paquete.id),
+      noches: Number(paquete.noches) || 0,
+      descuento: Number(paquete.descuento) || 0,
+      habitaciones: (paquete.habitaciones || []).map((hab) => ({
+        ...hab,
+        capacidad: Number(hab.capacidad) || 0,
+        precio: Number(hab.precio) || 0,
+      })),
+    };
+
+    if (grupoExistente) {
+      grupoExistente.instancias.push(instanciaPaquete);
+    } else {
+      acc.push({
+        ...instanciaPaquete, // Usamos la primera instancia como base
+        instancias: [instanciaPaquete], // Creamos el array de instancias
+      });
+    }
+    return acc;
+  }, []);
+
+  return {
     ...hotel,
-    // Categoría: Asegurar que las estrellas sean Number
-    categoria: {
-      ...hotel.categoria,
-      estrellas: Number(hotel.categoria?.estrellas) || 0,
-    },
-    // Temporada: Asegurar tipos y manejar nulos
+    hotelId: Number(hotel.hotelId) || null,
+    estrellas: Number(hotel.estrellas) || 0,
     temporada: hotel.temporada
       ? {
           ...hotel.temporada,
           porcentaje: Number(hotel.temporada.porcentaje) || 0,
-          fechaInicio: hotel.temporada.fechaInicio
-            ? new Date(hotel.temporada.fechaInicio)
-            : null,
-          fechaFin: hotel.temporada.fechaFin
-            ? new Date(hotel.temporada.fechaFin)
-            : null,
         }
       : null,
-    // Descuentos: Coerción de tipos
-    descuentos:
-      hotel.descuentos?.map((descuento) => ({
-        ...descuento,
-        porcentaje: Number(descuento.porcentaje) || 0,
-        cantidad_de_habitaciones:
-          Number(descuento.cantidad_de_habitaciones) || 0,
-      })) || [],
-    // Habitaciones: Coerción de tipos Y NORMALIZACIÓN DE ESTRUCTURA
-    habitaciones:
-      hotel.habitaciones?.map((habitacion) => {
-        // Lógica para encontrar la clave dinámica del tipo de habitación
-        const tipoHabitacion = Object.keys(habitacion).find(
-          (key) => key !== 'precio' && key !== 'capacidad'
-        );
-
-        return {
-          tipo: tipoHabitacion,
-          habitaciones: habitacion[tipoHabitacion] || [], // Array de instancias
-          precio: Number(habitacion.precio) || 0,
-          capacidad: Number(habitacion.capacidad) || 0,
-        };
-      }) || [],
-    // Paquetes: Coerción de tipos
-    paquetes:
-      hotel.paquetes?.map((paquete) => ({
-        ...paquete,
-        noches: Number(paquete.noches) || 0,
-        descuento: Number(paquete.descuento) || 0,
-        habitaciones:
-          paquete.habitaciones?.map((hab) => ({
-            ...hab,
-            capacidad: Number(hab.capacidad) || 0,
-            precio: Number(hab.precio) || 0,
-          })) || [],
-      })) || [],
-  };
-
-  // 2. AÑADIR DATOS DERIVADOS para simplificar componentes:
-
-  // 2.1. Datos Mínimos del Hotel para componentes hijos
-  const hotelData = {
-    hotelId: transformed.hotelId,
-    nombre: transformed.nombre,
-    temporada: transformed.temporada,
-  };
-
-  // 2.2. Descuentos Formateados para Componente Descuento.jsx
-  // Solo se calcula el porcentaje entero y la cantidad, la vista se encarga del texto.
-  const descuentosParaComponente =
-    transformed.descuentos.length > 0
-      ? transformed.descuentos.map((descuento) => {
-          const porcentaje = Math.round(descuento.porcentaje * 100);
-          return {
-            id: descuento.id,
-            porcentaje,
-            cantidad: descuento.cantidad_de_habitaciones,
-          };
-        })
-      : null;
-
-  // Devolvemos el objeto transformado, con la data de visualización añadida
-  return {
-    ...transformed,
-    hotelData, // Datos base para subcomponentes (HotelHeader, HabitacionItem)
-    descuentos: descuentosParaComponente, // Data limpia para Descuento.jsx
+    descuentos: (hotel.descuentos || []).map((d) => ({
+      ...d,
+      porcentaje: Number(d.porcentaje) || 0,
+      cantidad_de_habitaciones: Number(d.cantidad_de_habitaciones) || 0,
+    })),
+    habitaciones: habitacionesTransformadas,
+    paquetes: paquetesAgrupados, // Usamos los paquetes ya agrupados
+    _isTransformed: true, // Bandera para evitar re-transformación
   };
 };
 
 /**
- * Transforma un array de hoteles
- * @param {Array} hoteles - Array de objetos hotel
- * @returns {Array} - Array de hoteles transformados
+ * Transforma un array de hoteles.
+ * @param {Array<Object>} hoteles - Array de objetos hotel crudos.
+ * @returns {Array<Object>} - Array de hoteles transformados.
  */
 export const transformHoteles = (hoteles) => {
-  return hoteles?.map(transformHotel) || [];
+  if (!Array.isArray(hoteles)) {
+    return [];
+  }
+  return hoteles.map(transformHotel);
 };
