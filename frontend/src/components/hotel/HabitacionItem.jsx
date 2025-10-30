@@ -1,18 +1,12 @@
-import { memo, useMemo, useCallback, useState } from 'react';
+import { memo } from 'react';
 import { createPortal } from 'react-dom';
 import { Users, Home, Info } from 'lucide-react';
 import PriceTag from '@ui/PriceTag';
 import Counter from '@ui/Counter';
 import RoomDetailsModal from './RoomDetailsModal';
-import { calcSeasonalPrice } from '@utils/pricingUtils';
-import { useCarrito } from '@context/CarritoContext';
-import useBookingDates from '@hooks/useBookingDates';
+import { useHabitacionSelection } from '@hooks/useHabitacionSelection';
 
 function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
-  const [showModal, setShowModal] = useState(false);
-  const { isoFechaInicio, isoFechaFin } = useBookingDates();
-  const { carrito } = useCarrito();
-
   const {
     tipo,
     capacidad,
@@ -20,86 +14,19 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
     habitaciones: instanciasDisponibles,
   } = habitacionTipo;
 
-  const maxAvailable = instanciasDisponibles.length;
-
-  const hotelEnCarrito = useMemo(() => {
-    return carrito.hoteles.find((h) => h.hotelId === hotelData?.hotelId);
-  }, [carrito.hoteles, hotelData?.hotelId]);
-
-  const selectedCount = useMemo(() => {
-    if (!hotelEnCarrito) return 0;
-    const idsEnCarrito = new Set(hotelEnCarrito.habitaciones.map((h) => h.id));
-    return instanciasDisponibles.filter((inst) => idsEnCarrito.has(inst.id))
-      .length;
-  }, [hotelEnCarrito, instanciasDisponibles]);
-
-  const { precioFinal, precioOriginal } = useMemo(() => {
-    const final = hotelData?.temporada
-      ? calcSeasonalPrice(precioBase, hotelData.temporada.porcentaje)
-      : precioBase;
-    return { precioFinal: final, precioOriginal: precioBase };
-  }, [precioBase, hotelData]);
-
-  const handleIncrement = useCallback(() => {
-    if (selectedCount >= maxAvailable || !onAdd) return;
-
-    const idsEnCarrito = new Set(
-      hotelEnCarrito?.habitaciones.map((h) => h.id) || []
-    );
-    const instanciaParaAgregar = instanciasDisponibles.find(
-      (inst) => !idsEnCarrito.has(inst.id)
-    );
-
-    if (!instanciaParaAgregar) return;
-
-    // --- CORRECCIÓN AQUÍ ---
-    // El nombre ahora es simplemente el tipo de la habitación.
-    const habitacionCompleta = {
-      ...instanciaParaAgregar,
-      tipo,
-      capacidad,
-      precio: precioBase,
-      nombre: tipo,
-    };
-
-    const fechas = { fechaInicio: isoFechaInicio, fechaFin: isoFechaFin };
-    onAdd(habitacionCompleta, fechas);
-  }, [
+  // Toda la lógica ahora reside en esta única línea
+  const {
+    showModal,
     selectedCount,
+    precioFinal,
+    precioOriginal,
     maxAvailable,
-    instanciasDisponibles,
-    hotelEnCarrito,
-    tipo,
-    capacidad,
-    precioBase,
-    onAdd,
-    isoFechaInicio,
-    isoFechaFin,
-  ]);
-
-  const handleDecrement = useCallback(() => {
-    if (selectedCount <= 0 || !onRemove) return;
-
-    const idsEnCarrito = new Set(
-      hotelEnCarrito?.habitaciones.map((h) => h.id) || []
-    );
-    const instanciasSeleccionadas = instanciasDisponibles.filter((inst) =>
-      idsEnCarrito.has(inst.id)
-    );
-
-    if (instanciasSeleccionadas.length > 0) {
-      const idARemover =
-        instanciasSeleccionadas[instanciasSeleccionadas.length - 1].id;
-      onRemove(idARemover);
-    }
-  }, [selectedCount, onRemove, hotelEnCarrito, instanciasDisponibles]);
-
-  const handleShowDetails = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
-  const handleReserveFromModal = () => {
-    setShowModal(false);
-    handleIncrement();
-  };
+    handleIncrement,
+    handleDecrement,
+    handleShowDetails,
+    handleCloseModal,
+    handleReserveFromModal,
+  } = useHabitacionSelection(hotelData, habitacionTipo, onAdd, onRemove);
 
   return (
     <>

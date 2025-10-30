@@ -69,24 +69,19 @@ function carritoReducer(estado, accion) {
         ...estado,
         hoteles: estado.hoteles.map((hotel) =>
           hotel.hotelId === accion.payload.hotelId
-            ? hotel.habitaciones.some(
-                (room) => room.id === accion.payload.habitacion.id
-              )
-              ? hotel // Evita duplicados de la misma instancia de habitación
-              : {
-                  ...hotel,
-                  habitaciones: [
-                    ...hotel.habitaciones,
-                    accion.payload.habitacion,
-                  ],
-                }
+            ? {
+                ...hotel,
+                habitaciones: [
+                  ...hotel.habitaciones,
+                  accion.payload.habitacion,
+                ],
+              }
             : hotel
         ),
       };
     }
 
     case TIPOS.AGREGAR_PAQUETE: {
-      // PERMITE AGREGAR MÚLTIPLES INSTANCIAS DEL MISMO PAQUETE
       return {
         ...estado,
         hoteles: estado.hoteles.map((hotel) =>
@@ -104,14 +99,15 @@ function carritoReducer(estado, accion) {
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
           if (hotel.hotelId === accion.payload.hotelId) {
+            // Se filtra por el _cartId único en lugar del id de la habitación
             const updatedHabitaciones = hotel.habitaciones.filter(
-              (room) => room.id !== accion.payload.habitacionId
+              (room) => room._cartId !== accion.payload.cartId
             );
             if (
               updatedHabitaciones.length === 0 &&
               hotel.paquetes.length === 0
             ) {
-              return null; // Elimina el hotel si queda vacío
+              return null;
             }
             return { ...hotel, habitaciones: updatedHabitaciones };
           }
@@ -122,23 +118,20 @@ function carritoReducer(estado, accion) {
     }
 
     case TIPOS.REMOVER_PAQUETE: {
-      // ELIMINA SOLO LA ÚLTIMA INSTANCIA DEL PAQUETE ENCONTRADO
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
           if (hotel.hotelId === accion.payload.hotelId) {
-            const paquetes = [...hotel.paquetes];
-            const indexToRemove = paquetes
-              .map((pkg) => pkg.id)
-              .lastIndexOf(accion.payload.paqueteId); // Encuentra el último índice
-
-            if (indexToRemove !== -1) {
-              paquetes.splice(indexToRemove, 1); // Elimina solo ese elemento
+            // Se filtra por el _cartId único
+            const updatedPaquetes = hotel.paquetes.filter(
+              (pkg) => pkg._cartId !== accion.payload.cartId
+            );
+            if (
+              hotel.habitaciones.length === 0 &&
+              updatedPaquetes.length === 0
+            ) {
+              return null;
             }
-
-            if (hotel.habitaciones.length === 0 && paquetes.length === 0) {
-              return null; // Elimina el hotel si queda vacío
-            }
-            return { ...hotel, paquetes: paquetes };
+            return { ...hotel, paquetes: updatedPaquetes };
           }
           return hotel;
         })
@@ -209,6 +202,8 @@ function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
 
   const item = {
     ...elemento,
+    // Se añade un ID único para esta entrada específica del carrito
+    _cartId: `cart-item-${Date.now()}-${Math.random()}`,
     fechaInicio,
     fechaFin,
   };
@@ -286,19 +281,19 @@ export function CarritoProvider({ children }) {
   );
 
   const removerHabitacion = useCallback(
-    (hotelId, habitacionId) =>
+    (hotelId, cartId) =>
       dispatch({
         type: TIPOS.REMOVER_HABITACION,
-        payload: { hotelId, habitacionId },
+        payload: { hotelId, cartId },
       }),
     [dispatch]
   );
 
   const removerPaquete = useCallback(
-    (hotelId, paqueteId) =>
+    (hotelId, cartId) =>
       dispatch({
         type: TIPOS.REMOVER_PAQUETE,
-        payload: { hotelId, paqueteId },
+        payload: { hotelId, cartId },
       }),
     [dispatch]
   );

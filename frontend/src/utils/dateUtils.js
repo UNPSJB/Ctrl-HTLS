@@ -64,7 +64,6 @@ export function nightsBetween(
 }
 
 /**
- * --- NUEVA FUNCIÓN ---
  * Calcula el número de noches de un alquiler que se superponen con un rango de fechas de temporada.
  * @param {object} alquiler - Rango de fechas del alquiler { fechaInicio, fechaFin }.
  * @param {object} limite - Rango de fechas de la temporada { fechaInicio, fechaFin }.
@@ -103,6 +102,27 @@ export function normalizeDateValue(v) {
   return s === '' ? null : s;
 }
 
+/**
+ * Verifica si dos rangos de fechas se superponen.
+ * @param {object} range1 - { fechaInicio, fechaFin }
+ * @param {object} range2 - { fechaInicio, fechaFin }
+ * @returns {boolean} - True si hay superposición, de lo contrario false.
+ */
+export function dateRangesOverlap(range1, range2) {
+  if (!range1 || !range2) return false;
+
+  const start1 = parseDate(range1.fechaInicio);
+  const end1 = parseDate(range1.fechaFin);
+  const start2 = parseDate(range2.fechaInicio);
+  const end2 = parseDate(range2.fechaFin);
+
+  if (!start1 || !end1 || !start2 || !end2) return false;
+
+  // La superposición ocurre si un rango comienza antes de que el otro termine,
+  // y termina después de que el otro comience.
+  return start1 < end2 && start2 < end1;
+}
+
 const DEFAULT = {
   parseDate,
   isValidDate,
@@ -110,7 +130,8 @@ const DEFAULT = {
   formatFecha,
   toISODate,
   nightsBetween,
-  calculateOverlapNights, // <-- Exportamos la nueva función
+  calculateOverlapNights,
   normalizeDateValue,
+  dateRangesOverlap,
 };
 export default DEFAULT;

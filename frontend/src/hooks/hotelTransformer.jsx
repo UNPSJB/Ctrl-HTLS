@@ -1,22 +1,18 @@
-/**
- * Transforma un objeto hotel del formato de backend a una estructura optimizada para el frontend.
- * - Coerción de tipos: Convierte strings a Numbers.
- * - Reestructuración de datos: Agrupa habitaciones y paquetes por tipo/nombre.
- *
- * @param {Object} hotel - Objeto hotel crudo.
- * @returns {Object|null} - Objeto hotel transformado.
- */
+const capitalize = (str) => {
+  if (typeof str !== 'string' || str.length === 0) {
+    return '';
+  }
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 export const transformHotel = (hotel) => {
   if (!hotel) {
     return null;
   }
-
-  // Si el hotel ya fue transformado, lo retornamos para evitar trabajo doble.
   if (hotel._isTransformed) {
-    return hotel;
+    return null;
   }
 
-  // 1. Transformar y agrupar habitaciones
   const habitacionesTransformadas = (hotel.habitaciones || []).map((group) => {
     const tipoHabitacion = Object.keys(group).find((key) =>
       Array.isArray(group[key])
@@ -29,11 +25,8 @@ export const transformHotel = (hotel) => {
     };
   });
 
-  // 2. Transformar y agrupar paquetes
   const paquetesAgrupados = (hotel.paquetes || []).reduce((acc, paquete) => {
     const grupoExistente = acc.find((g) => g.nombre === paquete.nombre);
-
-    // Transformar la instancia actual del paquete
     const instanciaPaquete = {
       ...paquete,
       id: Number(paquete.id),
@@ -45,13 +38,12 @@ export const transformHotel = (hotel) => {
         precio: Number(hab.precio) || 0,
       })),
     };
-
     if (grupoExistente) {
       grupoExistente.instancias.push(instanciaPaquete);
     } else {
       acc.push({
-        ...instanciaPaquete, // Usamos la primera instancia como base
-        instancias: [instanciaPaquete], // Creamos el array de instancias
+        ...instanciaPaquete,
+        instancias: [instanciaPaquete],
       });
     }
     return acc;
@@ -59,8 +51,27 @@ export const transformHotel = (hotel) => {
 
   return {
     ...hotel,
+    nombre: capitalize(hotel.nombre),
+    // --- CORRECCIÓN AQUÍ: Verificación de seguridad ---
+    ubicacion: hotel.ubicacion
+      ? {
+          ...hotel.ubicacion,
+          // Usamos el nombre que viene de la API o el que ya tiene el objeto
+          nombrePais: capitalize(
+            hotel.ubicacion.nombrePais || hotel.ubicacion.pais
+          ),
+          nombreProvincia: capitalize(
+            hotel.ubicacion.nombreProvincia || hotel.ubicacion.provincia
+          ),
+          nombreCiudad: capitalize(
+            hotel.ubicacion.nombreCiudad || hotel.ubicacion.ciudad
+          ),
+        }
+      : {},
     hotelId: Number(hotel.hotelId) || null,
-    estrellas: Number(hotel.estrellas) || 0,
+    estrellas: hotel.categoria?.estrellas
+      ? Number(hotel.categoria.estrellas)
+      : hotel.categoria?.estrellas,
     temporada: hotel.temporada
       ? {
           ...hotel.temporada,
@@ -73,16 +84,11 @@ export const transformHotel = (hotel) => {
       cantidad_de_habitaciones: Number(d.cantidad_de_habitaciones) || 0,
     })),
     habitaciones: habitacionesTransformadas,
-    paquetes: paquetesAgrupados, // Usamos los paquetes ya agrupados
-    _isTransformed: true, // Bandera para evitar re-transformación
+    paquetes: paquetesAgrupados,
+    _isTransformed: true,
   };
 };
 
-/**
- * Transforma un array de hoteles.
- * @param {Array<Object>} hoteles - Array de objetos hotel crudos.
- * @returns {Array<Object>} - Array de hoteles transformados.
- */
 export const transformHoteles = (hoteles) => {
   if (!Array.isArray(hoteles)) {
     return [];

@@ -46,11 +46,11 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+      <h3 className="border-b pb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
         Ubicación
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             País *
@@ -59,7 +59,7 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             {...register('paisId', { required: 'Debe seleccionar un país' })}
             value={paisId}
             onChange={(e) => handlePaisChangeInternal(e.target.value)}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.paisId ? 'border-red-500' : 'border-gray-300'
             }`}
           >
@@ -71,7 +71,7 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             ))}
           </select>
           {errors.paisId && (
-            <p className="text-red-500 text-sm">{errors.paisId.message}</p>
+            <p className="text-sm text-red-500">{errors.paisId.message}</p>
           )}
         </div>
 
@@ -86,9 +86,9 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             value={provinciaId}
             onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
             disabled={isProvinciasDisabled}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.provinciaId ? 'border-red-500' : 'border-gray-300'
-            } ${isProvinciasDisabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+            } ${isProvinciasDisabled ? 'cursor-not-allowed bg-gray-100' : ''}`}
           >
             <option value="">
               {paisId ? 'Seleccionar provincia' : 'Primero seleccione un país'}
@@ -100,12 +100,12 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             ))}
           </select>
           {errors.provinciaId && (
-            <p className="text-red-500 text-sm">{errors.provinciaId.message}</p>
+            <p className="text-sm text-red-500">{errors.provinciaId.message}</p>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Ciudad *
@@ -117,9 +117,9 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             value={ciudadId}
             onChange={(e) => handleCiudadChangeInternal(e.target.value)}
             disabled={isCiudadesDisabled}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.ciudadId ? 'border-red-500' : 'border-gray-300'
-            } ${isCiudadesDisabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+            } ${isCiudadesDisabled ? 'cursor-not-allowed bg-gray-100' : ''}`}
           >
             <option value="">
               {provinciaId
@@ -133,7 +133,7 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             ))}
           </select>
           {errors.ciudadId && (
-            <p className="text-red-500 text-sm">{errors.ciudadId.message}</p>
+            <p className="text-sm text-red-500">{errors.ciudadId.message}</p>
           )}
         </div>
       </div>

@@ -6,7 +6,7 @@ import { useCarrito } from '@context/CarritoContext';
 import DateDisplay from '@ui/DateDisplay';
 
 function PackageCartItem({ pack, hotel, onRemove = null }) {
-  const { fechaInicio, fechaFin, nombre, id } = pack || {};
+  const { fechaInicio, fechaFin, nombre, _cartId } = pack || {};
 
   const { final: finalTotal } = useMemo(() => {
     return calcPackageTotal({
@@ -19,13 +19,13 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
 
   const handleRemove = useCallback(() => {
     if (onRemove) {
-      onRemove(id);
+      onRemove(_cartId);
       return;
     }
     if (typeof removerPaquete === 'function') {
-      removerPaquete(hotel?.hotelId, id);
+      removerPaquete(hotel?.hotelId, _cartId);
     }
-  }, [onRemove, removerPaquete, hotel?.hotelId, id]);
+  }, [onRemove, removerPaquete, hotel?.hotelId, _cartId]);
 
   if (!pack) return null;
 
@@ -48,7 +48,7 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
             onClick={handleRemove}
             aria-label={`Eliminar paquete ${nombre ?? ''}`}
             title="Eliminar paquete"
-            disabled={!pack?.id}
+            disabled={!_cartId}
             className="group rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:hover:bg-red-900/20 dark:hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />

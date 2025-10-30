@@ -32,15 +32,15 @@ export default function AdminCreateHotelForm() {
   const handleSelectChange = (field, value) => setValue(field, value);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="min-h-screen bg-gray-50 p-6 dark:bg-gray-900">
+      <div className="mx-auto max-w-4xl">
+        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
           {/* Header */}
-          <div className="bg-blue-600 dark:bg-blue-700 text-white p-6 flex items-center gap-3">
+          <div className="flex items-center gap-3 bg-blue-600 p-6 text-white dark:bg-blue-700">
             <Building2 className="h-8 w-8" />
             <div>
               <h1 className="text-2xl font-bold">Registrar Nuevo Hotel</h1>
-              <p className="text-blue-100 text-sm">
+              <p className="text-sm text-blue-100">
                 Complete la información del hotel y su encargado
               </p>
             </div>
@@ -55,10 +55,10 @@ export default function AdminCreateHotelForm() {
             >
               {/* Información Básica */}
               <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                <h3 className="border-b pb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
                   Información Básica
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <label
                       htmlFor="nombre"
@@ -74,12 +74,12 @@ export default function AdminCreateHotelForm() {
                       {...register('nombre', {
                         required: 'El nombre es obligatorio',
                       })}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         errors.nombre ? 'border-red-500' : 'border-gray-300'
-                      } ${loading || isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      } ${loading || isSubmitting ? 'cursor-not-allowed bg-gray-100' : ''}`}
                     />
                     {errors.nombre && (
-                      <p className="text-red-500 text-sm">
+                      <p className="text-sm text-red-500">
                         {errors.nombre.message}
                       </p>
                     )}
@@ -100,12 +100,12 @@ export default function AdminCreateHotelForm() {
                       {...register('telefono', {
                         required: 'El teléfono es obligatorio',
                       })}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         errors.telefono ? 'border-red-500' : 'border-gray-300'
-                      } ${loading || isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      } ${loading || isSubmitting ? 'cursor-not-allowed bg-gray-100' : ''}`}
                     />
                     {errors.telefono && (
-                      <p className="text-red-500 text-sm">
+                      <p className="text-sm text-red-500">
                         {errors.telefono.message}
                       </p>
                     )}
@@ -127,12 +127,12 @@ export default function AdminCreateHotelForm() {
                     {...register('direccion', {
                       required: 'La dirección es obligatoria',
                     })}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.direccion ? 'border-red-500' : 'border-gray-300'
-                    } ${loading || isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    } ${loading || isSubmitting ? 'cursor-not-allowed bg-gray-100' : ''}`}
                   />
                   {errors.direccion && (
-                    <p className="text-red-500 text-sm">
+                    <p className="text-sm text-red-500">
                       {errors.direccion.message}
                     </p>
                   )}
@@ -157,12 +157,12 @@ export default function AdminCreateHotelForm() {
                         message: 'Email inválido',
                       },
                     })}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.email ? 'border-red-500' : 'border-gray-300'
-                    } ${loading || isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    } ${loading || isSubmitting ? 'cursor-not-allowed bg-gray-100' : ''}`}
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-sm">
+                    <p className="text-sm text-red-500">
                       {errors.email.message}
                     </p>
                   )}
@@ -214,9 +214,9 @@ export default function AdminCreateHotelForm() {
                   }
                   value={watch('categoriaId') || ''}
                   disabled={loading || isSubmitting}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.categoriaId ? 'border-red-500' : 'border-gray-300'
-                  } ${loading || isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  } ${loading || isSubmitting ? 'cursor-not-allowed bg-gray-100' : ''}`}
                 >
                   <option value="">
                     {loading
@@ -230,18 +230,18 @@ export default function AdminCreateHotelForm() {
                   ))}
                 </select>
                 {errors.categoriaId && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-sm text-red-500">
                     {errors.categoriaId.message}
                   </p>
                 )}
               </section>
 
               {/* Botones */}
-              <div className="flex gap-3 pt-6 border-t">
+              <div className="flex gap-3 border-t pt-6">
                 <button
                   type="button"
                   disabled={loading || isSubmitting}
-                  className={`flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`flex-1 rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     loading || isSubmitting
                       ? 'cursor-not-allowed opacity-50'
                       : ''
@@ -252,7 +252,7 @@ export default function AdminCreateHotelForm() {
                 <button
                   type="submit"
                   disabled={loading || isSubmitting}
-                  className={`flex-1 px-4 py-2 rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`flex-1 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     loading || isSubmitting
                       ? 'cursor-not-allowed opacity-50'
                       : ''
