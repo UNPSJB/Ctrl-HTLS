@@ -33,7 +33,7 @@ function PagoPage() {
         </div>
 
         {/* Sidebar sticky - columna derecha */}
-        <div className="w-80 shrink-0">
+        <div className="w-100 shrink-0">
           <PaymentSummary />
         </div>
       </div>
