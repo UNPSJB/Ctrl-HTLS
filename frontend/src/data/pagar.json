@@ -1,0 +1,19 @@
+{
+    "alquileres": [
+        {
+            "alquilerId": 45,
+            "subTotal": 700.00
+        },
+        {
+            "alquilerId": 46,
+            "subTotal": 500.00
+        }
+    ],
+    "tipoFact": "A",
+    "medioPago": "Tarjeta",
+    "montonEfectivo": 0.00,
+    "montonTarjeta": 0.00,
+    "montoTotal": 1200.00,
+    "vendedorId": 5,
+    "clienteId": 12
+}
