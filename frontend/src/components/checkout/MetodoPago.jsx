@@ -1,24 +1,14 @@
-import { useEffect, useMemo, useState, useCallback } from 'react'; // 1. Importamos useState y useCallback
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Check } from 'lucide-react';
 import TarjetaForm from './TarjetaForm';
 
-function MetodoPago({
-  // 2. ELIMINAMOS las props de estado
-  // paymentMethod, (eliminado)
-  // setPaymentMethod, (eliminado)
-  // onCardChange, (eliminado)
-  className = '',
-  baseTotal = 0,
-  clientPoints = 0,
-}) {
-  // 3. AÑADIMOS estado interno
+function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [cardPayload, setCardPayload] = useState({
     cardData: null,
     valid: false,
   });
 
-  // 4. AÑADIMOS el handler local para la tarjeta
   const handleCardChange = useCallback(({ cardData, valid }) => {
     setCardPayload({ cardData, valid });
   }, []);
@@ -31,11 +21,10 @@ function MetodoPago({
 
   useEffect(() => {
     if (paymentMethod === 'punto' && !puntoEnabled) {
-      setPaymentMethod('cash'); // Usa el setter local
+      setPaymentMethod('cash');
     }
-  }, [paymentMethod, puntoEnabled]); // El setter local no necesita estar en las dependencias
+  }, [paymentMethod, puntoEnabled]);
 
-  // --- (El resto del componente no cambia) ---
   const methods = useMemo(
     () => [
       { id: 'cash', label: 'Efectivo', disabled: false },
@@ -56,10 +45,10 @@ function MetodoPago({
           <label
             key={m.id}
             onClick={() => {
-              if (!m.disabled) setPaymentMethod(m.id); // 5. Usa el setter local
+              if (!m.disabled) setPaymentMethod(m.id);
             }}
             className={`flex cursor-pointer select-none items-center gap-3 rounded-lg border p-3 transition-colors ${
-              paymentMethod === m.id // 6. Usa el estado local
+              paymentMethod === m.id
                 ? 'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-900'
                 : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900/50'
             } ${m.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
@@ -69,9 +58,9 @@ function MetodoPago({
               type="radio"
               name="payment"
               value={m.id}
-              checked={paymentMethod === m.id} // 7. Usa el estado local
+              checked={paymentMethod === m.id}
               onChange={() => {
-                if (!m.disabled) setPaymentMethod(m.id); // 8. Usa el setter local
+                if (!m.disabled) setPaymentMethod(m.id);
               }}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500"
               disabled={m.disabled}
@@ -99,7 +88,6 @@ function MetodoPago({
 
       {paymentMethod === 'card' && (
         <div className="mt-4">
-          {/* 9. El formulario de tarjeta ahora usa el handler local */}
           <TarjetaForm onChange={handleCardChange} />
         </div>
       )}
