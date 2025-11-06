@@ -1,24 +1,24 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import axiosInstance from '@api/axiosInstance';
-// import { useCliente } from '@context/ClienteContext'; // <-- Eliminado
 
-export const useClienteSearch = () => {
-  const [documentNumber, setDocumentNumber] = useState('');
+export const useClienteSearch = (initialDocumento = null) => {
+  const [documentNumber, setDocumentNumber] = useState(initialDocumento || '');
   const [searchResult, setSearchResult] = useState(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(!!initialDocumento);
+  const [hasSearched, setHasSearched] = useState(!!initialDocumento);
   const [error, setError] = useState(null);
 
-  // const { selectClient, clearClient } = useCliente(); // <-- Eliminado
-
   const handleSearch = useCallback(async () => {
-    if (!documentNumber.trim()) return;
+    if (!documentNumber.trim()) {
+      setIsSearching(false);
+      setHasSearched(false);
+      return;
+    }
 
     setIsSearching(true);
     setHasSearched(true);
     setError(null);
     setSearchResult(null);
-    // clearClient(); // <-- Eliminado
 
     try {
       const response = await axiosInstance.get(
@@ -33,17 +33,21 @@ export const useClienteSearch = () => {
       };
 
       setSearchResult(formattedClient);
-      // selectClient(formattedClient); // <-- Eliminado
     } catch (err) {
       const errorMessage =
         err.response?.data?.error || 'No se pudo encontrar al cliente.';
       setError(errorMessage);
       setSearchResult(null);
-      // clearClient(); // <-- Eliminado
     } finally {
       setIsSearching(false);
     }
-  }, [documentNumber]); // <-- Dependencias actualizadas
+  }, [documentNumber]);
+
+  useEffect(() => {
+    if (initialDocumento) {
+      handleSearch();
+    }
+  }, []);
 
   const handleKeyPress = useCallback(
     (e) => {
@@ -61,8 +65,8 @@ export const useClienteSearch = () => {
     isSearching,
     hasSearched,
     error,
-    handleSearch,
+    handleSearch, // Renombramos 'performSearch' de vuelta a 'handleSearch'
     handleKeyPress,
-    setSearchResult, // Exportamos esto para que el modal pueda usarlo
+    setSearchResult,
   };
 };

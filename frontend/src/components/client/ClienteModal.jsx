@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, User, UserPlus } from 'lucide-react';
 import Modal from '../ui/Modal';
 import ClienteDetailsModal from './ClienteDetailsModal';
@@ -8,6 +8,9 @@ import { useCliente } from '@context/ClienteContext';
 import { usePago } from '@context/PagoContext';
 
 function ClienteModal({ onClose, onClienteSelected }) {
+  const { client, selectClient, clearClient } = useCliente();
+  const { setClienteId } = usePago();
+
   const {
     documentNumber,
     setDocumentNumber,
@@ -15,14 +18,20 @@ function ClienteModal({ onClose, onClienteSelected }) {
     isSearching,
     error,
     handleSearch: performSearch,
-    handleKeyPress: onKeyPress,
     setSearchResult,
-  } = useClienteSearch();
+  } = useClienteSearch(client?.documento);
 
-  const { selectClient, clearClient } = useCliente();
-  const { setClienteId } = usePago();
   const [view, setView] = useState('search');
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchResult) {
+      if (!client || client.id !== searchResult.id) {
+        selectClient(searchResult);
+      }
+      setClienteId(searchResult.id);
+    }
+  }, [searchResult, client, selectClient, setClienteId]);
 
   const handleSearchClick = async () => {
     clearClient();
@@ -51,6 +60,10 @@ function ClienteModal({ onClose, onClienteSelected }) {
     setView('search');
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSearchClick();
+  };
+
   return (
     <>
       <Modal onClose={onClose}>
@@ -59,11 +72,12 @@ function ClienteModal({ onClose, onClienteSelected }) {
             <>
               <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-gray-100">
                 <Search className="h-6 w-6" />
-                Buscar Cliente
+                {client ? 'Cliente Cargado' : 'Buscar Cliente'}
               </h2>
               <p className="mb-4 text-gray-700 dark:text-gray-400">
-                Busca un cliente por su número de documento para asociar con la
-                reserva.
+                {client
+                  ? 'Verificando datos del cliente actual. Puede buscar otro.'
+                  : 'Busca un cliente por su número de documento para asociar con la reserva.'}
               </p>
               <div className="mb-6">
                 <div className="flex gap-3">
@@ -76,9 +90,7 @@ function ClienteModal({ onClose, onClienteSelected }) {
                     onChange={(e) =>
                       setDocumentNumber(e.target.value.replace(/\D/g, ''))
                     }
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') handleSearchClick();
-                    }}
+                    onKeyPress={handleKeyPress}
                     className="flex-1 rounded-lg border border-gray-300 bg-gray-50 p-3 text-gray-700 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                     autoFocus
                   />
@@ -93,9 +105,14 @@ function ClienteModal({ onClose, onClienteSelected }) {
                 </div>
               </div>
 
-              {searchResult && (
+              {isSearching && (
+                <div className="text-center text-gray-500 dark:text-gray-400">
+                  Verificando cliente...
+                </div>
+              )}
+
+              {searchResult && !isSearching && (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
-                  {/* --- BLOQUE VISUAL RESTAURADO --- */}
                   <div className="mb-4 flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-600">
                       <User className="h-6 w-6 text-gray-800 dark:text-gray-200" />
@@ -120,7 +137,6 @@ function ClienteModal({ onClose, onClienteSelected }) {
                       </div>
                     </div>
                   </div>
-                  {/* --- FIN DEL BLOQUE RESTAURADO --- */}
 
                   <div className="flex items-center justify-between">
                     <button
@@ -140,7 +156,7 @@ function ClienteModal({ onClose, onClienteSelected }) {
                 </div>
               )}
 
-              {error && !isSearching && (
+              {error && !isSearching && !searchResult && (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
                   <div className="flex items-center justify-between gap-4">
                     <div>
@@ -148,7 +164,9 @@ function ClienteModal({ onClose, onClienteSelected }) {
                         {error}
                       </p>
                       <p className="mt-1 text-sm text-red-500 dark:text-red-300">
-                        Puedes crear un nuevo cliente con este documento.
+                        {client && client.documento === documentNumber
+                          ? 'El cliente guardado ya no existe. Puede buscar otro o crear uno nuevo.'
+                          : 'Puedes crear un nuevo cliente con este documento.'}
                       </p>
                     </div>
                     <button
