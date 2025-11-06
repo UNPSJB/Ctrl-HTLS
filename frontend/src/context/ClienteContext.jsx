@@ -1,28 +1,26 @@
-import { createContext, useContext, useState, useMemo } from 'react';
-
-/**
- * ClienteContext
- * - Guarda el cliente seleccionado en el flujo de venta.
- * - Provee funciones para seleccionar/limpiar cliente.
- *
- * Nota: este contexto es ligero — no persiste en localStorage por ahora.
- */
+import { createContext, useContext, useMemo, useCallback } from 'react';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 const ClienteContext = createContext(undefined);
+const STORAGE_KEY = 'clienteState';
 
 export function ClienteProvider({ children }) {
-  const [client, setClient] = useState(null);
+  const [client, setClient] = usePersistedState(STORAGE_KEY, null);
 
-  const selectClient = (cliente) => {
-    // cliente: objeto tal como viene en clientes.json { id, nombre, puntos, ... }
-    setClient(cliente);
-  };
+  const selectClient = useCallback(
+    (cliente) => {
+      setClient(cliente);
+    },
+    [setClient]
+  );
 
-  const clearClient = () => setClient(null);
+  const clearClient = useCallback(() => {
+    setClient(null);
+  }, [setClient]);
 
   const value = useMemo(
     () => ({ client, selectClient, clearClient }),
-    [client]
+    [client, selectClient, clearClient]
   );
 
   return (

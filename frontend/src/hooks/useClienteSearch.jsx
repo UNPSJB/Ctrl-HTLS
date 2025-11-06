@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import axiosInstance from '@api/axiosInstance';
-import { useCliente } from '@context/ClienteContext';
+// import { useCliente } from '@context/ClienteContext'; // <-- Eliminado
 
 export const useClienteSearch = () => {
   const [documentNumber, setDocumentNumber] = useState('');
@@ -9,7 +9,7 @@ export const useClienteSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState(null);
 
-  const { selectClient, clearClient } = useCliente();
+  // const { selectClient, clearClient } = useCliente(); // <-- Eliminado
 
   const handleSearch = useCallback(async () => {
     if (!documentNumber.trim()) return;
@@ -18,7 +18,7 @@ export const useClienteSearch = () => {
     setHasSearched(true);
     setError(null);
     setSearchResult(null);
-    clearClient();
+    // clearClient(); // <-- Eliminado
 
     try {
       const response = await axiosInstance.get(
@@ -26,7 +26,6 @@ export const useClienteSearch = () => {
       );
       const foundClient = response.data;
 
-      // Adaptamos el objeto del backend para que coincida con lo que la UI espera
       const formattedClient = {
         ...foundClient,
         nombre: `${foundClient.nombre} ${foundClient.apellido}`,
@@ -34,17 +33,17 @@ export const useClienteSearch = () => {
       };
 
       setSearchResult(formattedClient);
-      selectClient(formattedClient);
+      // selectClient(formattedClient); // <-- Eliminado
     } catch (err) {
       const errorMessage =
         err.response?.data?.error || 'No se pudo encontrar al cliente.';
       setError(errorMessage);
       setSearchResult(null);
-      clearClient();
+      // clearClient(); // <-- Eliminado
     } finally {
       setIsSearching(false);
     }
-  }, [documentNumber, selectClient, clearClient]);
+  }, [documentNumber]); // <-- Dependencias actualizadas
 
   const handleKeyPress = useCallback(
     (e) => {
@@ -64,5 +63,6 @@ export const useClienteSearch = () => {
     error,
     handleSearch,
     handleKeyPress,
+    setSearchResult, // Exportamos esto para que el modal pueda usarlo
   };
 };

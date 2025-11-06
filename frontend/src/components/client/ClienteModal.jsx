@@ -5,6 +5,7 @@ import ClienteDetailsModal from './ClienteDetailsModal';
 import { useClienteSearch } from '@/hooks/useClienteSearch';
 import ClienteForm from './ClienteForm';
 import { useCliente } from '@context/ClienteContext';
+import { usePago } from '@context/PagoContext';
 
 function ClienteModal({ onClose, onClienteSelected }) {
   const {
@@ -13,17 +14,26 @@ function ClienteModal({ onClose, onClienteSelected }) {
     searchResult,
     isSearching,
     error,
-    handleSearch,
-    handleKeyPress,
+    handleSearch: performSearch,
+    handleKeyPress: onKeyPress,
     setSearchResult,
   } = useClienteSearch();
 
-  const { selectClient } = useCliente();
+  const { selectClient, clearClient } = useCliente();
+  const { setClienteId } = usePago();
   const [view, setView] = useState('search');
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
+  const handleSearchClick = async () => {
+    clearClient();
+    setClienteId(null);
+    await performSearch();
+  };
+
   const handleSelectClient = () => {
     if (searchResult) {
+      selectClient(searchResult);
+      setClienteId(searchResult.id);
       onClienteSelected?.(searchResult);
       onClose();
     }
@@ -37,6 +47,7 @@ function ClienteModal({ onClose, onClienteSelected }) {
     };
     setSearchResult(formattedClient);
     selectClient(formattedClient);
+    setClienteId(nuevoCliente.id);
     setView('search');
   };
 
@@ -65,12 +76,14 @@ function ClienteModal({ onClose, onClienteSelected }) {
                     onChange={(e) =>
                       setDocumentNumber(e.target.value.replace(/\D/g, ''))
                     }
-                    onKeyPress={handleKeyPress}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') handleSearchClick();
+                    }}
                     className="flex-1 rounded-lg border border-gray-300 bg-gray-50 p-3 text-gray-700 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                     autoFocus
                   />
                   <button
-                    onClick={handleSearch}
+                    onClick={handleSearchClick}
                     disabled={isSearching || !documentNumber.trim()}
                     className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
@@ -82,6 +95,7 @@ function ClienteModal({ onClose, onClienteSelected }) {
 
               {searchResult && (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
+                  {/* --- BLOQUE VISUAL RESTAURADO --- */}
                   <div className="mb-4 flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-600">
                       <User className="h-6 w-6 text-gray-800 dark:text-gray-200" />
@@ -106,6 +120,8 @@ function ClienteModal({ onClose, onClienteSelected }) {
                       </div>
                     </div>
                   </div>
+                  {/* --- FIN DEL BLOQUE RESTAURADO --- */}
+
                   <div className="flex items-center justify-between">
                     <button
                       onClick={() => setIsDetailsModalOpen(true)}
