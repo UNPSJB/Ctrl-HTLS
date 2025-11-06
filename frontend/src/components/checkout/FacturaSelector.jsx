@@ -1,7 +1,7 @@
 import { FileText, Check } from 'lucide-react';
-import { useState } from 'react';
+import { usePago } from '@context/PagoContext'; // 1. Importar hook y eliminar useState
 
-// Opciones de factura
+// ... (tiposFactura no cambia) ...
 const tiposFactura = [
   { id: 'A', label: 'Factura A', description: 'Responsable Inscripto' },
   { id: 'B', label: 'Factura B', description: 'Consumidor Final' },
@@ -9,11 +9,13 @@ const tiposFactura = [
 ];
 
 function FacturaSelector({ disabled = false }) {
-  const [selectedType, setSelectedType] = useState('B');
+  // 2. Usar el contexto
+  const { tipoFactura, setTipoFactura } = usePago();
+  // Se elimina el useState local
 
   const handleSelect = (id) => {
     if (!disabled) {
-      setSelectedType(id);
+      setTipoFactura(id); // 3. Usar función del contexto
     }
   };
 
@@ -30,7 +32,7 @@ function FacturaSelector({ disabled = false }) {
             key={tipo.id}
             onClick={() => handleSelect(tipo.id)}
             className={`flex cursor-pointer select-none items-center gap-3 rounded-lg border p-3 transition-colors ${
-              selectedType === tipo.id
+              tipoFactura === tipo.id // 4. Usar estado del contexto
                 ? 'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-900'
                 : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900/50'
             } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
@@ -40,13 +42,13 @@ function FacturaSelector({ disabled = false }) {
               type="radio"
               name="facturaTipo"
               value={tipo.id}
-              checked={selectedType === tipo.id}
+              checked={tipoFactura === tipo.id} // 5. Usar estado del contexto
               onChange={() => handleSelect(tipo.id)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500"
               disabled={disabled}
               aria-label={`${tipo.label}: ${tipo.description}`}
             />
-
+            {/* ... (resto del JSX no cambia) ... */}
             <div className="flex flex-1 items-baseline">
               <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
                 {tipo.label}
@@ -56,7 +58,7 @@ function FacturaSelector({ disabled = false }) {
               </span>
             </div>
 
-            {selectedType === tipo.id && (
+            {tipoFactura === tipo.id && (
               <Check className="h-4 w-4 text-green-600" />
             )}
           </label>

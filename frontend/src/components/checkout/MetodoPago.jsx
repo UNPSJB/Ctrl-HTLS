@@ -1,17 +1,21 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useCallback } from 'react'; // 1. Se elimina useState
 import { Check } from 'lucide-react';
 import TarjetaForm from './TarjetaForm';
+import { usePago } from '@context/PagoContext'; // 2. Importar el nuevo hook
 
-function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
-  const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [cardPayload, setCardPayload] = useState({
-    cardData: null,
-    valid: false,
-  });
-
-  const handleCardChange = useCallback(({ cardData, valid }) => {
-    setCardPayload({ cardData, valid });
-  }, []);
+function MetodoPago({
+  // 3. Se eliminan las props de estado
+  // paymentMethod, (eliminado)
+  // setPaymentMethod, (eliminado)
+  // onCardChange, (eliminado)
+  className = '',
+  baseTotal = 0,
+  clientPoints = 0,
+}) {
+  // 4. Usar el contexto para obtener el estado y las funciones
+  const { metodoPago, setMetodoPago, setCardData } = usePago();
+  // Se elimina el estado local (paymentMethod, cardPayload)
+  // Se elimina el handleCardChange local
 
   const puntoEnabled = useMemo(() => {
     const pts = Number(clientPoints || 0);
@@ -20,16 +24,16 @@ function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
   }, [clientPoints, baseTotal]);
 
   useEffect(() => {
-    if (paymentMethod === 'punto' && !puntoEnabled) {
-      setPaymentMethod('cash');
+    if (metodoPago === 'punto' && !puntoEnabled) {
+      setMetodoPago('cash');
     }
-  }, [paymentMethod, puntoEnabled]);
+  }, [metodoPago, puntoEnabled, setMetodoPago]);
 
   const methods = useMemo(
     () => [
-      { id: 'cash', label: 'Efectivo', disabled: false },
-      { id: 'punto', label: 'Puntos', disabled: !puntoEnabled },
-      { id: 'card', label: 'Tarjeta', disabled: false },
+      { id: 'Efectivo', label: 'Efectivo', disabled: false },
+      { id: 'Puntos', label: 'Puntos', disabled: !puntoEnabled },
+      { id: 'Tarjeta', label: 'Tarjeta', disabled: false },
     ],
     [puntoEnabled]
   );
@@ -45,10 +49,10 @@ function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
           <label
             key={m.id}
             onClick={() => {
-              if (!m.disabled) setPaymentMethod(m.id);
+              if (!m.disabled) setMetodoPago(m.id);
             }}
             className={`flex cursor-pointer select-none items-center gap-3 rounded-lg border p-3 transition-colors ${
-              paymentMethod === m.id
+              metodoPago === m.id
                 ? 'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-900'
                 : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900/50'
             } ${m.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
@@ -58,21 +62,20 @@ function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
               type="radio"
               name="payment"
               value={m.id}
-              checked={paymentMethod === m.id}
+              checked={metodoPago === m.id}
               onChange={() => {
-                if (!m.disabled) setPaymentMethod(m.id);
+                if (!m.disabled) setMetodoPago(m.id);
               }}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500"
               disabled={m.disabled}
             />
-
             <div className="flex flex-1 items-center">
               <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
                 {m.label}
               </span>
             </div>
 
-            {paymentMethod === m.id && (
+            {metodoPago === m.id && (
               <Check className="h-4 w-4 text-green-600" />
             )}
           </label>
@@ -86,9 +89,9 @@ function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
         </p>
       )}
 
-      {paymentMethod === 'card' && (
+      {metodoPago === 'card' && (
         <div className="mt-4">
-          <TarjetaForm onChange={handleCardChange} />
+          <TarjetaForm onChange={setCardData} />
         </div>
       )}
     </fieldset>

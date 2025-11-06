@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
-import { useCarrito } from '@context/CarritoContext';
+import { useMemo, useEffect } from 'react'; // Quitamos useState y useCallback
+import { useCarrito } from '@context/CarritoContext'; // Necesario para el cálculo correcto
 import { useCliente } from '@context/ClienteContext';
+import { usePago } from '@context/PagoContext'; // Para setear el monto
 import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
@@ -8,7 +9,9 @@ import FacturaSelector from './FacturaSelector';
 function PaymentSummary() {
   const { carrito } = useCarrito();
   const { client } = useCliente();
+  const { setMontoTotal } = usePago();
 
+  // Esta es la lógica de cálculo CORRECTA (la que usa las fechas)
   const { totalOriginal, totalFinal, descuentoTotal } = useMemo(() => {
     let originalSum = 0;
     let finalSum = 0;
@@ -44,6 +47,12 @@ function PaymentSummary() {
     };
   }, [carrito.hoteles]);
 
+  // Sincronizamos el total calculado con el Contexto de Pago
+  useEffect(() => {
+    setMontoTotal(totalFinal);
+  }, [totalFinal, setMontoTotal]);
+
+  // El botón se habilita solo si hay un total que pagar
   const canConfirm = totalFinal > 0;
 
   return (
@@ -52,6 +61,7 @@ function PaymentSummary() {
         Resumen del Pago
       </h3>
 
+      {/* Sección de totales */}
       <div className="space-y-2 border-b border-gray-200 pb-4 dark:border-gray-700">
         <div className="flex justify-between text-sm">
           <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
@@ -78,18 +88,19 @@ function PaymentSummary() {
       </div>
 
       <div className="mt-4">
+        {/* Estos componentes ahora leen/escriben en PagoContext */}
         <MetodoPago
           baseTotal={totalFinal}
           clientPoints={Number(client?.puntos ?? 0)}
         />
-
         <FacturaSelector />
       </div>
 
+      {/* Botón visual (sin funcionalidad) */}
       <div className="mt-6">
         <button
           type="button"
-          onClick={() => {}}
+          onClick={() => {}} // No hace nada
           disabled={!canConfirm}
           aria-disabled={!canConfirm}
           className={`w-full rounded-lg px-4 py-3 font-semibold text-white transition-colors ${
