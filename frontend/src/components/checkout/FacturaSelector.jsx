@@ -1,4 +1,5 @@
 import { FileText, Check } from 'lucide-react';
+import { useState } from 'react'; // 1. Importar useState
 
 // Opciones de factura
 const tiposFactura = [
@@ -7,10 +8,15 @@ const tiposFactura = [
   { id: 'C', label: 'Factura C', description: 'Monotributista' },
 ];
 
-function FacturaSelector({ selectedType = 'B', onChange, disabled = false }) {
+// 2. ELIMINAMOS las props de estado (selectedType, onChange)
+function FacturaSelector({ disabled = false }) {
+  // 3. AÑADIMOS estado interno
+  const [selectedType, setSelectedType] = useState('B');
+
   const handleSelect = (id) => {
-    if (!disabled && typeof onChange === 'function') {
-      onChange(id);
+    // 4. Usa el setter local
+    if (!disabled) {
+      setSelectedType(id);
     }
   };
 
@@ -27,7 +33,7 @@ function FacturaSelector({ selectedType = 'B', onChange, disabled = false }) {
             key={tipo.id}
             onClick={() => handleSelect(tipo.id)}
             className={`flex cursor-pointer select-none items-center gap-3 rounded-lg border p-3 transition-colors ${
-              selectedType === tipo.id
+              selectedType === tipo.id // 5. Usa el estado local
                 ? 'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-900'
                 : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900/50'
             } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
@@ -37,7 +43,7 @@ function FacturaSelector({ selectedType = 'B', onChange, disabled = false }) {
               type="radio"
               name="facturaTipo"
               value={tipo.id}
-              checked={selectedType === tipo.id}
+              checked={selectedType === tipo.id} // 6. Usa el estado local
               onChange={() => handleSelect(tipo.id)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500"
               disabled={disabled}
@@ -54,7 +60,7 @@ function FacturaSelector({ selectedType = 'B', onChange, disabled = false }) {
               </span>
             </div>
 
-            {selectedType === tipo.id && (
+            {selectedType === tipo.id && ( // 7. Usa el estado local
               <Check className="h-4 w-4 text-green-600" />
             )}
           </label>
