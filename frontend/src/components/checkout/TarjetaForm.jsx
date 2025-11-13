@@ -219,13 +219,15 @@ function TarjetaForm({ onChange, className = '' }) {
         </span>
 
         <div className="mt-1 flex items-center gap-3">
-          <div className="flex-1">
+          {/* ----- ESTE ES EL CAMBIO PRINCIPAL ----- */}
+          <div className="min-w-0 flex-1">
             <input
               id="card-number"
               type="text"
               placeholder="1234 5678 9012 3456"
               value={cardData.number}
               onChange={handleNumber}
+              // Quité min-w-0 de aquí porque va en el padre
               className="w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
               inputMode="numeric"
               aria-label="Número de tarjeta"
@@ -250,7 +252,8 @@ function TarjetaForm({ onChange, className = '' }) {
           placeholder="Nombre completo"
           value={cardData.name}
           onChange={handleName}
-          className="mt-1 w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
+          // El min-w-0 aquí no es estrictamente necesario pero no daña
+          className="mt-1 w-full min-w-0 rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
           aria-label="Nombre en la tarjeta"
           autoComplete="cc-name"
         />
@@ -267,7 +270,7 @@ function TarjetaForm({ onChange, className = '' }) {
             placeholder="MM/YY"
             value={cardData.expiry}
             onChange={handleExpiry}
-            className="mt-1 w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
+            className="mt-1 w-full min-w-0 rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
             aria-label="Fecha de expiración"
             inputMode="numeric"
             autoComplete="cc-exp"
@@ -282,7 +285,7 @@ function TarjetaForm({ onChange, className = '' }) {
             placeholder="123"
             value={cardData.cvc}
             onChange={handleCvc}
-            className="mt-1 w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
+            className="mt-1 w-full min-w-0 rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
             inputMode="numeric"
             aria-label="CVC"
             autoComplete="cc-csc"

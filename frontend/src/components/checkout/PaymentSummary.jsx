@@ -1,7 +1,7 @@
-import { useMemo, useEffect } from 'react'; // Quitamos useState y useCallback
-import { useCarrito } from '@context/CarritoContext'; // Necesario para el cálculo correcto
+import { useMemo, useEffect } from 'react';
+import { useCarrito } from '@context/CarritoContext';
 import { useCliente } from '@context/ClienteContext';
-import { usePago } from '@context/PagoContext'; // Para setear el monto
+import { usePago } from '@context/PagoContext';
 import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
@@ -88,7 +88,6 @@ function PaymentSummary() {
       </div>
 
       <div className="mt-4">
-        {/* Estos componentes ahora leen/escriben en PagoContext */}
         <MetodoPago
           baseTotal={totalFinal}
           clientPoints={Number(client?.puntos ?? 0)}
@@ -96,11 +95,10 @@ function PaymentSummary() {
         <FacturaSelector />
       </div>
 
-      {/* Botón visual (sin funcionalidad) */}
       <div className="mt-6">
         <button
           type="button"
-          onClick={() => {}} // No hace nada
+          onClick={() => {}}
           disabled={!canConfirm}
           aria-disabled={!canConfirm}
           className={`w-full rounded-lg px-4 py-3 font-semibold text-white transition-colors ${
