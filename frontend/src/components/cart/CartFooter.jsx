@@ -6,7 +6,7 @@ import { useCarrito } from '@context/CarritoContext';
 import { useBusqueda } from '@context/BusquedaContext';
 import { usePago } from '@context/PagoContext';
 import axiosInstance from '@api/axiosInstance';
-import Swal from 'sweetalert2';
+import { toast } from 'react-hot-toast';
 
 function CartFooter({ hotels = [], onClose }) {
   const navigate = useNavigate();
@@ -80,8 +80,9 @@ function CartFooter({ hotels = [], onClose }) {
     }
 
     setIsReserving(true);
+    setIsClienteModalOpen(false);
 
-    try {
+    const reservationPromise = async () => {
       const dataParaApi = carrito.hoteles.map((hotel) => {
         const grupos = new Map();
 
@@ -154,27 +155,23 @@ function CartFooter({ hotels = [], onClose }) {
       });
 
       const response = await axiosInstance.post('/reservar', dataParaApi);
-      const reservaConfirmada = response.data;
+      return response.data;
+    };
 
-      Swal.fire({
-        title: 'Reserva Creada',
-        text: 'Tu reserva ha sido confirmada. Serás redirigido al pago.',
-        icon: 'success',
-        timer: 2000,
-        showConfirmButton: false,
+    try {
+      const reservaConfirmada = await toast.promise(reservationPromise(), {
+        loading: 'Confirmando reserva...',
+        success: '¡Reserva creada con éxito!',
+        error: (err) =>
+          err.response?.data?.error || 'No se pudo crear la reserva.',
       });
 
-      navigate('/pago', { state: { reservaConfirmada: reservaConfirmada } });
       if (typeof onClose === 'function') onClose();
-    } catch (err) {
-      Swal.fire(
-        'Error',
-        err.response?.data?.error || 'No se pudo crear la reserva.',
-        'error'
-      );
+      navigate('/pago', { state: { reservaConfirmada: reservaConfirmada } });
+    } catch (error) {
+      console.error('Error al procesar la reserva:', error);
     } finally {
       setIsReserving(false);
-      setIsClienteModalOpen(false);
     }
   };
 
