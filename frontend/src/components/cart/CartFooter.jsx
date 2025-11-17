@@ -13,7 +13,7 @@ function CartFooter({ hotels = [], onClose }) {
   const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
   const [isReserving, setIsReserving] = useState(false);
 
-  const { carrito } = useCarrito();
+  const { carrito, setReservaConfirmada } = useCarrito();
   const { filtros } = useBusqueda();
   const { vendedorId } = usePago();
 
@@ -166,8 +166,10 @@ function CartFooter({ hotels = [], onClose }) {
           err.response?.data?.error || 'No se pudo crear la reserva.',
       });
 
+      setReservaConfirmada(reservaConfirmada);
+
       if (typeof onClose === 'function') onClose();
-      navigate('/pago', { state: { reservaConfirmada: reservaConfirmada } });
+      navigate('/pago');
     } catch (error) {
       console.error('Error al procesar la reserva:', error);
     } finally {

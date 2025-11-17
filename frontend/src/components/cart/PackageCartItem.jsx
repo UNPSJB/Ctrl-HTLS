@@ -5,7 +5,7 @@ import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@context/CarritoContext';
 import DateDisplay from '@ui/DateDisplay';
 
-function PackageCartItem({ pack, hotel, onRemove = null }) {
+function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
   const { fechaInicio, fechaFin, nombre, _cartId } = pack || {};
 
   const { final: finalTotal } = useMemo(() => {
@@ -18,6 +18,7 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
   const { removerPaquete } = useCarrito();
 
   const handleRemove = useCallback(() => {
+    if (isLocked) return;
     if (onRemove) {
       onRemove(_cartId);
       return;
@@ -25,7 +26,7 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
     if (typeof removerPaquete === 'function') {
       removerPaquete(hotel?.hotelId, _cartId);
     }
-  }, [onRemove, removerPaquete, hotel?.hotelId, _cartId]);
+  }, [onRemove, removerPaquete, hotel?.hotelId, _cartId, isLocked]);
 
   if (!pack) return null;
 
@@ -48,8 +49,8 @@ function PackageCartItem({ pack, hotel, onRemove = null }) {
             onClick={handleRemove}
             aria-label={`Eliminar paquete ${nombre ?? ''}`}
             title="Eliminar paquete"
-            disabled={!_cartId}
-            className="group rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+            disabled={!_cartId || isLocked}
+            className="group rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
           </button>

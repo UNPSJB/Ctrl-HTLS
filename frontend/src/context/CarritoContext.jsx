@@ -8,6 +8,8 @@ import {
 } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
 import dateUtils from '../utils/dateUtils';
+import axiosInstance from '@api/axiosInstance';
+import { toast } from 'react-hot-toast';
 
 const { normalizeDateValue } = dateUtils;
 const STORAGE_KEY = 'carritoState';
@@ -15,6 +17,7 @@ const SEARCH_FILTERS_KEY = 'busquedaFilters';
 
 const estadoInicial = {
   hoteles: [],
+  reservaConfirmada: null,
 };
 
 const TIPOS = {
@@ -25,6 +28,8 @@ const TIPOS = {
   REMOVER_PAQUETE: 'REMOVER_PAQUETE',
   REMOVER_HOTEL: 'REMOVER_HOTEL',
   REEMPLAZAR_ESTADO: 'REEMPLAZAR_ESTADO',
+  SET_RESERVA_CONFIRMADA: 'SET_RESERVA_CONFIRMADA',
+  LIMPIAR_CARRITO_Y_RESERVA: 'LIMPIAR_CARRITO_Y_RESERVA',
 };
 
 function carritoReducer(estado, accion) {
@@ -99,7 +104,6 @@ function carritoReducer(estado, accion) {
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
           if (hotel.hotelId === accion.payload.hotelId) {
-            // Se filtra por el _cartId único en lugar del id de la habitación
             const updatedHabitaciones = hotel.habitaciones.filter(
               (room) => room._cartId !== accion.payload.cartId
             );
@@ -121,7 +125,6 @@ function carritoReducer(estado, accion) {
       const nuevosHoteles = estado.hoteles
         .map((hotel) => {
           if (hotel.hotelId === accion.payload.hotelId) {
-            // Se filtra por el _cartId único
             const updatedPaquetes = hotel.paquetes.filter(
               (pkg) => pkg._cartId !== accion.payload.cartId
             );
@@ -149,6 +152,17 @@ function carritoReducer(estado, accion) {
 
     case TIPOS.REEMPLAZAR_ESTADO:
       return accion.payload ?? estado;
+
+    case TIPOS.SET_RESERVA_CONFIRMADA:
+      return {
+        ...estado,
+        reservaConfirmada: accion.payload,
+      };
+
+    case TIPOS.LIMPIAR_CARRITO_Y_RESERVA:
+      return {
+        ...estadoInicial,
+      };
 
     default:
       return estado;
@@ -202,7 +216,6 @@ function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
 
   const item = {
     ...elemento,
-    // Se añade un ID único para esta entrada específica del carrito
     _cartId: `cart-item-${Date.now()}-${Math.random()}`,
     fechaInicio,
     fechaFin,
@@ -244,6 +257,7 @@ export function CarritoProvider({ children }) {
     const normalized = {
       ...persistedState,
       hoteles: normalizeHoteles(persistedState.hoteles || []),
+      reservaConfirmada: persistedState.reservaConfirmada || null,
     };
 
     if (JSON.stringify(normalized) !== JSON.stringify(persistedState)) {
@@ -257,51 +271,114 @@ export function CarritoProvider({ children }) {
   }, [estado, setPersistedState]);
 
   const agregarHabitacion = useCallback(
-    (hotelInfo, habitacion, fechas) =>
+    (hotelInfo, habitacion, fechas) => {
+      if (estado.reservaConfirmada) {
+        toast.error('Hay una reserva pendiente. Cancela la actual primero.');
+        return;
+      }
       agregarElemento(
         dispatch,
         TIPOS.AGREGAR_HABITACION,
         hotelInfo,
         habitacion,
         fechas
-      ),
-    [dispatch]
+      );
+    },
+    [dispatch, estado.reservaConfirmada]
   );
 
   const agregarPaquete = useCallback(
-    (hotelInfo, paquete, fechas) =>
+    (hotelInfo, paquete, fechas) => {
+      if (estado.reservaConfirmada) {
+        toast.error('Hay una reserva pendiente. Cancela la actual primero.');
+        return;
+      }
       agregarElemento(
         dispatch,
         TIPOS.AGREGAR_PAQUETE,
         hotelInfo,
         paquete,
         fechas
-      ),
-    [dispatch]
+      );
+    },
+    [dispatch, estado.reservaConfirmada]
   );
 
   const removerHabitacion = useCallback(
-    (hotelId, cartId) =>
+    (hotelId, cartId) => {
+      if (estado.reservaConfirmada) {
+        toast.error('No puedes editar una reserva pendiente de pago.');
+        return;
+      }
       dispatch({
         type: TIPOS.REMOVER_HABITACION,
         payload: { hotelId, cartId },
-      }),
-    [dispatch]
+      });
+    },
+    [dispatch, estado.reservaConfirmada]
   );
 
   const removerPaquete = useCallback(
-    (hotelId, cartId) =>
+    (hotelId, cartId) => {
+      if (estado.reservaConfirmada) {
+        toast.error('No puedes editar una reserva pendiente de pago.');
+        return;
+      }
       dispatch({
         type: TIPOS.REMOVER_PAQUETE,
         payload: { hotelId, cartId },
-      }),
-    [dispatch]
+      });
+    },
+    [dispatch, estado.reservaConfirmada]
   );
 
   const removerHotel = useCallback(
     (hotelId) => dispatch({ type: TIPOS.REMOVER_HOTEL, payload: { hotelId } }),
     [dispatch]
   );
+
+  const setReservaConfirmada = useCallback(
+    (reserva) =>
+      dispatch({ type: TIPOS.SET_RESERVA_CONFIRMADA, payload: reserva }),
+    [dispatch]
+  );
+
+  const limpiarCarritoYReserva = useCallback(
+    () => dispatch({ type: TIPOS.LIMPIAR_CARRITO_Y_RESERVA }),
+    [dispatch]
+  );
+
+  const cancelarReserva = useCallback(async () => {
+    if (!estado.reservaConfirmada) return;
+
+    const alquilerIds = estado.reservaConfirmada
+      .flatMap((res) => res.alquiler.map((alq) => alq.alquilerId))
+      .filter(Boolean);
+
+    if (alquilerIds.length === 0) {
+      toast.error('Error: No se encontraron IDs para cancelar.');
+      limpiarCarritoYReserva();
+      return;
+    }
+
+    const cancelPromise = axiosInstance.post('/cancelar-reserva', {
+      alquilerIds,
+    });
+
+    try {
+      await toast.promise(cancelPromise, {
+        loading: 'Cancelando reserva...',
+        success: (res) => {
+          limpiarCarritoYReserva();
+          return 'Reserva cancelada con éxito.';
+        },
+        error: (err) =>
+          err.response?.data?.error || 'No se pudo cancelar la reserva.',
+      });
+    } catch (error) {
+      console.error('Error al cancelar:', error);
+    }
+  }, [estado.reservaConfirmada, limpiarCarritoYReserva]);
 
   const getHotelEntry = useCallback(
     (hotelId) => estado.hoteles.find((h) => h.hotelId === hotelId) || null,
@@ -347,6 +424,7 @@ export function CarritoProvider({ children }) {
   const value = useMemo(
     () => ({
       carrito: estado,
+      reservaConfirmada: estado.reservaConfirmada,
       agregarHabitacion,
       agregarPaquete,
       removerHabitacion,
@@ -357,6 +435,9 @@ export function CarritoProvider({ children }) {
       getSelectedRoomsForHotel,
       getSelectedPackageIdsForHotel,
       getHotelEntry,
+      setReservaConfirmada,
+      cancelarReserva,
+      limpiarCarritoYReserva,
     }),
     [
       estado,
@@ -370,6 +451,9 @@ export function CarritoProvider({ children }) {
       getSelectedRoomsForHotel,
       getSelectedPackageIdsForHotel,
       getHotelEntry,
+      setReservaConfirmada,
+      cancelarReserva,
+      limpiarCarritoYReserva,
     ]
   );
 

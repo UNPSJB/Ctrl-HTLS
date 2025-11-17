@@ -1,14 +1,8 @@
-// HotelCartSection.jsx
 import Temporada from '@components/hotel/Temporada';
 import RoomCartItem from './RoomCartItem';
 import PackageCartItem from './PackageCartItem';
 
-/**
- * HotelCartSection
- * - Recibe la entrada del hotel que viene del carrito (ya contiene habitaciones/paquetes).
- * - Renderiza ambas secciones con los componentes específicos.
- */
-function HotelCartSection({ hotel = {} }) {
+function HotelCartSection({ hotel = {}, isLocked = false }) {
   const temporadaTipo = hotel?.temporada?.tipo;
   const temporadaPorcentaje = hotel?.temporada?.porcentaje ?? 0;
 
@@ -22,11 +16,21 @@ function HotelCartSection({ hotel = {} }) {
       </div>
 
       {(hotel.habitaciones || []).map((room) => (
-        <RoomCartItem key={room.id} room={room} hotel={hotel} />
+        <RoomCartItem
+          key={room._cartId || room.id}
+          room={room}
+          hotel={hotel}
+          isLocked={isLocked}
+        />
       ))}
 
       {(hotel.paquetes || []).map((pack) => (
-        <PackageCartItem key={pack.id} pack={pack} hotel={hotel} />
+        <PackageCartItem
+          key={pack._cartId || pack.id}
+          pack={pack}
+          hotel={hotel}
+          isLocked={isLocked}
+        />
       ))}
     </section>
   );
