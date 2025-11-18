@@ -6,6 +6,7 @@ import CreateHotelFormPage from '@pages/CreateHotelFormPage';
 import CrearVendedor from '@pages/admin/CrearVendedor';
 import ClientesList from '@ui/admin/list/ClientesList';
 import AdminHotelList from '@ui/admin/list/AdminHotelList';
+import CrearCliente from '@components/forms/admin/CrearCliente';
 
 function AdminLayout() {
   const [selectedView, setSelectedView] = useState(null);
@@ -17,6 +18,7 @@ function AdminLayout() {
     CrearVendedor: <CrearVendedor />,
     VerUsuarios: <ClientesList />,
     VerHoteles: <AdminHotelList />,
+    CrearUsuario: <CrearCliente />,
     // Dashboard: <DashboardHome />,
     // Configuracion: <Configuracion />,
   };
