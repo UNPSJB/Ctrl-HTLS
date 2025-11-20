@@ -13,6 +13,7 @@ const paquetePromocionalServices = require('../hotel/paquetePromocionalServices'
 const Alquiler = require('../../models/ventas/Alquiler');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
+const DetalleFactura = require('../../models/ventas/DetalleFactura');
 
 const obtenerDisponibilidad = async (consultaAlquiler) => {
   const {
@@ -284,11 +285,9 @@ const actualizarReserva = async (reservas) => {
 };
 
 const cancelarReserva = async (alquilerIds) => {
-  // Iniciar una transacción
   const transaction = await sequelize.transaction();
 
   try {
-    // Verificar que el arreglo de IDs no esté vacío
     if (!alquilerIds || alquilerIds.length === 0) {
       throw new CustomError(
         'No se proporcionaron IDs de alquiler para cancelar',
@@ -296,32 +295,45 @@ const cancelarReserva = async (alquilerIds) => {
       );
     }
 
-    // Eliminar las habitaciones asociadas a los alquileres
+    const detallesAsociados = await DetalleFactura.findAll({
+      where: { alquilerId: alquilerIds },
+      attributes: ['alquilerId'],
+      group: ['alquilerId'],
+      transaction,
+      raw: true,
+    });
+
+    if (detallesAsociados.length > 0) {
+      const idsConFacturacion = detallesAsociados.map((d) => d.alquilerId);
+      throw new CustomError(
+        `No se pueden cancelar los alquileres id: ${idsConFacturacion.join(
+          ', ',
+        )} porque ya poseen facturación registrada`,
+        409,
+      );
+    }
+
     await AlquilerHabitacion.destroy({
       where: { alquilerId: alquilerIds },
       transaction,
     });
 
-    // Eliminar los paquetes promocionales asociados a los alquileres
     await AlquilerPaquetePromocional.destroy({
       where: { alquilerId: alquilerIds },
       transaction,
     });
 
-    // Eliminar los alquileres
     await Alquiler.destroy({
       where: { id: alquilerIds },
       transaction,
     });
 
-    // Confirmar la transacción
     await transaction.commit();
   } catch (error) {
-    // Revertir la transacción si algo falla
     await transaction.rollback();
     throw new CustomError(
       `Error al cancelar las reservas: ${error.message}`,
-      500,
+      error.statusCode || 500,
     );
   }
 };
