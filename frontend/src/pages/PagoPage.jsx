@@ -32,8 +32,7 @@ function PagoPage() {
           <HotelsListView />
         </div>
 
-        {/* Sidebar sticky - columna derecha */}
-        <div className="w-100 shrink-0">
+        <div className="w-96 shrink-0">
           <PaymentSummary />
         </div>
       </div>

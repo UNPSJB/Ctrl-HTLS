@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { UserPlus, Save, X, Lock, MapPin, Briefcase } from 'lucide-react';
+import { UserPlus, Save, X } from 'lucide-react';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
@@ -10,7 +10,7 @@ const tiposDocumento = [
   { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
-const CrearVendedor = () => {
+const CrearCliente = () => {
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -18,10 +18,6 @@ const CrearVendedor = () => {
     telefono: '',
     tipoDocumento: 'dni',
     numeroDocumento: '',
-    direccion: '',
-    password: '',
-    ciudadId: '', // Requerido por el backend
-    rol: 'vendedor', // Valor fijo
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,15 +30,19 @@ const CrearVendedor = () => {
     }));
   };
 
-  // Lógica de documento idéntica a la de Cliente
+  // Handler para el documento: se comporta distinto según el tipo seleccionado
   const handleDocumentoChange = (e) => {
     const { value } = e.target;
     const tipo = formData.tipoDocumento;
+
     let procesado = value;
 
+    // Si es DNI, LI o LE, forzamos solo números
     if (['dni', 'li', 'le'].includes(tipo)) {
       procesado = value.replace(/\D/g, '');
     } else {
+      // Si es Pasaporte, permitimos letras y números, pero quitamos símbolos raros y espacios
+      // También lo pasamos a mayúsculas por convención
       procesado = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     }
 
@@ -52,22 +52,23 @@ const CrearVendedor = () => {
     }));
   };
 
-  const handleNumericChange = (e) => {
-    const { name, value } = e.target;
+  // Handler solo para teléfono (siempre numérico)
+  const handleTelefonoChange = (e) => {
+    const { value } = e.target;
     const numericValue = value.replace(/\D/g, '');
     setFormData((prev) => ({
       ...prev,
-      [name]: numericValue,
+      telefono: numericValue,
     }));
   };
 
-  // Resetear número al cambiar tipo para evitar inconsistencias
+  // Si el usuario cambia el tipo de documento, limpiamos el número para evitar inconsistencias
   const handleTipoChange = (e) => {
     const { value } = e.target;
     setFormData((prev) => ({
       ...prev,
       tipoDocumento: value,
-      numeroDocumento: '',
+      numeroDocumento: '', // Reseteamos el número al cambiar el tipo
     }));
   };
 
@@ -75,15 +76,11 @@ const CrearVendedor = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Validación básica
     if (
       !formData.nombre ||
       !formData.apellido ||
       !formData.numeroDocumento ||
-      !formData.email ||
-      !formData.password ||
-      !formData.direccion ||
-      !formData.ciudadId
+      !formData.email
     ) {
       toast.error('Por favor complete todos los campos obligatorios');
       setLoading(false);
@@ -91,11 +88,8 @@ const CrearVendedor = () => {
     }
 
     try {
-      // El endpoint es /empleado según coreRoutes.js
-      await axiosInstance.post('/empleado', formData);
-      toast.success('Vendedor registrado exitosamente');
-
-      // Reset del formulario
+      await axiosInstance.post('/cliente', formData);
+      toast.success('Cliente registrado exitosamente');
       setFormData({
         nombre: '',
         apellido: '',
@@ -103,15 +97,11 @@ const CrearVendedor = () => {
         telefono: '',
         tipoDocumento: 'dni',
         numeroDocumento: '',
-        direccion: '',
-        password: '',
-        ciudadId: '',
-        rol: 'vendedor',
       });
     } catch (error) {
       console.error(error);
       const mensaje =
-        error.response?.data?.error || 'Ocurrió un error al crear el vendedor';
+        error.response?.data?.error || 'Ocurrió un error al crear el cliente';
       toast.error(mensaje);
     } finally {
       setLoading(false);
@@ -126,10 +116,6 @@ const CrearVendedor = () => {
       telefono: '',
       tipoDocumento: 'dni',
       numeroDocumento: '',
-      direccion: '',
-      password: '',
-      ciudadId: '',
-      rol: 'vendedor',
     });
     toast('Formulario limpiado', { icon: '🧹' });
   };
@@ -143,33 +129,22 @@ const CrearVendedor = () => {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {/* Header */}
         <div className="flex items-center gap-3 border-b border-gray-200 px-6 py-5 dark:border-gray-700">
           <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-            <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            <UserPlus className="h-6 w-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Registrar Nuevo Vendedor
+              Registrar Nuevo Cliente
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Complete los datos para dar de alta un empleado con acceso al
-              sistema.
+              Ingrese los datos personales para dar de alta un cliente.
             </p>
           </div>
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* --- Sección Datos Personales --- */}
-            <div className="col-span-full flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
-              <UserPlus className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
-                Datos Personales
-              </h3>
-            </div>
-
             <div>
               <label htmlFor="nombre" className={labelClass}>
                 Nombre *
@@ -180,7 +155,7 @@ const CrearVendedor = () => {
                 name="nombre"
                 value={formData.nombre}
                 onChange={handleChange}
-                placeholder="Ej: María"
+                placeholder="Ej: Juan"
                 className={inputClass}
               />
             </div>
@@ -195,7 +170,7 @@ const CrearVendedor = () => {
                 name="apellido"
                 value={formData.apellido}
                 onChange={handleChange}
-                placeholder="Ej: López"
+                placeholder="Ej: Pérez"
                 className={inputClass}
               />
             </div>
@@ -209,7 +184,7 @@ const CrearVendedor = () => {
                   id="tipoDocumento"
                   name="tipoDocumento"
                   value={formData.tipoDocumento}
-                  onChange={handleTipoChange}
+                  onChange={handleTipoChange} // Usamos el handler especial para resetear
                   className={`${inputClass} appearance-none`}
                 >
                   {tiposDocumento.map((tipo) => (
@@ -235,23 +210,15 @@ const CrearVendedor = () => {
                 id="numeroDocumento"
                 name="numeroDocumento"
                 value={formData.numeroDocumento}
-                onChange={handleDocumentoChange}
+                onChange={handleDocumentoChange} // Handler con lógica según tipo
                 placeholder={
                   formData.tipoDocumento === 'pasaporte'
-                    ? 'A1234567'
-                    : '12345678'
+                    ? 'Ej: A1234567'
+                    : 'Ej: 12345678'
                 }
                 className={inputClass}
                 maxLength={15}
               />
-            </div>
-
-            {/* --- Sección Contacto y Ubicación --- */}
-            <div className="col-span-full mt-2 flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
-              <MapPin className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
-                Contacto y Ubicación
-              </h3>
             </div>
 
             <div>
@@ -264,7 +231,7 @@ const CrearVendedor = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="vendedor@empresa.com"
+                placeholder="juan@ejemplo.com"
                 className={inputClass}
               />
             </div>
@@ -278,70 +245,13 @@ const CrearVendedor = () => {
                 id="telefono"
                 name="telefono"
                 value={formData.telefono}
-                onChange={handleNumericChange}
-                placeholder="1123456789"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="direccion" className={labelClass}>
-                Dirección *
-              </label>
-              <input
-                type="text"
-                id="direccion"
-                name="direccion"
-                value={formData.direccion}
-                onChange={handleChange}
-                placeholder="Av. Corrientes 1234"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="ciudadId" className={labelClass}>
-                ID Ciudad (Temporal) *
-              </label>
-              <input
-                type="text"
-                id="ciudadId"
-                name="ciudadId"
-                value={formData.ciudadId}
-                onChange={handleNumericChange}
-                placeholder="Ej: 1"
-                className={inputClass}
-              />
-              <p className="mt-1 text-xs text-gray-400">
-                Ingrese el ID numérico de la ciudad.
-              </p>
-            </div>
-
-            {/* --- Sección Seguridad --- */}
-            <div className="col-span-full mt-2 flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
-              <Lock className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
-                Seguridad
-              </h3>
-            </div>
-
-            <div className="col-span-full md:col-span-1">
-              <label htmlFor="password" className={labelClass}>
-                Contraseña *
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
+                onChange={handleTelefonoChange}
+                placeholder="Ej: 1123456789"
                 className={inputClass}
               />
             </div>
           </div>
 
-          {/* Botones de Acción */}
           <div className="mt-8 flex items-center justify-end gap-4 border-t border-gray-100 pt-6 dark:border-gray-700">
             <button
               type="button"
@@ -366,7 +276,7 @@ const CrearVendedor = () => {
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  Guardar Vendedor
+                  Guardar Cliente
                 </>
               )}
             </button>
@@ -377,4 +287,4 @@ const CrearVendedor = () => {
   );
 };
 
-export default CrearVendedor;
+export default CrearCliente;

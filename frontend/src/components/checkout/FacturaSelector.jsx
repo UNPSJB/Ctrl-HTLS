@@ -1,7 +1,6 @@
-import { FileText, Check } from 'lucide-react';
-import { usePago } from '@context/PagoContext'; // 1. Importar hook y eliminar useState
+import { FileText } from 'lucide-react';
+import { usePago } from '@context/PagoContext';
 
-// ... (tiposFactura no cambia) ...
 const tiposFactura = [
   { id: 'A', label: 'Factura A', description: 'Responsable Inscripto' },
   { id: 'B', label: 'Factura B', description: 'Consumidor Final' },
@@ -9,15 +8,17 @@ const tiposFactura = [
 ];
 
 function FacturaSelector({ disabled = false }) {
-  // 2. Usar el contexto
   const { tipoFactura, setTipoFactura } = usePago();
-  // Se elimina el useState local
 
   const handleSelect = (id) => {
     if (!disabled) {
-      setTipoFactura(id); // 3. Usar función del contexto
+      setTipoFactura(id);
     }
   };
+
+  // Clases comunes para el select
+  const selectClasses =
+    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 appearance-none';
 
   return (
     <fieldset className="mt-4" aria-label="Tipo de Factura">
@@ -26,43 +27,29 @@ function FacturaSelector({ disabled = false }) {
         Tipo de Factura
       </legend>
 
-      <div className="space-y-2" role="radiogroup">
-        {tiposFactura.map((tipo) => (
-          <label
-            key={tipo.id}
-            onClick={() => handleSelect(tipo.id)}
-            className={`flex cursor-pointer select-none items-center gap-3 rounded-lg border p-3 transition-colors ${
-              tipoFactura === tipo.id // 4. Usar estado del contexto
-                ? 'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-900'
-                : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900/50'
-            } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+      <div className="relative">
+        <select
+          id="factura-select"
+          value={tipoFactura}
+          onChange={(e) => handleSelect(e.target.value)}
+          disabled={disabled}
+          className={`${selectClasses} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+        >
+          {tiposFactura.map((tipo) => (
+            <option key={tipo.id} value={tipo.id}>
+              {tipo.label} ({tipo.description})
+            </option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+          <svg
+            className="h-4 w-4 fill-current"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
           >
-            <input
-              id={`factura-${tipo.id}`}
-              type="radio"
-              name="facturaTipo"
-              value={tipo.id}
-              checked={tipoFactura === tipo.id} // 5. Usar estado del contexto
-              onChange={() => handleSelect(tipo.id)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-              disabled={disabled}
-              aria-label={`${tipo.label}: ${tipo.description}`}
-            />
-            {/* ... (resto del JSX no cambia) ... */}
-            <div className="flex flex-1 items-baseline">
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {tipo.label}
-              </span>
-              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                ({tipo.description})
-              </span>
-            </div>
-
-            {tipoFactura === tipo.id && (
-              <Check className="h-4 w-4 text-green-600" />
-            )}
-          </label>
-        ))}
+            <path d="M5.516 7.548c.436-.446 1.043-.48 1.576 0L10 10.405l2.908-2.857c.533-.48 1.14-.446 1.576 0 .436.445.408 1.197 0 1.615l-3.69 3.63c-.533.48-1.408.48-1.94 0l-3.69-3.63c-.408-.418-.436-1.17 0-1.615z" />
+          </svg>
+        </div>
       </div>
     </fieldset>
   );

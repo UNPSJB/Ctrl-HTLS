@@ -5,6 +5,8 @@ import VendedoresLIst from '@ui/admin/list/VendedoresLIst';
 import CreateHotelFormPage from '@pages/CreateHotelFormPage';
 import CrearVendedor from '@pages/admin/CrearVendedor';
 import ClientesList from '@ui/admin/list/ClientesList';
+import AdminHotelList from '@ui/admin/list/AdminHotelList';
+import CrearCliente from '@components/forms/admin/CrearCliente';
 
 function AdminLayout() {
   const [selectedView, setSelectedView] = useState(null);
@@ -15,14 +17,14 @@ function AdminLayout() {
     VerVendedores: <VendedoresLIst />,
     CrearVendedor: <CrearVendedor />,
     VerUsuarios: <ClientesList />,
-    // VerHoteles: <VerHoteles />,
+    VerHoteles: <AdminHotelList />,
+    CrearUsuario: <CrearCliente />,
     // Dashboard: <DashboardHome />,
     // Configuracion: <Configuracion />,
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Sidebar */}
       <aside
         className={`fixed bottom-0 left-0 top-0 z-40 transform overflow-y-auto border-r border-gray-200 bg-white transition-transform duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-800 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:block lg:translate-x-0`}
         style={{ width: '18rem' }}
@@ -36,7 +38,6 @@ function AdminLayout() {
         />
       </aside>
 
-      {/* Main */}
       <main
         className="pt-0 lg:ml-72"
         style={{
@@ -71,7 +72,6 @@ function AdminLayout() {
         </div>
       </main>
 
-      {/* Botón para abrir sidebar en móvil */}
       <button
         onClick={() => setIsSidebarOpen(true)}
         className="fixed bottom-6 left-6 z-50 rounded-full bg-blue-600 p-3 text-white shadow-lg lg:hidden"

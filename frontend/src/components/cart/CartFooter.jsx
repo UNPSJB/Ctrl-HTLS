@@ -2,10 +2,20 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClienteModal from '../client/ClienteModal';
 import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
+import { useCarrito } from '@context/CarritoContext';
+import { useBusqueda } from '@context/BusquedaContext';
+import { usePago } from '@context/PagoContext';
+import axiosInstance from '@api/axiosInstance';
+import { toast } from 'react-hot-toast';
 
 function CartFooter({ hotels = [], onClose }) {
   const navigate = useNavigate();
   const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
+  const [isReserving, setIsReserving] = useState(false);
+
+  const { carrito, setReservaConfirmada } = useCarrito();
+  const { filtros } = useBusqueda();
+  const { vendedorId } = usePago();
 
   const totals = useMemo(() => {
     let finalSum = 0;
@@ -59,15 +69,111 @@ function CartFooter({ hotels = [], onClose }) {
   const isDisabled = hotels.length === 0;
 
   const handleReservar = () => {
-    if (isDisabled) return;
+    if (isDisabled || isReserving) return;
     setIsClienteModalOpen(true);
   };
 
-  const handleCloseModal = (clienteSeleccionado) => {
+  const handleCloseModal = async (clienteSeleccionado) => {
+    if (!clienteSeleccionado) {
+      setIsClienteModalOpen(false);
+      return;
+    }
+
+    setIsReserving(true);
     setIsClienteModalOpen(false);
-    if (clienteSeleccionado) {
-      navigate('/pago');
+
+    const reservationPromise = async () => {
+      const dataParaApi = carrito.hoteles.map((hotel) => {
+        const grupos = new Map();
+
+        hotel.habitaciones.forEach((hab) => {
+          const key = `${hab.fechaInicio}_${hab.fechaFin}`;
+          if (!grupos.has(key)) {
+            grupos.set(key, {
+              fechaInicio: hab.fechaInicio,
+              fechaFin: hab.fechaFin,
+              habitaciones: [],
+              paquetes: [],
+            });
+          }
+          grupos.get(key).habitaciones.push(hab);
+        });
+
+        hotel.paquetes.forEach((pkg) => {
+          const key = `${pkg.fechaInicio}_${pkg.fechaFin}`;
+          if (!grupos.has(key)) {
+            grupos.set(key, {
+              fechaInicio: pkg.fechaInicio,
+              fechaFin: pkg.fechaFin,
+              habitaciones: [],
+              paquetes: [],
+            });
+          }
+          grupos.get(key).paquetes.push(pkg);
+        });
+
+        const alquiler = Array.from(grupos.values()).map((grupo) => {
+          let montoTotal = 0;
+
+          grupo.habitaciones.forEach((hab) => {
+            const calc = calcRoomInstanceTotal({
+              precio: hab.precio,
+              porcentaje: hotel?.temporada?.porcentaje,
+              alquiler: {
+                fechaInicio: hab.fechaInicio,
+                fechaFin: hab.fechaFin,
+              },
+              limite: hotel.temporada,
+            });
+            montoTotal += calc.final;
+          });
+
+          grupo.paquetes.forEach((pkg) => {
+            const calc = calcPackageTotal({
+              paquete: pkg,
+              porcentaje: hotel?.temporada?.porcentaje,
+            });
+            montoTotal += calc.final;
+          });
+
+          return {
+            fechaInicio: grupo.fechaInicio,
+            fechaFin: grupo.fechaFin,
+            pasajeros: filtros.capacidad || 1,
+            montoTotal: montoTotal,
+            habitaciones: grupo.habitaciones.map((h) => h.id),
+            paquetes: grupo.paquetes.map((p) => p.id),
+          };
+        });
+
+        return {
+          hotelId: hotel.hotelId,
+          vendedorId: vendedorId,
+          clienteId: clienteSeleccionado.id,
+          alquiler: alquiler,
+        };
+      });
+
+      const response = await axiosInstance.post('/reservar', dataParaApi);
+      return response.data;
+    };
+
+    try {
+      const reservaConfirmada = await toast.promise(reservationPromise(), {
+        loading: 'Confirmando reserva...',
+        success: '¡Reserva creada con éxito!',
+        error: (err) =>
+          err.response?.data?.error || 'No se pudo crear la reserva.',
+      });
+
+      setReservaConfirmada(reservaConfirmada);
+
       if (typeof onClose === 'function') onClose();
+      navigate('/pago');
+    } catch (error) {
+      console.error('Error al procesar la reserva:', error);
+    } finally {
+      setIsReserving(false);
     }
   };
 
@@ -90,14 +196,14 @@ function CartFooter({ hotels = [], onClose }) {
           </div>
           <button
             onClick={handleReservar}
-            disabled={isDisabled}
+            disabled={isDisabled || isReserving}
             className={`rounded-md px-4 py-2 font-medium text-white transition-colors ${
-              isDisabled
+              isDisabled || isReserving
                 ? 'cursor-not-allowed bg-gray-400'
                 : 'bg-blue-600 hover:bg-blue-700'
             }`}
           >
-            Reservar
+            {isReserving ? 'Reservando...' : 'Reservar'}
           </button>
         </div>
       </div>

@@ -1,21 +1,9 @@
-import { useEffect, useMemo, useCallback } from 'react'; // 1. Se elimina useState
-import { Check } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import TarjetaForm from './TarjetaForm';
-import { usePago } from '@context/PagoContext'; // 2. Importar el nuevo hook
+import { usePago } from '@context/PagoContext';
 
-function MetodoPago({
-  // 3. Se eliminan las props de estado
-  // paymentMethod, (eliminado)
-  // setPaymentMethod, (eliminado)
-  // onCardChange, (eliminado)
-  className = '',
-  baseTotal = 0,
-  clientPoints = 0,
-}) {
-  // 4. Usar el contexto para obtener el estado y las funciones
+function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
   const { metodoPago, setMetodoPago, setCardData } = usePago();
-  // Se elimina el estado local (paymentMethod, cardPayload)
-  // Se elimina el handleCardChange local
 
   const puntoEnabled = useMemo(() => {
     const pts = Number(clientPoints || 0);
@@ -24,8 +12,8 @@ function MetodoPago({
   }, [clientPoints, baseTotal]);
 
   useEffect(() => {
-    if (metodoPago === 'punto' && !puntoEnabled) {
-      setMetodoPago('cash');
+    if (metodoPago === 'Puntos' && !puntoEnabled) {
+      setMetodoPago('Efectivo');
     }
   }, [metodoPago, puntoEnabled, setMetodoPago]);
 
@@ -34,9 +22,17 @@ function MetodoPago({
       { id: 'Efectivo', label: 'Efectivo', disabled: false },
       { id: 'Puntos', label: 'Puntos', disabled: !puntoEnabled },
       { id: 'Tarjeta', label: 'Tarjeta', disabled: false },
+      { id: 'Mixto', label: 'Mixto (Efectivo y Tarjeta)', disabled: false },
     ],
     [puntoEnabled]
   );
+
+  // 2. Actualizamos la lógica para mostrar el formulario de tarjeta
+  const showCardForm = metodoPago === 'Tarjeta' || metodoPago === 'Mixto';
+
+  // Clases comunes para el select
+  const selectClasses =
+    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 appearance-none';
 
   return (
     <fieldset className={`mt-3 ${className}`} aria-label="Método de pago">
@@ -44,42 +40,28 @@ function MetodoPago({
         Método de Pago
       </legend>
 
-      <div className="space-y-2" role="radiogroup">
-        {methods.map((m) => (
-          <label
-            key={m.id}
-            onClick={() => {
-              if (!m.disabled) setMetodoPago(m.id);
-            }}
-            className={`flex cursor-pointer select-none items-center gap-3 rounded-lg border p-3 transition-colors ${
-              metodoPago === m.id
-                ? 'border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-900'
-                : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900/50'
-            } ${m.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+      <div className="relative">
+        <select
+          id="metodo-pago-select"
+          value={metodoPago}
+          onChange={(e) => setMetodoPago(e.target.value)}
+          className={selectClasses}
+        >
+          {methods.map((m) => (
+            <option key={m.id} value={m.id} disabled={m.disabled}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+          <svg
+            className="h-4 w-4 fill-current"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
           >
-            <input
-              id={`pay-${m.id}`}
-              type="radio"
-              name="payment"
-              value={m.id}
-              checked={metodoPago === m.id}
-              onChange={() => {
-                if (!m.disabled) setMetodoPago(m.id);
-              }}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-              disabled={m.disabled}
-            />
-            <div className="flex flex-1 items-center">
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {m.label}
-              </span>
-            </div>
-
-            {metodoPago === m.id && (
-              <Check className="h-4 w-4 text-green-600" />
-            )}
-          </label>
-        ))}
+            <path d="M5.516 7.548c.436-.446 1.043-.48 1.576 0L10 10.405l2.908-2.857c.533-.48 1.14-.446 1.576 0 .436.445.408 1.197 0 1.615l-3.69 3.63c-.533.48-1.408.48-1.94 0l-3.69-3.63c-.408-.418-.436-1.17 0-1.615z" />
+          </svg>
+        </div>
       </div>
 
       {!puntoEnabled && (
@@ -89,7 +71,7 @@ function MetodoPago({
         </p>
       )}
 
-      {metodoPago === 'card' && (
+      {showCardForm && (
         <div className="mt-4">
           <TarjetaForm onChange={setCardData} />
         </div>
