@@ -8,6 +8,7 @@ const coreRoutes = require('./routes/core/coreRoutes');
 const hotelRoutes = require('./routes/hotel/hotelRoutes');
 const alquilerRoutes = require('./routes/ventas/alquilerRoutes');
 const facturaRoutes = require('./routes/ventas/facturasRoutes');
+const liquidacionesRoutes = require('./routes/ventas/liquidacionesRoutes');
 
 // Importar todos los modelos y asociaciones
 require('./models/associations');
@@ -24,6 +25,7 @@ app.use('/api', coreRoutes);
 app.use('/api', hotelRoutes);
 app.use('/api', alquilerRoutes);
 app.use('/api', facturaRoutes);
+app.use('/api', liquidacionesRoutes);
 
 // Sincronizar la base de datos
 sequelize
