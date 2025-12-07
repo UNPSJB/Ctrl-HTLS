@@ -1,8 +1,9 @@
 const express = require('express');
+const authController = require('../../controllers/auth/authController');
+
 const router = express.Router();
 
-// router.post('/login', authController.loginController); // Cualquier usuario puede loguearse
-// router.post('/refresh', authController.refreshTokenController);
-// router.post('/logout', authController.logoutController);
+router.post('/login', authController.loginController);
+router.post('/logout', authController.logoutController);
 
 module.exports = router;

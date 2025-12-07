@@ -4,6 +4,7 @@ const cors = require('cors');
 const port = 3000;
 const sequelize = require('./config/database');
 const { swaggerUi, swaggerSpec } = require('./config/swaggerConfig');
+const authRoutes = require('./routes/auth/authRoutes');
 const coreRoutes = require('./routes/core/coreRoutes');
 const hotelRoutes = require('./routes/hotel/hotelRoutes');
 const alquilerRoutes = require('./routes/ventas/alquilerRoutes');
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Usar las rutas de core
+app.use('/api', authRoutes)
 app.use('/api', coreRoutes);
 app.use('/api', hotelRoutes);
 app.use('/api', alquilerRoutes);
