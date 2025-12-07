@@ -52,7 +52,6 @@ const obtenerDisponibilidad = async (consultaAlquiler) => {
 
 const crearReserva = async (reservas) => {
   const transaction = await sequelize.transaction();
-  //const alquileresCreados = [];
   try {
     for (const reserva of reservas) {
       const alquileres = reserva.alquiler;
@@ -102,6 +101,7 @@ const crearReserva = async (reservas) => {
           },
           transaction, // Pasar la transacción
         );
+        alquiler.alquilerId = nuevoAlquiler.id;
         // Guardar habitaciones y paquetes
         if (habitaciones && habitaciones.length > 0) {
           await habitacionServices.guardarHabitaciones(
@@ -138,6 +138,7 @@ const crearReserva = async (reservas) => {
     await transaction.commit();
     return reservas;
   } catch (error) {
+    await transaction.rollback();
     throw new CustomError(
       `Error al crear la reserva: ${error.message}`,
       error.statusCode || 500,

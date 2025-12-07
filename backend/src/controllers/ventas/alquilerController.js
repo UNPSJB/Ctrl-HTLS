@@ -17,9 +17,8 @@ const setReserva = async (req, res) => {
   const reserva = req.body;
 
   try {
-    //const resultado = await alquilerServices.crearReserva(reserva);
-    const reservas = await alquilerServices.crearReserva(reserva);
-    res.status(201).json(reservas);
+    const resultado = await alquilerServices.crearReserva(reserva);
+    res.status(201).json(resultado);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
