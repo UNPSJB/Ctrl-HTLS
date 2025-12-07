@@ -306,30 +306,22 @@ export function CarritoProvider({ children }) {
 
   const removerHabitacion = useCallback(
     (hotelId, cartId) => {
-      if (estado.reservaConfirmada) {
-        toast.error('No puedes editar una reserva pendiente de pago.');
-        return;
-      }
       dispatch({
         type: TIPOS.REMOVER_HABITACION,
         payload: { hotelId, cartId },
       });
     },
-    [dispatch, estado.reservaConfirmada]
+    [dispatch]
   );
 
   const removerPaquete = useCallback(
     (hotelId, cartId) => {
-      if (estado.reservaConfirmada) {
-        toast.error('No puedes editar una reserva pendiente de pago.');
-        return;
-      }
       dispatch({
         type: TIPOS.REMOVER_PAQUETE,
         payload: { hotelId, cartId },
       });
     },
-    [dispatch, estado.reservaConfirmada]
+    [dispatch]
   );
 
   const removerHotel = useCallback(

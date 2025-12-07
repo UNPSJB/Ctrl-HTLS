@@ -1,11 +1,11 @@
 import { Bed, Package as PackageIcon } from 'lucide-react';
-import HabitacionCard from '@ui/cards/HabitacionCard'; // Usando tu versión de solo vista
-import PaqueteCard from '@ui/cards/PaqueteCard'; // Usando la nueva versión de solo vista
+import HabitacionCard from '@ui/cards/HabitacionCard';
+import PaqueteCard from '@ui/cards/PaqueteCard';
 import Temporada from '@hotel/Temporada';
 import { useCarrito } from '@context/CarritoContext';
 
 function HotelsListView() {
-  const { carrito } = useCarrito();
+  const { carrito, removerHabitacion, removerPaquete } = useCarrito();
   const hotels = Array.isArray(carrito?.hoteles) ? carrito.hoteles : [];
 
   return (
@@ -47,6 +47,9 @@ function HotelsListView() {
                         key={hab.id ?? `${idHotel}-hab-${i}`}
                         habitacion={hab}
                         hotel={hotel}
+                        onRemove={(cartId) =>
+                          removerHabitacion(hotel.hotelId, cartId)
+                        }
                       />
                     ))}
                   </div>
@@ -68,6 +71,9 @@ function HotelsListView() {
                         key={pkg.id ?? `${idHotel}-pack-${i}`}
                         paquete={pkg}
                         hotel={hotel}
+                        onRemove={(cartId) =>
+                          removerPaquete(hotel.hotelId, cartId)
+                        }
                       />
                     ))}
                   </div>

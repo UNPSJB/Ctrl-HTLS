@@ -1,10 +1,10 @@
 import PriceTag from '@ui/PriceTag';
-import { Users, Calendar } from 'lucide-react';
+import { Users, Calendar, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { calcPackageTotal } from '@utils/pricingUtils';
 import DateDisplay from '@ui/DateDisplay';
 
-function PaqueteCard({ paquete, hotel }) {
+function PaqueteCard({ paquete, hotel, onRemove }) {
   if (!paquete) return null;
 
   const priceInfo = useMemo(() => {
@@ -15,8 +15,18 @@ function PaqueteCard({ paquete, hotel }) {
   }, [paquete, hotel]);
 
   return (
-    <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/60">
-      <div className="flex items-start justify-between">
+    <div className="group relative rounded-lg bg-gray-50 p-4 dark:bg-gray-700/60">
+      {onRemove && (
+        <button
+          onClick={() => onRemove(paquete._cartId)}
+          className="absolute right-4 top-4 rounded-full p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+          title="Quitar paquete"
+        >
+          <Trash2 className="h-5 w-5" />
+        </button>
+      )}
+
+      <div className="flex items-start justify-between pr-10">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
           {paquete.nombre}
         </h3>
