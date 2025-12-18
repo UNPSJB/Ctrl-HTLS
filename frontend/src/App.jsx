@@ -6,6 +6,7 @@ import { ClienteProvider } from '@context/ClienteContext';
 import { PagoProvider } from '@context/PagoContext';
 import AppRouter from './routes/AppRouter';
 import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './context/AuthContext';
 
 function AppContent() {
   const { theme } = useContext(ThemeContext);
@@ -35,17 +36,19 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <BusquedaProvider>
-        <CarritoProvider>
-          <ClienteProvider>
-            <PagoProvider>
-              <AppContent />
-            </PagoProvider>
-          </ClienteProvider>
-        </CarritoProvider>
-      </BusquedaProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <BusquedaProvider>
+          <CarritoProvider>
+            <ClienteProvider>
+              <PagoProvider>
+                <AppContent />
+              </PagoProvider>
+            </ClienteProvider>
+          </CarritoProvider>
+        </BusquedaProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 
