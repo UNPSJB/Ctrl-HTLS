@@ -113,7 +113,7 @@ function CartFooter({ hotels = [], onClose }) {
         });
 
         const alquiler = Array.from(grupos.values()).map((grupo) => {
-          let montoTotal = 0;
+          let montoCalculado = 0;
 
           grupo.habitaciones.forEach((hab) => {
             const calc = calcRoomInstanceTotal({
@@ -125,7 +125,7 @@ function CartFooter({ hotels = [], onClose }) {
               },
               limite: hotel.temporada,
             });
-            montoTotal += calc.final;
+            montoCalculado += calc.final;
           });
 
           grupo.paquetes.forEach((pkg) => {
@@ -133,14 +133,15 @@ function CartFooter({ hotels = [], onClose }) {
               paquete: pkg,
               porcentaje: hotel?.temporada?.porcentaje,
             });
-            montoTotal += calc.final;
+            montoCalculado += calc.final;
           });
 
           return {
             fechaInicio: grupo.fechaInicio,
             fechaFin: grupo.fechaFin,
             pasajeros: filtros.capacidad || 1,
-            montoTotal: montoTotal,
+            montoTotal: montoCalculado, // Para que el backend lo guarde
+            subTotal: montoCalculado, // Redundancia para el frontend
             habitaciones: grupo.habitaciones.map((h) => h.id),
             paquetes: grupo.paquetes.map((p) => p.id),
           };
