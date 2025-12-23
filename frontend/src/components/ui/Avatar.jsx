@@ -1,9 +1,12 @@
-import { User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const Avatar = () => {
+  const { user } = useAuth();
+  const inicial = user?.nombre?.charAt(0).toUpperCase() || 'U';
+
   return (
-    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 transition-colors group hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer">
-      <User className="w-6 h-6 text-gray-800 dark:text-gray-200 group-hover:text-gray-400" />
+    <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-gradient-to-tr from-blue-600 to-blue-400 text-sm font-bold text-white shadow-md dark:border-gray-700">
+      {inicial}
     </div>
   );
 };

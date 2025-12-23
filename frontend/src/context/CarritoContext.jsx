@@ -413,6 +413,14 @@ export function CarritoProvider({ children }) {
     [estado.hoteles]
   );
 
+  // NUEVO: Efecto para cancelar automáticamente si hay reserva pero 0 elementos
+  useEffect(() => {
+    if (estado.reservaConfirmada && totalElementos === 0) {
+      // Usamos un timeout mínimo o llamada directa para permitir renderizados
+      cancelarReserva();
+    }
+  }, [estado.reservaConfirmada, totalElementos, cancelarReserva]);
+
   const value = useMemo(
     () => ({
       carrito: estado,

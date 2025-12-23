@@ -7,16 +7,19 @@ import {
   BarChart3,
   Settings,
   ChevronDown,
+  LogOut,
 } from 'lucide-react';
-import { ThemeContext } from '@context/ThemeContext';
-import ThemeToggle from '@ui/ThemeToggle';
-import Avatar from '@components/ui/Avatar';
-import logoLight from '@assets/logo.svg';
-import logoDark from '@assets/logo-dark.svg';
+import { ThemeContext } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import Avatar from '@/components/ui/Avatar';
+import logoLight from '@/assets/logo.svg';
+import logoDark from '@/assets/logo-dark.svg';
 
 function AdminSidebar({ onSelect = () => {} }) {
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const { theme } = useContext(ThemeContext);
+  const { user, logout } = useAuth();
 
   const logo = useMemo(
     () => (theme === 'dark' ? logoDark : logoLight),
@@ -74,13 +77,11 @@ function AdminSidebar({ onSelect = () => {} }) {
   ];
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Logo */}
+    <div className="flex h-full flex-col bg-white dark:bg-gray-900">
       <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-4 dark:border-gray-700">
         <img src={logo} alt="Logo" className="h-8" />
       </div>
 
-      {/* Menú */}
       <nav className="flex-1 space-y-2 overflow-y-auto p-4">
         {menuItems.map((item, idx) => (
           <div key={idx}>
@@ -93,11 +94,11 @@ function AdminSidebar({ onSelect = () => {} }) {
                 >
                   <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {item.title}
                     </div>
                     {item.description && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         {item.description}
                       </div>
                     )}
@@ -129,10 +130,10 @@ function AdminSidebar({ onSelect = () => {} }) {
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700"
               >
                 <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                <div>
-                  <div className="font-medium">{item.title}</div>
+                <div className="text-left">
+                  <div className="text-sm font-medium">{item.title}</div>
                   {item.description && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       {item.description}
                     </div>
                   )}
@@ -143,35 +144,44 @@ function AdminSidebar({ onSelect = () => {} }) {
         ))}
       </nav>
 
-      {/* Footer con Theme y Avatar */}
-      <div className="mt-auto border-t border-gray-200 px-4 py-4 dark:border-gray-700">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="mt-auto border-t border-gray-200 bg-gray-50/50 px-4 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between px-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Tema
-            </div>
+            </span>
             <ThemeToggle />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 px-2">
             <Avatar />
-            <div className="flex-1">
-              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Carlos Rodríguez
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
+                {user?.nombre} {user?.apellido}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                admin@hotelapp.com
+              <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+                {user?.email}
               </div>
             </div>
           </div>
 
-          <button
-            onClick={() => onSelect('Configuracion')}
-            className="inline-flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Configuración
-          </button>
+          <div className="space-y-1">
+            <button
+              onClick={() => onSelect('Configuracion')}
+              className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              <Settings className="h-4 w-4" />
+              Configuración
+            </button>
+
+            <button
+              onClick={logout}
+              className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </div>
     </div>
