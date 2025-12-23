@@ -18,6 +18,7 @@ const {
   getTiposDeHabitacion,
   createEncargado,
   asignarEmpleado,
+  desasignarEmpleado,
 } = require('../../controllers/hotel/hotelController');
 
 const router = express.Router();
@@ -57,7 +58,9 @@ router.post('/hotel/:id/descuentos', validateId, setDescuento); //Ruta para crea
 
 router.post('/hotel/asignar-empleado', asignarEmpleado); //Ruta para asingar un empleado a un hotel
 
-//IMPLEMENTAR
-//router.post('/hotel/desasignar-empleado', asignarEmpleado);
+router.post(
+  '/hotel/desasignar-empleado',
+  desasignarEmpleado,
+); //Ruta para desasignar un empleado de un hotel
 
 module.exports = router;

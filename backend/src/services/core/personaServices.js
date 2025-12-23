@@ -11,6 +11,53 @@ const {
   verificarDocumento,
 } = require('../../utils/helpers');
 const Hotel = require('../../models/hotel/Hotel');
+const HotelEmpleado = require('../../models/hotel/HotelEmpleado');
+const DetalleFactura = require('../../models/ventas/DetalleFactura');
+const Liquidacion = require('../../models/ventas/Liquidacion');
+
+const incluirRelacionesVendedor = [
+  {
+    model: Hotel,
+    as: 'hoteles',
+    attributes: ['id', 'nombre'],
+    through: { attributes: [] },
+  },
+  {
+    model: DetalleFactura,
+    as: 'detallesFactura',
+    attributes: ['id', 'descripcion', 'subtotal', 'facturaId', 'liquidacionId'],
+  },
+  {
+    model: Liquidacion,
+    as: 'liquidaciones',
+    attributes: ['id', 'numero', 'fecha_emision', 'fecha_pago', 'total'],
+  },
+];
+
+const formatearVendedor = (vendedor) => ({
+  id: vendedor.id,
+  nombre: `${vendedor.nombre} ${vendedor.apellido}`,
+  email: vendedor.email,
+  telefono: vendedor.telefono,
+  hotelesPermitidos: (vendedor.hoteles || []).map((hotel) => ({
+    id: hotel.id,
+    nombre: hotel.nombre,
+  })),
+  ventas: (vendedor.detallesFactura || []).map((detalle) => ({
+    id: detalle.id,
+    descripcion: detalle.descripcion,
+    subtotal: Number(detalle.subtotal),
+    facturaId: detalle.facturaId,
+    liquidacionId: detalle.liquidacionId,
+  })),
+  liquidaciones: (vendedor.liquidaciones || []).map((liquidacion) => ({
+    id: liquidacion.id,
+    numero: liquidacion.numero,
+    fechaEmision: liquidacion.fecha_emision,
+    fechaPago: liquidacion.fecha_pago,
+    total: Number(liquidacion.total),
+  })),
+});
 
 /**
  * Crea un nuevo empleado.
@@ -118,12 +165,27 @@ const eliminarEmpleado = async (id) => {
     throw new CustomError('Empleado no encontrado', 404);
   }
 
-  // Verificar el rol del empleado
-  if (empleado.rol !== 'vendedor') {
+  const asignacion = await HotelEmpleado.findOne({
+    where: { empleadoId: id },
+  });
+  if (asignacion) {
     throw new CustomError(
-      'Solo se pueden eliminar empleados con rol de vendedor',
-      403,
-    ); // Forbidden
+      'No se puede eliminar al vendedor porque está asignado a un hotel',
+      409,
+    );
+  }
+
+  const ventaSinLiquidar = await DetalleFactura.findOne({
+    where: {
+      empleadoId: id,
+      liquidacionId: { [Op.is]: null },
+    },
+  });
+  if (ventaSinLiquidar) {
+    throw new CustomError(
+      'No se puede eliminar al vendedor porque tiene ventas sin liquidar',
+      409,
+    );
   }
 
   await empleado.destroy();
@@ -132,30 +194,16 @@ const eliminarEmpleado = async (id) => {
 const obtenerVendedores = async () => {
   const vendedores = await Empleado.findAll({
     where: { rol: 'vendedor' },
-    include: [
-      {
-        model: Hotel,
-        as: 'hoteles',
-        attributes: ['id', 'nombre'],
-        through: { attributes: [] },
-      },
-    ],
+    include: incluirRelacionesVendedor,
   });
 
-  return vendedores.map((vendedor) => ({
-    id: vendedor.id,
-    nombre: `${vendedor.nombre} ${vendedor.apellido}`,
-    email: vendedor.email,
-    telefono: vendedor.telefono,
-    hotelesPermitidos: vendedor.hoteles.map((hotel) => ({
-      id: hotel.id,
-      nombre: hotel.nombre,
-    })),
-  }));
+  return vendedores.map(formatearVendedor);
 };
 
 const obtenerVendedorPorId = async (id) => {
-  const vendedor = await Empleado.findByPk(id);
+  const vendedor = await Empleado.findByPk(id, {
+    include: incluirRelacionesVendedor,
+  });
   if (!vendedor) {
     throw new CustomError('Vendedor no encontrado', 404);
   }
@@ -164,7 +212,7 @@ const obtenerVendedorPorId = async (id) => {
     throw new CustomError('El empleado no es un vendedor', 404);
   }
 
-  return vendedor;
+  return formatearVendedor(vendedor);
 };
 
 const crearCliente = async (cliente) => {

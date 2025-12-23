@@ -836,6 +836,38 @@ const asignarEmpleadoAHotel = async (hotelId, empleadoId) => {
   }
 };
 
+/**
+ * Función para desasignar un empleado de un hotel
+ *
+ * @param {*} hotelId - ID del hotel
+ * @param {*} empleadoId  - ID del empleado (vendedor)
+ */
+const desasignarEmpleadoDeHotel = async (hotelId, empleadoId) => {
+  try {
+    await verificarIdHotel(hotelId);
+    await personaServices.obtenerVendedorPorId(empleadoId);
+
+    const asignacion = await HotelEmpleado.findOne({
+      where: { hotelId, empleadoId },
+    });
+
+    if (!asignacion) {
+      throw new CustomError(
+        'El empleado no está asignado a este hotel',
+        404,
+      ); // Not Found
+    }
+
+    await asignacion.destroy();
+    return { message: 'Empleado desasignado correctamente del hotel' };
+  } catch (error) {
+    throw new CustomError(
+      `Error al desasignar el empleado del hotel: ${error.message}`,
+      error.status || 500,
+    );
+  }
+};
+
 module.exports = {
   crearHotel,
   modificarHotel,
@@ -851,4 +883,5 @@ module.exports = {
   //getPaquetesDisponibles,
   crearEncargado,
   asignarEmpleadoAHotel,
+  desasignarEmpleadoDeHotel,
 };
