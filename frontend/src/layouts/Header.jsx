@@ -1,21 +1,34 @@
-import { useState } from 'react';
+import { useState, useContext, useMemo } from 'react'; // Añadimos useContext y useMemo
+import { Link } from 'react-router-dom'; // Para que el logo sea un enlace
 import { useAuth } from '@/context/AuthContext';
+import { ThemeContext } from '@/context/ThemeContext'; // Importamos el contexto del tema
 import Avatar from '@/components/ui/Avatar';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { LogOut, User, Settings, ChevronDown } from 'lucide-react';
 
+// Importamos los logos igual que en AdminHeader
+import logoLight from '@/assets/logo.svg';
+import logoDark from '@/assets/logo-dark.svg';
+
 const Header = () => {
   const { user, logout } = useAuth();
+  const { theme } = useContext(ThemeContext); // Obtenemos el tema actual
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Lógica para elegir el logo según el tema
+  const logo = useMemo(
+    () => (theme === 'dark' ? logoDark : logoLight),
+    [theme]
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
-        {/* Logo / Título */}
+        {/* Logo / Título actualizado para usar imagen */}
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-extrabold tracking-tight text-blue-600 dark:text-blue-500">
-            Ctrl-HTLS
-          </span>
+          <Link to="/" aria-label="Ir al inicio">
+            <img src={logo} alt="Logo" className="h-10" />
+          </Link>
         </div>
 
         {/* Acciones Derecha */}
