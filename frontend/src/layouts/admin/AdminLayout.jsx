@@ -16,9 +16,9 @@ function AdminLayout() {
     CrearHotel: <CreateHotelFormPage />,
     VerVendedores: <VendedoresLIst />,
     CrearVendedor: <CrearVendedor />,
-    VerUsuarios: <ClientesList />,
+    VerClientes: <ClientesList />,
     VerHoteles: <AdminHotelList />,
-    CrearUsuario: <CrearCliente />,
+    CrearCliente: <CrearCliente />,
     // Dashboard: <DashboardHome />,
     // Configuracion: <Configuracion />,
   };

@@ -9,20 +9,24 @@ const ClientesList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Cargar los clientes al montar el componente
   useEffect(() => {
-    const fetchClientes = async () => {
-      try {
-        const response = await axiosInstance.get('/clientes');
-        setClientes(response.data);
-      } catch (err) {
-        setError(err.response?.data?.error || 'Error al cargar los clientes');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchClientes();
   }, []);
+
+  const fetchClientes = async () => {
+    try {
+      setLoading(true);
+      // Endpoint del backend para obtener todos los clientes
+      const response = await axiosInstance.get('/clientes');
+      setClientes(response.data);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Error al cargar los clientes');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getPuntosColor = (puntos) => {
     if (puntos >= 2000)
@@ -33,25 +37,42 @@ const ClientesList = () => {
   };
 
   const handleEdit = (id) => {
-    console.log('Editar cliente', id);
+    console.log('Navegar a edición de cliente:', id);
+    // Aquí iría la lógica para abrir un modal o navegar a la ruta de edición
   };
 
-  const handleDelete = (id) => {
-    console.log('Eliminar cliente', id);
+  const handleDelete = async (id) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
+      try {
+        // Llamada al endpoint DELETE del backend
+        await axiosInstance.delete(`/cliente/${id}`);
+        // Actualizar la lista local eliminando el registro borrado
+        setClientes(clientes.filter((cliente) => cliente.id !== id));
+        alert('Cliente eliminado exitosamente');
+      } catch (err) {
+        // El backend puede devolver errores si el cliente tiene dependencias (ej. reservas activas)
+        alert(err.response?.data?.error || 'No se pudo eliminar el cliente');
+      }
+    }
   };
 
   const handleView = (id) => {
-    console.log('Ver cliente', id);
+    console.log('Ver detalles completos del cliente:', id);
+    // Aquí se podría abrir un modal con el historial de alquileres del cliente
   };
 
-  if (loading) {
-    return <Loading />;
-  }
+  if (loading) return <Loading />;
 
   if (error) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center shadow dark:border-red-700 dark:bg-red-900/20">
         <p className="text-red-600 dark:text-red-400">Error: {error}</p>
+        <button
+          onClick={fetchClientes}
+          className="mt-4 text-sm font-medium text-red-700 underline hover:text-red-800"
+        >
+          Reintentar carga
+        </button>
       </div>
     );
   }
@@ -61,7 +82,7 @@ const ClientesList = () => {
       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow dark:border-gray-700 dark:bg-gray-800">
         <div className="py-8 text-center">
           <p className="text-gray-600 dark:text-gray-300">
-            No hay clientes registrados.
+            No hay clientes registrados en el sistema.
           </p>
         </div>
       </div>
