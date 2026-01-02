@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from '../api/axiosInstance';
 
 const capitalize = (str) => {
-  if (typeof str !== 'string' || str.length === 0) {
-    return '';
-  }
+  if (typeof str !== 'string' || str.length === 0) return '';
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
@@ -16,7 +14,13 @@ const useUbicacion = () => {
   const [provinciaId, setProvinciaId] = useState('');
   const [ciudadId, setCiudadId] = useState('');
 
+  // Estados de carga
+  const [loadingPaises, setLoadingPaises] = useState(false);
+  const [loadingProvincias, setLoadingProvincias] = useState(false);
+  const [loadingCiudades, setLoadingCiudades] = useState(false);
+
   useEffect(() => {
+    setLoadingPaises(true);
     axios
       .get('/paises')
       .then((res) => {
@@ -26,7 +30,8 @@ const useUbicacion = () => {
         }));
         setPaises(capitalizedData);
       })
-      .catch((err) => console.error('Error cargando países:', err));
+      .catch((err) => console.error('Error cargando países:', err))
+      .finally(() => setLoadingPaises(false));
   }, []);
 
   useEffect(() => {
@@ -35,6 +40,7 @@ const useUbicacion = () => {
       setProvinciaId('');
       return;
     }
+    setLoadingProvincias(true);
     axios
       .get(`/provincias/${paisId}`)
       .then((res) => {
@@ -44,7 +50,8 @@ const useUbicacion = () => {
         }));
         setProvincias(capitalizedData);
       })
-      .catch((err) => console.error('Error cargando provincias:', err));
+      .catch((err) => console.error('Error cargando provincias:', err))
+      .finally(() => setLoadingProvincias(false));
   }, [paisId]);
 
   useEffect(() => {
@@ -53,6 +60,7 @@ const useUbicacion = () => {
       setCiudadId('');
       return;
     }
+    setLoadingCiudades(true);
     axios
       .get(`/ciudades/${provinciaId}`)
       .then((res) => {
@@ -62,7 +70,8 @@ const useUbicacion = () => {
         }));
         setCiudades(capitalizedData);
       })
-      .catch((err) => console.error('Error cargando ciudades:', err));
+      .catch((err) => console.error('Error cargando ciudades:', err))
+      .finally(() => setLoadingCiudades(false));
   }, [provinciaId]);
 
   const handlePaisChange = (newPaisId) => {
@@ -97,8 +106,11 @@ const useUbicacion = () => {
     handleProvinciaChange,
     handleCiudadChange,
     resetUbicacion,
-    isProvinciasDisabled: !paisId,
-    isCiudadesDisabled: !provinciaId,
+    isProvinciasDisabled: !paisId || loadingPaises,
+    isCiudadesDisabled: !provinciaId || loadingProvincias,
+    loadingPaises,
+    loadingProvincias,
+    loadingCiudades,
   };
 };
 
