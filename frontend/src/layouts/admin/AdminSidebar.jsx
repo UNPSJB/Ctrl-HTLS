@@ -57,12 +57,12 @@ function AdminSidebar({ onSelect = () => {} }) {
       ],
     },
     {
-      title: 'Gestión de Usuarios',
+      title: 'Gestión de Clientes',
       icon: Users,
-      description: 'ABM de usuarios',
+      description: 'ABM de clientes',
       submenu: [
-        { title: 'Ver Usuarios', key: 'VerUsuarios' },
-        { title: 'Crear Usuario', key: 'CrearUsuario' },
+        { title: 'Ver Clientes', key: 'VerClientes' },
+        { title: 'Crear Cliente', key: 'CrearCliente' },
       ],
     },
     {

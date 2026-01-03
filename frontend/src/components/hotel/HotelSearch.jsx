@@ -3,6 +3,7 @@ import { useBusqueda } from '@context/BusquedaContext';
 import dateUtils from '@utils/dateUtils';
 import { Search, MapPin, Calendar, Users, Globe, Building } from 'lucide-react';
 import useUbicacion from '@hooks/useUbicacion';
+import { toast } from 'react-hot-toast'; // Importación añadida
 
 const { toISODate } = dateUtils;
 
@@ -20,6 +21,9 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
     handleCiudadChange,
     isProvinciasDisabled,
     isCiudadesDisabled,
+    loadingPaises, // Nuevos estados obtenidos del hook
+    loadingProvincias,
+    loadingCiudades,
   } = useUbicacion();
 
   const [localFilters, setLocalFilters] = useState({
@@ -36,7 +40,6 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    actualizarFiltros({ ...localFilters, paisId, provinciaId, ciudadId });
 
     if (!ciudadId || !localFilters.fechaInicio || !localFilters.fechaFin) {
       toast.error(
@@ -44,6 +47,8 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
       );
       return;
     }
+
+    actualizarFiltros({ ...localFilters, paisId, provinciaId, ciudadId });
 
     const params = {
       ubicacion: ciudadId,
@@ -98,9 +103,12 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
                 <select
                   value={paisId}
                   onChange={(e) => handlePaisChange(e.target.value)}
-                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                  disabled={loadingPaises}
+                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                 >
-                  <option value="">Seleccionar país</option>
+                  <option value="">
+                    {loadingPaises ? 'Cargando países...' : 'Seleccionar país'}
+                  </option>
                   {paises.map((pais) => (
                     <option key={pais.id} value={pais.id}>
                       {pais.nombre}
@@ -119,10 +127,16 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
                 <select
                   value={provinciaId}
                   onChange={(e) => handleProvinciaChange(e.target.value)}
-                  disabled={isProvinciasDisabled}
-                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:disabled:bg-gray-600"
+                  disabled={isProvinciasDisabled || loadingProvincias}
+                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                 >
-                  <option value="">Seleccionar provincia</option>
+                  <option value="">
+                    {loadingProvincias
+                      ? 'Cargando provincias...'
+                      : paisId
+                        ? 'Seleccionar provincia'
+                        : 'Primero seleccione un país'}
+                  </option>
                   {provincias.map((prov) => (
                     <option key={prov.id} value={prov.id}>
                       {prov.nombre}
@@ -141,10 +155,16 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
                 <select
                   value={ciudadId}
                   onChange={(e) => handleCiudadChange(e.target.value)}
-                  disabled={isCiudadesDisabled}
-                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:disabled:bg-gray-600"
+                  disabled={isCiudadesDisabled || loadingCiudades}
+                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                 >
-                  <option value="">Seleccionar ciudad</option>
+                  <option value="">
+                    {loadingCiudades
+                      ? 'Cargando ciudades...'
+                      : provinciaId
+                        ? 'Seleccionar ciudad'
+                        : 'Primero seleccione una provincia'}
+                  </option>
                   {ciudades.map((ciudad) => (
                     <option key={ciudad.id} value={ciudad.id}>
                       {ciudad.nombre}
