@@ -15,6 +15,23 @@ const liquidarComisiones = async (req, res) => {
   }
 };
 
+const liquidarVendedor = async (req, res) => {
+  const { vendedorId } = req.params;
+  const { fechaInicio, fechaFin } = req.body;
+
+  try {
+    const resultado = await liquidacionesServices.liquidarVendedorPorId(
+      vendedorId,
+      fechaInicio,
+      fechaFin,
+    );
+    res.status(201).json(resultado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const listarLiquidaciones = async (req, res) => {
   const { fechaInicio, fechaFin } = req.query;
 
@@ -32,5 +49,6 @@ const listarLiquidaciones = async (req, res) => {
 
 module.exports = {
   liquidarComisiones,
+  liquidarVendedor,
   listarLiquidaciones,
 };

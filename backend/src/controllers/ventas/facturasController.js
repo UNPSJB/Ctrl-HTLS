@@ -43,7 +43,13 @@ const confirmarPago = async (req, res) => {
       vendedorId,
       clienteId,
     );
-    res.status(201).json(resultado);
+
+    const { pdfBuffer, ...datosFactura } = resultado;
+
+    res.status(201).json({
+      ...datosFactura,
+      pdfBase64: pdfBuffer.toString('base64'),
+    });
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });

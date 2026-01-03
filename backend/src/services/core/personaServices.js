@@ -36,9 +36,13 @@ const incluirRelacionesVendedor = [
 
 const formatearVendedor = (vendedor) => ({
   id: vendedor.id,
-  nombre: `${vendedor.nombre} ${vendedor.apellido}`,
+  nombre: vendedor.nombre,
+  apellido: vendedor.apellido,
+  tipoDocumento: vendedor.tipoDocumento,
+  numeroDocumento: vendedor.numeroDocumento,
   email: vendedor.email,
   telefono: vendedor.telefono,
+  direccion: vendedor.direccion,
   hotelesPermitidos: (vendedor.hoteles || []).map((hotel) => ({
     id: hotel.id,
     nombre: hotel.nombre,
@@ -204,6 +208,7 @@ const obtenerVendedorPorId = async (id) => {
   const vendedor = await Empleado.findByPk(id, {
     include: incluirRelacionesVendedor,
   });
+  
   if (!vendedor) {
     throw new CustomError('Vendedor no encontrado', 404);
   }
@@ -311,11 +316,7 @@ const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
     where: { email, id: { [Op.ne]: id } },
   });
 
-  const emailEncargado = await Encargado.findOne({
-    where: { email, id: { [Op.ne]: id } },
-  });
-
-  const emailExistente = emailCliente || emailEmpleado || emailEncargado;
+  const emailExistente = emailCliente || emailEmpleado;
 
   if (emailExistente) {
     throw new CustomError('El email ya está registrado', 409); // Conflict

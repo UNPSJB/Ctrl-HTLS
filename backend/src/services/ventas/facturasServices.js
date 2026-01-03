@@ -5,6 +5,7 @@ const DetalleFactura = require('../../models/ventas/DetalleFactura');
 const Pago = require('../../models/ventas/Pago');
 const Alquiler = require('../../models/ventas/Alquiler');
 const Cliente = require('../../models/core/Cliente');
+const { generarPDFFactura } = require('./pdfFacturaService');
 
 const generarFactura = async (alquilerIds, vendedorId) => {};
 
@@ -253,10 +254,13 @@ const confirmarPago = async (
 
     await transaction.commit();
 
+    const pdfBuffer = await generarPDFFactura(factura, pago, detallesCreados, cliente);
+
     return {
       factura,
       pago,
       detalles: detallesCreados,
+      pdfBuffer,
     };
   } catch (error) {
     await transaction.rollback();
