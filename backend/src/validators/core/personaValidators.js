@@ -54,11 +54,6 @@ const validateEmpleado = [
       'El rol debe ser uno de los siguientes: Administrador, Vendedor, Desarrollador',
     )
     .toLowerCase(),
-  body('password')
-    .notEmpty()
-    .withMessage('La contraseña es requerida')
-    .isString()
-    .withMessage('La contraseña debe ser una cadena de caracteres'),
   body('direccion')
     .notEmpty()
     .withMessage('La dirección es requerida')

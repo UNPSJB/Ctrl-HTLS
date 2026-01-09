@@ -125,7 +125,6 @@ const actualizarEmpleado = async (id, empleado) => {
     apellido,
     email,
     rol,
-    password,
     telefono,
     tipoDocumento,
     numeroDocumento,
@@ -143,16 +142,12 @@ const actualizarEmpleado = async (id, empleado) => {
   await verificarUpdate(numeroDocumento, email, telefono, id);
   await verificarCiudad(ciudadId);
 
-  // Hash la contraseña
-  const hashedPassword = await bcrypt.hash(password, 10);
-
   // Actualizar el empleado
   await empleadoExistente.update({
     nombre,
     apellido,
     email,
     rol,
-    password: hashedPassword,
     telefono,
     tipoDocumento,
     numeroDocumento,
@@ -208,7 +203,7 @@ const obtenerVendedorPorId = async (id) => {
   const vendedor = await Empleado.findByPk(id, {
     include: incluirRelacionesVendedor,
   });
-  
+
   if (!vendedor) {
     throw new CustomError('Vendedor no encontrado', 404);
   }
@@ -331,7 +326,7 @@ const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
   });
 
   const documentoEncargado = await Encargado.findOne({
-    where: { numeroDocumento, id: { [Op.ne]: id } },
+    where: { dni: numeroDocumento, id: { [Op.ne]: id } },
   });
 
   const documentoExistente =
