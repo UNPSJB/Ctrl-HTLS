@@ -11,6 +11,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
 import VendedoresList from '@/components/ui/admin/list/VendedoresLIst';
 import VendedorFormPage from '@/pages/admin/VendedorFormPage';
+import ClienteFormPage from '@/pages/admin/ClienteFormPage';
 // Importaremos placeholder o componentes reales según existan
 import ClientesList from '@/components/ui/admin/list/ClientesList';
 import AdminHotelList from '@/components/ui/admin/list/AdminHotelList';
@@ -53,7 +54,8 @@ function AppRouter() {
 
                 {/* Rutas de Clientes */}
                 <Route path="clientes" element={<ClientesList />} />
-                <Route path="clientes/nuevo" element={<div>Crear Cliente (TODO)</div>} />
+                <Route path="clientes/nuevo" element={<ClienteFormPage />} />
+                <Route path="clientes/editar/:id" element={<ClienteFormPage />} />
 
                 {/* Fallback admin */}
                 <Route path="*" element={<Navigate to="/admin" replace />} />

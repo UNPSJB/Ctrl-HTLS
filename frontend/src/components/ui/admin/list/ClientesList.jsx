@@ -1,18 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2 } from 'lucide-react';
 import TableButton from '@ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
 import { Loading } from '@ui/Loading';
-import EditarClienteModal from '@/components/client/EditarClienteModal';
 
 const ClientesList = () => {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [setError] = useState(null);
-
-  // Estados para la edición
-  const [clienteAEditar, setClienteAEditar] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchClientes();
@@ -32,8 +29,7 @@ const ClientesList = () => {
   };
 
   const handleEdit = (cliente) => {
-    setClienteAEditar(cliente);
-    setIsEditModalOpen(true);
+    navigate(`/admin/clientes/editar/${cliente.id}`);
   };
 
   const handleDelete = async (id) => {
@@ -115,17 +111,6 @@ const ClientesList = () => {
           </table>
         </div>
       </div>
-
-      {isEditModalOpen && (
-        <EditarClienteModal
-          cliente={clienteAEditar}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setClienteAEditar(null);
-          }}
-          onActualizado={fetchClientes}
-        />
-      )}
     </>
   );
 };
