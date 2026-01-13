@@ -15,11 +15,13 @@ import ThemeToggle from '@/components/ui/ThemeToggle';
 import Avatar from '@/components/ui/Avatar';
 import logoLight from '@/assets/logo.svg';
 import logoDark from '@/assets/logo-dark.svg';
+import { NavLink, useLocation } from 'react-router-dom';
 
-function AdminSidebar({ onSelect = () => {} }) {
+function AdminSidebar({ onClose }) {
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const { theme } = useContext(ThemeContext);
   const { user, logout } = useAuth();
+  const location = useLocation();
 
   const logo = useMemo(
     () => (theme === 'dark' ? logoDark : logoLight),
@@ -35,16 +37,16 @@ function AdminSidebar({ onSelect = () => {} }) {
       title: 'Dashboard',
       icon: Home,
       description: 'Vista general',
-      key: 'Dashboard',
+      path: '/admin',
     },
     {
       title: 'Gestión de Hoteles',
       icon: Building2,
       description: 'ABM de hoteles',
       submenu: [
-        { title: 'Ver Hoteles', key: 'VerHoteles' },
-        { title: 'Crear Hotel', key: 'CrearHotel' },
-        { title: 'Categorías', key: 'CategoriasHotel' },
+        { title: 'Ver Hoteles', path: '/admin/hoteles' },
+        { title: 'Crear Hotel', path: '/admin/hoteles/nuevo' },
+        { title: 'Categorías', path: '/admin/hoteles/categorias' },
       ],
     },
     {
@@ -52,8 +54,8 @@ function AdminSidebar({ onSelect = () => {} }) {
       icon: UserCheck,
       description: 'ABM de vendedores',
       submenu: [
-        { title: 'Ver Vendedores', key: 'VerVendedores' },
-        { title: 'Crear Vendedor', key: 'CrearVendedor' },
+        { title: 'Ver Vendedores', path: '/admin/vendedores' },
+        { title: 'Crear Vendedor', path: '/admin/vendedores/nuevo' },
       ],
     },
     {
@@ -61,8 +63,8 @@ function AdminSidebar({ onSelect = () => {} }) {
       icon: Users,
       description: 'ABM de clientes',
       submenu: [
-        { title: 'Ver Clientes', key: 'VerClientes' },
-        { title: 'Crear Cliente', key: 'CrearCliente' },
+        { title: 'Ver Clientes', path: '/admin/clientes' },
+        { title: 'Crear Cliente', path: '/admin/clientes/nuevo' },
       ],
     },
     {
@@ -70,8 +72,8 @@ function AdminSidebar({ onSelect = () => {} }) {
       icon: BarChart3,
       description: 'Estadísticas',
       submenu: [
-        { title: 'Reservas', key: 'ReporteReservas' },
-        { title: 'Ingresos', key: 'ReporteIngresos' },
+        { title: 'Reservas', path: '/admin/reportes/reservas' },
+        { title: 'Ingresos', path: '/admin/reportes/ingresos' },
       ],
     },
   ];
@@ -90,7 +92,8 @@ function AdminSidebar({ onSelect = () => {} }) {
                 <button
                   onClick={() => handleToggleSubmenu(item.title)}
                   aria-expanded={openSubmenu === item.title}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 ${item.submenu.some(sub => location.pathname === sub.path) ? 'bg-gray-100 dark:bg-gray-800' : ''
+                    }`}
                 >
                   <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                   <div className="flex-1">
@@ -104,30 +107,41 @@ function AdminSidebar({ onSelect = () => {} }) {
                     )}
                   </div>
                   <ChevronDown
-                    className={`h-4 w-4 transform text-gray-400 transition-transform ${
-                      openSubmenu === item.title ? 'rotate-180' : ''
-                    }`}
+                    className={`h-4 w-4 transform text-gray-400 transition-transform ${openSubmenu === item.title ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
 
                 {openSubmenu === item.title && (
                   <div className="ml-8 mt-2 space-y-1">
                     {item.submenu.map((sub, sidx) => (
-                      <button
+                      <NavLink
                         key={sidx}
-                        onClick={() => onSelect(sub.key)}
-                        className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                        to={sub.path}
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                          `block w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${isActive
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                            : 'text-gray-700 dark:text-gray-300'
+                          }`
+                        }
                       >
                         {sub.title}
-                      </button>
+                      </NavLink>
                     ))}
                   </div>
                 )}
               </>
             ) : (
-              <button
-                onClick={() => onSelect(item.key)}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700"
+              <NavLink
+                to={item.path}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 ${isActive
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                    : 'text-gray-900 dark:text-gray-100'
+                  }`
+                }
               >
                 <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                 <div className="text-left">
@@ -138,7 +152,7 @@ function AdminSidebar({ onSelect = () => {} }) {
                     </div>
                   )}
                 </div>
-              </button>
+              </NavLink>
             )}
           </div>
         ))}
@@ -166,13 +180,14 @@ function AdminSidebar({ onSelect = () => {} }) {
           </div>
 
           <div className="space-y-1">
-            <button
-              onClick={() => onSelect('Configuracion')}
+            <NavLink
+              to="/admin/configuracion"
+              onClick={onClose}
               className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               <Settings className="h-4 w-4" />
               Configuración
-            </button>
+            </NavLink>
 
             <button
               onClick={logout}

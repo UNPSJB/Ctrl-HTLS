@@ -95,6 +95,12 @@ const useUbicacion = () => {
     setCiudadId('');
   };
 
+  const setInitialUbicacion = (pId, prId, cId) => {
+    if (pId) setPaisId(pId.toString());
+    if (prId) setProvinciaId(prId.toString());
+    if (cId) setCiudadId(cId.toString());
+  };
+
   return {
     paises,
     provincias,
@@ -106,6 +112,7 @@ const useUbicacion = () => {
     handleProvinciaChange,
     handleCiudadChange,
     resetUbicacion,
+    setInitialUbicacion,
     isProvinciasDisabled: !paisId || loadingPaises,
     isCiudadesDisabled: !provinciaId || loadingProvincias,
     loadingPaises,

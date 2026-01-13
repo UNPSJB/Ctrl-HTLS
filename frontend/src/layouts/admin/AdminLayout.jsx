@@ -1,27 +1,10 @@
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
-import AdminSidebar from '@layouts/admin/AdminSidebar';
-import VendedoresLIst from '@ui/admin/list/VendedoresLIst';
-import CreateHotelFormPage from '@pages/CreateHotelFormPage';
-import CrearVendedor from '@pages/admin/CrearVendedor';
-import ClientesList from '@ui/admin/list/ClientesList';
-import AdminHotelList from '@ui/admin/list/AdminHotelList';
-import CrearCliente from '@components/forms/admin/CrearCliente';
+import AdminSidebar from '@/layouts/admin/AdminSidebar';
+import { Outlet } from 'react-router-dom';
 
 function AdminLayout() {
-  const [selectedView, setSelectedView] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const viewMap = {
-    CrearHotel: <CreateHotelFormPage />,
-    VerVendedores: <VendedoresLIst />,
-    CrearVendedor: <CrearVendedor />,
-    VerClientes: <ClientesList />,
-    VerHoteles: <AdminHotelList />,
-    CrearCliente: <CrearCliente />,
-    // Dashboard: <DashboardHome />,
-    // Configuracion: <Configuracion />,
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -29,13 +12,7 @@ function AdminLayout() {
         className={`fixed bottom-0 left-0 top-0 z-40 transform overflow-y-auto border-r border-gray-200 bg-white transition-transform duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-800 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:block lg:translate-x-0`}
         style={{ width: '18rem' }}
       >
-        <AdminSidebar
-          onClose={() => setIsSidebarOpen(false)}
-          onSelect={(key) => {
-            setSelectedView(key);
-            setIsSidebarOpen(false);
-          }}
-        />
+        <AdminSidebar onClose={() => setIsSidebarOpen(false)} />
       </aside>
 
       <main
@@ -46,29 +23,7 @@ function AdminLayout() {
         }}
       >
         <div className="container mx-auto px-4 py-6">
-          {!selectedView ? (
-            <div>
-              <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
-                Panel de administración
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                Seleccioná una opción del menú.
-              </p>
-            </div>
-          ) : (
-            <div>
-              {viewMap[selectedView] || (
-                <div className="rounded-lg border border-gray-200 bg-white p-6 shadow dark:border-gray-700 dark:bg-gray-800">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Sección: {selectedView}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Componente no implementado todavía.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+          <Outlet />
         </div>
       </main>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import TableButton from '@ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
@@ -28,9 +29,10 @@ const VendedoresList = () => {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleEdit = (id) => {
-    console.log('Editar vendedor con ID:', id);
-    // Aquí podrías implementar la navegación o apertura de modal de edición
+    navigate(`/admin/vendedores/editar/${id}`);
   };
 
   const handleDelete = async (id) => {
@@ -136,7 +138,7 @@ const VendedoresList = () => {
                 <td className="p-4">
                   <div className="flex flex-wrap gap-1">
                     {vendedor.hotelesPermitidos &&
-                    vendedor.hotelesPermitidos.length > 0 ? (
+                      vendedor.hotelesPermitidos.length > 0 ? (
                       vendedor.hotelesPermitidos.map((hotel) => (
                         <span
                           key={hotel.id}

@@ -15,6 +15,10 @@ const HotelEmpleado = require('../../models/hotel/HotelEmpleado');
 const DetalleFactura = require('../../models/ventas/DetalleFactura');
 const Liquidacion = require('../../models/ventas/Liquidacion');
 
+const Ciudad = require('../../models/core/Ciudad');
+const Provincia = require('../../models/core/Provincia');
+const Pais = require('../../models/core/Pais');
+
 const incluirRelacionesVendedor = [
   {
     model: Hotel,
@@ -32,6 +36,22 @@ const incluirRelacionesVendedor = [
     as: 'liquidaciones',
     attributes: ['id', 'numero', 'fecha_emision', 'fecha_pago', 'total'],
   },
+  {
+    model: Ciudad,
+    as: 'ciudad',
+    include: [
+      {
+        model: Provincia,
+        as: 'provincia',
+        include: [
+          {
+            model: Pais,
+            as: 'pais',
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 const formatearVendedor = (vendedor) => ({
@@ -43,6 +63,16 @@ const formatearVendedor = (vendedor) => ({
   email: vendedor.email,
   telefono: vendedor.telefono,
   direccion: vendedor.direccion,
+  ciudadId: vendedor.ciudadId,
+  // Datos de ubicación extendidos para el frontend
+  ubicacion: vendedor.ciudad ? {
+    ciudadId: vendedor.ciudad.id,
+    ciudadNombre: vendedor.ciudad.nombre,
+    provinciaId: vendedor.ciudad.provincia ? vendedor.ciudad.provincia.id : null,
+    provinciaNombre: vendedor.ciudad.provincia ? vendedor.ciudad.provincia.nombre : null,
+    paisId: vendedor.ciudad.provincia && vendedor.ciudad.provincia.pais ? vendedor.ciudad.provincia.pais.id : null,
+    paisNombre: vendedor.ciudad.provincia && vendedor.ciudad.provincia.pais ? vendedor.ciudad.provincia.pais.nombre : null,
+  } : null,
   hotelesPermitidos: (vendedor.hoteles || []).map((hotel) => ({
     id: hotel.id,
     nombre: hotel.nombre,

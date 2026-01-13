@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { UserPlus, Save, X, Lock, MapPin, Briefcase } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import useUbicacion from '@/hooks/useUbicacion';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
@@ -10,7 +12,28 @@ const tiposDocumento = [
   { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
-const CrearVendedor = () => {
+const VendedorFormPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEditing = Boolean(id);
+
+  // Hook de ubicación personalizado
+  const {
+    paises,
+    provincias,
+    ciudades,
+    paisId,
+    provinciaId,
+    ciudadId,
+    handlePaisChange,
+    handleProvinciaChange,
+    handleCiudadChange,
+    isProvinciasDisabled,
+    isCiudadesDisabled,
+    resetUbicacion,
+    setInitialUbicacion,
+  } = useUbicacion();
+
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -20,11 +43,54 @@ const CrearVendedor = () => {
     numeroDocumento: '',
     direccion: '',
     password: '',
-    ciudadId: '', // Requerido por el backend
-    rol: 'vendedor', // Valor fijo
+    rol: 'vendedor',
   });
 
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+
+  // Efecto para cargar datos si estamos editando
+  useEffect(() => {
+    if (isEditing) {
+      fetchVendedor();
+    }
+  }, [id]);
+
+  const fetchVendedor = async () => {
+    try {
+      setLoadingData(true);
+      const response = await axiosInstance.get(`/vendedor/${id}`);
+      const data = response.data;
+
+      setFormData({
+        nombre: data.nombre || '',
+        apellido: data.apellido || '',
+        email: data.email || '',
+        telefono: data.telefono || '',
+        tipoDocumento: data.tipoDocumento || 'dni',
+        numeroDocumento: data.numeroDocumento || '',
+        direccion: data.direccion || '',
+        password: '', // No mostramos la contraseña al editar
+        rol: 'vendedor',
+      });
+
+      // Precargar ubicación si está disponible en la respuesta
+      if (data.ubicacion) {
+        setInitialUbicacion(
+          data.ubicacion.paisId,
+          data.ubicacion.provinciaId,
+          data.ubicacion.ciudadId
+        );
+      }
+
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al cargar datos del vendedor');
+      navigate('/admin/vendedores');
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,7 +100,6 @@ const CrearVendedor = () => {
     }));
   };
 
-  // Lógica de documento idéntica a la de Cliente
   const handleDocumentoChange = (e) => {
     const { value } = e.target;
     const tipo = formData.tipoDocumento;
@@ -61,7 +126,6 @@ const CrearVendedor = () => {
     }));
   };
 
-  // Resetear número al cambiar tipo para evitar inconsistencias
   const handleTipoChange = (e) => {
     const { value } = e.target;
     setFormData((prev) => ({
@@ -81,37 +145,39 @@ const CrearVendedor = () => {
       !formData.apellido ||
       !formData.numeroDocumento ||
       !formData.email ||
-      !formData.password ||
+      (!isEditing && !formData.password) || // Password obligatorio solo al crear
       !formData.direccion ||
-      !formData.ciudadId
+      !ciudadId
     ) {
       toast.error('Por favor complete todos los campos obligatorios');
       setLoading(false);
       return;
     }
 
-    try {
-      // El endpoint es /empleado según coreRoutes.js
-      await axiosInstance.post('/empleado', formData);
-      toast.success('Vendedor registrado exitosamente');
+    const payload = {
+      ...formData,
+      ciudadId: ciudadId,
+    };
 
-      // Reset del formulario
-      setFormData({
-        nombre: '',
-        apellido: '',
-        email: '',
-        telefono: '',
-        tipoDocumento: 'dni',
-        numeroDocumento: '',
-        direccion: '',
-        password: '',
-        ciudadId: '',
-        rol: 'vendedor',
-      });
+    // Si editamos y el password está vacío, lo quitamos para no sobreescribirlo con vacío
+    if (isEditing && !payload.password) {
+      delete payload.password;
+    }
+
+    try {
+      if (isEditing) {
+        await axiosInstance.put(`/empleado/${id}`, payload);
+        toast.success('Vendedor actualizado exitosamente');
+      } else {
+        await axiosInstance.post('/empleado', payload);
+        toast.success('Vendedor registrado exitosamente');
+      }
+      navigate('/admin/vendedores');
     } catch (error) {
       console.error(error);
-      const mensaje =
-        error.response?.data?.error || 'Ocurrió un error al crear el vendedor';
+      const mensaje = isEditing
+        ? (error.response?.data?.error || 'Error al actualizar vendedor')
+        : (error.response?.data?.error || 'Error al crear vendedor');
       toast.error(mensaje);
     } finally {
       setLoading(false);
@@ -119,19 +185,7 @@ const CrearVendedor = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      nombre: '',
-      apellido: '',
-      email: '',
-      telefono: '',
-      tipoDocumento: 'dni',
-      numeroDocumento: '',
-      direccion: '',
-      password: '',
-      ciudadId: '',
-      rol: 'vendedor',
-    });
-    toast('Formulario limpiado', { icon: '🧹' });
+    navigate('/admin/vendedores');
   };
 
   const inputClass =
@@ -139,6 +193,10 @@ const CrearVendedor = () => {
 
   const labelClass =
     'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+
+  if (loadingData) {
+    return <div className="p-8 text-center">Cargando datos...</div>;
+  }
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -150,11 +208,12 @@ const CrearVendedor = () => {
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Registrar Nuevo Vendedor
+              {isEditing ? 'Editar Vendedor' : 'Registrar Nuevo Vendedor'}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Complete los datos para dar de alta un empleado con acceso al
-              sistema.
+              {isEditing
+                ? 'Actualice los datos del vendedor seleccionado.'
+                : 'Complete los datos para dar de alta un empleado con acceso al sistema.'}
             </p>
           </div>
         </div>
@@ -299,23 +358,54 @@ const CrearVendedor = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="ciudadId" className={labelClass}>
-                ID Ciudad (Temporal) *
-              </label>
-              <input
-                type="text"
-                id="ciudadId"
-                name="ciudadId"
-                value={formData.ciudadId}
-                onChange={handleNumericChange}
-                placeholder="Ej: 1"
-                className={inputClass}
-              />
-              <p className="mt-1 text-xs text-gray-400">
-                Ingrese el ID numérico de la ciudad.
-              </p>
+            {/* Selectores de Ubicación (Cascada) */}
+            <div className="contents">
+              <div>
+                <label htmlFor="pais" className={labelClass}>País *</label>
+                <select
+                  id="pais"
+                  value={paisId}
+                  onChange={(e) => handlePaisChange(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Seleccione país</option>
+                  {paises.map((p) => (
+                    <option key={p.id} value={p.id}>{p.nombre}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="provincia" className={labelClass}>Provincia *</label>
+                <select
+                  id="provincia"
+                  value={provinciaId}
+                  onChange={(e) => handleProvinciaChange(e.target.value)}
+                  className={inputClass}
+                  disabled={isProvinciasDisabled}
+                >
+                  <option value="">Seleccione provincia</option>
+                  {provincias.map((p) => (
+                    <option key={p.id} value={p.id}>{p.nombre}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="ciudad" className={labelClass}>Ciudad *</label>
+                <select
+                  id="ciudad"
+                  value={ciudadId}
+                  onChange={(e) => handleCiudadChange(e.target.value)}
+                  className={inputClass}
+                  disabled={isCiudadesDisabled}
+                >
+                  <option value="">Seleccione ciudad</option>
+                  {ciudades.map((c) => (
+                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+
 
             {/* --- Sección Seguridad --- */}
             <div className="col-span-full mt-2 flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
@@ -327,7 +417,7 @@ const CrearVendedor = () => {
 
             <div className="col-span-full md:col-span-1">
               <label htmlFor="password" className={labelClass}>
-                Contraseña *
+                {isEditing ? 'Nueva Contraseña (Opcional)' : 'Contraseña *'}
               </label>
               <input
                 type="password"
@@ -338,6 +428,8 @@ const CrearVendedor = () => {
                 placeholder="••••••••"
                 className={inputClass}
               />
+              {isEditing && <p className="text-xs text-gray-500 mt-1">Dejar en blanco para mantener la actual.</p>}
+
             </div>
           </div>
 
@@ -350,7 +442,7 @@ const CrearVendedor = () => {
               className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               <X className="h-4 w-4" />
-              Limpiar Formulario
+              Cancelar
             </button>
 
             <button
@@ -366,7 +458,7 @@ const CrearVendedor = () => {
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  Guardar Vendedor
+                  {isEditing ? 'Actualizar Vendedor' : 'Guardar Vendedor'}
                 </>
               )}
             </button>
@@ -377,4 +469,4 @@ const CrearVendedor = () => {
   );
 };
 
-export default CrearVendedor;
+export default VendedorFormPage;

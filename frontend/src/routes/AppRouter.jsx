@@ -9,6 +9,11 @@ import PagoPage from '@/pages/PagoPage';
 import HotelPage from '@/pages/HotelPage';
 import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
+import VendedoresList from '@/components/ui/admin/list/VendedoresLIst';
+import VendedorFormPage from '@/pages/admin/VendedorFormPage';
+// Importaremos placeholder o componentes reales según existan
+import ClientesList from '@/components/ui/admin/list/ClientesList';
+import AdminHotelList from '@/components/ui/admin/list/AdminHotelList';
 
 function AppRouter() {
   const { user, loading } = useAuth();
@@ -34,10 +39,30 @@ function AppRouter() {
             )}
 
             {user.rol === 'administrador' && (
-              <Route element={<AdminLayout />}>
-                <Route path="/" element={<DashboardPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<DashboardPage />} />
+
+                {/* Rutas de Vendedores */}
+                <Route path="vendedores" element={<VendedoresList />} />
+                <Route path="vendedores/nuevo" element={<VendedorFormPage />} />
+                <Route path="vendedores/editar/:id" element={<VendedorFormPage />} />
+
+                {/* Rutas de Hoteles */}
+                <Route path="hoteles" element={<AdminHotelList />} />
+                <Route path="hoteles/nuevo" element={<CreateHotelFormPage />} />
+
+                {/* Rutas de Clientes */}
+                <Route path="clientes" element={<ClientesList />} />
+                <Route path="clientes/nuevo" element={<div>Crear Cliente (TODO)</div>} />
+
+                {/* Fallback admin */}
+                <Route path="*" element={<Navigate to="/admin" replace />} />
               </Route>
+            )}
+
+            {/* Redirección para admins que entran a la raíz */}
+            {user.rol === 'administrador' && (
+              <Route path="/" element={<Navigate to="/admin" replace />} />
             )}
 
             <Route path="*" element={<Navigate to="/" replace />} />
