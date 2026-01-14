@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { UserPlus, Save, X, Lock, MapPin, Briefcase } from 'lucide-react';
+import { User, Save, X, Lock, MapPin, Building2, Briefcase } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useUbicacion from '@/hooks/useUbicacion';
 
@@ -30,7 +30,6 @@ const VendedorFormPage = () => {
     handleCiudadChange,
     isProvinciasDisabled,
     isCiudadesDisabled,
-    resetUbicacion,
     setInitialUbicacion,
   } = useUbicacion();
 
@@ -46,11 +45,14 @@ const VendedorFormPage = () => {
     rol: 'vendedor',
   });
 
+  const [assignedHotels, setAssignedHotels] = useState([]); // Hoteles asignados (objetos completos)
+  const [initialHotels, setInitialHotels] = useState([]); // Para comparar cambios
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [activeTab, setActiveTab] = useState('general'); // general, ubicacion, hoteles, seguridad
 
-  // Efecto para cargar datos si estamos editando
   useEffect(() => {
+    // Si estamos editando, cargamos datos del vendedor
     if (isEditing) {
       fetchVendedor();
     }
@@ -62,6 +64,8 @@ const VendedorFormPage = () => {
       const response = await axiosInstance.get(`/vendedor/${id}`);
       const data = response.data;
 
+      const userHotels = data.hotelesPermitidos ? data.hotelesPermitidos : [];
+
       setFormData({
         nombre: data.nombre || '',
         apellido: data.apellido || '',
@@ -70,11 +74,13 @@ const VendedorFormPage = () => {
         tipoDocumento: data.tipoDocumento || 'dni',
         numeroDocumento: data.numeroDocumento || '',
         direccion: data.direccion || '',
-        password: '', // No mostramos la contraseña al editar
+        password: '',
         rol: 'vendedor',
       });
 
-      // Precargar ubicación si está disponible en la respuesta
+      setAssignedHotels(userHotels);
+      setInitialHotels(userHotels);
+
       if (data.ubicacion) {
         setInitialUbicacion(
           data.ubicacion.paisId,
@@ -82,7 +88,6 @@ const VendedorFormPage = () => {
           data.ubicacion.ciudadId
         );
       }
-
     } catch (error) {
       console.error(error);
       toast.error('Error al cargar datos del vendedor');
@@ -100,52 +105,40 @@ const VendedorFormPage = () => {
     }));
   };
 
+  const handleRemoveHotel = (hotelId) => {
+    if (window.confirm('¿Seguro que desea quitar el acceso a este hotel? Esta acción se aplicará al guardar.')) {
+      setAssignedHotels(prev => prev.filter(h => h.id !== hotelId));
+    }
+  };
+
   const handleDocumentoChange = (e) => {
     const { value } = e.target;
     const tipo = formData.tipoDocumento;
-    let procesado = value;
+    let procesado = value.replace(tipo === 'pasaporte' ? /[^a-zA-Z0-9]/g : /\D/g, '');
+    if (tipo === 'pasaporte') procesado = procesado.toUpperCase();
 
-    if (['dni', 'li', 'le'].includes(tipo)) {
-      procesado = value.replace(/\D/g, '');
-    } else {
-      procesado = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      numeroDocumento: procesado,
-    }));
+    setFormData((prev) => ({ ...prev, numeroDocumento: procesado }));
   };
 
   const handleNumericChange = (e) => {
     const { name, value } = e.target;
-    const numericValue = value.replace(/\D/g, '');
-    setFormData((prev) => ({
-      ...prev,
-      [name]: numericValue,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, '') }));
   };
 
   const handleTipoChange = (e) => {
-    const { value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      tipoDocumento: value,
-      numeroDocumento: '',
-    }));
+    setFormData((prev) => ({ ...prev, tipoDocumento: e.target.value, numeroDocumento: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validación básica
     if (
       !formData.nombre ||
       !formData.apellido ||
       !formData.numeroDocumento ||
       !formData.email ||
-      (!isEditing && !formData.password) || // Password obligatorio solo al crear
+      (!isEditing && !formData.password) ||
       !formData.direccion ||
       !ciudadId
     ) {
@@ -158,312 +151,235 @@ const VendedorFormPage = () => {
       ...formData,
       ciudadId: ciudadId,
     };
+    // Quitamos hotelIds del payload porque no es aceptado por el endpoint de updateEmpleado
+    delete payload.hotelIds;
 
-    // Si editamos y el password está vacío, lo quitamos para no sobreescribirlo con vacío
-    if (isEditing && !payload.password) {
-      delete payload.password;
-    }
+    if (isEditing && !payload.password) delete payload.password;
 
     try {
+      let vendedorId = id;
+
       if (isEditing) {
         await axiosInstance.put(`/empleado/${id}`, payload);
-        toast.success('Vendedor actualizado exitosamente');
+        toast.success('Datos del vendedor actualizados');
       } else {
-        await axiosInstance.post('/empleado', payload);
-        toast.success('Vendedor registrado exitosamente');
+        const res = await axiosInstance.post('/empleado', payload);
+        vendedorId = res.data.id;
+        toast.success('Vendedor registrado');
       }
+
+      // Manejo de desasignación de hoteles (Solo eliminaciones)
+      if (vendedorId && isEditing) {
+        const currentIds = assignedHotels.map(h => h.id);
+        const removedHotels = initialHotels.filter(h => !currentIds.includes(h.id));
+
+        if (removedHotels.length > 0) {
+          await Promise.all(removedHotels.map(h =>
+            axiosInstance.post('/hotel/desasignar-empleado', { hotelId: h.id, vendedorId })
+          ));
+          toast.success('Se quitaron los permisos de hoteles seleccionados');
+        }
+      }
+
       navigate('/admin/vendedores');
     } catch (error) {
       console.error(error);
-      const mensaje = isEditing
-        ? (error.response?.data?.error || 'Error al actualizar vendedor')
-        : (error.response?.data?.error || 'Error al crear vendedor');
+      const mensaje = error.response?.data?.error || 'Error al guardar vendedor';
       toast.error(mensaje);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    navigate('/admin/vendedores');
-  };
+  const handleCancel = () => navigate('/admin/vendedores');
 
-  const inputClass =
-    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
+  const inputClass = 'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
+  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
 
-  const labelClass =
-    'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
-
-  if (loadingData) {
-    return <div className="p-8 text-center">Cargando datos...</div>;
-  }
+  if (loadingData) return <div className="p-8 text-center text-gray-500">Cargando perfil...</div>;
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {/* Header */}
-        <div className="flex items-center gap-3 border-b border-gray-200 px-6 py-5 dark:border-gray-700">
-          <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-            <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              {isEditing ? 'Editar Vendedor' : 'Registrar Nuevo Vendedor'}
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {isEditing
-                ? 'Actualice los datos del vendedor seleccionado.'
-                : 'Complete los datos para dar de alta un empleado con acceso al sistema.'}
-            </p>
+    <div className="mx-auto max-w-5xl space-y-6">
+
+      {/* Encabezado Tipo Perfil */}
+      <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+          <User className="h-8 w-8" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {isEditing ? `${formData.nombre} ${formData.apellido}` : 'Nuevo Vendedor'}
+          </h1>
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <Briefcase className="h-4 w-4" />
+            <span>Rol: Vendedor</span>
+            {isEditing && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">Activo</span>}
           </div>
         </div>
+      </div>
 
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* --- Sección Datos Personales --- */}
-            <div className="col-span-full flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
-              <UserPlus className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
-                Datos Personales
-              </h3>
-            </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        {/* Sidebar de Navegación Local */}
+        <div className="lg:col-span-1">
+          <nav className="flex flex-col space-y-1 rounded-xl border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <button type="button" onClick={() => setActiveTab('general')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'general' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
+              <User className="h-4 w-4" /> Información Personal
+            </button>
+            <button type="button" onClick={() => setActiveTab('ubicacion')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'ubicacion' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
+              <MapPin className="h-4 w-4" /> Ubicación y Contacto
+            </button>
+            <button type="button" onClick={() => setActiveTab('hoteles')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'hoteles' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
+              <Building2 className="h-4 w-4" /> Acceso a Hoteles
+            </button>
+            <button type="button" onClick={() => setActiveTab('seguridad')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'seguridad' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
+              <Lock className="h-4 w-4" /> Seguridad
+            </button>
+          </nav>
+        </div>
 
-            <div>
-              <label htmlFor="nombre" className={labelClass}>
-                Nombre *
-              </label>
-              <input
-                type="text"
-                id="nombre"
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleChange}
-                placeholder="Ej: María"
-                className={inputClass}
-              />
-            </div>
+        {/* Contenido Principal */}
+        <div className="lg:col-span-3">
+          <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
-            <div>
-              <label htmlFor="apellido" className={labelClass}>
-                Apellido *
-              </label>
-              <input
-                type="text"
-                id="apellido"
-                name="apellido"
-                value={formData.apellido}
-                onChange={handleChange}
-                placeholder="Ej: López"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="tipoDocumento" className={labelClass}>
-                Tipo de Documento *
-              </label>
-              <div className="relative">
-                <select
-                  id="tipoDocumento"
-                  name="tipoDocumento"
-                  value={formData.tipoDocumento}
-                  onChange={handleTipoChange}
-                  className={`${inputClass} appearance-none`}
-                >
-                  {tiposDocumento.map((tipo) => (
-                    <option key={tipo.id} value={tipo.id}>
-                      {tipo.nombre}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                  </svg>
+            {/* --- Pestaña: General --- */}
+            {activeTab === 'general' && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="nombre" className={labelClass}>Nombre *</label>
+                    <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} className={inputClass} />
+                  </div>
+                  <div>
+                    <label htmlFor="apellido" className={labelClass}>Apellido *</label>
+                    <input type="text" id="apellido" name="apellido" value={formData.apellido} onChange={handleChange} className={inputClass} />
+                  </div>
+                  <div>
+                    <label htmlFor="tipoDocumento" className={labelClass}>Tipo Documento *</label>
+                    <select id="tipoDocumento" name="tipoDocumento" value={formData.tipoDocumento} onChange={handleTipoChange} className={inputClass}>
+                      {tiposDocumento.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="numeroDocumento" className={labelClass}>Número Documento *</label>
+                    <input type="text" id="numeroDocumento" name="numeroDocumento" value={formData.numeroDocumento} onChange={handleDocumentoChange} className={inputClass} maxLength={15} />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div>
-              <label htmlFor="numeroDocumento" className={labelClass}>
-                Número de Documento *
-              </label>
-              <input
-                type="text"
-                id="numeroDocumento"
-                name="numeroDocumento"
-                value={formData.numeroDocumento}
-                onChange={handleDocumentoChange}
-                placeholder={
-                  formData.tipoDocumento === 'pasaporte'
-                    ? 'A1234567'
-                    : '12345678'
-                }
-                className={inputClass}
-                maxLength={15}
-              />
-            </div>
-
-            {/* --- Sección Contacto y Ubicación --- */}
-            <div className="col-span-full mt-2 flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
-              <MapPin className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
-                Contacto y Ubicación
-              </h3>
-            </div>
-
-            <div>
-              <label htmlFor="email" className={labelClass}>
-                Correo Electrónico *
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="vendedor@empresa.com"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="telefono" className={labelClass}>
-                Teléfono
-              </label>
-              <input
-                type="text"
-                id="telefono"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleNumericChange}
-                placeholder="1123456789"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="direccion" className={labelClass}>
-                Dirección *
-              </label>
-              <input
-                type="text"
-                id="direccion"
-                name="direccion"
-                value={formData.direccion}
-                onChange={handleChange}
-                placeholder="Av. Corrientes 1234"
-                className={inputClass}
-              />
-            </div>
-
-            {/* Selectores de Ubicación (Cascada) */}
-            <div className="contents">
-              <div>
-                <label htmlFor="pais" className={labelClass}>País *</label>
-                <select
-                  id="pais"
-                  value={paisId}
-                  onChange={(e) => handlePaisChange(e.target.value)}
-                  className={inputClass}
-                >
-                  <option value="">Seleccione país</option>
-                  {paises.map((p) => (
-                    <option key={p.id} value={p.id}>{p.nombre}</option>
-                  ))}
-                </select>
+            {/* --- Pestaña: Ubicación --- */}
+            {activeTab === 'ubicacion' && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación y Contacto</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="email" className={labelClass}>Email *</label>
+                    <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} />
+                  </div>
+                  <div>
+                    <label htmlFor="telefono" className={labelClass}>Teléfono</label>
+                    <input type="text" id="telefono" name="telefono" value={formData.telefono} onChange={handleNumericChange} className={inputClass} />
+                  </div>
+                  <div className="col-span-full">
+                    <label htmlFor="direccion" className={labelClass}>Dirección *</label>
+                    <input type="text" id="direccion" name="direccion" value={formData.direccion} onChange={handleChange} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>País *</label>
+                    <select value={paisId} onChange={(e) => handlePaisChange(e.target.value)} className={inputClass}>
+                      <option value="">Seleccione país</option>
+                      {paises.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Provincia *</label>
+                    <select value={provinciaId} onChange={(e) => handleProvinciaChange(e.target.value)} className={inputClass} disabled={isProvinciasDisabled}>
+                      <option value="">Seleccione provincia</option>
+                      {provincias.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Ciudad *</label>
+                    <select value={ciudadId} onChange={(e) => handleCiudadChange(e.target.value)} className={inputClass} disabled={isCiudadesDisabled}>
+                      <option value="">Seleccione ciudad</option>
+                      {ciudades.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label htmlFor="provincia" className={labelClass}>Provincia *</label>
-                <select
-                  id="provincia"
-                  value={provinciaId}
-                  onChange={(e) => handleProvinciaChange(e.target.value)}
-                  className={inputClass}
-                  disabled={isProvinciasDisabled}
-                >
-                  <option value="">Seleccione provincia</option>
-                  {provincias.map((p) => (
-                    <option key={p.id} value={p.id}>{p.nombre}</option>
+            )}
+
+            {/* --- Pestaña: Hoteles --- */}
+            {activeTab === 'hoteles' && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Hoteles Asignados</h3>
+                <p className="text-sm text-gray-500">
+                  Gestione los hoteles a los que este vendedor tiene acceso.
+                  <br />
+                </p>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {assignedHotels.map((hotel) => (
+                    <div
+                      key={hotel.id}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm dark:bg-blue-900 dark:text-blue-300">
+                          <Building2 className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{hotel.nombre}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveHotel(hotel.id)}
+                        className="rounded-full p-1 text-red-500 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30"
+                        title="Quitar acceso"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                   ))}
-                </select>
+                  {assignedHotels.length === 0 && (
+                    <div className="col-span-full rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500 dark:border-gray-600">
+                      <Building2 className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                      <p>Este vendedor no tiene hoteles asignados.</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <label htmlFor="ciudad" className={labelClass}>Ciudad *</label>
-                <select
-                  id="ciudad"
-                  value={ciudadId}
-                  onChange={(e) => handleCiudadChange(e.target.value)}
-                  className={inputClass}
-                  disabled={isCiudadesDisabled}
-                >
-                  <option value="">Seleccione ciudad</option>
-                  {ciudades.map((c) => (
-                    <option key={c.id} value={c.id}>{c.nombre}</option>
-                  ))}
-                </select>
+            )}
+
+            {/* --- Pestaña: Seguridad --- */}
+            {activeTab === 'seguridad' && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
+                <div className="max-w-md">
+                  <label htmlFor="password" className={labelClass}>{isEditing ? 'Nueva Contraseña' : 'Contraseña *'}</label>
+                  <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} placeholder="••••••••" className={inputClass} />
+                  {isEditing && <p className="mt-1 text-xs text-gray-500">Deje el campo vacío para mantener la contraseña actual.</p>}
+                </div>
               </div>
+            )}
+
+            {/* Footer de Acciones (Siempre visible) */}
+            <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+              <button type="button" onClick={handleCancel} disabled={loading} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300">
+                Cancelar
+              </button>
+              <button type="submit" disabled={loading} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                {loading ? 'Guardando...' : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Guardar Cambios
+                  </>
+                )}
+              </button>
             </div>
 
-
-            {/* --- Sección Seguridad --- */}
-            <div className="col-span-full mt-2 flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
-              <Lock className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
-                Seguridad
-              </h3>
-            </div>
-
-            <div className="col-span-full md:col-span-1">
-              <label htmlFor="password" className={labelClass}>
-                {isEditing ? 'Nueva Contraseña (Opcional)' : 'Contraseña *'}
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className={inputClass}
-              />
-              {isEditing && <p className="text-xs text-gray-500 mt-1">Dejar en blanco para mantener la actual.</p>}
-
-            </div>
-          </div>
-
-          {/* Botones de Acción */}
-          <div className="mt-8 flex items-center justify-end gap-4 border-t border-gray-100 pt-6 dark:border-gray-700">
-            <button
-              type="button"
-              onClick={handleCancel}
-              disabled={loading}
-              className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
-              <X className="h-4 w-4" />
-              Cancelar
-            </button>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-50"
-            >
-              {loading ? (
-                <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  {isEditing ? 'Actualizar Vendedor' : 'Guardar Vendedor'}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

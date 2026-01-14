@@ -53,10 +53,7 @@ function AdminSidebar({ onClose }) {
       title: 'Gestión de Vendedores',
       icon: UserCheck,
       description: 'ABM de vendedores',
-      submenu: [
-        { title: 'Ver Vendedores', path: '/admin/vendedores' },
-        { title: 'Crear Vendedor', path: '/admin/vendedores/nuevo' },
-      ],
+      path: '/admin/vendedores',
     },
     {
       title: 'Gestión de Clientes',

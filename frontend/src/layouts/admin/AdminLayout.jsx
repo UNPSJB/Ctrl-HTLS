@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import AdminSidebar from '@/layouts/admin/AdminSidebar';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import { Outlet } from 'react-router-dom';
 
 function AdminLayout() {
@@ -23,6 +24,7 @@ function AdminLayout() {
         }}
       >
         <div className="container mx-auto px-4 py-6">
+          <Breadcrumbs />
           <Outlet />
         </div>
       </main>
