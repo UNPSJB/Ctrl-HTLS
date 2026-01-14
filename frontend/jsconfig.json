@@ -2,22 +2,57 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"],
-      "@api/*": ["api/*"],
-      "@components/*": ["components/*"],
-      "@hooks/*": ["hooks/*"],
-      "@context/*": ["context/*"],
-      "@utils/*": ["utils/*"],
-      "@assets/*": ["assets/*"],
-      "@ui/*": ["components/ui/*"],
-      "@layouts/*": ["layouts/*"],
-      "@pages/*": ["pages/*"],
-      "@routes/*": ["routes/*"],
-      "@hotel/*": ["components/hotel/*"],
-      "@client/*": ["components/client/*"],
-      "@cart/*": ["components/cart/*"],
-      "@data/*": ["data/*"],
-      "@checkout/*": ["components/checkout/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@api/*": [
+        "api/*"
+      ],
+      "@components/*": [
+        "components/*"
+      ],
+      "@hooks/*": [
+        "hooks/*"
+      ],
+      "@context/*": [
+        "context/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@assets/*": [
+        "assets/*"
+      ],
+      "@ui/*": [
+        "components/ui/*"
+      ],
+      "@layouts/*": [
+        "layouts/*"
+      ],
+      "@pages/*": [
+        "pages/*"
+      ],
+      "@routes/*": [
+        "routes/*"
+      ],
+      "@modules/*": [
+        "modules/*"
+      ],
+      "@hotel/*": [
+        "components/hotel/*"
+      ],
+      "@client/*": [
+        "components/client/*"
+      ],
+      "@cart/*": [
+        "components/cart/*"
+      ],
+      "@data/*": [
+        "data/*"
+      ],
+      "@checkout/*": [
+        "components/checkout/*"
+      ]
     },
     // Opciones recomendadas para un proyecto React moderno
     "target": "ES2020",
@@ -30,5 +65,7 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

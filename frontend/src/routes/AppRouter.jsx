@@ -1,20 +1,20 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import MainLayout from '@/layouts/MainLayout';
-import AdminLayout from '@/layouts/admin/AdminLayout';
+import AdminLayout from '@/modules/admin/layout/AdminLayout';
 import HomePage from '@/pages/HomePage';
-import CreateHotelFormPage from '@/pages/CreateHotelFormPage';
+import CreateHotelFormPage from '@/modules/admin/hotels/pages/CreateHotelFormPage';
 import DashboardPage from '@/pages/admin/DashboardPage';
 import PagoPage from '@/pages/PagoPage';
 import HotelPage from '@/pages/HotelPage';
 import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
-import VendedoresList from '@/components/ui/admin/list/VendedoresLIst';
-import VendedorFormPage from '@/pages/admin/VendedorFormPage';
-import ClienteFormPage from '@/pages/admin/ClienteFormPage';
+import VendedoresList from '@/modules/admin/vendors/components/VendedoresList';
+import VendedorFormPage from '@/modules/admin/vendors/pages/VendedorFormPage';
+import ClienteFormPage from '@/modules/admin/clients/pages/ClienteFormPage';
 // Importaremos placeholder o componentes reales según existan
-import ClientesManager from '@/components/ui/admin/list/ClientesManager';
-import AdminHotelList from '@/components/ui/admin/list/AdminHotelList';
+import ClientesManager from '@/modules/admin/clients/components/ClientesManager';
+import AdminHotelList from '@/modules/admin/hotels/components/AdminHotelList';
 
 function AppRouter() {
   const { user, loading } = useAuth();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
-import AdminSidebar from '@/layouts/admin/AdminSidebar';
+import AdminSidebar from '@/modules/admin/layout/AdminSidebar';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import { Outlet } from 'react-router-dom';
 
