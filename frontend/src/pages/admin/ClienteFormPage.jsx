@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { UserPlus, Save, X, Edit } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },
@@ -149,7 +149,8 @@ const ClienteFormPage = () => {
     }
 
     return (
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-4xl space-y-6">
+
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div className="flex items-center gap-3 border-b border-gray-200 px-6 py-5 dark:border-gray-700">
                     <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">

@@ -13,7 +13,7 @@ import VendedoresList from '@/components/ui/admin/list/VendedoresLIst';
 import VendedorFormPage from '@/pages/admin/VendedorFormPage';
 import ClienteFormPage from '@/pages/admin/ClienteFormPage';
 // Importaremos placeholder o componentes reales según existan
-import ClientesList from '@/components/ui/admin/list/ClientesList';
+import ClientesManager from '@/components/ui/admin/list/ClientesManager';
 import AdminHotelList from '@/components/ui/admin/list/AdminHotelList';
 
 function AppRouter() {
@@ -53,7 +53,7 @@ function AppRouter() {
                 <Route path="hoteles/nuevo" element={<CreateHotelFormPage />} />
 
                 {/* Rutas de Clientes */}
-                <Route path="clientes" element={<ClientesList />} />
+                <Route path="clientes" element={<ClientesManager />} />
                 <Route path="clientes/nuevo" element={<ClienteFormPage />} />
                 <Route path="clientes/editar/:id" element={<ClienteFormPage />} />
 
