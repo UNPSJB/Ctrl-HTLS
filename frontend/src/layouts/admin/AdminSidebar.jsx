@@ -88,14 +88,14 @@ function AdminSidebar({ onClose }) {
                 <button
                   onClick={() => handleToggleSubmenu(item.title)}
                   className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${item.submenu.some(sub => location.pathname.startsWith(sub.path))
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/10 dark:text-blue-400'
-                      : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
+                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/10 dark:text-blue-400'
+                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
                     }`}
                 >
                   <div className="flex items-center gap-3">
                     <item.icon className={`h-5 w-5 ${item.submenu.some(sub => location.pathname.startsWith(sub.path))
-                        ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-gray-400 group-hover:text-gray-500'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-400 group-hover:text-gray-500'
                       }`} />
                     {item.title}
                   </div>
@@ -147,47 +147,36 @@ function AdminSidebar({ onClose }) {
       {/* Footer / User Profile */}
       <div className="border-t border-gray-200 p-4 dark:border-gray-800">
         <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700/50 dark:bg-gray-800/50">
-          {/* User Info */}
-          <div className="mb-4 flex items-center gap-3">
-            <Avatar />
-            <div className="min-w-0 flex-1 overflow-hidden">
-              <p className="truncate text-sm font-bold text-gray-900 dark:text-white">
-                {user?.nombre} {user?.apellido}
-              </p>
-              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-                {user?.email}
-              </p>
+          {/* User Info & Actions - Simplified */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <Avatar />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-200">
+                  {user?.nombre} {user?.apellido}
+                </p>
+                <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                  {user?.rol}
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* Actions */}
-          <div className="space-y-1">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={toggleTheme}
-                className="flex items-center justify-center gap-2 rounded-lg bg-white p-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400"
                 title="Cambiar tema"
               >
-                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                Tema
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
-              <NavLink
-                to="/admin/configuracion"
-                onClick={onClose}
-                className="flex items-center justify-center gap-2 rounded-lg bg-white p-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              <button
+                onClick={logout}
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-red-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-red-400"
+                title="Cerrar Sesión"
               >
-                <Settings className="h-4 w-4" />
-                Ajustes
-              </NavLink>
+                <LogOut className="h-5 w-5" />
+              </button>
             </div>
-
-            <button
-              onClick={logout}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-50 p-2 text-xs font-medium text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20"
-            >
-              <LogOut className="h-4 w-4" />
-              Cerrar Sesión
-            </button>
           </div>
         </div>
       </div>
