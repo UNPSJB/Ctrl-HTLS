@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, X, Lock, MapPin, Building2, Briefcase } from 'lucide-react';
+import { User, Save, X, Lock, MapPin, Building2, Briefcase, DollarSign } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useUbicacion from '@/hooks/useUbicacion';
+import DateDisplay from '@ui/DateDisplay';
+import TableButton from '@ui/TableButton';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
@@ -49,7 +51,7 @@ const VendedorFormPage = () => {
   const [initialHotels, setInitialHotels] = useState([]); // Para comparar cambios
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
-  const [activeTab, setActiveTab] = useState('general'); // general, ubicacion, hoteles, seguridad
+  const [activeTab, setActiveTab] = useState('general'); // general, ubicacion, hoteles, seguridad, comisiones
 
   useEffect(() => {
     // Si estamos editando, cargamos datos del vendedor
@@ -65,6 +67,9 @@ const VendedorFormPage = () => {
       const data = response.data;
 
       const userHotels = data.hotelesPermitidos ? data.hotelesPermitidos : [];
+
+      setVentas(data.ventas || []);
+      setLiquidaciones(data.liquidaciones || []);
 
       setFormData({
         nombre: data.nombre || '',
@@ -359,6 +364,120 @@ const VendedorFormPage = () => {
                   <label htmlFor="password" className={labelClass}>{isEditing ? 'Nueva Contraseña' : 'Contraseña *'}</label>
                   <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} placeholder="••••••••" className={inputClass} />
                   {isEditing && <p className="mt-1 text-xs text-gray-500">Deje el campo vacío para mantener la contraseña actual.</p>}
+                </div>
+              </div>
+            )}
+
+            {/* --- Pestaña: Comisiones --- */}
+            {activeTab === 'comisiones' && (
+              <div className="space-y-8">
+                {/* Sección Pendientes */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Comisiones Pendientes</h3>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">Monto Pendiente Estimado</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        ${(ventas.filter(v => !v.liquidacionId).reduce((acc, curr) => acc + Number(curr.subtotal), 0) * 0.02).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+                    <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+                      <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                          <th className="px-4 py-2">ID</th>
+                          <th className="px-4 py-2">Descripción</th>
+                          <th className="px-4 py-2 text-right">Monto Venta</th>
+                          <th className="px-4 py-2 text-right">Comisión (2%)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ventas.filter(v => !v.liquidacionId).length > 0 ? (
+                          ventas.filter(v => !v.liquidacionId).map(v => (
+                            <tr key={v.id} className="border-b dark:border-gray-700">
+                              <td className="px-4 py-2">{v.id}</td>
+                              <td className="px-4 py-2">{v.descripcion}</td>
+                              <td className="px-4 py-2 text-right">${Number(v.subtotal).toFixed(2)}</td>
+                              <td className="px-4 py-2 text-right font-medium text-green-600">${(Number(v.subtotal) * 0.02).toFixed(2)}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4" className="px-4 py-8 text-center text-gray-500">No hay ventas pendientes de liquidación.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {ventas.some(v => !v.liquidacionId) && (
+                    <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                      <h4 className="mb-2 text-sm font-semibold text-blue-900 dark:text-blue-100">Generar Liquidación</h4>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                        <div className="flex-1">
+                          <label className="mb-1 block text-xs font-medium text-blue-800 dark:text-blue-200">Fecha Inicio</label>
+                          <input type="date" id="liq-start" className={inputClass} />
+                        </div>
+                        <div className="flex-1">
+                          <label className="mb-1 block text-xs font-medium text-blue-800 dark:text-blue-200">Fecha Fin</label>
+                          <input type="date" id="liq-end" defaultValue={new Date().toISOString().split('T')[0]} className={inputClass} />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const start = document.getElementById('liq-start').value;
+                            const end = document.getElementById('liq-end').value;
+                            if (!start || !end) return toast.error('Seleccione fechas');
+                            if (!confirm('¿Generar liquidación?')) return;
+
+                            try {
+                              setLoading(true);
+                              await axiosInstance.post(`/liquidaciones/liquidar/${id}`, { fechaInicio: start, fechaFin: end });
+                              toast.success('Liquidación generada');
+                              fetchVendedor(); // Recargar datos
+                            } catch (e) {
+                              toast.error(e.response?.data?.error || 'Error');
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          className="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700"
+                        >
+                          Liquidar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
+                  <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Historial de Liquidaciones</h3>
+                  <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+                      <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                          <th className="px-4 py-2">Nro</th>
+                          <th className="px-4 py-2">Fecha</th>
+                          <th className="px-4 py-2 text-right">Total Pagado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {liquidaciones.length > 0 ? (
+                          liquidaciones.map(l => (
+                            <tr key={l.id} className="border-b dark:border-gray-700">
+                              <td className="px-4 py-2">#{l.numero}</td>
+                              <td className="px-4 py-2"><DateDisplay date={l.fechaEmision} /></td>
+                              <td className="px-4 py-2 text-right font-bold text-green-600">${Number(l.total).toFixed(2)}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr><td colSpan="3" className="px-4 py-8 text-center">Sin historial.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}

@@ -11,6 +11,8 @@ import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
 import VendedoresList from '@/modules/admin/vendors/components/VendedoresList';
 import VendedorFormPage from '@/modules/admin/vendors/pages/VendedorFormPage';
+import LiquidacionesGlobalesPage from '@/modules/admin/vendors/pages/LiquidacionesGlobalesPage';
+import VendedorLiquidacionesPage from '@/modules/admin/vendors/pages/VendedorLiquidacionesPage';
 import ClienteFormPage from '@/modules/admin/clients/pages/ClienteFormPage';
 // Importaremos placeholder o componentes reales según existan
 import ClientesManager from '@/modules/admin/clients/components/ClientesManager';
@@ -45,6 +47,8 @@ function AppRouter() {
 
                 {/* Rutas de Vendedores */}
                 <Route path="vendedores" element={<VendedoresList />} />
+                <Route path="vendedores/liquidaciones" element={<LiquidacionesGlobalesPage />} />
+                <Route path="vendedores/liquidaciones/:id" element={<VendedorLiquidacionesPage />} />
                 <Route path="vendedores/nuevo" element={<VendedorFormPage />} />
                 <Route path="vendedores/editar/:id" element={<VendedorFormPage />} />
 

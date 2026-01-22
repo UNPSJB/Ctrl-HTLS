@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Edit, Trash2, Eye, Search, Plus, ChevronLeft, ChevronRight, X, CheckSquare, Square } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Edit, Trash2, Eye, Search, Plus, ChevronLeft, ChevronRight, X, CheckSquare, Square, DollarSign, FileText } from 'lucide-react';
 import TableButton from '@ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
 import { Loading } from '@ui/Loading';
@@ -121,6 +121,13 @@ const VendedoresList = () => {
           <p className="text-sm text-gray-500 dark:text-gray-400">Listado y administración de fuerza de ventas</p>
         </div>
         <div className="flex gap-2">
+          <Link
+            to="/admin/vendedores/liquidaciones"
+            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <DollarSign className="h-4 w-4" />
+            Liquidaciones
+          </Link>
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}
@@ -256,6 +263,12 @@ const VendedoresList = () => {
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
+                        <TableButton
+                          variant="view"
+                          icon={FileText}
+                          onClick={() => navigate(`/admin/vendedores/liquidaciones/${vendedor.id}`)}
+                          title="Ver Liquidaciones"
+                        />
                         <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />
                         <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(vendedor.id)} />
                       </div>
