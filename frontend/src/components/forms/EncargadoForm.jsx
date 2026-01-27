@@ -11,9 +11,9 @@ const tiposDocumento = [
 const EncargadoForm = ({ register, errors, loading }) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 border-b pb-2">
-        <User className="h-5 w-5 text-gray-600" />
-        <h3 className="text-lg font-semibold text-gray-900">
+      <div className="flex items-center gap-2 border-b pb-2 dark:border-gray-700">
+        <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Datos del Encargado
         </h3>
       </div>
@@ -22,7 +22,7 @@ const EncargadoForm = ({ register, errors, loading }) => {
         <div className="space-y-2">
           <label
             htmlFor="encargadoNombre"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Nombre *
           </label>
@@ -38,9 +38,8 @@ const EncargadoForm = ({ register, errors, loading }) => {
                 message: 'El nombre debe tener al menos 2 caracteres',
               },
             })}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.encargadoNombre ? 'border-red-500' : 'border-gray-300'
-            } ${loading ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.encargadoNombre ? 'border-red-500' : 'border-gray-300'
+              } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
           />
           {errors.encargadoNombre && (
             <p className="text-red-500 text-sm">
@@ -52,7 +51,7 @@ const EncargadoForm = ({ register, errors, loading }) => {
         <div className="space-y-2">
           <label
             htmlFor="encargadoApellido"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Apellido *
           </label>
@@ -68,9 +67,8 @@ const EncargadoForm = ({ register, errors, loading }) => {
                 message: 'El apellido debe tener al menos 2 caracteres',
               },
             })}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.encargadoApellido ? 'border-red-500' : 'border-gray-300'
-            } ${loading ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.encargadoApellido ? 'border-red-500' : 'border-gray-300'
+              } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
           />
           {errors.encargadoApellido && (
             <p className="text-red-500 text-sm">
@@ -82,7 +80,7 @@ const EncargadoForm = ({ register, errors, loading }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Tipo de Documento *
           </label>
           <select
@@ -90,11 +88,10 @@ const EncargadoForm = ({ register, errors, loading }) => {
               required: 'El tipo de documento es obligatorio',
             })}
             disabled={loading}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.encargadoTipoDocumento
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.encargadoTipoDocumento
                 ? 'border-red-500'
                 : 'border-gray-300'
-            } ${loading ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+              } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
           >
             <option value="">Seleccionar tipo de documento</option>
             {tiposDocumento.map((tipo) => (
@@ -113,7 +110,7 @@ const EncargadoForm = ({ register, errors, loading }) => {
         <div className="space-y-2">
           <label
             htmlFor="encargadoNumeroDocumento"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Número de Documento *
           </label>
@@ -135,11 +132,10 @@ const EncargadoForm = ({ register, errors, loading }) => {
                   'El número de documento debe tener al menos 6 caracteres',
               },
             })}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.encargadoNumeroDocumento
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.encargadoNumeroDocumento
                 ? 'border-red-500'
                 : 'border-gray-300'
-            } ${loading ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+              } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
           />
           {errors.encargadoNumeroDocumento && (
             <p className="text-red-500 text-sm">

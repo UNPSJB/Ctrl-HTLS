@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import MainLayout from '@/layouts/MainLayout';
 import AdminLayout from '@/modules/admin/layout/AdminLayout';
 import HomePage from '@/pages/HomePage';
-import CreateHotelFormPage from '@/modules/admin/hotels/pages/CreateHotelFormPage';
+import HotelFormPage from '@/modules/admin/hotels/pages/HotelFormPage';
 import DashboardPage from '@/pages/admin/DashboardPage';
 import PagoPage from '@/pages/PagoPage';
 import HotelPage from '@/pages/HotelPage';
@@ -35,7 +35,7 @@ function AppRouter() {
               <Route element={<MainLayout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="pago" element={<PagoPage />} />
-                <Route path="crear-hotel" element={<CreateHotelFormPage />} />
+                <Route path="crear-hotel" element={<HotelFormPage />} />
                 <Route path="hotel/:id" element={<HotelPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
@@ -54,7 +54,8 @@ function AppRouter() {
 
                 {/* Rutas de Hoteles */}
                 <Route path="hoteles" element={<AdminHotelList />} />
-                <Route path="hoteles/nuevo" element={<CreateHotelFormPage />} />
+                <Route path="hoteles/nuevo" element={<HotelFormPage />} />
+                <Route path="hoteles/editar/:id" element={<HotelFormPage />} />
 
                 {/* Rutas de Clientes */}
                 <Route path="clientes" element={<ClientesManager />} />

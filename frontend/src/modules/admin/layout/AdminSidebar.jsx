@@ -42,11 +42,7 @@ function AdminSidebar({ onClose }) {
     {
       title: 'Hoteles',
       icon: Building2,
-      submenu: [
-        // { title: 'Ver Hoteles', path: '/admin/hoteles' }, // Backend limitation
-        { title: 'Crear Hotel', path: '/admin/hoteles/nuevo' },
-        { title: 'Categorías', path: '/admin/hoteles/categorias' },
-      ],
+      path: '/admin/hoteles',
     },
     {
       title: 'Vendedores',

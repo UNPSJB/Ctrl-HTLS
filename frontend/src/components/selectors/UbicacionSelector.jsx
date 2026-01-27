@@ -59,9 +59,8 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             {...register('paisId', { required: 'Debe seleccionar un país' })}
             value={paisId}
             onChange={(e) => handlePaisChangeInternal(e.target.value)}
-            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.paisId ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.paisId ? 'border-red-500' : 'border-gray-300'
+              }`}
           >
             <option value="">Seleccionar país</option>
             {(paises || []).map((pais) => (
@@ -86,9 +85,8 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             value={provinciaId}
             onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
             disabled={isProvinciasDisabled}
-            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.provinciaId ? 'border-red-500' : 'border-gray-300'
-            } ${isProvinciasDisabled ? 'cursor-not-allowed bg-gray-100' : ''}`}
+            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.provinciaId ? 'border-red-500' : 'border-gray-300'
+              } ${isProvinciasDisabled ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : ''}`}
           >
             <option value="">
               {paisId ? 'Seleccionar provincia' : 'Primero seleccione un país'}
@@ -117,9 +115,8 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
             value={ciudadId}
             onChange={(e) => handleCiudadChangeInternal(e.target.value)}
             disabled={isCiudadesDisabled}
-            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.ciudadId ? 'border-red-500' : 'border-gray-300'
-            } ${isCiudadesDisabled ? 'cursor-not-allowed bg-gray-100' : ''}`}
+            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.ciudadId ? 'border-red-500' : 'border-gray-300'
+              } ${isCiudadesDisabled ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : ''}`}
           >
             <option value="">
               {provinciaId
