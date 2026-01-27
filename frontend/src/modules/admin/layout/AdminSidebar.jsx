@@ -107,6 +107,7 @@ function AdminSidebar({ onClose }) {
                       <NavLink
                         key={sidx}
                         to={sub.path}
+                        end={sub.path === '/admin'} // Add end prop if path is exactly /admin
                         onClick={onClose}
                         className={({ isActive }) =>
                           `block rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
@@ -124,6 +125,8 @@ function AdminSidebar({ onClose }) {
             ) : (
               <NavLink
                 to={item.path}
+                // Use 'end' if the path is the root admin path '/admin' to avoid matching all sub-routes
+                end={item.path === '/admin'}
                 onClick={onClose}
                 className={({ isActive }) =>
                   `group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
