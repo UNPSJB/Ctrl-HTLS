@@ -15,7 +15,7 @@ const TiposHabitacionSelector = ({
 }) => {
   const getTipoHabitacionNombre = (id) => {
     return (
-      tiposHabitaciones.find((tipo) => tipo.id === id.toString())?.nombre || ''
+      tiposHabitaciones.find((tipo) => tipo.id == id)?.nombre || ''
     );
   };
 
@@ -91,8 +91,8 @@ const TiposHabitacionSelector = ({
             onClick={onAgregar}
             disabled={!canAdd || loading}
             className={`px-4 py-2 rounded-md text-white font-medium flex items-center gap-1 ${canAdd && !loading
-                ? 'bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500'
-                : 'bg-gray-400 cursor-not-allowed dark:bg-gray-600'
+              ? 'bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500'
+              : 'bg-gray-400 cursor-not-allowed dark:bg-gray-600'
               }`}
           >
             <Plus className="h-4 w-4" />
