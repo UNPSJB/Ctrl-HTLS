@@ -8,6 +8,7 @@ const {
 const {
   createHotel,
   updateHotel,
+  getAllHoteles,
   setTemporada,
   getCategorias,
   setDescuento,
@@ -23,6 +24,7 @@ const {
 
 const router = express.Router();
 
+router.get('/hoteles', getAllHoteles); //Ruta para obtener todos los hoteles
 router.post('/hotel', validateHotel, createHotel); //Ruta para crear un hotel
 router.put('/hotel/:id', validateId, validateHotel, updateHotel); //Ruta para modificar un hotel
 router.get('/categorias', getCategorias); //Ruta para obtener las categorias de los hoteles
@@ -58,9 +60,6 @@ router.post('/hotel/:id/descuentos', validateId, setDescuento); //Ruta para crea
 
 router.post('/hotel/asignar-empleado', asignarEmpleado); //Ruta para asingar un empleado a un hotel
 
-router.post(
-  '/hotel/desasignar-empleado',
-  desasignarEmpleado,
-); //Ruta para desasignar un empleado de un hotel
+router.post('/hotel/desasignar-empleado', desasignarEmpleado); //Ruta para desasignar un empleado de un hotel
 
 module.exports = router;

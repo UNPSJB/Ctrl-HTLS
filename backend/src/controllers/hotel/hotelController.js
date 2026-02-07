@@ -72,6 +72,16 @@ const updateHotel = async (req, res) => {
   }
 };
 
+const getAllHoteles = async (req, res) => {
+  try {
+    const hoteles = await hotelServices.obtenerTodosLosHoteles();
+    res.json(hoteles);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getCategorias = async (req, res) => {
   try {
     const categorias = await hotelServices.obtenerCategorias();
@@ -241,6 +251,7 @@ const desasignarEmpleado = async (req, res) => {
 module.exports = {
   createHotel,
   updateHotel,
+  getAllHoteles,
   getCategorias,
   setTemporada,
   setHabitaciones,

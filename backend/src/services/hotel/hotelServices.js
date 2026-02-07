@@ -277,6 +277,35 @@ const getHotelesPorCiudad = async (ciudadId) => {
   return hoteles;
 };
 
+const obtenerTodosLosHoteles = async () => {
+  const hoteles = await Hotel.findAll({
+    include: [
+      {
+        model: Categoria,
+        as: 'categoria',
+      },
+      {
+        model: Ciudad,
+        as: 'ciudad',
+        include: [
+          {
+            model: Provincia,
+            as: 'provincia',
+            include: [
+              {
+                model: Pais,
+                as: 'pais',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  return hoteles;
+};
+
 const obtenerCategorias = async () => {
   // Obtener todas las categorías de los hoteles
   const categorias = await Categoria.findAll();
@@ -852,10 +881,7 @@ const desasignarEmpleadoDeHotel = async (hotelId, empleadoId) => {
     });
 
     if (!asignacion) {
-      throw new CustomError(
-        'El empleado no está asignado a este hotel',
-        404,
-      ); // Not Found
+      throw new CustomError('El empleado no está asignado a este hotel', 404); // Not Found
     }
 
     await asignacion.destroy();
@@ -871,6 +897,7 @@ const desasignarEmpleadoDeHotel = async (hotelId, empleadoId) => {
 module.exports = {
   crearHotel,
   modificarHotel,
+  obtenerTodosLosHoteles,
   obtenerCategorias,
   agregarPaquetePromocional,
   agregarTemporada,
