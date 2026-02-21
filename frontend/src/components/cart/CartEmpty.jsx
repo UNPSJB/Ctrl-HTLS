@@ -1,5 +1,6 @@
 import { ShoppingCart } from 'lucide-react';
 
+// Componente que se muestra cuando no hay elementos seleccionados
 function CartEmpty() {
   return (
     <div

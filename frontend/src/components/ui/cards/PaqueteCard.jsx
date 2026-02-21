@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { calcPackageTotal } from '@utils/pricingUtils';
 import DateDisplay from '@ui/DateDisplay';
 
+// Tarjeta detallada para un paquete turístico en el carrito
 function PaqueteCard({ paquete, hotel, onRemove }) {
   if (!paquete) return null;
 
@@ -78,11 +79,10 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
         )}
         {priceInfo.ajusteTemporadaMonto !== 0 && (
           <div
-            className={`flex justify-between ${
-              priceInfo.ajusteTemporadaMonto < 0
+            className={`flex justify-between ${priceInfo.ajusteTemporadaMonto < 0
                 ? 'text-green-600 dark:text-green-400'
                 : 'text-red-600 dark:text-red-400'
-            }`}
+              }`}
           >
             <span>Ajuste por temporada:</span>
             <span className="font-medium">

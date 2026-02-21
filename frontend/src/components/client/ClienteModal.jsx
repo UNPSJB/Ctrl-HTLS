@@ -7,6 +7,7 @@ import ClienteForm from './ClienteForm';
 import { useCliente } from '@context/ClienteContext';
 import { usePago } from '@context/PagoContext';
 
+// Modal de búsqueda y selección de clientes
 function ClienteModal({ onClose, onClienteSelected }) {
   const { client, selectClient, clearClient } = useCliente();
   const { setClienteId } = usePago();

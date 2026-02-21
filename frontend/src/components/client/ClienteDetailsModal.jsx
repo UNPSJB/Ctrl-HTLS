@@ -1,6 +1,7 @@
 import { User, FileText, Phone } from 'lucide-react';
 import Modal from '../ui/Modal';
 
+// Modal detallado que muestra toda la información de un cliente específico
 const ClienteDetailsModal = ({ cliente, onClose }) => {
   if (!cliente) return null;
 
@@ -16,7 +17,7 @@ const ClienteDetailsModal = ({ cliente, onClose }) => {
           Información completa del cliente para verificación
         </p>
 
-        {/* Información Personal */}
+        { }
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800 dark:text-gray-100">
             <FileText className="w-5 h-5" />
@@ -42,7 +43,7 @@ const ClienteDetailsModal = ({ cliente, onClose }) => {
           </div>
         </div>
 
-        {/* Información de Contacto */}
+        { }
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800 dark:text-gray-100">
             <Phone className="w-5 h-5" />
@@ -66,7 +67,7 @@ const ClienteDetailsModal = ({ cliente, onClose }) => {
           </div>
         </div>
 
-        {/* Información de Registro */}
+        { }
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800 dark:text-gray-100">
             Información de Registro
@@ -83,7 +84,7 @@ const ClienteDetailsModal = ({ cliente, onClose }) => {
           </div>
         </div>
 
-        {/* Puntos acumulados */}
+        { }
         <div className="bg-white dark:bg-gray-700 p-4 border border-gray-200 dark:border-gray-700 rounded-lg mt-2">
           <div className="flex justify-between items-center">
             <span className="text-gray-700 dark:text-gray-300 font-medium">

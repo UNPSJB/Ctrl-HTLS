@@ -40,6 +40,7 @@ const LockedCartFooter = ({ onCancel }) => {
   );
 };
 
+// Componente principal que agrupa el encabezado, listado de hoteles y footer del carrito
 function CartSummary() {
   const { carrito, totalElementos, reservaConfirmada, cancelarReserva } =
     useCarrito();

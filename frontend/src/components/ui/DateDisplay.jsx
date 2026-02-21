@@ -4,8 +4,9 @@ import { useMemo } from 'react';
 
 const { formatFecha, nightsBetween } = dateUtils;
 
+// Muestra un rango de fechas y la cantidad de noches
 function DateDisplay({ fechaInicio, fechaFin }) {
-  // Calculamos las noches dentro del componente
+
   const nights = useMemo(
     () => nightsBetween(fechaInicio, fechaFin, { useUTC: true }),
     [fechaInicio, fechaFin]

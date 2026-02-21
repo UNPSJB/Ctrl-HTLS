@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import TarjetaForm from './TarjetaForm';
 import { usePago } from '@context/PagoContext';
 
+// Selector de métodos de pago (Efectivo, Puntos, Tarjeta, Mixto)
 function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
   const { metodoPago, setMetodoPago, setCardData } = usePago();
 
@@ -27,10 +28,8 @@ function MetodoPago({ className = '', baseTotal = 0, clientPoints = 0 }) {
     [puntoEnabled]
   );
 
-  // 2. Actualizamos la lógica para mostrar el formulario de tarjeta
   const showCardForm = metodoPago === 'Tarjeta' || metodoPago === 'Mixto';
 
-  // Clases comunes para el select
   const selectClasses =
     'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 appearance-none';
 

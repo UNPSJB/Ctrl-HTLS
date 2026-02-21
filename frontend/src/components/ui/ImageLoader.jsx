@@ -1,6 +1,7 @@
 import { ImageOff } from 'lucide-react';
 import { useState } from 'react';
 
+// Cargador de imágenes con fallback en caso de error
 const ImageLoader = ({ name, folder, cuadrado = true }) => {
   const [imageError, setImageError] = useState(false);
 

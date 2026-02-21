@@ -1,6 +1,6 @@
-// Icono de carrito importado desde lucide-react
 import { ShoppingCart } from 'lucide-react';
 
+// Encabezado del carrito con título e icono
 function CartHeader() {
   return (
     <div className="py-4">

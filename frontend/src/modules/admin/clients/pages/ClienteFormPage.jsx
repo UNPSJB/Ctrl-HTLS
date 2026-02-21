@@ -11,6 +11,7 @@ const tiposDocumento = [
     { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
+// Formulario para registro y edición de clientes
 const ClienteFormPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -34,6 +35,7 @@ const ClienteFormPage = () => {
         }
     }, [id]);
 
+    // Obtiene datos del cliente para editar
     const fetchCliente = async () => {
         try {
             setLoadingData(true);
@@ -64,6 +66,7 @@ const ClienteFormPage = () => {
         }));
     };
 
+    // Formatea el número de documento según el tipo
     const handleDocumentoChange = (e) => {
         const { value } = e.target;
         const tipo = formData.tipoDocumento;
@@ -99,6 +102,7 @@ const ClienteFormPage = () => {
         }));
     };
 
+    // Valida y envía el formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -152,6 +156,7 @@ const ClienteFormPage = () => {
         <div className="mx-auto max-w-4xl space-y-6">
 
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                {/* Encabezado del Formulario */}
                 <div className="flex items-center gap-3 border-b border-gray-200 px-6 py-5 dark:border-gray-700">
                     <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
                         {isEditing ? (
@@ -172,6 +177,7 @@ const ClienteFormPage = () => {
                     </div>
                 </div>
 
+                {/* Campos del Formulario */}
                 <form onSubmit={handleSubmit} className="p-6">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
@@ -281,6 +287,7 @@ const ClienteFormPage = () => {
                         </div>
                     </div>
 
+                    {/* Botones de Acción */}
                     <div className="mt-8 flex items-center justify-end gap-4 border-t border-gray-100 pt-6 dark:border-gray-700">
                         <button
                             type="button"

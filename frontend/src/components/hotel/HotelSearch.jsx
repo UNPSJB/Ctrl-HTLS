@@ -3,7 +3,7 @@ import { useBusqueda } from '@context/BusquedaContext';
 import dateUtils from '@utils/dateUtils';
 import { Search, MapPin, Calendar, Users, Globe, Building } from 'lucide-react';
 import useUbicacion from '@hooks/useUbicacion';
-import { toast } from 'react-hot-toast'; // Importación añadida
+import { toast } from 'react-hot-toast'; 
 
 const { toISODate } = dateUtils;
 
@@ -21,7 +21,7 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
     handleCiudadChange,
     isProvinciasDisabled,
     isCiudadesDisabled,
-    loadingPaises, // Nuevos estados obtenidos del hook
+    loadingPaises, 
     loadingProvincias,
     loadingCiudades,
   } = useUbicacion();

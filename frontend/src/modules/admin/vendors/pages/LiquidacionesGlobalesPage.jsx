@@ -5,24 +5,22 @@ import axiosInstance from '@api/axiosInstance';
 import { Loading } from '@ui/Loading';
 import DateDisplay from '@ui/DateDisplay';
 
+// Página para consulta y generación masiva de liquidaciones
 const LiquidacionesGlobalesPage = () => {
   const [liquidaciones, setLiquidaciones] = useState([]);
   const [loading, setLoading] = useState(false);
-  
-  // Fechas para filtros y nueva liquidación
+
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
 
   useEffect(() => {
-    // Cargar liquidaciones del mes actual por defecto
+
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    
+
     setFechaInicio(firstDay.toISOString().split('T')[0]);
     setFechaFin(today.toISOString().split('T')[0]);
-    
-    //fetchLiquidaciones(firstDay.toISOString().split('T')[0], today.toISOString().split('T')[0]);
-    // Lo llamamos en el useEffect abajo dependiente de nada inicial o disparado manual
+
   }, []);
 
   useEffect(() => {
@@ -31,6 +29,7 @@ const LiquidacionesGlobalesPage = () => {
     }
   }, [fechaInicio, fechaFin]);
 
+  // Obtiene historial de liquidaciones según el rango de fechas
   const fetchLiquidaciones = async () => {
     try {
       setLoading(true);
@@ -46,6 +45,7 @@ const LiquidacionesGlobalesPage = () => {
     }
   };
 
+  // Genera liquidaciones para todos los vendedores
   const handleLiquidarMasivo = async () => {
     if (!fechaInicio || !fechaFin) {
       toast.error('Seleccione un rango de fechas');
@@ -65,7 +65,7 @@ const LiquidacionesGlobalesPage = () => {
 
       if (response.data.liquidaciones && response.data.liquidaciones.length > 0) {
         toast.success(`Se generaron ${response.data.liquidaciones.length} liquidaciones.`);
-        fetchLiquidaciones(); // Recargar lista
+        fetchLiquidaciones();
       } else {
         toast.success(response.data.message || 'Proceso completado');
       }
@@ -79,12 +79,13 @@ const LiquidacionesGlobalesPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* Encabezado y Acción Global */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Liquidaciones Globales</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Historial y generación masiva de pagos</p>
         </div>
-        
+
         <button
           onClick={handleLiquidarMasivo}
           disabled={loading}
@@ -96,7 +97,8 @@ const LiquidacionesGlobalesPage = () => {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {/* Filtros */}
+
+        {/* Filtros de Fecha */}
         <div className="mb-6 flex flex-wrap items-end gap-4">
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Desde</label>
@@ -125,12 +127,12 @@ const LiquidacionesGlobalesPage = () => {
           </button>
         </div>
 
-        {/* Tabla */}
+        {/* Listado de Liquidaciones */}
         <div className="overflow-x-auto">
           {loading ? (
-             <div className="flex justify-center p-8">
-               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-             </div>
+            <div className="flex justify-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
           ) : liquidaciones.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <FileText className="mb-2 h-8 w-8 opacity-50" />
@@ -159,9 +161,9 @@ const LiquidacionesGlobalesPage = () => {
                       ${Number(liq.total).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 text-center">
-                       <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                         <CheckCircle2 className="h-3 w-3" /> Generada
-                       </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                        <CheckCircle2 className="h-3 w-3" /> Generada
+                      </span>
                     </td>
                   </tr>
                 ))}

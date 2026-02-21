@@ -7,13 +7,13 @@ import { Loading } from '@ui/Loading';
 
 const ITEMS_PER_PAGE = 10;
 
+// Listado y administración de vendedores (empleados)
 const VendedoresList = () => {
   const [vendedores, setVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Estados para filtros y paginación
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -22,6 +22,7 @@ const VendedoresList = () => {
     fetchVendedores();
   }, []);
 
+  // Obtiene la lista de vendedores desde la API
   const fetchVendedores = async () => {
     try {
       setLoading(true);
@@ -39,7 +40,7 @@ const VendedoresList = () => {
     navigate(`/admin/vendedores/editar/${id}`);
   };
 
-  // Filtrado y Paginación
+  // Filtra vendedores por nombre, documento o email
   const filteredVendedores = useMemo(() => {
     if (!searchTerm) return vendedores;
     const lowerTerm = searchTerm.toLowerCase();
@@ -74,9 +75,10 @@ const VendedoresList = () => {
     }
   };
 
+  // Eliminación masiva de vendedores seleccionados
   const handleBulkDelete = async () => {
     if (window.confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} vendedores seleccionados?`)) {
-      setLoading(true); // O mostrar un indicador de proceso
+      setLoading(true);
       for (const id of selectedIds) {
         await deleteVendedor(id);
       }
@@ -102,10 +104,9 @@ const VendedoresList = () => {
     }
   };
 
-  // Reset page when search changes
   useEffect(() => {
     setCurrentPage(1);
-    setSelectedIds([]); // Limpiar selección al cambiar búsqueda/filtro
+    setSelectedIds([]);
   }, [searchTerm]);
 
   const handleCreate = () => {
@@ -114,7 +115,8 @@ const VendedoresList = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header y Filtros */}
+
+      {/* Encabezado y Acciones */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Vendedores</h2>
@@ -148,6 +150,7 @@ const VendedoresList = () => {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+
         {/* Barra de Búsqueda */}
         <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
           <div className="relative max-w-md">
@@ -170,7 +173,7 @@ const VendedoresList = () => {
           </div>
         </div>
 
-        {/* Tabla / Loading */}
+        {/* Detalle de Vendedores en Tabla */}
         <div className="overflow-x-auto min-h-[300px]">
           {loading ? (
             <div className="flex h-64 items-center justify-center">

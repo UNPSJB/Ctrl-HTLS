@@ -2,6 +2,7 @@ import Temporada from '@components/hotel/Temporada';
 import RoomCartItem from './RoomCartItem';
 import PackageCartItem from './PackageCartItem';
 
+// Sección agrupada por hotel dentro del carrito de compras
 function HotelCartSection({ hotel = {}, isLocked = false }) {
   const temporadaTipo = hotel?.temporada?.tipo;
   const temporadaPorcentaje = hotel?.temporada?.porcentaje ?? 0;

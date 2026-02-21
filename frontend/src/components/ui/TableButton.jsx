@@ -1,5 +1,6 @@
+// Botón optimizado para acciones dentro de tablas
 const TableButton = ({
-  onClick = () => {},
+  onClick = () => { },
   variant = 'view',
   size = 'sm',
   disabled = false,

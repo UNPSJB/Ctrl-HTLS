@@ -5,6 +5,7 @@ import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@context/CarritoContext';
 import DateDisplay from '@ui/DateDisplay';
 
+// Elemento individual de un paquete dentro de la sección de hotel del carrito
 function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
   const { fechaInicio, fechaFin, nombre, _cartId } = pack || {};
 

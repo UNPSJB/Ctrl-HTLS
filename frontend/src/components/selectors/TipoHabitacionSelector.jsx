@@ -1,5 +1,6 @@
 import { X, Plus, DollarSign } from 'lucide-react';
 
+// Selector interactivo para asociar tipos de habitación y precios a un hotel
 const TiposHabitacionSelector = ({
   tiposHabitaciones = [],
   tiposSeleccionados,
@@ -37,7 +38,7 @@ const TiposHabitacionSelector = ({
           Agregar Tipos de Habitaciones con Precios *
         </label>
 
-        {/* Selector y precio */}
+        { }
         <div className="flex gap-3 items-end">
           <div className="flex-1">
             <label className="block text-sm text-gray-600 mb-1 dark:text-gray-400">
@@ -100,7 +101,7 @@ const TiposHabitacionSelector = ({
           </button>
         </div>
 
-        {/* Error de validación para tipos de habitaciones */}
+        { }
         {errors.tiposHabitaciones && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md dark:bg-red-900/20 dark:border-red-800">
             <p className="text-red-600 text-sm font-medium dark:text-red-400">
@@ -109,7 +110,7 @@ const TiposHabitacionSelector = ({
           </div>
         )}
 
-        {/* Lista de tipos agregados */}
+        { }
         {tiposSeleccionados.length > 0 && (
           <div className="space-y-2">
             <label className="block text-sm text-gray-600 dark:text-gray-400">
@@ -142,7 +143,7 @@ const TiposHabitacionSelector = ({
           </div>
         )}
 
-        {/* Mensaje cuando no hay tipos agregados */}
+        { }
         {tiposSeleccionados.length === 0 && (
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-900/20 dark:border-yellow-900/30">
             <p className="text-yellow-800 text-sm dark:text-yellow-200">

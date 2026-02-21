@@ -1,5 +1,6 @@
 import { Tag } from 'lucide-react';
 
+// Etiqueta indicadora de descuento por temporada alta
 const Temporada = ({ porcentaje }) => {
   return (
     <div className="flex items-center gap-2">

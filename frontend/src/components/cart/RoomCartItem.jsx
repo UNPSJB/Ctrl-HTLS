@@ -5,6 +5,7 @@ import { calcRoomInstanceTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@context/CarritoContext';
 import DateDisplay from '@ui/DateDisplay';
 
+// Elemento individual de una habitación dentro de la sección de hotel del carrito
 function RoomCartItem({ room, hotel, onRemove = null, isLocked = false }) {
   const {
     fechaInicio,

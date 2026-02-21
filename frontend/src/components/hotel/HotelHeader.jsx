@@ -4,6 +4,7 @@ import Temporada from './Temporada';
 import ImageLoader from '@ui/ImageLoader';
 import Calificacion from './Calificacion';
 
+// Encabezado de la tarjeta de hotel con imagen, nombre y ubicación
 const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
   const navigate = useNavigate();
 

@@ -5,7 +5,6 @@ import { normalizeDiscount } from '@utils/pricingUtils';
 function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
   const precioBase = habitacion?.precio ?? 100;
 
-  // Tomamos porcentaje desde temporada.porcentaje si existe
   const descuentoTemporada = normalizeDiscount(temporada?.porcentaje) || 0;
   const precioFinal =
     Math.round(precioBase * (1 - descuentoTemporada) * 100) / 100;
@@ -15,7 +14,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
 
   return (
     <Modal onClose={onClose}>
-      {/* Imagen principal */}
+      {}
       <div className="relative h-48 w-full">
         <ImageLoader
           name={habitacion?.nombre}
@@ -24,7 +23,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
         />
       </div>
 
-      {/* Contenido */}
+      {}
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-6">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           {habitacion?.nombre}
@@ -61,7 +60,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
           )}
         </div>
 
-        {/* Desglose de precios */}
+        {}
         <div className="rounded-lg border border-gray-300 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
           <h3 className="mb-3 font-semibold text-gray-800 dark:text-gray-100">
             Desglose de precio por noche
@@ -103,7 +102,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
         </div>
       </div>
 
-      {/* Acción */}
+      {}
       <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
         <button
           onClick={onReserve}

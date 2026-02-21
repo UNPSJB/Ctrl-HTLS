@@ -7,8 +7,9 @@ import HotelHeader from '@components/hotel/HotelHeader';
 import Descuento from '@ui/Descuento';
 import { transformHotel } from '@/hooks/hotelTransformer';
 
+// Tarjeta interactiva de hotel con selección de habitaciones y paquetes
 function HotelCard({ hotel: rawHotel }) {
-  // El hook `useMemo` se asegura de que la transformación solo ocurra si `rawHotel` cambia.
+
   const hotel = useMemo(() => transformHotel(rawHotel), [rawHotel]);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -27,7 +28,7 @@ function HotelCard({ hotel: rawHotel }) {
 
       {isExpanded && (
         <>
-          {/* Sección de Habitaciones */}
+          { }
           <section
             aria-labelledby={`rooms-${hotel.hotelId}-title`}
             className="border-t border-gray-200 p-4 dark:border-gray-700"
@@ -58,7 +59,7 @@ function HotelCard({ hotel: rawHotel }) {
             </ul>
           </section>
 
-          {/* Sección de Paquetes */}
+          { }
           <section
             aria-labelledby={`packages-${hotel.hotelId}-title`}
             className="border-t border-gray-200 p-4 dark:border-gray-700"

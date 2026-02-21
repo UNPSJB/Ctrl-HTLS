@@ -11,17 +11,14 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
     : [];
   const noches = Math.max(1, Math.floor(toNumber(paquete.noches)));
 
-  // Precio total original (suma precios * noches)
   const precioTotal = roundTwo(
     habitaciones.reduce((acc, hab) => acc + toNumber(hab.precio), 0) * noches
   );
 
-  // Descuento del paquete (normalizado)
   const packageDisc = normalizeDiscount(paquete.descuento);
   const descuentoAplicado = roundTwo(precioTotal * packageDisc);
   const precioConDescuentoPaquete = roundTwo(precioTotal * (1 - packageDisc));
 
-  // Descuento de temporada (hotel)
   const hotelDisc = normalizeDiscount(temporada?.porcentaje);
   const finalPrice = roundTwo(precioConDescuentoPaquete * (1 - hotelDisc));
 
@@ -30,7 +27,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
 
   return (
     <Modal onClose={onClose}>
-      {/* Galería de imágenes de habitaciones */}
+      {}
       <div className="flex h-[19rem] gap-4 overflow-x-auto scroll-smooth p-4">
         {habitaciones.map((hab, index) => (
           <div key={index} className="w-full flex-shrink-0">
@@ -43,13 +40,13 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
         ))}
       </div>
 
-      {/* Contenido del modal */}
+      {}
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-6">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           {paquete.nombre}
         </h2>
 
-        {/* Descuento por temporada */}
+        {}
         {hasHotelDiscount && (
           <div className="flex items-center gap-2">
             <Tag className="h-4 w-4 text-green-500" />
@@ -59,12 +56,12 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
           </div>
         )}
 
-        {/* Descripción */}
+        {}
         <p className="mb-6 text-gray-600 dark:text-gray-300">
           {paquete.descripcion}
         </p>
 
-        {/* Habitaciones incluidas */}
+        {}
         <div className="mb-6">
           <h3 className="mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
             Habitaciones incluidas
@@ -84,7 +81,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
           </div>
         </div>
 
-        {/* Info adicional */}
+        {}
         <div className="mb-6 grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <Calendar className="h-5 w-5" />
@@ -98,7 +95,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
           </div>
         </div>
 
-        {/* Tabla de precios */}
+        {}
         <div className="mb-6">
           <h3 className="mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
             Precios del paquete
@@ -163,7 +160,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
         </div>
       </div>
 
-      {/* Botón de reserva */}
+      {}
       <div className="sticky bottom-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
         <button
           onClick={() => {

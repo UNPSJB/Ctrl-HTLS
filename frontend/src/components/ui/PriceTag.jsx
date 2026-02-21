@@ -1,17 +1,17 @@
+// Componente para mostrar precios con formato de moneda ARS
 function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
-  // Formateador de moneda: AJUSTADO para mostrar CERO decimales.
+
   const formatCurrency = (value) =>
     new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 0, // <-- Cambio clave: Mínimo 0 decimales
-      maximumFractionDigits: 0, // <-- Cambio clave: Máximo 0 decimales
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(value);
 
   const mostrarOriginal = typeof original === 'number' && original > precio;
   const isColumn = seasonLayout === 'column';
 
-  // Seguridad: si seasonLayout recibe algo inválido, caemos en 'row'
   const layoutClass = isColumn
     ? 'flex-col items-center gap-2'
     : 'flex-row items-baseline gap-3';
@@ -20,20 +20,19 @@ function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
     <>
       {mostrarOriginal ? (
         <div className={`flex ${layoutClass}`}>
-          {/* Precio actual */}
+          { }
           <p
-            className={`text-md font-bold ${
-              isColumn
+            className={`text-md font-bold ${isColumn
                 ? 'w-full text-green-600 dark:text-green-400 sm:w-auto'
                 : 'text-green-600 dark:text-green-400'
-            }`}
+              }`}
             aria-label={`Precio actual ${formatCurrency(precio)}`}
             title={`Precio: ${formatCurrency(precio)}`}
           >
             {formatCurrency(precio)}
           </p>
 
-          {/* Precio original tachado */}
+          { }
           <p
             className={`${isColumn ? 'w-full text-sm text-gray-500 line-through dark:text-gray-400 sm:w-auto' : 'text-sm text-gray-500 line-through dark:text-gray-400'}`}
             aria-label={`Precio original ${formatCurrency(original)}`}

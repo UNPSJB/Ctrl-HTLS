@@ -1,3 +1,4 @@
+// Componente contador con botones de incremento y decremento
 function Counter({ value = 0, onIncrement, onDecrement, max = 1 }) {
   return (
     <div className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-800">

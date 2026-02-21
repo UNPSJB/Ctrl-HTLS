@@ -5,6 +5,7 @@ import { useHotelsData } from '@/hooks/useHotelsData';
 import { Loading } from '@/components/ui/Loading';
 import { useNavigate } from 'react-router-dom';
 
+// Lista principal de hoteles para administración
 const AdminHotelList = () => {
   const { hoteles, loading, error } = useHotelsData();
   const navigate = useNavigate();
@@ -19,14 +20,14 @@ const AdminHotelList = () => {
   };
 
   const handleDelete = () => {
-    // Sin funcionalidad
+
   };
 
   const handleView = () => {
-    // Sin funcionalidad
+
   };
 
-  // Filtrado simple (sin paginación por ahora, pero con estructura lista)
+  // Filtrado de hoteles por búsqueda
   const filteredHoteles = useMemo(() => {
     if (!hoteles) return [];
     if (!searchTerm) return hoteles;
@@ -38,7 +39,6 @@ const AdminHotelList = () => {
     );
   }, [hoteles, searchTerm]);
 
-  // Render logic matches VendedoresList structure
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -60,6 +60,7 @@ const AdminHotelList = () => {
 
   return (
     <div className="space-y-6">
+
       {/* Header y Acciones */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
@@ -67,7 +68,7 @@ const AdminHotelList = () => {
           <p className="text-sm text-gray-500 dark:text-gray-400">Administra los hoteles, ubicaciones y categorías</p>
         </div>
         <div className="flex gap-2">
-          {/* Botones de acción adicionales si fueran necesarios */}
+
           <button
             onClick={handleCreate}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
@@ -79,6 +80,7 @@ const AdminHotelList = () => {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+
         {/* Barra de Búsqueda */}
         <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
           <div className="relative max-w-md">
@@ -101,7 +103,7 @@ const AdminHotelList = () => {
           </div>
         </div>
 
-        {/* Tabla */}
+        {/* Listado de Hoteles */}
         <div className="overflow-x-auto min-h-[300px]">
           {filteredHoteles.length > 0 ? (
             <table className="w-full border-collapse">
@@ -137,7 +139,7 @@ const AdminHotelList = () => {
                             {hotel.nombre}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                            {/* Optional secondary info */}
+
                           </div>
                         </div>
                       </div>

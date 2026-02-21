@@ -1,5 +1,6 @@
 import { useCliente } from '@context/ClienteContext';
 
+// Muestra la tarjeta con datos básicos y puntos del cliente seleccionado
 function ClienteData() {
   const { client } = useCliente();
 
@@ -23,7 +24,6 @@ function ClienteData() {
   return (
     <div className="rounded-lg bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center justify-between gap-4">
-        {/* Left: avatar + datos */}
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-100">
             {initials || 'UX'}

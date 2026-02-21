@@ -12,12 +12,12 @@ const tiposDocumento = [
   { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
+// Formulario para gestión de vendedores
 const VendedorFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
 
-  // Hook de ubicación personalizado
   const {
     paises,
     provincias,
@@ -45,19 +45,20 @@ const VendedorFormPage = () => {
     rol: 'vendedor',
   });
 
-  const [assignedHotels, setAssignedHotels] = useState([]); // Hoteles asignados (objetos completos)
-  const [initialHotels, setInitialHotels] = useState([]); // Para comparar cambios
+  const [assignedHotels, setAssignedHotels] = useState([]);
+  const [initialHotels, setInitialHotels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
-  const [activeTab, setActiveTab] = useState('general'); // general, ubicacion, hoteles, seguridad, comisiones
+  const [activeTab, setActiveTab] = useState('general');
 
   useEffect(() => {
-    // Si estamos editando, cargamos datos del vendedor
+
     if (isEditing) {
       fetchVendedor();
     }
   }, [id]);
 
+  // Carga datos del vendedor para edición
   const fetchVendedor = async () => {
     try {
       setLoadingData(true);
@@ -129,6 +130,7 @@ const VendedorFormPage = () => {
     setFormData((prev) => ({ ...prev, tipoDocumento: e.target.value, numeroDocumento: '' }));
   };
 
+  // Procesa el alta o actualización del vendedor
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -151,7 +153,7 @@ const VendedorFormPage = () => {
       ...formData,
       ciudadId: ciudadId,
     };
-    // Quitamos hotelIds del payload porque no es aceptado por el endpoint de updateEmpleado
+
     delete payload.hotelIds;
 
     if (isEditing && !payload.password) delete payload.password;
@@ -168,7 +170,6 @@ const VendedorFormPage = () => {
         toast.success('Vendedor registrado');
       }
 
-      // Manejo de desasignación de hoteles (Solo eliminaciones)
       if (vendedorId && isEditing) {
         const currentIds = assignedHotels.map(h => h.id);
         const removedHotels = initialHotels.filter(h => !currentIds.includes(h.id));
@@ -201,7 +202,7 @@ const VendedorFormPage = () => {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
 
-      {/* Encabezado Tipo Perfil */}
+      {/* Perfil del Vendedor */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
           <User className="h-8 w-8" />
@@ -219,7 +220,8 @@ const VendedorFormPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        {/* Sidebar de Navegación Local */}
+
+        {/* Menú de Secciones */}
         <div className="lg:col-span-1">
           <nav className="flex flex-col space-y-1 rounded-xl border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <button type="button" onClick={() => setActiveTab('general')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'general' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
@@ -237,11 +239,10 @@ const VendedorFormPage = () => {
           </nav>
         </div>
 
-        {/* Contenido Principal */}
+        {/* Formulario Dinámico */}
         <div className="lg:col-span-3">
           <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
-            {/* --- Pestaña: General --- */}
             {activeTab === 'general' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
@@ -268,7 +269,6 @@ const VendedorFormPage = () => {
               </div>
             )}
 
-            {/* --- Pestaña: Ubicación --- */}
             {activeTab === 'ubicacion' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación y Contacto</h3>
@@ -310,7 +310,6 @@ const VendedorFormPage = () => {
               </div>
             )}
 
-            {/* --- Pestaña: Hoteles --- */}
             {activeTab === 'hoteles' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Hoteles Asignados</h3>
@@ -351,7 +350,6 @@ const VendedorFormPage = () => {
               </div>
             )}
 
-            {/* --- Pestaña: Seguridad --- */}
             {activeTab === 'seguridad' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
@@ -363,7 +361,6 @@ const VendedorFormPage = () => {
               </div>
             )}
 
-            {/* Footer de Acciones (Siempre visible) */}
             <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
               <button type="button" onClick={handleCancel} disabled={loading} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300">
                 Cancelar

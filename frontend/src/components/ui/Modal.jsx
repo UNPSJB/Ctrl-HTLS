@@ -1,10 +1,11 @@
 import { X } from 'lucide-react';
 
+// Contenedor modal genérico con fondo oscurecido
 const Modal = ({ children, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800">
-        {/* Botón de cerrar */}
+        { }
         <button
           onClick={onClose}
           className="absolute right-4 top-4 z-20 rounded-full bg-white/70 p-2 transition-colors hover:bg-white dark:bg-gray-700 dark:hover:bg-gray-600"

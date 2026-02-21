@@ -30,19 +30,16 @@ const CrearCliente = () => {
     }));
   };
 
-  // Handler para el documento: se comporta distinto según el tipo seleccionado
   const handleDocumentoChange = (e) => {
     const { value } = e.target;
     const tipo = formData.tipoDocumento;
 
     let procesado = value;
 
-    // Si es DNI, LI o LE, forzamos solo números
     if (['dni', 'li', 'le'].includes(tipo)) {
       procesado = value.replace(/\D/g, '');
     } else {
-      // Si es Pasaporte, permitimos letras y números, pero quitamos símbolos raros y espacios
-      // También lo pasamos a mayúsculas por convención
+
       procesado = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     }
 
@@ -52,7 +49,6 @@ const CrearCliente = () => {
     }));
   };
 
-  // Handler solo para teléfono (siempre numérico)
   const handleTelefonoChange = (e) => {
     const { value } = e.target;
     const numericValue = value.replace(/\D/g, '');
@@ -62,13 +58,12 @@ const CrearCliente = () => {
     }));
   };
 
-  // Si el usuario cambia el tipo de documento, limpiamos el número para evitar inconsistencias
   const handleTipoChange = (e) => {
     const { value } = e.target;
     setFormData((prev) => ({
       ...prev,
       tipoDocumento: value,
-      numeroDocumento: '', // Reseteamos el número al cambiar el tipo
+      numeroDocumento: '', 
     }));
   };
 
@@ -184,7 +179,7 @@ const CrearCliente = () => {
                   id="tipoDocumento"
                   name="tipoDocumento"
                   value={formData.tipoDocumento}
-                  onChange={handleTipoChange} // Usamos el handler especial para resetear
+                  onChange={handleTipoChange} 
                   className={`${inputClass} appearance-none`}
                 >
                   {tiposDocumento.map((tipo) => (
@@ -210,7 +205,7 @@ const CrearCliente = () => {
                 id="numeroDocumento"
                 name="numeroDocumento"
                 value={formData.numeroDocumento}
-                onChange={handleDocumentoChange} // Handler con lógica según tipo
+                onChange={handleDocumentoChange} 
                 placeholder={
                   formData.tipoDocumento === 'pasaporte'
                     ? 'Ej: A1234567'

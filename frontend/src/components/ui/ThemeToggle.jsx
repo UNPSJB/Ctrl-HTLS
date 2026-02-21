@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { ThemeContext } from '@context/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
 
+// Botón para alternar entre modo claro y oscuro
 const ThemeToggle = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
 

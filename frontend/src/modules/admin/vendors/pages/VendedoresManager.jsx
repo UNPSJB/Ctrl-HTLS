@@ -4,11 +4,13 @@ import { Search, UserPlus } from 'lucide-react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 
+// Contenedor principal para gestión de vendedores
 const VendedoresManager = () => {
     const [documento, setDocumento] = useState('');
     const [buscando, setBuscando] = useState(false);
     const navigate = useNavigate();
 
+    // Busca vendedor por número de documento
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!documento.trim()) {
@@ -44,11 +46,11 @@ const VendedoresManager = () => {
 
     return (
         <div className="space-y-6">
-            {/* Fila 1: Búsqueda y Creación */}
+
+            {/* Barra de Herramientas: Búsqueda y Registro */}
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
-                    {/* Formulario de Búsqueda */}
                     <form onSubmit={handleSearch} className="flex flex-1 items-center gap-2">
                         <div className="relative flex-1 max-w-md">
                             <input
@@ -69,7 +71,6 @@ const VendedoresManager = () => {
                         </button>
                     </form>
 
-                    {/* Botón de Crear */}
                     <button
                         onClick={handleCreate}
                         className="flex items-center gap-2 rounded-lg border border-green-600 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-100 dark:border-green-500 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"
@@ -80,7 +81,7 @@ const VendedoresManager = () => {
                 </div>
             </div>
 
-            {/* Fila 2: Contenido Dinámico (Formulario) */}
+            {/* Área de Visualización (Outlet para VendedoresList o Formularios) */}
             <div>
                 <Outlet />
             </div>

@@ -1,6 +1,7 @@
 import useUbicacion from '@/hooks/useUbicacion';
 import { useEffect } from 'react';
 
+// Selector cascada de ubicación: País -> Provincia -> Ciudad
 const UbicacionSelector = ({ errors = {}, register, setValue }) => {
   const {
     paises,
@@ -16,7 +17,6 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
     handleCiudadChange,
   } = useUbicacion();
 
-  // Sincronizar los valores del hook useUbicacion con react-hook-form
   useEffect(() => {
     setValue('paisId', paisId);
   }, [paisId, setValue]);

@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import DateDisplay from '@ui/DateDisplay';
 import { Loading } from '@ui/Loading';
 
+// Detalle de ventas y liquidaciones de un vendedor
 const VendedorLiquidacionesPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -16,7 +17,6 @@ const VendedorLiquidacionesPage = () => {
 
     const [activeTab, setActiveTab] = useState('resumen');
 
-    // Calculate totals
     const pendingSales = ventas.filter(v => !v.liquidacionId);
     const pendingAmount = pendingSales.reduce((acc, curr) => acc + Number(curr.subtotal), 0) * 0.02;
     const totalPaid = liquidaciones.reduce((acc, curr) => acc + Number(curr.total), 0);
@@ -25,6 +25,7 @@ const VendedorLiquidacionesPage = () => {
         fetchData();
     }, [id]);
 
+    // Obtiene datos de ventas y liquidaciones del servidor
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -41,6 +42,7 @@ const VendedorLiquidacionesPage = () => {
         }
     };
 
+    // Procesa la liquidación para el periodo seleccionado
     const handleLiquidar = async () => {
         const start = document.getElementById('liq-start').value;
         const end = document.getElementById('liq-end').value;
@@ -61,11 +63,11 @@ const VendedorLiquidacionesPage = () => {
                 fechaFin: end
             });
             toast.success('Liquidación generada correctamente');
-            fetchData(); // Reload data
+            fetchData();
         } catch (error) {
             console.error(error);
             toast.error(error.response?.data?.error || 'Error al generar liquidación');
-            setLoading(false); // Only stop loading on error, success reloads which handles loading
+            setLoading(false);
         }
     };
 
@@ -73,7 +75,8 @@ const VendedorLiquidacionesPage = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
+
+            {/* Encabezado con Datos del Vendedor */}
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => navigate('/admin/vendedores')}
@@ -91,14 +94,14 @@ const VendedorLiquidacionesPage = () => {
                 </div>
             </div>
 
-            {/* Tabs Navigation */}
+            {/* Selector de Pestañas */}
             <div className="border-b border-gray-200 dark:border-gray-700">
                 <nav className="-mb-px flex space-x-8">
                     <button
                         onClick={() => setActiveTab('resumen')}
                         className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${activeTab === 'resumen'
-                                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                            ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                             }`}
                     >
                         Resumen y Liquidar
@@ -106,8 +109,8 @@ const VendedorLiquidacionesPage = () => {
                     <button
                         onClick={() => setActiveTab('ventas')}
                         className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${activeTab === 'ventas'
-                                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                            ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                             }`}
                     >
                         Historial de Ventas
@@ -115,10 +118,10 @@ const VendedorLiquidacionesPage = () => {
                 </nav>
             </div>
 
-            {/* --- Tab: Resumen --- */}
             {activeTab === 'resumen' && (
                 <>
-                    {/* Stats Cards */}
+
+                    {/* Tarjetas de Resumen Dinámico */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                             <div className="flex items-center gap-4">
@@ -158,8 +161,9 @@ const VendedorLiquidacionesPage = () => {
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        {/* Left Column: Pending Actions */}
+
                         <div className="space-y-6">
+                            {/* Sección para Generar Nueva Liquidación */}
                             <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                                 <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
                                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Generar Nueva Liquidación</h2>
@@ -258,7 +262,7 @@ const VendedorLiquidacionesPage = () => {
                             </div>
                         </div>
 
-                        {/* Right Column: History */}
+                        {/* Tabla de Historial de Pagos */}
                         <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 h-fit">
                             <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Historial de Pagos</h2>

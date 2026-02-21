@@ -9,6 +9,7 @@ const tiposDocumento = [
   { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
+// Formulario para la creación de un nuevo cliente
 function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
   const {
     register,

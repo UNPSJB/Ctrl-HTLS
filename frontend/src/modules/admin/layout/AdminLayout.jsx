@@ -4,6 +4,7 @@ import AdminSidebar from '@/modules/admin/layout/AdminSidebar';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import { Outlet } from 'react-router-dom';
 
+// Estructura principal para el área de administración
 function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -11,11 +12,13 @@ function AdminLayout() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <aside
         className={`fixed bottom-0 left-0 top-0 z-40 transform overflow-y-auto border-r border-gray-200 bg-white transition-transform duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-800 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:block lg:translate-x-0`}
+        // Barra lateral (Sidebar)
         style={{ width: '18rem' }}
       >
         <AdminSidebar onClose={() => setIsSidebarOpen(false)} />
       </aside>
 
+      // Área de contenido principal
       <main
         className="pt-0 lg:ml-72"
         style={{

@@ -18,6 +18,7 @@ import logoLight from '@/assets/logo.svg';
 import logoDark from '@/assets/logo-dark.svg';
 import { NavLink, useLocation } from 'react-router-dom';
 
+// Barra lateral de navegación para el módulo Admin
 function AdminSidebar({ onClose }) {
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const { theme, toggleTheme } = useContext(ThemeContext);
@@ -33,6 +34,7 @@ function AdminSidebar({ onClose }) {
     setOpenSubmenu((prev) => (prev === title ? null : title));
   };
 
+  // Elementos del menú de navegación
   const menuItems = [
     {
       title: 'Dashboard',
@@ -52,7 +54,7 @@ function AdminSidebar({ onClose }) {
     {
       title: 'Clientes',
       icon: Users,
-      path: '/admin/clientes', // Changed to single link
+      path: '/admin/clientes',
     },
     {
       title: 'Reportes',
@@ -66,13 +68,14 @@ function AdminSidebar({ onClose }) {
 
   return (
     <div className="flex h-full flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-      {/* Header Logo */}
-      <div className="flex h-16 items-center border-b border-gray-100 px-6 dark:border-gray-800">
+
+      {/* Logo y Nombre de Marca */}
+      <div className="flex h-20 items-center justify-center border-b border-gray-200 px-6 dark:border-gray-800">
         <img src={logo} alt="Logo" className="h-8 w-auto" />
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      {/* Menú de Navegación Principal */}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6 custom-scrollbar">
         <div className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           Menu Principal
         </div>
@@ -107,7 +110,7 @@ function AdminSidebar({ onClose }) {
                       <NavLink
                         key={sidx}
                         to={sub.path}
-                        end={sub.path === '/admin'} // Add end prop if path is exactly /admin
+                        end={sub.path === '/admin'}
                         onClick={onClose}
                         className={({ isActive }) =>
                           `block rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
@@ -125,7 +128,7 @@ function AdminSidebar({ onClose }) {
             ) : (
               <NavLink
                 to={item.path}
-                // Use 'end' if the path is the root admin path '/admin' to avoid matching all sub-routes
+
                 end={item.path === '/admin'}
                 onClick={onClose}
                 className={({ isActive }) =>
@@ -143,10 +146,10 @@ function AdminSidebar({ onClose }) {
         ))}
       </nav>
 
-      {/* Footer / User Profile */}
+      // Sección inferior con usuario y configuración de tema
       <div className="border-t border-gray-200 p-4 dark:border-gray-800">
         <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700/50 dark:bg-gray-800/50">
-          {/* User Info & Actions - Simplified */}
+
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 overflow-hidden">
               <Avatar />

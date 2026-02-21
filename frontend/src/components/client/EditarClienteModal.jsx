@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { Save, User } from 'lucide-react';
 import Modal from '@ui/Modal';
 
+// Modal para la edición de datos de un cliente existente
 const EditarClienteModal = ({ cliente, onClose, onActualizado }) => {
   const [formData, setFormData] = useState({
     nombre: '',
@@ -32,13 +33,13 @@ const EditarClienteModal = ({ cliente, onClose, onActualizado }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Intentamos la actualización (Dará el error de email hasta que arreglen el backend)
+
       await axiosInstance.put(`/cliente/${cliente.id}`, formData);
       toast.success('Cliente actualizado correctamente');
       onActualizado();
       onClose();
     } catch (error) {
-      // Captura el error "column Encargado.email does not exist" y lo muestra
+
       const mensaje = error.response?.data?.error || 'Error al actualizar';
       toast.error(mensaje);
       console.error('Error detectado en backend:', mensaje);

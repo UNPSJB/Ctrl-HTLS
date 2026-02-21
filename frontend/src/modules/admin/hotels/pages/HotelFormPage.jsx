@@ -6,30 +6,27 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@/hooks/useHotel';
 
-// Components
 import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import EncargadoForm from '@/components/forms/EncargadoForm';
 import TiposHabitacionSelector from '@/components/selectors/TipoHabitacionSelector';
 import { Loading } from '@/components/ui/Loading';
 import HabitacionesList from '@/modules/admin/hotels/components/HabitacionesList';
 
+// Formulario para gestión de hoteles
 export default function HotelFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
   const { tiposHabitaciones, categorias, loading: loadingResources } = useHotel();
 
-  // Local state for UI
   const [activeTab, setActiveTab] = useState('general');
   const [loadingData, setLoadingData] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Inventario state (managed manually as in useHotelForm)
   const [tiposSeleccionados, setTiposSeleccionados] = useState([]);
   const [selectedTipo, setSelectedTipo] = useState('');
   const [precioTemporal, setPrecioTemporal] = useState('');
 
-  // Local rooms for new hotel creation
   const [localRooms, setLocalRooms] = useState([]);
 
   const form = useForm({
@@ -61,20 +58,20 @@ export default function HotelFormPage() {
     clearErrors,
   } = form;
 
-  // Fetch hotel data if editing
+  // Carga inicial de datos para edición
   useEffect(() => {
     if (isEditing) {
       fetchHotelData();
     }
   }, [id]);
 
+  // Obtiene datos del hotel desde la API
   const fetchHotelData = async () => {
     try {
       setLoadingData(true);
       const response = await axiosInstance.get(`/hotel/${id}`);
       const hotel = response.data;
 
-      // Populate form
       reset({
         nombre: hotel.nombre,
         direccion: hotel.direccion,
@@ -91,14 +88,13 @@ export default function HotelFormPage() {
         tiposHabitaciones: hotel.tiposHabitacion || [],
       });
 
-      // Special handling for inventory state
       if (hotel.tiposHabitacion) {
         setTiposSeleccionados(hotel.tiposHabitacion.map(t => {
           const catalogType = tiposHabitaciones.find(th => String(th.id) === String(t.tipoHabitacionId || t.id));
           return {
             id: t.tipoHabitacionId || t.id,
             precio: t.precio,
-            nombre: catalogType?.nombre || t.nombre, // Ensure name is present
+            nombre: catalogType?.nombre || t.nombre,
             ...t
           };
         }));
@@ -113,7 +109,7 @@ export default function HotelFormPage() {
     }
   };
 
-  // Inventory handlers
+  // Agrega un tipo de habitación a la lista local
   const handleAgregarTipoHabitacion = () => {
     if (selectedTipo && precioTemporal && !isNaN(precioTemporal)) {
       const tipoId = Number.parseInt(selectedTipo);
@@ -152,7 +148,7 @@ export default function HotelFormPage() {
     }
   };
 
-  // Submit Handler
+  // Procesa el envío del formulario
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
@@ -205,7 +201,6 @@ export default function HotelFormPage() {
         const newHotelId = res.data.id;
         toast.success('Hotel creado exitosamente');
 
-        // Create local rooms if any
         if (localRooms.length > 0 && newHotelId) {
           try {
             const roomPromises = localRooms.map(room =>
@@ -288,6 +283,7 @@ export default function HotelFormPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {/* Encabezado del Hotel */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <button onClick={() => navigate('/admin/hoteles')} className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700">
           <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
@@ -306,6 +302,7 @@ export default function HotelFormPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        {/* Navegación por Pestañas */}
         <aside className="lg:col-span-1">
           <nav className="flex flex-col space-y-1 rounded-xl border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             {[
@@ -330,6 +327,7 @@ export default function HotelFormPage() {
           </nav>
         </aside>
 
+        {/* Contenido de la Pestaña Activa */}
         <main className="lg:col-span-3">
           <form onSubmit={handleSubmit(onSubmit)} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px]">
 
@@ -393,7 +391,6 @@ export default function HotelFormPage() {
               </div>
             )}
 
-            {/* Footer Controls */}
             <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
               <button
                 type="button"

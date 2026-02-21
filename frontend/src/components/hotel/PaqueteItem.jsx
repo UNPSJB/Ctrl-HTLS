@@ -8,6 +8,7 @@ import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@context/CarritoContext';
 import useBookingDates from '@hooks/useBookingDates';
 
+// Elemento de lista para un paquete turístico dentro del detalle del hotel
 function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
   const [mostrarModal, setMostrarModal] = useState(false);
   const { isoFechaInicio, isoFechaFin } = useBookingDates();
@@ -26,8 +27,6 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
     return instancias.filter((inst) => idsEnCarrito.has(inst.id)).length;
   }, [hotelEnCarrito, instancias]);
 
-  // --- CORRECCIÓN AQUÍ ---
-  // Desestructuramos 'original' y 'final' que son los valores correctos que devuelve la función.
   const { original: precioBase, final: precioDescuento } = useMemo(() => {
     return calcPackageTotal({
       paquete: instancias[0],

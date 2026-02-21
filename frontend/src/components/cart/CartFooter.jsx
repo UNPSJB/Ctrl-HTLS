@@ -8,6 +8,7 @@ import { usePago } from '@context/PagoContext';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 
+// Pie del carrito con resumen de totales y botón de reservar
 function CartFooter({ hotels = [], onClose }) {
   const navigate = useNavigate();
   const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
@@ -140,8 +141,8 @@ function CartFooter({ hotels = [], onClose }) {
             fechaInicio: grupo.fechaInicio,
             fechaFin: grupo.fechaFin,
             pasajeros: filtros.capacidad || 1,
-            montoTotal: montoCalculado, // Para que el backend lo guarde
-            subTotal: montoCalculado, // Redundancia para el frontend
+            montoTotal: montoCalculado,
+            subTotal: montoCalculado,
             habitaciones: grupo.habitaciones.map((h) => h.id),
             paquetes: grupo.paquetes.map((p) => p.id),
           };
@@ -180,6 +181,7 @@ function CartFooter({ hotels = [], onClose }) {
 
   return (
     <>
+      {/* Resumen de totales y acción de reserva */}
       <div className="rounded-lg border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/50">
         <div className="flex items-center justify-between">
           <div>
@@ -198,11 +200,10 @@ function CartFooter({ hotels = [], onClose }) {
           <button
             onClick={handleReservar}
             disabled={isDisabled || isReserving}
-            className={`rounded-md px-4 py-2 font-medium text-white transition-colors ${
-              isDisabled || isReserving
+            className={`rounded-md px-4 py-2 font-medium text-white transition-colors ${isDisabled || isReserving
                 ? 'cursor-not-allowed bg-gray-400'
                 : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+              }`}
           >
             {isReserving ? 'Reservando...' : 'Reservar'}
           </button>

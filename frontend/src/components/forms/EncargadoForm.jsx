@@ -1,6 +1,5 @@
 import { User } from 'lucide-react';
 
-// Tipos de documento disponibles
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
   { id: 'li', nombre: 'LI' },
@@ -8,6 +7,7 @@ const tiposDocumento = [
   { id: 'le', nombre: 'Tarjeta de Identidad' },
 ];
 
+// Sección del formulario para capturar datos del encargado del hotel
 const EncargadoForm = ({ register, errors, loading }) => {
   return (
     <div className="space-y-4">
@@ -89,8 +89,8 @@ const EncargadoForm = ({ register, errors, loading }) => {
             })}
             disabled={loading}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.encargadoTipoDocumento
-                ? 'border-red-500'
-                : 'border-gray-300'
+              ? 'border-red-500'
+              : 'border-gray-300'
               } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
           >
             <option value="">Seleccionar tipo de documento</option>
@@ -133,8 +133,8 @@ const EncargadoForm = ({ register, errors, loading }) => {
               },
             })}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.encargadoNumeroDocumento
-                ? 'border-red-500'
-                : 'border-gray-300'
+              ? 'border-red-500'
+              : 'border-gray-300'
               } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
           />
           {errors.encargadoNumeroDocumento && (

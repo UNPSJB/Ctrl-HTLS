@@ -9,6 +9,7 @@ import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
 
+// Resumen final de la transacción y procesamiento del pago
 function PaymentSummary() {
   const navigate = useNavigate();
   const { carrito, reservaConfirmada, limpiarCarritoYReserva } = useCarrito();
@@ -16,10 +17,10 @@ function PaymentSummary() {
 
   const {
     setMontoTotal,
-    metodoPago, // 'Efectivo', 'Tarjeta', 'Mixto', etc.
+    metodoPago,
     tipoFactura,
-    montoEfectivo, // Valor que viene del input/contexto
-    montoTarjeta, // Valor que viene del input/contexto
+    montoEfectivo,
+    montoTarjeta,
     clienteId,
     vendedorId,
     resetPago,
@@ -27,7 +28,6 @@ function PaymentSummary() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // 1. Cálculo del Total Visual (Fuente de verdad)
   const { totalOriginal, totalFinal, descuentoTotal } = useMemo(() => {
     let originalSum = 0;
     let finalSum = 0;
@@ -58,12 +58,11 @@ function PaymentSummary() {
 
     return {
       totalOriginal: originalSum,
-      totalFinal: finalSum, // Este es el montoTotal real
+      totalFinal: finalSum,
       descuentoTotal: originalSum - finalSum,
     };
   }, [carrito.hoteles]);
 
-  // Actualizamos el contexto con el total calculado
   useEffect(() => {
     setMontoTotal(totalFinal);
   }, [totalFinal, setMontoTotal]);
@@ -83,13 +82,11 @@ function PaymentSummary() {
     setIsProcessing(true);
 
     try {
-      // --- PASO 1: Preparar los items (Alquileres) ---
-      // Usamos el "montoTotal" visual para corregir cualquier 0 que venga del backend
+
       const itemsRaw = reservaConfirmada.flatMap((grupo) =>
         Array.isArray(grupo.alquiler) ? grupo.alquiler : [grupo]
       );
 
-      // Mapeamos y corregimos precios si es necesario
       let alquileresPayload = itemsRaw
         .map((item) => ({
           alquilerId: item.id || item.alquilerId,
@@ -104,7 +101,6 @@ function PaymentSummary() {
         0
       );
 
-      // AUTO-CORRECCIÓN DE PRECIOS: Si la BD trajo 0, usamos el total visual distribuido
       if (Math.abs(sumaBackend - totalFinal) > 1.0 && totalFinal > 0) {
         const count = alquileresPayload.length;
         const base = Math.floor((totalFinal / count) * 100) / 100;
@@ -121,7 +117,6 @@ function PaymentSummary() {
         0
       );
 
-      // --- PASO 2: Lógica Estricta de Medios de Pago ---
       let pagoEfectivoFinal = 0;
       let pagoTarjetaFinal = 0;
 
@@ -136,11 +131,10 @@ function PaymentSummary() {
         pagoEfectivoFinal = 0;
         pagoTarjetaFinal = totalAEnviar;
       } else if (metodoPago === 'Mixto') {
-        // En mixto respetamos lo que viene del input, asegurando que sean números
+
         pagoEfectivoFinal = Number(montoEfectivo || 0);
         pagoTarjetaFinal = Number(montoTarjeta || 0);
 
-        // Validación extra: En mixto la suma debe coincidir
         if (Math.abs(pagoEfectivoFinal + pagoTarjetaFinal - totalAEnviar) > 1) {
           throw new Error(
             `Los montos (Efec: $${pagoEfectivoFinal} + Tarj: $${pagoTarjetaFinal}) no suman el total ($${totalAEnviar}).`
@@ -148,25 +142,22 @@ function PaymentSummary() {
         }
       }
 
-      // --- PASO 3: Construcción del BODY Exacto ---
       const payload = {
         alquileres: alquileresPayload,
         tipoFact: tipoFactura || 'B',
         medioPago: metodoPago,
 
-        // Campos de montos calculados según la lógica anterior
         montoTarjeta: pagoTarjetaFinal,
 
-        // ENVIAMOS AMBOS: El correcto y el que tiene el TYPO del backend
         montoEfectivo: pagoEfectivoFinal,
-        montonEfectivo: pagoEfectivoFinal, // <--- Aquí cubrimos el requerimiento del backend
+        montonEfectivo: pagoEfectivoFinal,
 
         montoTotal: Number(totalAEnviar.toFixed(2)),
         vendedorId: vendedorId || 2,
         clienteId: finalClienteId,
       };
 
-      console.log('Enviando pago:', payload); // Para depuración
+      console.log('Enviando pago:', payload);
 
       const response = await axiosInstance.post('/confirmar-pago', payload);
 
@@ -190,7 +181,7 @@ function PaymentSummary() {
 
   return (
     <div className="rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-      {/* ... (resto del renderizado igual que antes) ... */}
+      { }
       <h3 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
         Resumen del Pago
       </h3>
@@ -221,7 +212,7 @@ function PaymentSummary() {
       </div>
 
       <div className="mt-4">
-        {/* Aquí MetodoPago permite al usuario elegir y setear montoEfectivo/montoTarjeta en el contexto */}
+        { }
         <MetodoPago
           baseTotal={totalFinal}
           clientPoints={Number(client?.puntos ?? 0)}
@@ -234,11 +225,10 @@ function PaymentSummary() {
           type="button"
           onClick={handlePayment}
           disabled={!canConfirm}
-          className={`flex w-full items-center justify-center rounded-lg px-4 py-3 font-semibold text-white transition-colors ${
-            canConfirm
+          className={`flex w-full items-center justify-center rounded-lg px-4 py-3 font-semibold text-white transition-colors ${canConfirm
               ? 'bg-blue-600 hover:bg-blue-700'
               : 'cursor-not-allowed bg-gray-400'
-          }`}
+            }`}
         >
           {isProcessing ? 'Procesando...' : 'Finalizar Reserva y Pagar'}
         </button>

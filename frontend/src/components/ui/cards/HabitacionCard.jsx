@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { calcRoomInstanceTotal } from '@utils/pricingUtils';
 import DateDisplay from '@ui/DateDisplay';
 
+// Tarjeta detallada para una instancia de habitación en el carrito
 function HabitacionCard({ habitacion, hotel, onRemove }) {
   if (!habitacion) return null;
 

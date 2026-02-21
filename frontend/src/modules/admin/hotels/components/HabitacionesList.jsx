@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import { Loading } from '@/components/ui/Loading';
 
+// Listado gestionable de habitaciones para un hotel
 export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms = [], onLocalChange }) {
     const [habitaciones, setHabitaciones] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -13,18 +14,18 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
 
     const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
 
-    // Mode detection: If no hotelId, we are in "Local Draft" mode
     const isLocalMode = !hotelId;
 
     useEffect(() => {
         if (!isLocalMode) {
             fetchHabitaciones();
         } else {
-            // In local mode, we display what the parent gives us
+
             setHabitaciones(localRooms);
         }
     }, [hotelId, localRooms, isLocalMode]);
 
+    // Carga habitaciones existentes del servidor
     const fetchHabitaciones = async () => {
         try {
             setLoading(true);
@@ -39,6 +40,7 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
         }
     };
 
+    // Crea o actualiza una habitación
     const onSubmit = async (data) => {
         try {
             const payload = {
@@ -50,19 +52,19 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
             const tipoObj = tiposDisponibles.find(t => t.id === payload.tipoHabitacionId);
 
             if (isLocalMode) {
-                // --- LOCAL MODE ---
+
                 if (editingId) {
                     const updated = habitaciones.map(h => h.tempId === editingId ? { ...payload, tempId: editingId, tipoHabitacion: tipoObj } : h);
                     onLocalChange(updated);
                     toast.success('Habitación actualizada (Borrador)');
                 } else {
-                    // Generate a temp ID
+
                     const newRoom = { ...payload, tempId: Date.now(), tipoHabitacion: tipoObj };
                     onLocalChange([...habitaciones, newRoom]);
                     toast.success('Habitación agregada (Borrador)');
                 }
             } else {
-                // --- BACKEND MODE ---
+
                 if (editingId) {
                     await axiosInstance.put(`/hotel/${hotelId}/habitacion/${editingId}`, payload);
                     toast.success('Habitación actualizada');
@@ -83,6 +85,7 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
         }
     };
 
+    // Elimina una habitación tras confirmación
     const handleDelete = async (habitacionId, tempId) => {
         if (!window.confirm('¿Confirma eliminar esta habitación?')) return;
 
@@ -124,6 +127,7 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
 
     return (
         <div className="space-y-6">
+            {/* Encabezado y Botón Nuevo */}
             <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Habitaciones Físicas</h3>
                 {!isCreating && (
@@ -138,6 +142,7 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
 
             {isCreating && (
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 animate-in fade-in slide-in-from-top-2">
+                    {/* Formulario de Creación/Edición */}
                     <div className="flex flex-col md:flex-row gap-4 items-end">
                         <div className="w-24">
                             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Número</label>
@@ -217,6 +222,7 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
                 <Loading />
             ) : (
                 <div className="rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
+                    {/* Tabla de Habitaciones */}
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 font-medium">
                             <tr>
@@ -235,7 +241,6 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
                                 </tr>
                             ) : (
                                 habitaciones.map(habitacion => {
-                                    // Find associated type name if possible
                                     const tipo = tiposDisponibles.find(t => t.id === habitacion.tipoHabitacionId);
                                     return (
                                         <tr key={habitacion.id || habitacion.tempId} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">

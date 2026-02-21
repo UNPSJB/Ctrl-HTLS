@@ -1,3 +1,4 @@
+// Pantalla de carga animada (Spinner central)
 export const Loading = () => {
   return (
     <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">

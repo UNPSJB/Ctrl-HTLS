@@ -8,13 +8,13 @@ import { toast } from 'react-hot-toast';
 
 const ITEMS_PER_PAGE = 10;
 
+// Adminsitración y listado de clientes
 const ClientesManager = () => {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Estados para filtros y paginación
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -23,6 +23,7 @@ const ClientesManager = () => {
     fetchClientes();
   }, []);
 
+  // Obtiene los clientes desde el servidor
   const fetchClientes = async () => {
     try {
       setLoading(true);
@@ -46,7 +47,7 @@ const ClientesManager = () => {
     navigate('/admin/clientes/nuevo');
   };
 
-  // Filtrado y Paginación
+  // Filtro de búsqueda en tiempo real
   const filteredClientes = useMemo(() => {
     if (!searchTerm) return clientes;
     const lowerTerm = searchTerm.toLowerCase();
@@ -65,12 +66,12 @@ const ClientesManager = () => {
     return filteredClientes.slice(start, start + ITEMS_PER_PAGE);
   }, [currentPage, filteredClientes]);
 
-  // Reset page when search changes
   useEffect(() => {
     setCurrentPage(1);
     setSelectedIds([]);
   }, [searchTerm]);
 
+  // Confirmación y eliminación de cliente
   const handleDelete = async (id) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
       await deleteCliente(id);
@@ -89,6 +90,7 @@ const ClientesManager = () => {
     }
   };
 
+  // Eliminación de múltiples clientes seleccionados
   const handleBulkDelete = async () => {
     if (window.confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} clientes seleccionados?`)) {
       setLoading(true);
@@ -102,7 +104,6 @@ const ClientesManager = () => {
         }
       }
 
-      // Refetch or update state
       if (deletedCount > 0) {
         setClientes(prev => prev.filter(c => !selectedIds.includes(c.id)));
         toast.success(`${deletedCount} clientes eliminados`);
@@ -128,10 +129,10 @@ const ClientesManager = () => {
     }
   };
 
-
   return (
     <div className="space-y-6">
-      {/* Header y Filtros */}
+
+      {/* Header y Acciones */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Clientes</h2>
@@ -158,6 +159,7 @@ const ClientesManager = () => {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+
         {/* Barra de Búsqueda */}
         <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
           <div className="relative max-w-md">
@@ -180,8 +182,7 @@ const ClientesManager = () => {
           </div>
         </div>
 
-        {/* Tabla / Loading */}
-        {/* Tabla / Loading */}
+        {/* Tabla de Resultados */}
         <div className="overflow-x-auto min-h-[300px]">
           {loading ? (
             <div className="flex h-64 items-center justify-center">
@@ -268,7 +269,7 @@ const ClientesManager = () => {
           )}
         </div>
 
-        {/* Paginación */}
+        {/* Controles de Paginación */}
         {!loading && filteredClientes.length > 0 && (
           <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
             <div className="text-sm text-gray-500 dark:text-gray-400">

@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 
+// Mapeo de rutas a nombres legibles en español
 const routeNameMap = {
     admin: 'Dashboard',
     vendedores: 'Vendedores',
@@ -15,11 +16,13 @@ const routeNameMap = {
     categorias: 'Categorías',
 };
 
+// Componente de migas de pan para navegación
 const Breadcrumbs = () => {
     const location = useLocation();
     const pathnames = location.pathname.split('/').filter((x) => x);
 
     return (
+        // Estructura visual de la lista de navegación
         <nav className="mb-4 flex" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                 <li className="inline-flex items-center">
@@ -32,18 +35,13 @@ const Breadcrumbs = () => {
                     </Link>
                 </li>
                 {pathnames.map((value, index) => {
-                    // Skip 'admin' as it is the first "Inicio" link usually, or handle it if it duplicates.
-                    // My map has admin: 'Dashboard'.
-                    // If the path is /admin/vendedores, split gives ['admin', 'vendedores'].
-                    // If I hardcode /admin as "Inicio", I should skip 'admin' in the map loop if index is 0.
+
                     if (value === 'admin' && index === 0) return null;
 
                     const to = `/${pathnames.slice(0, index + 1).join('/')}`;
                     const isLast = index === pathnames.length - 1;
                     const name = routeNameMap[value] || value;
 
-                    // If it's an ID (numeric or long string), show "Detalle" or skip?
-                    // If previous was 'editar', this is likely an ID.
                     const isId = !isNaN(value) || (pathnames[index - 1] === 'editar');
                     const displayName = isId ? value : name;
 

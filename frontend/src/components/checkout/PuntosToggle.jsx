@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useCliente } from '@context/ClienteContext';
 
+// Toggle para habilitar el uso de puntos acumulados como descuento
 function PuntosToggle({ onToggle, className = '' }) {
   const { client } = useCliente?.() ?? {};
   const clientPoints = Number(client?.puntos ?? 0);

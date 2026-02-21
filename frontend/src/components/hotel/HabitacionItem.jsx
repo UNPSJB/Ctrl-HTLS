@@ -6,6 +6,7 @@ import Counter from '@ui/Counter';
 import RoomDetailsModal from './RoomDetailsModal';
 import { useHabitacionSelection } from '@hooks/useHabitacionSelection';
 
+// Elemento de lista para una habitación dentro del detalle del hotel
 function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
   const {
     tipo,
@@ -14,7 +15,6 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
     habitaciones: instanciasDisponibles,
   } = habitacionTipo;
 
-  // Toda la lógica ahora reside en esta única línea
   const {
     showModal,
     selectedCount,
