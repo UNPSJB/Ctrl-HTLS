@@ -52,11 +52,16 @@ export const transformHotel = (hotel) => {
   return {
     ...hotel,
     nombre: capitalize(hotel.nombre),
-    // --- CORRECCIÓN AQUÍ: Verificación de seguridad ---
-    ubicacion: hotel.ubicacion
+    // --- ADAPTACIÓN PARA API REAL ---
+    ubicacion: hotel.ciudad
       ? {
+        nombrePais: capitalize(hotel.ciudad.provincia?.pais?.nombre || ''),
+        nombreProvincia: capitalize(hotel.ciudad.provincia?.nombre || ''),
+        nombreCiudad: capitalize(hotel.ciudad.nombre || ''),
+      }
+      : hotel.ubicacion
+        ? {
           ...hotel.ubicacion,
-          // Usamos el nombre que viene de la API o el que ya tiene el objeto
           nombrePais: capitalize(
             hotel.ubicacion.nombrePais || hotel.ubicacion.pais
           ),
@@ -67,16 +72,24 @@ export const transformHotel = (hotel) => {
             hotel.ubicacion.nombreCiudad || hotel.ubicacion.ciudad
           ),
         }
-      : {},
-    hotelId: Number(hotel.hotelId) || null,
+        : {},
+    hotelId: Number(hotel.id || hotel.hotelId) || null,
+    categoria: hotel.categoria
+      ? {
+        ...hotel.categoria,
+        estrellas: hotel.categoria.estrellas || hotel.categoria.nombre,
+      }
+      : { estrellas: 0 },
     estrellas: hotel.categoria?.estrellas
       ? Number(hotel.categoria.estrellas)
-      : hotel.categoria?.estrellas,
+      : !isNaN(hotel.categoria?.nombre)
+        ? Number(hotel.categoria.nombre)
+        : hotel.categoria?.nombre,
     temporada: hotel.temporada
       ? {
-          ...hotel.temporada,
-          porcentaje: Number(hotel.temporada.porcentaje) || 0,
-        }
+        ...hotel.temporada,
+        porcentaje: Number(hotel.temporada.porcentaje) || 0,
+      }
       : null,
     descuentos: (hotel.descuentos || []).map((d) => ({
       ...d,

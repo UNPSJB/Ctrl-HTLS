@@ -39,17 +39,6 @@ const AdminHotelList = () => {
     );
   }, [hoteles, searchTerm]);
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-3"></div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Cargando hoteles...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center shadow dark:border-red-700 dark:bg-red-900/20">
@@ -105,7 +94,14 @@ const AdminHotelList = () => {
 
         {/* Listado de Hoteles */}
         <div className="overflow-x-auto min-h-[300px]">
-          {filteredHoteles.length > 0 ? (
+          {loading ? (
+            <div className="flex h-64 items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Cargando hoteles...</p>
+              </div>
+            </div>
+          ) : filteredHoteles.length > 0 ? (
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">

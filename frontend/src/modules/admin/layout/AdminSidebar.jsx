@@ -5,7 +5,6 @@ import {
   Users,
   UserCheck,
   BarChart3,
-  Settings,
   ChevronDown,
   LogOut,
   Moon,
@@ -146,7 +145,7 @@ function AdminSidebar({ onClose }) {
         ))}
       </nav>
 
-      // Sección inferior con usuario y configuración de tema
+      {/* Sección inferior con usuario y configuración de tema */}
       <div className="border-t border-gray-200 p-4 dark:border-gray-800">
         <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700/50 dark:bg-gray-800/50">
 
