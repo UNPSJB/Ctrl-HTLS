@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const Ciudad = require('../models/core/Ciudad');
 const Cliente = require('../models/core/Cliente');
 const Empleado = require('../models/core/Empleado');
@@ -15,24 +16,19 @@ const verificarCiudad = async (ciudadId) => {
 };
 
 const verificarDocumento = async (numeroDocumento) => {
-  // Verificar si ya existe un cliente con el mismo documento
-  const encargadoExistente = await Encargado.findOne({
-    where: { dni: numeroDocumento },
-  });
+  const [encargadoExistente, empleadoExistente, clienteExistente] =
+    await Promise.all([
+      Encargado.findOne({ where: { dni: numeroDocumento } }),
+      Empleado.findOne({ where: { numeroDocumento } }),
+      Cliente.findOne({ where: { numeroDocumento } }),
+    ]);
+
   if (encargadoExistente) {
     throw new CustomError('Ya existe un encargado con el mismo documento', 409); // Conflict
   }
-  // Verificar si ya existe un empleado con el mismo documento
-  const empleadoExistente = await Empleado.findOne({
-    where: { numeroDocumento },
-  });
   if (empleadoExistente) {
     throw new CustomError('Ya existe un empleado con el mismo documento', 409); // Conflict
   }
-
-  const clienteExistente = await Cliente.findOne({
-    where: { numeroDocumento },
-  });
   if (clienteExistente) {
     throw new CustomError('Ya existe un cliente con el mismo documento', 409); // Conflict
   }
@@ -48,54 +44,69 @@ const verificarTipoDocumento = (tipoDocumento) => {
   }
 };
 
-const verificarEmail = async (email) => {
-  // Verificar si ya existe un hotel con el mismo email
-  const hotelExistenteEmail = await Hotel.findOne({
-    where: { email },
-  });
+const verificarEmail = async (email, excludeHotelId = null) => {
+  const [hotelExistenteEmail, clienteExistenteEmail, empleadoExistenteEmail] =
+    await Promise.all([
+      Hotel.findOne({
+        where: {
+          email,
+          ...(excludeHotelId && { id: { [Op.ne]: excludeHotelId } }),
+        },
+      }),
+      Cliente.findOne({ where: { email } }),
+      Empleado.findOne({ where: { email } }),
+    ]);
+
   if (hotelExistenteEmail) {
     throw new CustomError('Ya existe un hotel con el mismo email', 409); // Conflict
   }
-  const clienteExistenteEmail = await Cliente.findOne({
-    where: { email },
-  });
   if (clienteExistenteEmail) {
     throw new CustomError('Ya existe un cliente con el mismo email', 409); // Conflict
   }
-  const empleadoExistenteEmail = await Empleado.findOne({
-    where: { email },
-  });
   if (empleadoExistenteEmail) {
     throw new CustomError('Ya existe un empleado con el mismo email', 409); // Conflict
   }
 };
 
-const verificarTelefono = async (telefono) => {
-  // Verificar si ya existe un hotel con el mismo telefono
-  const hotelExistenteTelefono = await Hotel.findOne({
-    where: { telefono },
-  });
+const verificarTelefono = async (telefono, excludeHotelId = null) => {
+  const [
+    hotelExistenteTelefono,
+    clienteExistenteTelefono,
+    empleadoExistenteTelefono,
+  ] = await Promise.all([
+    Hotel.findOne({
+      where: {
+        telefono,
+        ...(excludeHotelId && { id: { [Op.ne]: excludeHotelId } }),
+      },
+    }),
+    Cliente.findOne({ where: { telefono } }),
+    Empleado.findOne({ where: { telefono } }),
+  ]);
+
   if (hotelExistenteTelefono) {
     throw new CustomError('Ya existe un hotel con el mismo telefono', 409); // Conflict
   }
-  const clienteExistenteTelefono = await Cliente.findOne({
-    where: { telefono },
-  });
   if (clienteExistenteTelefono) {
     throw new CustomError('Ya existe un cliente con el mismo telefono', 409); // Conflict
   }
-  const empleadoExistenteTelefono = await Empleado.findOne({
-    where: { telefono },
-  });
   if (empleadoExistenteTelefono) {
     throw new CustomError('Ya existe un empleado con el mismo telefono', 409); // Conflict
   }
 };
 
-const verificarDireccion = async (direccion, ciudadId) => {
+const verificarDireccion = async (
+  direccion,
+  ciudadId,
+  excludeHotelId = null,
+) => {
   // Verificar si ya existe un hotel con la misma dirección
   const hotelExistenteDireccion = await Hotel.findOne({
-    where: { direccion, ciudadId },
+    where: {
+      direccion,
+      ciudadId,
+      ...(excludeHotelId && { id: { [Op.ne]: excludeHotelId } }),
+    },
   });
   if (hotelExistenteDireccion) {
     throw new CustomError('Ya existe un hotel con la misma dirección', 409); // Conflict
@@ -139,14 +150,6 @@ const verificarTiposHabitacion = async (tipoHabitaciones) => {
 const verificarFechas = (fechaInicio, fechaFin) => {
   const fechaInicioDate = new Date(fechaInicio);
   const fechaFinDate = new Date(fechaFin);
-  const fechaActual = new Date();
-
-  // if (fechaInicioDate < fechaActual) {
-  //   throw new CustomError(
-  //     'La fecha de inicio debe ser mayor a la fecha actual',
-  //     400,
-  //   ); // Bad Request
-  // }
   if (fechaInicioDate >= fechaFinDate) {
     throw new CustomError(
       'La fecha de inicio debe ser menor a la fecha de fin',

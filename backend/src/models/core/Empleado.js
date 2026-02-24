@@ -15,7 +15,7 @@ const Empleado = sequelize.define(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      isEmail: true,
+      validate: { isEmail: true },
     },
     rol: {
       type: DataTypes.ENUM('administrador', 'vendedor', 'desarrollador'),

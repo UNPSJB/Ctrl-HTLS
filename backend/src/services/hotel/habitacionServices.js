@@ -7,7 +7,6 @@ const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocio
 const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const HotelTipoHabitacion = require('../../models/hotel/HotelTipoHabitacion');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
-const tipoHabitacionServices = require('./tipoHabitacionServices');
 const {
   verificarDisponibilidadHabitaciones,
   verificarHabitacionesPaquetePromocional,
@@ -25,77 +24,77 @@ const crearHabitaciones = async (idHotel, habitaciones) => {
 
     // Verificar si los tipos de habitación son válidos y están relacionados con el hotel
     const idsTipoHabitacion = habitaciones.map((h) => h.idTipoHabitacion);
-    const tiposPorHotel =
-      await tipoHabitacionServices.obtenerTiposDeHabitacionDeHotel(idHotel);
-    console.log(tiposPorHotel);
 
-    // const tiposRelacionados = await HotelTipoHabitacion.findAll({
-    //   where: {
-    //     hotelId: idHotel,
-    //     tipoHabitacionId: { [Op.in]: idsTipoHabitacion },
-    //   },
-    //   transaction,
-    // });
+    const tiposRelacionados = await HotelTipoHabitacion.findAll({
+      where: {
+        hotelId: idHotel,
+        tipoHabitacionId: { [Op.in]: idsTipoHabitacion },
+      },
+      transaction,
+    });
 
-    // const tiposRelacionadosIds = tiposRelacionados.map(
-    //   (t) => t.tipoHabitacionId,
-    // );
-    // const tiposInvalidos = idsTipoHabitacion.filter(
-    //   (id) => !tiposRelacionadosIds.includes(id),
-    // );
+    const tiposRelacionadosIds = tiposRelacionados.map(
+      (t) => t.tipoHabitacionId,
+    );
+    const tiposInvalidos = idsTipoHabitacion.filter(
+      (id) => !tiposRelacionadosIds.includes(id),
+    );
 
-    // if (tiposInvalidos.length > 0) {
-    //   throw new CustomError(
-    //     `Los siguientes tipos de habitación no están relacionados con el hotel: ${tiposInvalidos.join(
-    //       ', ',
-    //     )}`,
-    //     400, // Bad Request
-    //   );
-    // }
+    if (tiposInvalidos.length > 0) {
+      throw new CustomError(
+        `Los siguientes tipos de habitación no están relacionados con el hotel: ${tiposInvalidos.join(
+          ', ',
+        )}`,
+        400, // Bad Request
+      );
+    }
 
-    // // Verificar si hay números de habitación duplicados en el mismo hotel
-    // const numerosHabitacion = habitaciones.map((h) => h.numero);
-    // const habitacionesExistentes = await Habitacion.findAll({
-    //   where: {
-    //     hotelId: idHotel,
-    //     numero: { [Op.in]: numerosHabitacion },
-    //   },
-    //   transaction,
-    // });
+    // Verificar si hay números de habitación duplicados en el mismo hotel
+    const numerosHabitacion = habitaciones.map((h) => h.numero);
+    const habitacionesExistentes = await Habitacion.findAll({
+      where: {
+        hotelId: idHotel,
+        numero: { [Op.in]: numerosHabitacion },
+      },
+      transaction,
+    });
 
-    // if (habitacionesExistentes.length > 0) {
-    //   const numerosDuplicados = habitacionesExistentes.map((h) => h.numero);
-    //   throw new CustomError(
-    //     `Los siguientes números de habitación ya existen en este hotel: ${numerosDuplicados.join(
-    //       ', ',
-    //     )}`,
-    //     409, // Conflict
-    //   );
-    // }
+    if (habitacionesExistentes.length > 0) {
+      const numerosDuplicados = habitacionesExistentes.map((h) => h.numero);
+      throw new CustomError(
+        `Los siguientes números de habitación ya existen en este hotel: ${numerosDuplicados.join(
+          ', ',
+        )}`,
+        409, // Conflict
+      );
+    }
 
-    // // Crear las habitaciones
-    // const habitacionesCreadas = await Promise.all(
-    //   habitaciones.map((habitacion) =>
-    //     Habitacion.create(
-    //       {
-    //         hotelId: idHotel,
-    //         numero: habitacion.numero,
-    //         piso: habitacion.piso,
-    //         tipoHabitacionId: habitacion.idTipoHabitacion,
-    //       },
-    //       { transaction },
-    //     ),
-    //   ),
-    // );
+    // Crear las habitaciones
+    const habitacionesCreadas = await Promise.all(
+      habitaciones.map((habitacion) =>
+        Habitacion.create(
+          {
+            hotelId: idHotel,
+            numero: habitacion.numero,
+            piso: habitacion.piso,
+            tipoHabitacionId: habitacion.idTipoHabitacion,
+          },
+          { transaction },
+        ),
+      ),
+    );
 
-    // // Confirmar la transacción
-    // await transaction.commit();
+    // Confirmar la transacción
+    await transaction.commit();
 
-    // return habitacionesCreadas;
+    return habitacionesCreadas;
   } catch (error) {
     // Revertir la transacción si algo falla
     await transaction.rollback();
-    throw new CustomError(`Error al crear habitaciones: ${error.message}`, 500);
+    throw new CustomError(
+      `Error al crear habitaciones: ${error.message}`,
+      error.statusCode || 500,
+    );
   }
 };
 
@@ -367,19 +366,24 @@ const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
 };
 
 const verificarHabitacionesHotel = async (idHotel, habitaciones) => {
-  for (const idHabitacion of habitaciones) {
-    const habitacion = await Habitacion.findOne({
-      where: {
-        hotelId: idHotel,
-        id: idHabitacion,
-      },
-    });
-    if (!habitacion) {
-      throw new CustomError(
-        `La habitación con ID ${idHabitacion} no existe o no pertenece al hotel`,
-        404,
-      ); // Not Found
-    }
+  const habitacionesEncontradas = await Habitacion.findAll({
+    where: {
+      hotelId: idHotel,
+      id: { [Op.in]: habitaciones },
+    },
+    attributes: ['id'],
+  });
+
+  const idsEncontrados = habitacionesEncontradas.map((h) => h.id);
+  const idsFaltantes = habitaciones.filter(
+    (id) => !idsEncontrados.includes(id),
+  );
+
+  if (idsFaltantes.length > 0) {
+    throw new CustomError(
+      `Las habitaciones con ID ${idsFaltantes.join(', ')} no existen o no pertenecen al hotel`,
+      404,
+    ); // Not Found
   }
 };
 

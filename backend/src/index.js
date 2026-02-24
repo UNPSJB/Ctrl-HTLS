@@ -22,7 +22,7 @@ app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Usar las rutas de core
-app.use('/api', authRoutes)
+app.use('/api', authRoutes);
 app.use('/api', coreRoutes);
 app.use('/api', hotelRoutes);
 app.use('/api', alquilerRoutes);

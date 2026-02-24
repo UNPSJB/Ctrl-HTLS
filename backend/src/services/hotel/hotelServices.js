@@ -45,13 +45,16 @@ const crearHotel = async (
     await verificarCiudad(ciudadId);
 
     await verificarHotel(
-      nombre,
-      ciudadId,
-      direccion,
-      email,
-      telefono,
-      encargadoId,
-      categoriaId,
+      {
+        nombre,
+        ciudadId,
+        direccion,
+        email,
+        telefono,
+        encargadoId,
+        categoriaId,
+      },
+      null,
     );
     // Crear el nuevo hotel
     nuevoHotel = await Hotel.create({
@@ -89,7 +92,7 @@ const crearHotel = async (
     };
   } catch (error) {
     await deleteEncargado(encargadoId);
-    throw new CustomError(error.message, error.status || 500);
+    throw new CustomError(error.message, error.statusCode || 500);
   }
 };
 
@@ -111,13 +114,16 @@ const modificarHotel = async (
   await verificarCiudad(ciudadId);
 
   await verificarHotel(
-    nombre,
-    ciudadId,
-    direccion,
-    email,
-    telefono,
-    encargadoId,
-    categoriaId,
+    {
+      nombre,
+      ciudadId,
+      direccion,
+      email,
+      telefono,
+      encargadoId,
+      categoriaId,
+    },
+    id,
   );
 
   hotel.nombre = nombre;
@@ -135,6 +141,45 @@ const modificarHotel = async (
 //IMPLEMENTAR
 const eliminarHotel = async (id) => {
   return id;
+};
+
+const getHotelById = async (hotelId) => {
+  const hotel = await Hotel.findByPk(hotelId, {
+    include: [
+      {
+        model: Encargado,
+        as: 'encargado',
+      },
+      {
+        model: Categoria,
+        as: 'categoria',
+      },
+      {
+        model: Ciudad,
+        as: 'ciudad',
+        include: [
+          {
+            model: Provincia,
+            as: 'provincia',
+            include: [
+              {
+                model: Pais,
+                as: 'pais',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!hotel) {
+    throw new CustomError('El hotel no existe', 404); // Not Found
+  }
+
+  const hotelData = hotel.toJSON();
+
+  return hotelData;
 };
 
 const asignarTipoHabitaciones = async (hotelId, tipoHabitaciones) => {
@@ -187,7 +232,7 @@ const asignarTipoHabitaciones = async (hotelId, tipoHabitaciones) => {
     return tiposHabitacionAsignados;
   } catch (error) {
     await transaction.rollback(); // Algo falló, deshacemos todo
-    throw new CustomError(error.message, error.status || 500);
+    throw new CustomError(error.message, error.statusCode || 500);
   }
 };
 
@@ -197,7 +242,7 @@ const getTiposHabitacionesHotel = async (idHotel) => {
   try {
     return hotelTipoHabitacionServices.getTipoHabitacionesDeHotel(idHotel);
   } catch (error) {
-    throw new CustomError(error.message, error.status || 500);
+    throw new CustomError(error.message, error.statusCode || 500);
   }
 };
 
@@ -377,6 +422,13 @@ const agregarPaquetePromocional = async (idHotel, paquete) => {
     );
 
   return paqueteCompleto;
+};
+
+const obtenerPaquetesDeHotel = async (idHotel) => {
+  await verificarIdHotel(idHotel);
+  const paquetes =
+    await paquetePromocionalServices.obtenerPaquetesPorHotel(idHotel);
+  return paquetes;
 };
 
 const agregarTemporada = async (idHotel, temporada) => {
@@ -860,7 +912,7 @@ const asignarEmpleadoAHotel = async (hotelId, empleadoId) => {
   } catch (error) {
     throw new CustomError(
       `Error al asignar el empleado al hotel: ${error.message}`,
-      error.status || 500,
+      error.statusCode || 500,
     ); // Internal Server Error
   }
 };
@@ -889,7 +941,7 @@ const desasignarEmpleadoDeHotel = async (hotelId, empleadoId) => {
   } catch (error) {
     throw new CustomError(
       `Error al desasignar el empleado del hotel: ${error.message}`,
-      error.status || 500,
+      error.statusCode || 500,
     );
   }
 };
@@ -897,9 +949,11 @@ const desasignarEmpleadoDeHotel = async (hotelId, empleadoId) => {
 module.exports = {
   crearHotel,
   modificarHotel,
+  getHotelById,
   obtenerTodosLosHoteles,
   obtenerCategorias,
   agregarPaquetePromocional,
+  obtenerPaquetesDeHotel,
   agregarTemporada,
   agregarDescuentos,
   getDisponibilidadPorHotel,

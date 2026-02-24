@@ -14,7 +14,7 @@ const HotelEmpleado = sequelize.define(
     empleadoId: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'HotelEmpleado',
+        model: 'Empleado',
         key: 'id',
       },
     },

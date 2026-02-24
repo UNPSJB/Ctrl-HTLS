@@ -65,14 +65,26 @@ const formatearVendedor = (vendedor) => ({
   direccion: vendedor.direccion,
   ciudadId: vendedor.ciudadId,
   // Datos de ubicación extendidos para el frontend
-  ubicacion: vendedor.ciudad ? {
-    ciudadId: vendedor.ciudad.id,
-    ciudadNombre: vendedor.ciudad.nombre,
-    provinciaId: vendedor.ciudad.provincia ? vendedor.ciudad.provincia.id : null,
-    provinciaNombre: vendedor.ciudad.provincia ? vendedor.ciudad.provincia.nombre : null,
-    paisId: vendedor.ciudad.provincia && vendedor.ciudad.provincia.pais ? vendedor.ciudad.provincia.pais.id : null,
-    paisNombre: vendedor.ciudad.provincia && vendedor.ciudad.provincia.pais ? vendedor.ciudad.provincia.pais.nombre : null,
-  } : null,
+  ubicacion: vendedor.ciudad
+    ? {
+        ciudadId: vendedor.ciudad.id,
+        ciudadNombre: vendedor.ciudad.nombre,
+        provinciaId: vendedor.ciudad.provincia
+          ? vendedor.ciudad.provincia.id
+          : null,
+        provinciaNombre: vendedor.ciudad.provincia
+          ? vendedor.ciudad.provincia.nombre
+          : null,
+        paisId:
+          vendedor.ciudad.provincia && vendedor.ciudad.provincia.pais
+            ? vendedor.ciudad.provincia.pais.id
+            : null,
+        paisNombre:
+          vendedor.ciudad.provincia && vendedor.ciudad.provincia.pais
+            ? vendedor.ciudad.provincia.pais.nombre
+            : null,
+      }
+    : null,
   hotelesPermitidos: (vendedor.hoteles || []).map((hotel) => ({
     id: hotel.id,
     nombre: hotel.nombre,
@@ -146,7 +158,9 @@ const crearEmpleado = async (empleado) => {
     ciudadId,
   });
 
-  return nuevoEmpleado;
+  const empleadoJSON = nuevoEmpleado.toJSON();
+  delete empleadoJSON.password;
+  return empleadoJSON;
 };
 
 const actualizarEmpleado = async (id, empleado) => {
@@ -333,50 +347,33 @@ const obtenerClientePorDocumento = async (numeroDocumento) => {
 };
 
 const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
-  // Verificar si el email ya existe
-  const emailCliente = await Cliente.findOne({
-    where: { email, id: { [Op.ne]: id } },
-  });
-  const emailEmpleado = await Empleado.findOne({
-    where: { email, id: { [Op.ne]: id } },
-  });
+  const [
+    emailCliente,
+    emailEmpleado,
+    documentoCliente,
+    documentoEmpleado,
+    documentoEncargado,
+    telefonoCliente,
+    telefonoEmpleado,
+  ] = await Promise.all([
+    Cliente.findOne({ where: { email, id: { [Op.ne]: id } } }),
+    Empleado.findOne({ where: { email, id: { [Op.ne]: id } } }),
+    Cliente.findOne({ where: { numeroDocumento, id: { [Op.ne]: id } } }),
+    Empleado.findOne({ where: { numeroDocumento, id: { [Op.ne]: id } } }),
+    Encargado.findOne({ where: { dni: numeroDocumento, id: { [Op.ne]: id } } }),
+    Cliente.findOne({ where: { telefono, id: { [Op.ne]: id } } }),
+    Empleado.findOne({ where: { telefono, id: { [Op.ne]: id } } }),
+  ]);
 
-  const emailExistente = emailCliente || emailEmpleado;
-
-  if (emailExistente) {
+  if (emailCliente || emailEmpleado) {
     throw new CustomError('El email ya está registrado', 409); // Conflict
   }
 
-  const documentoCliente = await Cliente.findOne({
-    where: { numeroDocumento, id: { [Op.ne]: id } },
-  });
-
-  const documentoEmpleado = await Empleado.findOne({
-    where: { numeroDocumento, id: { [Op.ne]: id } },
-  });
-
-  const documentoEncargado = await Encargado.findOne({
-    where: { dni: numeroDocumento, id: { [Op.ne]: id } },
-  });
-
-  const documentoExistente =
-    documentoCliente || documentoEmpleado || documentoEncargado;
-
-  if (documentoExistente) {
+  if (documentoCliente || documentoEmpleado || documentoEncargado) {
     throw new CustomError('El número de documento ya está registrado', 409); // Conflict
   }
 
-  const telefonoCliente = await Cliente.findOne({
-    where: { telefono, id: { [Op.ne]: id } },
-  });
-
-  const telefonoEmpleado = await Empleado.findOne({
-    where: { telefono, id: { [Op.ne]: id } },
-  });
-
-  const telefonoExistente = telefonoCliente || telefonoEmpleado;
-
-  if (telefonoExistente) {
+  if (telefonoCliente || telefonoEmpleado) {
     throw new CustomError('El teléfono ya está registrado', 409); // Conflict
   }
 };

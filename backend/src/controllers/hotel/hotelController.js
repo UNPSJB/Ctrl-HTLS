@@ -82,6 +82,17 @@ const getAllHoteles = async (req, res) => {
   }
 };
 
+const getHotelById = async (req, res) => {
+  const hotelId = req.params.id;
+  try {
+    const hotel = await hotelServices.getHotelById(hotelId);
+    res.json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getCategorias = async (req, res) => {
   try {
     const categorias = await hotelServices.obtenerCategorias();
@@ -104,6 +115,40 @@ const setHabitaciones = async (req, res) => {
   try {
     const hotel = await habitacionServices.crearHabitaciones(id, habitaciones);
     res.json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const getHabitaciones = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const habitaciones = await habitacionServices.obtenerHabitaciones(id);
+    res.json(habitaciones);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const getPaquetes = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const paquetes = await hotelServices.obtenerPaquetesDeHotel(id);
+    res.json(paquetes);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
@@ -252,7 +297,10 @@ module.exports = {
   createHotel,
   updateHotel,
   getAllHoteles,
+  getHotelById,
   getCategorias,
+  getHabitaciones,
+  getPaquetes,
   setTemporada,
   setHabitaciones,
   setDescuento,

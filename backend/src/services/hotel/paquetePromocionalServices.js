@@ -60,21 +60,20 @@ const crearPaquete = async (idHotel, paquete) => {
     );
   }
   // Calcular la capacidad máxima del paquete
-  let capacidadMaxima = 0;
-  for (const idHabitacion of paquete.habitaciones) {
-    const habitacion = await Habitacion.findByPk(idHabitacion, {
-      include: [
-        {
-          model: TipoHabitacion,
-          as: 'tipoHabitacion',
-          attributes: ['capacidad'],
-        },
-      ],
-    });
-    if (habitacion && habitacion.tipoHabitacion) {
-      capacidadMaxima += habitacion.tipoHabitacion.capacidad;
-    }
-  }
+  const habitacionesConTipo = await Habitacion.findAll({
+    where: { id: { [Op.in]: paquete.habitaciones } },
+    include: [
+      {
+        model: TipoHabitacion,
+        as: 'tipoHabitacion',
+        attributes: ['capacidad'],
+      },
+    ],
+  });
+  const capacidadMaxima = habitacionesConTipo.reduce(
+    (sum, h) => sum + (h.tipoHabitacion ? h.tipoHabitacion.capacidad : 0),
+    0,
+  );
 
   // Crear el paquete promocional
   const nuevoPaquetePromocional = await PaquetePromocional.create({
@@ -84,12 +83,6 @@ const crearPaquete = async (idHotel, paquete) => {
   });
   return nuevoPaquetePromocional;
 };
-
-//IMPLEMENTAR
-const modificarPaquete = async (idPaquete, paquete) => {};
-
-//IMPLEMENTAR
-const eliminarPaquete = async (idPaquete) => {};
 
 const asignarHabitacionAPaquete = async (paqueteCreado, paquete) => {
   for (const habitacion of paquete.habitaciones) {
@@ -123,6 +116,31 @@ const getPaqueteCompleto = async (idPaquete) => {
   }
 
   return paquete;
+};
+
+const obtenerPaquetesPorHotel = async (idHotel) => {
+  const paquetes = await PaquetePromocional.findAll({
+    where: { hotelId: idHotel },
+    include: [
+      {
+        model: Habitacion,
+        as: 'habitaciones',
+        include: [
+          {
+            model: TipoHabitacion,
+            as: 'tipoHabitacion',
+            attributes: ['nombre', 'capacidad'],
+          },
+        ],
+        through: {
+          model: PaquetePromocionalHabitacion,
+          attributes: ['fechaInicio', 'fechaFin'],
+        },
+      },
+    ],
+  });
+
+  return paquetes;
 };
 
 const obtenerPaquetesTuristicos = async (idHotel, fechaInicio, fechaFin) => {
@@ -258,6 +276,7 @@ const guardarPaquetes = async (
 module.exports = {
   crearPaquete,
   asignarHabitacionAPaquete,
+  obtenerPaquetesPorHotel,
   obtenerPaquetesTuristicos,
   guardarPaquetes,
 };
