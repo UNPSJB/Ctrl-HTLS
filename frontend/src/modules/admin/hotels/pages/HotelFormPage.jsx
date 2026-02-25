@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, Save, MapPin, User, Bed, ArrowLeft, DoorOpen } from 'lucide-react';
+import { ArrowLeft, Building2, MapPin, User, Bed, DoorOpen, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@/hooks/useHotel';
@@ -10,6 +10,7 @@ import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import EncargadoForm from '@/components/forms/EncargadoForm';
 import TiposHabitacionSelector from '@/components/selectors/TipoHabitacionSelector';
 import { Loading } from '@/components/ui/Loading';
+import { InnerLoading } from '@/components/ui/InnerLoading';
 import HabitacionesList from '@/modules/admin/hotels/components/HabitacionesList';
 
 // Formulario para gestión de hoteles
@@ -73,31 +74,48 @@ export default function HotelFormPage() {
       const hotel = response.data;
 
       reset({
-        nombre: hotel.nombre,
-        direccion: hotel.direccion,
-        telefono: hotel.telefono,
-        email: hotel.email,
-        categoriaId: hotel.categoriaId,
-        paisId: hotel.ubicacion?.paisId || '',
-        provinciaId: hotel.ubicacion?.provinciaId || '',
-        ciudadId: hotel.ubicacion?.ciudadId || '',
+        nombre: hotel.nombre || '',
+        direccion: hotel.direccion || '',
+        telefono: hotel.telefono || '',
+        email: hotel.email || '',
+        categoriaId: hotel.categoriaId || '',
+        paisId: hotel.ciudad?.provincia?.pais?.id || '',
+        provinciaId: hotel.ciudad?.provincia?.id || '',
+        ciudadId: hotel.ciudad?.id || '',
         encargadoNombre: hotel.encargado?.nombre || '',
         encargadoApellido: hotel.encargado?.apellido || '',
         encargadoTipoDocumento: hotel.encargado?.tipoDocumento || '',
-        encargadoNumeroDocumento: hotel.encargado?.numeroDocumento || '',
-        tiposHabitaciones: hotel.tiposHabitacion || [],
+        encargadoNumeroDocumento: hotel.encargado?.dni || '',
+        tiposHabitaciones: [],
       });
 
-      if (hotel.tiposHabitacion) {
-        setTiposSeleccionados(hotel.tiposHabitacion.map(t => {
-          const catalogType = tiposHabitaciones.find(th => String(th.id) === String(t.tipoHabitacionId || t.id));
-          return {
-            id: t.tipoHabitacionId || t.id,
-            precio: t.precio,
-            nombre: catalogType?.nombre || t.nombre,
-            ...t
-          };
-        }));
+      setTiposSeleccionados([]);
+
+      // Intento de inferir tipos de habitación y precios desde el listado de habitaciones físicas
+      // Esto es un parche necesario ya que el endpoint /hotel/:id no devuelve las tarifas actualmente.
+      try {
+        const roomsRes = await axiosInstance.get(`/hotel/${id}/habitaciones`);
+        const rooms = roomsRes.data;
+        const inferredTypes = [];
+        const seenTypes = new Set();
+
+        rooms.forEach(r => {
+          if (r.tipoHabitacionId && !seenTypes.has(r.tipoHabitacionId)) {
+            seenTypes.add(r.tipoHabitacionId);
+            inferredTypes.push({
+              id: r.tipoHabitacionId,
+              nombre: r.tipoHabitacion?.nombre || `Tipo #${r.tipoHabitacionId}`,
+              precio: r.precio || 0
+            });
+          }
+        });
+
+        if (inferredTypes.length > 0) {
+          setTiposSeleccionados(inferredTypes);
+          setValue('tiposHabitaciones', inferredTypes);
+        }
+      } catch (errInferred) {
+        console.error("No se pudieron inferir las tarifas:", errInferred);
       }
 
     } catch (error) {
@@ -230,7 +248,6 @@ export default function HotelFormPage() {
     }
   };
 
-  if (loadingResources || loadingData) return <Loading />;
 
   const renderGeneralTab = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-300">
@@ -329,68 +346,76 @@ export default function HotelFormPage() {
 
         {/* Contenido de la Pestaña Activa */}
         <main className="lg:col-span-3">
-          <form onSubmit={handleSubmit(onSubmit)} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px]">
+          <form onSubmit={handleSubmit(onSubmit)} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
 
-            {activeTab === 'general' && renderGeneralTab()}
+            {/* Cuerpo del Formulario */}
+            <div className="flex-1">
+              {(loadingResources || loadingData) ? (
+                <InnerLoading />
+              ) : (
+                <div className="animate-in fade-in duration-300">
+                  {activeTab === 'general' && renderGeneralTab()}
 
-            {activeTab === 'ubicacion' && (
-              <div className="animate-in fade-in duration-300">
-                <div className="space-y-2 mb-4">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Dirección *</label>
-                  <input
-                    {...register('direccion', { required: 'La dirección es obligatoria' })}
-                    className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                  />
-                  {errors.direccion && <span className="text-red-500 text-xs">{errors.direccion.message}</span>}
+                  {activeTab === 'ubicacion' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Dirección *</label>
+                        <input
+                          {...register('direccion', { required: 'La dirección es obligatoria' })}
+                          className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                        />
+                        {errors.direccion && <span className="text-red-500 text-xs">{errors.direccion.message}</span>}
+                      </div>
+                      <UbicacionSelector errors={errors} register={register} setValue={setValue} watch={watch} />
+                    </div>
+                  )}
+
+                  {activeTab === 'encargado' && (
+                    <div className="space-y-4">
+                      <EncargadoForm register={register} errors={errors} loading={loadingResources || isSubmitting} />
+                      {isEditing && (
+                        <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 text-sm rounded-md dark:bg-yellow-900/20 dark:text-yellow-200">
+                          Nota: La edición de datos sensibles del encargado puede estar restringida.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'tarifas' && (
+                    <TiposHabitacionSelector
+                      tiposHabitaciones={tiposHabitaciones}
+                      tiposSeleccionados={tiposSeleccionados}
+                      selectedTipo={selectedTipo}
+                      setSelectedTipo={setSelectedTipo}
+                      precioTemporal={precioTemporal}
+                      setPrecioTemporal={setPrecioTemporal}
+                      onAgregar={handleAgregarTipoHabitacion}
+                      onRemover={handleTipoHabitacionRemove}
+                      canAdd={selectedTipo && precioTemporal && !isNaN(precioTemporal)}
+                      loading={loadingResources}
+                      errors={errors}
+                    />
+                  )}
+
+                  {activeTab === 'habitaciones' && (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 text-blue-800 rounded-lg dark:bg-blue-900/20 dark:text-blue-200 text-sm">
+                        Aquí puedes dar de alta las habitaciones físicas (ej: 101, 102) y su ubicación.
+                        Asegúrate de configurar primero los precios en la pestaña "Tarifas".
+                      </div>
+                      <HabitacionesList
+                        hotelId={id}
+                        tiposDisponibles={tiposSeleccionados}
+                        localRooms={localRooms}
+                        onLocalChange={setLocalRooms}
+                      />
+                    </div>
+                  )}
                 </div>
-                <UbicacionSelector errors={errors} register={register} setValue={setValue} watch={watch} />
-              </div>
-            )}
+              )}
+            </div>
 
-            {activeTab === 'encargado' && (
-              <div className="animate-in fade-in duration-300">
-                <EncargadoForm register={register} errors={errors} loading={loadingResources || isSubmitting} />
-                {isEditing && (
-                  <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 text-sm rounded-md dark:bg-yellow-900/20 dark:text-yellow-200">
-                    Nota: La edición de datos sensibles del encargado puede estar restringida.
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'tarifas' && (
-              <div className="animate-in fade-in duration-300">
-                <TiposHabitacionSelector
-                  tiposHabitaciones={tiposHabitaciones}
-                  tiposSeleccionados={tiposSeleccionados}
-                  selectedTipo={selectedTipo}
-                  setSelectedTipo={setSelectedTipo}
-                  precioTemporal={precioTemporal}
-                  setPrecioTemporal={setPrecioTemporal}
-                  onAgregar={handleAgregarTipoHabitacion}
-                  onRemover={handleTipoHabitacionRemove}
-                  canAdd={selectedTipo && precioTemporal && !isNaN(precioTemporal)}
-                  loading={loadingResources}
-                  errors={errors}
-                />
-              </div>
-            )}
-
-            {activeTab === 'habitaciones' && (
-              <div className="animate-in fade-in duration-300">
-                <div className="mb-4 p-4 bg-blue-50 text-blue-800 rounded-lg dark:bg-blue-900/20 dark:text-blue-200 text-sm">
-                  Aquí puedes dar de alta las habitaciones físicas (ej: 101, 102) y su ubicación.
-                  Asegúrate de configurar primero los precios en la pestaña "Tarifas".
-                </div>
-                <HabitacionesList
-                  hotelId={id}
-                  tiposDisponibles={tiposSeleccionados}
-                  localRooms={localRooms}
-                  onLocalChange={setLocalRooms}
-                />
-              </div>
-            )}
-
+            {/* Footer Estático */}
             <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
               <button
                 type="button"
@@ -402,7 +427,7 @@ export default function HotelFormPage() {
               {(activeTab !== 'habitaciones' || !isEditing) && (
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || loadingResources || loadingData}
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="h-4 w-4" />

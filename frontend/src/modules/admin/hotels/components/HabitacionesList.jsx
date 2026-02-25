@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
+import { InnerLoading } from '@/components/ui/InnerLoading';
 import { Loading } from '@/components/ui/Loading';
 
 // Listado gestionable de habitaciones para un hotel
@@ -29,10 +30,8 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
     const fetchHabitaciones = async () => {
         try {
             setLoading(true);
-            const res = await axiosInstance.get(`/hotel/${hotelId}`);
-            if (res.data.habitaciones) {
-                setHabitaciones(res.data.habitaciones);
-            }
+            const res = await axiosInstance.get(`/hotel/${hotelId}/habitaciones`);
+            setHabitaciones(res.data);
         } catch (error) {
             console.error("Failed to fetch habitaciones", error);
         } finally {
@@ -46,20 +45,20 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
             const payload = {
                 numero: Number(data.numero),
                 piso: Number(data.piso),
-                tipoHabitacionId: Number(data.tipoHabitacionId)
+                idTipoHabitacion: Number(data.tipoHabitacionId)
             };
 
-            const tipoObj = tiposDisponibles.find(t => t.id === payload.tipoHabitacionId);
+            const tipoObj = tiposDisponibles.find(t => t.id === payload.idTipoHabitacion);
 
             if (isLocalMode) {
 
                 if (editingId) {
-                    const updated = habitaciones.map(h => h.tempId === editingId ? { ...payload, tempId: editingId, tipoHabitacion: tipoObj } : h);
+                    const updated = habitaciones.map(h => h.tempId === editingId ? { ...payload, tipoHabitacionId: payload.idTipoHabitacion, tempId: editingId, tipoHabitacion: tipoObj } : h);
                     onLocalChange(updated);
                     toast.success('Habitación actualizada (Borrador)');
                 } else {
 
-                    const newRoom = { ...payload, tempId: Date.now(), tipoHabitacion: tipoObj };
+                    const newRoom = { ...payload, tipoHabitacionId: payload.idTipoHabitacion, tempId: Date.now(), tipoHabitacion: tipoObj };
                     onLocalChange([...habitaciones, newRoom]);
                     toast.success('Habitación agregada (Borrador)');
                 }
@@ -69,7 +68,8 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
                     await axiosInstance.put(`/hotel/${hotelId}/habitacion/${editingId}`, payload);
                     toast.success('Habitación actualizada');
                 } else {
-                    await axiosInstance.post(`/hotel/${hotelId}/habitacion`, payload);
+                    // El backend espera un objeto con una propiedad 'habitaciones' que es un arreglo
+                    await axiosInstance.post(`/hotel/${hotelId}/habitacion`, { habitaciones: [payload] });
                     toast.success('Habitación creada');
                 }
                 fetchHabitaciones();
@@ -219,7 +219,7 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
             )}
 
             {loading ? (
-                <Loading />
+                <InnerLoading message="Cargando habitaciones..." />
             ) : (
                 <div className="rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
                     {/* Tabla de Habitaciones */}
@@ -234,34 +234,42 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                             {habitaciones.length === 0 ? (
-                                <tr>
+                                <tr key="empty-state">
                                     <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                         No hay habitaciones físicas creadas aún.
                                     </td>
                                 </tr>
                             ) : (
-                                habitaciones.map(habitacion => {
-                                    const tipo = tiposDisponibles.find(t => t.id === habitacion.tipoHabitacionId);
-                                    return (
-                                        <tr key={habitacion.id || habitacion.tempId} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                            <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">#{habitacion.numero}</td>
-                                            <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{habitacion.piso}° Piso</td>
-                                            <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                                    {tipo?.nombre || habitacion.tipoHabitacion?.nombre || 'Desconocido'}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-right space-x-2">
-                                                <button type="button" onClick={() => startEdit(habitacion)} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1">
-                                                    <Edit2 className="w-4 h-4" />
-                                                </button>
-                                                <button type="button" onClick={() => handleDelete(habitacion.id, habitacion.tempId)} className="text-red-500 hover:text-red-700 p-1">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
+                                [...habitaciones]
+                                    .sort((a, b) => {
+                                        // Primero ordenar por piso
+                                        if (a.piso !== b.piso) return a.piso - b.piso;
+                                        // Si el piso es igual, ordenar por número
+                                        return a.numero - b.numero;
+                                    })
+                                    .map((habitacion, index) => {
+                                        const tipo = tiposDisponibles.find(t => t.id === habitacion.tipoHabitacionId);
+                                        const rowKey = habitacion.id || habitacion.tempId || `room-${index}`;
+                                        return (
+                                            <tr key={rowKey} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">#{habitacion.numero}</td>
+                                                <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{habitacion.piso}° Piso</td>
+                                                <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                        {tipo?.nombre || habitacion.tipoHabitacion?.nombre || 'Desconocido'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-right space-x-2">
+                                                    <button type="button" onClick={() => startEdit(habitacion)} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1">
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button type="button" onClick={() => handleDelete(habitacion.id, habitacion.tempId)} className="text-red-500 hover:text-red-700 p-1">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                             )}
                         </tbody>
                     </table>
