@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, X, Lock, MapPin, Building2, Briefcase } from 'lucide-react';
+import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useUbicacion from '@/hooks/useUbicacion';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -13,7 +13,6 @@ const tiposDocumento = [
   { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
-// Formulario para gestión de vendedores
 const VendedorFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -53,13 +52,11 @@ const VendedorFormPage = () => {
   const [activeTab, setActiveTab] = useState('general');
 
   useEffect(() => {
-
     if (isEditing) {
       fetchVendedor();
     }
   }, [id]);
 
-  // Carga datos del vendedor para edición
   const fetchVendedor = async () => {
     try {
       setLoadingData(true);
@@ -131,7 +128,6 @@ const VendedorFormPage = () => {
     setFormData((prev) => ({ ...prev, tipoDocumento: e.target.value, numeroDocumento: '' }));
   };
 
-  // Procesa el alta o actualización del vendedor
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -198,13 +194,17 @@ const VendedorFormPage = () => {
   const inputClass = 'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
   const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
 
-  // if (loadingData) return <div className="p-8 text-center text-gray-500">Cargando perfil...</div>;
-
   return (
     <div className="mx-auto max-w-5xl space-y-6">
 
-      {/* Perfil del Vendedor */}
+      {/* Perfil del Vendedor / Encabezado Externo */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <button
+          onClick={handleCancel}
+          className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700 transition-colors"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+        </button>
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
           <User className="h-8 w-8" />
         </div>
@@ -369,10 +369,10 @@ const VendedorFormPage = () => {
             )}
 
             <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-              <button type="button" onClick={handleCancel} disabled={loading} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300">
+              <button type="button" onClick={handleCancel} disabled={loading} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 transition-colors">
                 Cancelar
               </button>
-              <button type="submit" disabled={loading || loadingData} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+              <button type="submit" disabled={loading || loadingData} className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50">
                 {loading ? 'Guardando...' : (
                   <>
                     <Save className="h-4 w-4" />
