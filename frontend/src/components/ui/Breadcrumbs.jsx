@@ -9,9 +9,6 @@ const routeNameMap = {
     hoteles: 'Hoteles',
     nuevo: 'Nuevo',
     editar: 'Editar',
-    reportes: 'Reportes',
-    reservas: 'Reservas',
-    ingresos: 'Ingresos',
     configuracion: 'Configuración',
     categorias: 'Categorías',
 };

@@ -1,11 +1,9 @@
-import { useState, useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import {
   Home,
   Building2,
   Users,
   UserCheck,
-  BarChart3,
-  ChevronDown,
   LogOut,
   Moon,
   Sun
@@ -15,23 +13,17 @@ import { useAuth } from '@/context/AuthContext';
 import Avatar from '@/components/ui/Avatar';
 import logoLight from '@/assets/logo.svg';
 import logoDark from '@/assets/logo-dark.svg';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 // Barra lateral de navegación para el módulo Admin
 function AdminSidebar({ onClose }) {
-  const [openSubmenu, setOpenSubmenu] = useState(null);
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { user, logout } = useAuth();
-  const location = useLocation();
 
   const logo = useMemo(
     () => (theme === 'dark' ? logoDark : logoLight),
     [theme]
   );
-
-  const handleToggleSubmenu = (title) => {
-    setOpenSubmenu((prev) => (prev === title ? null : title));
-  };
 
   // Elementos del menú de navegación
   const menuItems = [
@@ -55,14 +47,6 @@ function AdminSidebar({ onClose }) {
       icon: Users,
       path: '/admin/clientes',
     },
-    {
-      title: 'Reportes',
-      icon: BarChart3,
-      submenu: [
-        { title: 'Reservas', path: '/admin/reportes/reservas' },
-        { title: 'Ingresos', path: '/admin/reportes/ingresos' },
-      ],
-    },
   ];
 
   return (
@@ -80,68 +64,21 @@ function AdminSidebar({ onClose }) {
         </div>
 
         {menuItems.map((item, idx) => (
-          <div key={idx} className="space-y-1">
-            {item.submenu ? (
-              <>
-                <button
-                  onClick={() => handleToggleSubmenu(item.title)}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${item.submenu.some(sub => location.pathname.startsWith(sub.path))
-                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/10 dark:text-blue-400'
-                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
-                    }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <item.icon className={`h-5 w-5 ${item.submenu.some(sub => location.pathname.startsWith(sub.path))
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-400 group-hover:text-gray-500'
-                      }`} />
-                    {item.title}
-                  </div>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${openSubmenu === item.title || item.submenu.some(sub => location.pathname.startsWith(sub.path)) ? 'rotate-180' : ''
-                      }`}
-                  />
-                </button>
-
-                {(openSubmenu === item.title || item.submenu.some(sub => location.pathname.startsWith(sub.path))) && (
-                  <div className="ml-4 space-y-1 border-l-2 border-gray-100 pl-3 dark:border-gray-800">
-                    {item.submenu.map((sub, sidx) => (
-                      <NavLink
-                        key={sidx}
-                        to={sub.path}
-                        end={sub.path === '/admin'}
-                        onClick={onClose}
-                        className={({ isActive }) =>
-                          `block rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
-                          }`
-                        }
-                      >
-                        {sub.title}
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <NavLink
-                to={item.path}
-
-                end={item.path === '/admin'}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  `group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
-                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/10 dark:text-blue-400'
-                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
-                  }`
-                }
-              >
-                <item.icon className="h-5 w-5 transition-colors group-hover:text-gray-900 dark:group-hover:text-white" />
-                {item.title}
-              </NavLink>
-            )}
-          </div>
+          <NavLink
+            key={idx}
+            to={item.path}
+            end={item.path === '/admin'}
+            onClick={onClose}
+            className={({ isActive }) =>
+              `group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/10 dark:text-blue-400'
+                : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`
+            }
+          >
+            <item.icon className="h-5 w-5 transition-colors group-hover:text-gray-900 dark:group-hover:text-white" />
+            {item.title}
+          </NavLink>
         ))}
       </nav>
 
