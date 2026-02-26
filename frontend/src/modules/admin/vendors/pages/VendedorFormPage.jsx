@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, X, Lock, MapPin, Building2, Briefcase } from 'lucide-react';
+import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useUbicacion from '@/hooks/useUbicacion';
+import { InnerLoading } from '@/components/ui/InnerLoading';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
@@ -12,7 +13,6 @@ const tiposDocumento = [
   { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
-// Formulario para gestión de vendedores
 const VendedorFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -52,13 +52,11 @@ const VendedorFormPage = () => {
   const [activeTab, setActiveTab] = useState('general');
 
   useEffect(() => {
-
     if (isEditing) {
       fetchVendedor();
     }
   }, [id]);
 
-  // Carga datos del vendedor para edición
   const fetchVendedor = async () => {
     try {
       setLoadingData(true);
@@ -130,7 +128,6 @@ const VendedorFormPage = () => {
     setFormData((prev) => ({ ...prev, tipoDocumento: e.target.value, numeroDocumento: '' }));
   };
 
-  // Procesa el alta o actualización del vendedor
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -197,13 +194,17 @@ const VendedorFormPage = () => {
   const inputClass = 'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
   const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
 
-  if (loadingData) return <div className="p-8 text-center text-gray-500">Cargando perfil...</div>;
-
   return (
     <div className="mx-auto max-w-5xl space-y-6">
 
-      {/* Perfil del Vendedor */}
+      {/* Perfil del Vendedor / Encabezado Externo */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <button
+          onClick={handleCancel}
+          className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700 transition-colors"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+        </button>
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
           <User className="h-8 w-8" />
         </div>
@@ -241,135 +242,141 @@ const VendedorFormPage = () => {
 
         {/* Formulario Dinámico */}
         <div className="lg:col-span-3">
-          <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
 
-            {activeTab === 'general' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <label htmlFor="nombre" className={labelClass}>Nombre *</label>
-                    <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} className={inputClass} />
-                  </div>
-                  <div>
-                    <label htmlFor="apellido" className={labelClass}>Apellido *</label>
-                    <input type="text" id="apellido" name="apellido" value={formData.apellido} onChange={handleChange} className={inputClass} />
-                  </div>
-                  <div>
-                    <label htmlFor="tipoDocumento" className={labelClass}>Tipo Documento *</label>
-                    <select id="tipoDocumento" name="tipoDocumento" value={formData.tipoDocumento} onChange={handleTipoChange} className={inputClass}>
-                      {tiposDocumento.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="numeroDocumento" className={labelClass}>Número Documento *</label>
-                    <input type="text" id="numeroDocumento" name="numeroDocumento" value={formData.numeroDocumento} onChange={handleDocumentoChange} className={inputClass} maxLength={15} />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'ubicacion' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación y Contacto</h3>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <label htmlFor="email" className={labelClass}>Email *</label>
-                    <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} />
-                  </div>
-                  <div>
-                    <label htmlFor="telefono" className={labelClass}>Teléfono</label>
-                    <input type="text" id="telefono" name="telefono" value={formData.telefono} onChange={handleNumericChange} className={inputClass} />
-                  </div>
-                  <div className="col-span-full">
-                    <label htmlFor="direccion" className={labelClass}>Dirección *</label>
-                    <input type="text" id="direccion" name="direccion" value={formData.direccion} onChange={handleChange} className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>País *</label>
-                    <select value={paisId} onChange={(e) => handlePaisChange(e.target.value)} className={inputClass}>
-                      <option value="">Seleccione país</option>
-                      {paises.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Provincia *</label>
-                    <select value={provinciaId} onChange={(e) => handleProvinciaChange(e.target.value)} className={inputClass} disabled={isProvinciasDisabled}>
-                      <option value="">Seleccione provincia</option>
-                      {provincias.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Ciudad *</label>
-                    <select value={ciudadId} onChange={(e) => handleCiudadChange(e.target.value)} className={inputClass} disabled={isCiudadesDisabled}>
-                      <option value="">Seleccione ciudad</option>
-                      {ciudades.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'hoteles' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Hoteles Asignados</h3>
-                <p className="text-sm text-gray-500">
-                  Gestione los hoteles a los que este vendedor tiene acceso.
-                  <br />
-                </p>
-
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {assignedHotels.map((hotel) => (
-                    <div
-                      key={hotel.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm dark:bg-blue-900 dark:text-blue-300">
-                          <Building2 className="h-4 w-4" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{hotel.nombre}</span>
+            {loadingData ? (
+              <InnerLoading message="Cargando perfil..." />
+            ) : (
+              <div className="flex-1 space-y-6">
+                {activeTab === 'general' && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div>
+                        <label htmlFor="nombre" className={labelClass}>Nombre *</label>
+                        <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} className={inputClass} />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveHotel(hotel.id)}
-                        className="rounded-full p-1 text-red-500 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30"
-                        title="Quitar acceso"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+                      <div>
+                        <label htmlFor="apellido" className={labelClass}>Apellido *</label>
+                        <input type="text" id="apellido" name="apellido" value={formData.apellido} onChange={handleChange} className={inputClass} />
+                      </div>
+                      <div>
+                        <label htmlFor="tipoDocumento" className={labelClass}>Tipo Documento *</label>
+                        <select id="tipoDocumento" name="tipoDocumento" value={formData.tipoDocumento} onChange={handleTipoChange} className={inputClass}>
+                          {tiposDocumento.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="numeroDocumento" className={labelClass}>Número Documento *</label>
+                        <input type="text" id="numeroDocumento" name="numeroDocumento" value={formData.numeroDocumento} onChange={handleDocumentoChange} className={inputClass} maxLength={15} />
+                      </div>
                     </div>
-                  ))}
-                  {assignedHotels.length === 0 && (
-                    <div className="col-span-full rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500 dark:border-gray-600">
-                      <Building2 className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                      <p>Este vendedor no tiene hoteles asignados.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+                  </div>
+                )}
 
-            {activeTab === 'seguridad' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
-                <div className="max-w-md">
-                  <label htmlFor="password" className={labelClass}>{isEditing ? 'Nueva Contraseña' : 'Contraseña *'}</label>
-                  <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} placeholder="••••••••" className={inputClass} />
-                  {isEditing && <p className="mt-1 text-xs text-gray-500">Deje el campo vacío para mantener la contraseña actual.</p>}
-                </div>
+                {activeTab === 'ubicacion' && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación y Contacto</h3>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div>
+                        <label htmlFor="email" className={labelClass}>Email *</label>
+                        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} />
+                      </div>
+                      <div>
+                        <label htmlFor="telefono" className={labelClass}>Teléfono</label>
+                        <input type="text" id="telefono" name="telefono" value={formData.telefono} onChange={handleNumericChange} className={inputClass} />
+                      </div>
+                      <div className="col-span-full">
+                        <label htmlFor="direccion" className={labelClass}>Dirección *</label>
+                        <input type="text" id="direccion" name="direccion" value={formData.direccion} onChange={handleChange} className={inputClass} />
+                      </div>
+                      <div>
+                        <label className={labelClass}>País *</label>
+                        <select value={paisId} onChange={(e) => handlePaisChange(e.target.value)} className={inputClass}>
+                          <option value="">Seleccione país</option>
+                          {paises.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelClass}>Provincia *</label>
+                        <select value={provinciaId} onChange={(e) => handlePaisChange ? handleProvinciaChange(e.target.value) : null} className={inputClass} disabled={isProvinciasDisabled}>
+                          <option value="">Seleccione provincia</option>
+                          {provincias.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelClass}>Ciudad *</label>
+                        <select value={ciudadId} onChange={(e) => handlePaisChange ? handleCiudadChange(e.target.value) : null} className={inputClass} disabled={isCiudadesDisabled}>
+                          <option value="">Seleccione ciudad</option>
+                          {ciudades.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'hoteles' && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Hoteles Asignados</h3>
+                    <p className="text-sm text-gray-500">
+                      Gestione los hoteles a los que este vendedor tiene acceso.
+                      <br />
+                    </p>
+
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {assignedHotels.map((hotel) => (
+                        <div
+                          key={hotel.id}
+                          className="flex items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm dark:bg-blue-900 dark:text-blue-300">
+                              <Building2 className="h-4 w-4" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{hotel.nombre}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveHotel(hotel.id)}
+                            className="rounded-full p-1 text-red-500 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30"
+                            title="Quitar acceso"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      {assignedHotels.length === 0 && (
+                        <div className="col-span-full rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500 dark:border-gray-600">
+                          <Building2 className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                          <p>Este vendedor no tiene hoteles asignados.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'seguridad' && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
+                    <div className="max-w-md">
+                      <label htmlFor="password" className={labelClass}>{isEditing ? 'Nueva Contraseña' : 'Contraseña *'}</label>
+                      <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} placeholder="••••••••" className={inputClass} />
+                      {isEditing && <p className="mt-1 text-xs text-gray-500">Deje el campo vacío para mantener la contraseña actual.</p>}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-              <button type="button" onClick={handleCancel} disabled={loading} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300">
+              <button type="button" onClick={handleCancel} disabled={loading} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 transition-colors">
                 Cancelar
               </button>
-              <button type="submit" disabled={loading} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+              <button type="submit" disabled={loading || loadingData} className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50">
                 {loading ? 'Guardando...' : (
                   <>
                     <Save className="h-4 w-4" />
-                    Guardar Cambios
+                    {isEditing ? 'Guardar Cambios' : 'Registrar Vendedor'}
                   </>
                 )}
               </button>

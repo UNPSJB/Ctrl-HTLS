@@ -2,7 +2,7 @@ import useUbicacion from '@/hooks/useUbicacion';
 import { useEffect } from 'react';
 
 // Selector cascada de ubicación: País -> Provincia -> Ciudad
-const UbicacionSelector = ({ errors = {}, register, setValue }) => {
+const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
   const {
     paises,
     provincias,
@@ -15,19 +15,38 @@ const UbicacionSelector = ({ errors = {}, register, setValue }) => {
     handlePaisChange,
     handleProvinciaChange,
     handleCiudadChange,
+    setInitialUbicacion,
   } = useUbicacion();
 
+  // Sincronización inicial desde el formulario (Modo Edición)
   useEffect(() => {
-    setValue('paisId', paisId);
-  }, [paisId, setValue]);
+    const fPaisId = watch('paisId');
+    const fProvinciaId = watch('provinciaId');
+    const fCiudadId = watch('ciudadId');
+
+    if (fPaisId && !paisId) {
+      setInitialUbicacion(fPaisId, fProvinciaId, fCiudadId);
+    }
+  }, [watch, paisId, setInitialUbicacion]);
+
+  // Actualizar el formulario solo cuando el hook cambia (y sea diferente al valor actual)
+  useEffect(() => {
+    if (paisId && watch('paisId') !== paisId) {
+      setValue('paisId', paisId);
+    }
+  }, [paisId, setValue, watch]);
 
   useEffect(() => {
-    setValue('provinciaId', provinciaId);
-  }, [provinciaId, setValue]);
+    if (provinciaId && watch('provinciaId') !== provinciaId) {
+      setValue('provinciaId', provinciaId);
+    }
+  }, [provinciaId, setValue, watch]);
 
   useEffect(() => {
-    setValue('ciudadId', ciudadId);
-  }, [ciudadId, setValue]);
+    if (ciudadId && watch('ciudadId') !== ciudadId) {
+      setValue('ciudadId', ciudadId);
+    }
+  }, [ciudadId, setValue, watch]);
 
   const handlePaisChangeInternal = (value) => {
     handlePaisChange(value);
