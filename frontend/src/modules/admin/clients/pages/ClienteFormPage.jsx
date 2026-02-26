@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { UserPlus, Save, X, Edit, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },
@@ -16,6 +17,7 @@ const tiposDocumento = [
 const ClienteFormPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { setCrumbLabel } = useBreadcrumbs();
     const isEditing = Boolean(id);
 
     const [formData, setFormData] = useState({
@@ -42,6 +44,10 @@ const ClienteFormPage = () => {
             setLoadingData(true);
             const response = await axiosInstance.get(`/cliente/${id}`);
             const data = response.data;
+
+            if (data.nombre) {
+                setCrumbLabel(id, `${data.nombre} ${data.apellido || ''}`.trim());
+            }
             setFormData({
                 nombre: data.nombre || '',
                 apellido: data.apellido || '',

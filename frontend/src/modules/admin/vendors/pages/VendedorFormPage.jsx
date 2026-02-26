@@ -5,6 +5,7 @@ import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft } from 'lu
 import { useNavigate, useParams } from 'react-router-dom';
 import useUbicacion from '@/hooks/useUbicacion';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
@@ -16,6 +17,7 @@ const tiposDocumento = [
 const VendedorFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { setCrumbLabel } = useBreadcrumbs();
   const isEditing = Boolean(id);
 
   const {
@@ -62,6 +64,10 @@ const VendedorFormPage = () => {
       setLoadingData(true);
       const response = await axiosInstance.get(`/vendedor/${id}`);
       const data = response.data;
+
+      if (data.nombre) {
+        setCrumbLabel(id, `${data.nombre} ${data.apellido || ''}`.trim());
+      }
 
       const userHotels = data.hotelesPermitidos ? data.hotelesPermitidos : [];
 

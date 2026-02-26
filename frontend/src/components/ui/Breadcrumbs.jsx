@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
+import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 
 // Mapeo de rutas a nombres legibles en español
 const routeNameMap = {
@@ -16,6 +17,7 @@ const routeNameMap = {
 // Componente de migas de pan para navegación
 const Breadcrumbs = () => {
     const location = useLocation();
+    const { labels } = useBreadcrumbs();
     const pathnames = location.pathname.split('/').filter((x) => x);
 
     return (
@@ -37,10 +39,14 @@ const Breadcrumbs = () => {
 
                     const to = `/${pathnames.slice(0, index + 1).join('/')}`;
                     const isLast = index === pathnames.length - 1;
-                    const name = routeNameMap[value] || value;
+
+                    // Buscar en el mapeo estático o en el contexto dinámico
+                    const staticName = routeNameMap[value];
+                    const dynamicName = labels[value];
+                    const name = dynamicName || staticName || value;
 
                     const isId = !isNaN(value) || (pathnames[index - 1] === 'editar');
-                    const displayName = isId ? value : name;
+                    const displayName = isId ? (dynamicName || value) : name;
 
                     return (
                         <li key={to}>

@@ -5,6 +5,7 @@ import { ArrowLeft, Building2, MapPin, User, Bed, DoorOpen, Save } from 'lucide-
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@/hooks/useHotel';
+import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 
 import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import EncargadoForm from '@/components/forms/EncargadoForm';
@@ -17,6 +18,7 @@ import HabitacionesList from '@/modules/admin/hotels/components/HabitacionesList
 export default function HotelFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { setCrumbLabel } = useBreadcrumbs();
   const isEditing = Boolean(id);
   const { tiposHabitaciones, categorias, loading: loadingResources } = useHotel();
 
@@ -72,6 +74,10 @@ export default function HotelFormPage() {
       setLoadingData(true);
       const response = await axiosInstance.get(`/hotel/${id}`);
       const hotel = response.data;
+
+      if (hotel.nombre) {
+        setCrumbLabel(id, hotel.nombre);
+      }
 
       reset({
         nombre: hotel.nombre || '',
