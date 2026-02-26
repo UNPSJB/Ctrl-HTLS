@@ -110,7 +110,24 @@ const setHabitaciones = async (req, res) => {
   }
 
   const { id } = req.params;
-  const habitaciones = req.body;
+  const payload = Array.isArray(req.body) ? req.body : [req.body];
+
+  const habitaciones = payload.map((habitacion) => {
+    const numero =
+      habitacion.numero ??
+      habitacion.numeroHabitacion ??
+      habitacion.numero_habitacion;
+    const tipoHabitacionId =
+      habitacion.idTipoHabitacion ??
+      habitacion.tipoHabitacionId ??
+      habitacion.tipo_habitacion_id;
+
+    return {
+      numero,
+      piso: habitacion.piso,
+      idTipoHabitacion: tipoHabitacionId,
+    };
+  });
 
   try {
     const hotel = await habitacionServices.crearHabitaciones(id, habitaciones);
@@ -247,7 +264,8 @@ const getTiposDeHabitacion = async (req, res) => {
 };
 
 const createEncargado = async (req, res) => {
-  const { nombre, apellido, tipoDocumento, numeroDocumento } = req.body;
+  const { nombre, apellido, tipoDocumento, numeroDocumento, telefono } =
+    req.body;
 
   try {
     const encargado = await hotelServices.crearEncargado(
@@ -255,6 +273,7 @@ const createEncargado = async (req, res) => {
       apellido,
       tipoDocumento,
       numeroDocumento,
+      telefono,
     );
     res.status(201).json(encargado);
   } catch (error) {

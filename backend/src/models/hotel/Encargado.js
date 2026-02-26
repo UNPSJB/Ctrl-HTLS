@@ -21,6 +21,10 @@ const Encargado = sequelize.define(
       type: DataTypes.ENUM('dni', 'li', 'le', 'pasaporte'),
       allowNull: false,
     },
+    telefono: {
+      type: DataTypes.STRING,
+      allowNull: true, // o false si lo querés obligatorio
+    },
   },
   {
     tableName: 'encargados',

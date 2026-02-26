@@ -1,4 +1,7 @@
+const { Op } = require('sequelize');
 const Hotel = require('../../models/hotel/Hotel');
+const HotelTipoHabitacion = require('../../models/hotel/HotelTipoHabitacion');
+const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const sequelize = require('../../config/database');
 const {
   verificarCiudad,
@@ -149,6 +152,14 @@ const getHotelById = async (hotelId) => {
       {
         model: Encargado,
         as: 'encargado',
+        attributes: [
+          'id',
+          'nombre',
+          'apellido',
+          'tipoDocumento',
+          'dni',
+          'telefono',
+        ],
       },
       {
         model: Categoria,
@@ -170,6 +181,18 @@ const getHotelById = async (hotelId) => {
           },
         ],
       },
+      {
+        model: HotelTipoHabitacion,
+        as: 'hotelTipoHabitaciones',
+        attributes: ['hotelId', 'tipoHabitacionId', 'precio'],
+        include: [
+          {
+            model: TipoHabitacion,
+            as: 'tipoHabitacion',
+            attributes: ['id', 'nombre', 'capacidad'],
+          },
+        ],
+      },
     ],
   });
 
@@ -178,8 +201,40 @@ const getHotelById = async (hotelId) => {
   }
 
   const hotelData = hotel.toJSON();
+  const ciudad = hotelData.ciudad;
+  const provincia = ciudad?.provincia;
+  const pais = provincia?.pais;
 
-  return hotelData;
+  return {
+    ...hotelData,
+    encargado: hotelData.encargado
+      ? {
+          id: hotelData.encargado.id,
+          nombre: hotelData.encargado.nombre,
+          apellido: hotelData.encargado.apellido,
+          tipoDocumento: hotelData.encargado.tipoDocumento,
+          numeroDocumento: hotelData.encargado.dni,
+          telefono: hotelData.encargado.telefono,
+        }
+      : null,
+    ubicacion: ciudad
+      ? {
+          ciudadId: ciudad.id,
+          provinciaId: provincia?.id,
+          paisId: pais?.id,
+          ciudad: ciudad,
+          provincia: provincia,
+          pais: pais,
+        }
+      : null,
+    tarifas: hotelData.hotelTipoHabitaciones?.map((registro) => ({
+      hotelId: registro.hotelId,
+      tipoHabitacionId: registro.tipoHabitacionId,
+      tipoHabitacionNombre: registro.tipoHabitacion?.nombre,
+      capacidad: registro.tipoHabitacion?.capacidad,
+      precio: registro.precio,
+    })),
+  };
 };
 
 const asignarTipoHabitaciones = async (hotelId, tipoHabitaciones) => {
@@ -345,6 +400,11 @@ const obtenerTodosLosHoteles = async () => {
           },
         ],
       },
+      {
+        model: Encargado,
+        as: 'encargado',
+        attributes: ['id', 'nombre', 'apellido'],
+      },
     ],
   });
 
@@ -358,18 +418,23 @@ const obtenerCategorias = async () => {
   return categorias;
 };
 
-const verificarHotel = async (
-  nombre,
-  ciudadId,
-  direccion,
-  email,
-  telefono,
-  encargadoId,
-  categoriaId,
-) => {
+const verificarHotel = async (hotelData, hotelId = null) => {
+  const {
+    nombre,
+    ciudadId,
+    direccion,
+    email,
+    telefono,
+    encargadoId,
+    categoriaId,
+  } = hotelData;
   // Verificar si ya existe un hotel con el mismo nombre en la misma ciudad
   const hotelExistenteNombre = await Hotel.findOne({
-    where: { nombre, ciudadId },
+    where: {
+      nombre,
+      ciudadId,
+      ...(hotelId && { id: { [Op.ne]: hotelId } }),
+    },
   });
   if (hotelExistenteNombre) {
     throw new CustomError(
@@ -386,7 +451,10 @@ const verificarHotel = async (
   }
 
   const encargadoHotelExistente = await Hotel.findOne({
-    where: { encargadoId },
+    where: {
+      encargadoId,
+      ...(hotelId && { id: { [Op.ne]: hotelId } }),
+    },
   });
   if (encargadoHotelExistente) {
     throw new CustomError('El encargado ya tiene un hotel asignado', 409); // Conflict
@@ -396,9 +464,9 @@ const verificarHotel = async (
     throw new CustomError('La categoría no existe', 404); // Not Found
   }
 
-  await verificarDireccion(direccion, ciudadId);
-  await verificarEmail(email);
-  await verificarTelefono(telefono);
+  await verificarDireccion(direccion, ciudadId, hotelId);
+  await verificarEmail(email, hotelId);
+  await verificarTelefono(telefono, hotelId);
 };
 
 const agregarPaquetePromocional = async (idHotel, paquete) => {
@@ -662,6 +730,7 @@ const crearEncargado = async (
   apellido,
   tipoDocumento,
   numeroDocumento,
+  telefono,
 ) => {
   let nuevoEncargado = {};
   try {
@@ -672,6 +741,7 @@ const crearEncargado = async (
       apellido,
       dni: numeroDocumento,
       tipoDocumento,
+      telefono,
     });
 
     return nuevoEncargado.dataValues;
