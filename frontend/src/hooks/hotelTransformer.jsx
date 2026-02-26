@@ -98,6 +98,9 @@ export const transformHotel = (hotel) => {
     })),
     habitaciones: habitacionesTransformadas,
     paquetes: paquetesAgrupados,
+    encargadoNombre: hotel.encargado
+      ? `${capitalize(hotel.encargado.nombre)} ${capitalize(hotel.encargado.apellido)}`
+      : 'Sin encargado',
     _isTransformed: true,
   };
 };

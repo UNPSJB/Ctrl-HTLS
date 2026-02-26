@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Edit, Trash2, Eye, Plus, Search, MapPin, Star, Building2, X } from 'lucide-react';
+import { Edit, Trash2, Eye, Plus, Search, MapPin, Star, Building2, X, User } from 'lucide-react';
 import TableButton from '@/components/ui/TableButton';
 import { useHotelsData } from '@/hooks/useHotelsData';
 import { Loading } from '@/components/ui/Loading';
@@ -134,8 +134,9 @@ const AdminHotelList = () => {
                           <div className="font-medium text-gray-900 dark:text-white">
                             {hotel.nombre}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-
+                          <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {hotel.encargadoNombre}
                           </div>
                         </div>
                       </div>

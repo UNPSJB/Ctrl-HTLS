@@ -85,43 +85,27 @@ export default function HotelFormPage() {
         telefono: hotel.telefono || '',
         email: hotel.email || '',
         categoriaId: hotel.categoriaId || '',
-        paisId: hotel.ciudad?.provincia?.pais?.id || '',
-        provinciaId: hotel.ciudad?.provincia?.id || '',
-        ciudadId: hotel.ciudad?.id || '',
+        paisId: hotel.ubicacion?.paisId || '',
+        provinciaId: hotel.ubicacion?.provinciaId || '',
+        ciudadId: hotel.ubicacion?.ciudadId || '',
         encargadoNombre: hotel.encargado?.nombre || '',
         encargadoApellido: hotel.encargado?.apellido || '',
         encargadoTipoDocumento: hotel.encargado?.tipoDocumento || '',
-        encargadoNumeroDocumento: hotel.encargado?.dni || '',
-        tiposHabitaciones: [],
+        encargadoNumeroDocumento: hotel.encargado?.numeroDocumento || '',
+        tiposHabitaciones: hotel.tarifas?.map(t => ({
+          id: t.tipoHabitacionId,
+          nombre: t.tipoHabitacionNombre,
+          precio: t.precio
+        })) || [],
       });
 
-      setTiposSeleccionados([]);
-
-      // Intento de inferir tipos de habitación y precios desde el listado de habitaciones físicas
-      // Esto es un parche necesario ya que el endpoint /hotel/:id no devuelve las tarifas actualmente.
-      try {
-        const roomsRes = await axiosInstance.get(`/hotel/${id}/habitaciones`);
-        const rooms = roomsRes.data;
-        const inferredTypes = [];
-        const seenTypes = new Set();
-
-        rooms.forEach(r => {
-          if (r.tipoHabitacionId && !seenTypes.has(r.tipoHabitacionId)) {
-            seenTypes.add(r.tipoHabitacionId);
-            inferredTypes.push({
-              id: r.tipoHabitacionId,
-              nombre: r.tipoHabitacion?.nombre || `Tipo #${r.tipoHabitacionId}`,
-              precio: r.precio || 0
-            });
-          }
-        });
-
-        if (inferredTypes.length > 0) {
-          setTiposSeleccionados(inferredTypes);
-          setValue('tiposHabitaciones', inferredTypes);
-        }
-      } catch (errInferred) {
-        console.error("No se pudieron inferir las tarifas:", errInferred);
+      if (hotel.tarifas) {
+        const formattedTarifas = hotel.tarifas.map(t => ({
+          id: t.tipoHabitacionId,
+          nombre: t.tipoHabitacionNombre,
+          precio: t.precio
+        }));
+        setTiposSeleccionados(formattedTarifas);
       }
 
     } catch (error) {
