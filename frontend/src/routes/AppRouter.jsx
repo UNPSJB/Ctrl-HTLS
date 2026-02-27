@@ -12,7 +12,10 @@ import LoginPage from '@/pages/LoginPage';
 import VendedoresList from '@/modules/admin/vendors/components/VendedoresList';
 import VendedorFormPage from '@/modules/admin/vendors/pages/VendedorFormPage';
 import LiquidacionesGlobalesPage from '@/modules/admin/vendors/pages/LiquidacionesGlobalesPage';
+import AdministradoresList from '@/modules/admin/vendors/components/AdministradoresList';
 import VendedorLiquidacionesPage from '@/modules/admin/vendors/pages/VendedorLiquidacionesPage';
+import PersonalManager from '@/modules/admin/vendors/pages/PersonalManager';
+import AdminFormPage from '@/modules/admin/vendors/pages/AdminFormPage';
 import ClienteFormPage from '@/modules/admin/clients/pages/ClienteFormPage';
 // Importaremos placeholder o componentes reales según existan
 import ClientesManager from '@/modules/admin/clients/components/ClientesManager';
@@ -45,12 +48,18 @@ function AppRouter() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
 
-                {/* Rutas de Vendedores */}
-                <Route path="vendedores" element={<VendedoresList />} />
-                <Route path="vendedores/liquidaciones" element={<LiquidacionesGlobalesPage />} />
-                <Route path="vendedores/liquidaciones/:id" element={<VendedorLiquidacionesPage />} />
+                {/* Rutas de Personal (Vendedores + Administradores) */}
+                <Route path="personal" element={<PersonalManager />}>
+                  <Route index element={<Navigate to="vendedores" replace />} />
+                  <Route path="vendedores" element={<VendedoresList />} />
+                  <Route path="administradores" element={<AdministradoresList />} />
+                </Route>
                 <Route path="vendedores/nuevo" element={<VendedorFormPage />} />
                 <Route path="vendedores/editar/:id" element={<VendedorFormPage />} />
+                <Route path="administradores/nuevo" element={<AdminFormPage />} />
+                <Route path="administradores/editar/:id" element={<AdminFormPage />} />
+                <Route path="personal/liquidaciones" element={<LiquidacionesGlobalesPage />} />
+                <Route path="personal/liquidaciones/:id" element={<VendedorLiquidacionesPage />} />
 
                 {/* Rutas de Hoteles */}
                 <Route path="hoteles" element={<AdminHotelList />} />

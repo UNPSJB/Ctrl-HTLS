@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Edit, Trash2, Eye, Plus, Search, MapPin, Star, Building2, X, User } from 'lucide-react';
 import TableButton from '@/components/ui/TableButton';
 import { useHotelsData } from '@/hooks/useHotelsData';
-import { Loading } from '@/components/ui/Loading';
+import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useNavigate } from 'react-router-dom';
 
 // Lista principal de hoteles para administración
@@ -92,15 +92,9 @@ const AdminHotelList = () => {
           </div>
         </div>
 
-        {/* Listado de Hoteles */}
-        <div className="overflow-x-auto min-h-[300px]">
+        <div className="overflow-x-auto min-h-[400px] flex flex-col">
           {loading ? (
-            <div className="flex h-64 items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">Cargando hoteles...</p>
-              </div>
-            </div>
+            <InnerLoading message="Cargando hoteles..." />
           ) : filteredHoteles.length > 0 ? (
             <table className="w-full border-collapse">
               <thead>

@@ -38,9 +38,9 @@ function AdminSidebar({ onClose }) {
       path: '/admin/hoteles',
     },
     {
-      title: 'Vendedores',
+      title: 'Personal',
       icon: UserCheck,
-      path: '/admin/vendedores',
+      path: '/admin/personal',
     },
     {
       title: 'Clientes',

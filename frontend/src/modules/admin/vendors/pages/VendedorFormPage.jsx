@@ -220,7 +220,7 @@ const VendedorFormPage = () => {
           </h1>
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <Briefcase className="h-4 w-4" />
-            <span>Rol: Vendedor</span>
+            <span>Rol: {formData.rol === 'administrador' ? 'Administrador' : 'Vendedor'}</span>
             {isEditing && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">Activo</span>}
           </div>
         </div>
@@ -237,9 +237,11 @@ const VendedorFormPage = () => {
             <button type="button" onClick={() => setActiveTab('ubicacion')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'ubicacion' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
               <MapPin className="h-4 w-4" /> Ubicación y Contacto
             </button>
-            <button type="button" onClick={() => setActiveTab('hoteles')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'hoteles' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
-              <Building2 className="h-4 w-4" /> Acceso a Hoteles
-            </button>
+            {formData.rol === 'vendedor' && (
+              <button type="button" onClick={() => setActiveTab('hoteles')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'hoteles' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
+                <Building2 className="h-4 w-4" /> Acceso a Hoteles
+              </button>
+            )}
             <button type="button" onClick={() => setActiveTab('seguridad')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'seguridad' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
               <Lock className="h-4 w-4" /> Seguridad
             </button>
@@ -275,6 +277,13 @@ const VendedorFormPage = () => {
                       <div>
                         <label htmlFor="numeroDocumento" className={labelClass}>Número Documento *</label>
                         <input type="text" id="numeroDocumento" name="numeroDocumento" value={formData.numeroDocumento} onChange={handleDocumentoChange} className={inputClass} maxLength={15} />
+                      </div>
+                      <div>
+                        <label htmlFor="rol" className={labelClass}>Rol en el Sistema *</label>
+                        <select id="rol" name="rol" value={formData.rol} onChange={handleChange} className={inputClass}>
+                          <option value="vendedor">Vendedor</option>
+                          <option value="administrador">Administrador</option>
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -382,7 +391,7 @@ const VendedorFormPage = () => {
                 {loading ? 'Guardando...' : (
                   <>
                     <Save className="h-4 w-4" />
-                    {isEditing ? 'Guardar Cambios' : 'Registrar Vendedor'}
+                    {isEditing ? 'Guardar Cambios' : `Registrar ${formData.rol === 'administrador' ? 'Administrador' : 'Vendedor'}`}
                   </>
                 )}
               </button>

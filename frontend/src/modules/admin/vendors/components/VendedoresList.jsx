@@ -1,13 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Edit, Trash2, Eye, Search, Plus, ChevronLeft, ChevronRight, X, CheckSquare, Square, DollarSign, FileText } from 'lucide-react';
-import TableButton from '@ui/TableButton';
+import { Edit, Trash2, Search, Plus, ChevronLeft, ChevronRight, X, DollarSign, FileText, User, Users } from 'lucide-react';
+import TableButton from '@/components/ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
-import { Loading } from '@ui/Loading';
+import { InnerLoading } from '@/components/ui/InnerLoading';
 
 const ITEMS_PER_PAGE = 10;
 
-// Listado y administración de vendedores (empleados)
 const VendedoresList = () => {
   const [vendedores, setVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +21,6 @@ const VendedoresList = () => {
     fetchVendedores();
   }, []);
 
-  // Obtiene la lista de vendedores desde la API
   const fetchVendedores = async () => {
     try {
       setLoading(true);
@@ -37,14 +35,12 @@ const VendedoresList = () => {
   };
 
   const handleEdit = (id) => {
-    navigate(`/admin/vendedores/editar/${id}`);
+    navigate(`/admin/personal/vendedores/editar/${id}`);
   };
 
-  // Filtra vendedores por nombre, documento o email
   const filteredVendedores = useMemo(() => {
     if (!searchTerm) return vendedores;
     const lowerTerm = searchTerm.toLowerCase();
-
     return vendedores.filter(v =>
       v.nombre.toLowerCase().includes(lowerTerm) ||
       v.apellido.toLowerCase().includes(lowerTerm) ||
@@ -61,215 +57,119 @@ const VendedoresList = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este vendedor?')) {
-      await deleteVendedor(id);
-    }
-  };
-
-  const deleteVendedor = async (id) => {
-    try {
-      await axiosInstance.delete(`/empleado/${id}`);
-      setVendedores(prev => prev.filter((v) => v.id !== id));
-      setSelectedIds(prev => prev.filter(selId => selId !== id));
-    } catch (err) {
-      alert(`Error al eliminar vendedor: ${err.response?.data?.error || 'Error desconocido'}`);
-    }
-  };
-
-  // Eliminación masiva de vendedores seleccionados
-  const handleBulkDelete = async () => {
-    if (window.confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} vendedores seleccionados?`)) {
-      setLoading(true);
-      for (const id of selectedIds) {
-        await deleteVendedor(id);
+      try {
+        await axiosInstance.delete(`/empleado/${id}`);
+        setVendedores(prev => prev.filter((v) => v.id !== id));
+      } catch (err) {
+        alert('Error al eliminar vendedor');
       }
-      setSelectedIds([]);
-      setLoading(false);
-      alert('Vendedores eliminados');
     }
   };
 
-  const toggleSelectAll = () => {
-    if (selectedIds.length === currentItems.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(currentItems.map(v => v.id));
-    }
-  };
-
-  const toggleSelect = (id) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter(selId => selId !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
+  const handleCreate = () => {
+    navigate('/admin/personal/vendedores/nuevo');
   };
 
   useEffect(() => {
     setCurrentPage(1);
-    setSelectedIds([]);
   }, [searchTerm]);
 
-  const handleCreate = () => {
-    navigate('/admin/vendedores/nuevo');
-  };
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   return (
     <div className="space-y-6">
 
-      {/* Encabezado y Acciones */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Vendedores</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Listado y administración de fuerza de ventas</p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            to="/admin/vendedores/liquidaciones"
-            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-          >
-            <DollarSign className="h-4 w-4" />
-            Liquidaciones
-          </Link>
-          {selectedIds.length > 0 && (
-            <button
-              onClick={handleBulkDelete}
-              className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
-            >
-              <Trash2 className="h-4 w-4" />
-              Eliminar ({selectedIds.length})
-            </button>
-          )}
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo Vendedor
-          </button>
-        </div>
-      </div>
-
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
-        {/* Barra de Búsqueda */}
-        <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <div className="relative max-w-md">
+        {/* Barra de Acceso Rápido: Búsqueda y Botones al mismo nivel */}
+        <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-md">
             <input
               type="text"
-              placeholder="Buscar por nombre, documento o email..."
+              placeholder="Buscar por nombre, DNI o email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             />
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
             {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={() => setSearchTerm('')} className="absolute right-3 top-2.5 text-gray-400">
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
+
+          <div className="flex gap-2">
+            <Link
+              to="/admin/personal/liquidaciones"
+              className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+            >
+              <DollarSign className="h-4 w-4 text-green-600" />
+              Liquidaciones
+            </Link>
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm"
+            >
+              <Plus className="h-4 w-4" />
+              Nuevo Vendedor
+            </button>
+          </div>
         </div>
 
-        {/* Detalle de Vendedores en Tabla */}
-        <div className="overflow-x-auto min-h-[300px]">
+        {/* Tabla Estándar */}
+        <div className="overflow-x-auto min-h-[400px] flex flex-col">
           {loading ? (
-            <div className="flex h-64 items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">Cargando vendedores...</p>
-              </div>
-            </div>
+            <InnerLoading message="Cargando personal de ventas..." />
           ) : filteredVendedores.length > 0 ? (
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
-                  <th className="w-4 px-6 py-3">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={currentItems.length > 0 && selectedIds.length === currentItems.length}
-                      onChange={toggleSelectAll}
-                    />
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Vendedor
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Documento
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Contacto
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Hoteles
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Acciones
-                  </th>
+                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Personal</th>
+                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Identificación</th>
+                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Contacto</th>
+                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Hoteles</th>
+                  <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {currentItems.map((vendedor) => (
-                  <tr
-                    key={vendedor.id}
-                    className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 ${selectedIds.includes(vendedor.id) ? 'bg-blue-50 dark:bg-blue-900/10' : 'bg-white dark:bg-gray-800'}`}
-                  >
-                    <td className="px-6 py-4">
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        checked={selectedIds.includes(vendedor.id)}
-                        onChange={() => toggleSelect(vendedor.id)}
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                  <tr key={vendedor.id} className="hover:bg-gray-50 transition-colors bg-white dark:bg-gray-800">
+                    <td className="px-6 py-3">
                       <div className="flex items-center">
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold dark:bg-blue-900/30 dark:text-blue-400">
-                          {vendedor.nombre.charAt(0)}{vendedor.apellido.charAt(0)}
+                        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                          <User className="h-4 w-4" />
                         </div>
-                        <div className="ml-4">
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {vendedor.nombre} {vendedor.apellido}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {vendedor.rol}
+                        <div className="ml-4 text-sm">
+                          <div className="font-medium text-gray-900 dark:text-white capitalize transition-all">
+                            {vendedor.nombre.toLowerCase()} {vendedor.apellido.toLowerCase()}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                      <span className="uppercase font-bold text-xs mr-2 border rounded px-1">{vendedor.tipoDocumento}</span>
+                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                      <span className="font-bold border rounded px-1 text-[10px] mr-2">{vendedor.tipoDocumento}</span>
                       {vendedor.numeroDocumento}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
                       <div>{vendedor.email}</div>
-                      <div className="text-xs text-gray-500">{vendedor.telefono}</div>
+                      <div className="text-[11px] text-gray-500">{vendedor.telefono}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1 max-w-[200px]">
-                        {vendedor.hotelesPermitidos && vendedor.hotelesPermitidos.length > 0 ? (
-                          vendedor.hotelesPermitidos.slice(0, 3).map(h => (
-                            <span key={h.id} className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                              {h.nombre}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">Ninguno</span>
-                        )}
-                        {vendedor.hotelesPermitidos && vendedor.hotelesPermitidos.length > 3 && (
-                          <span className="text-xs text-gray-500">+{vendedor.hotelesPermitidos.length - 3}</span>
-                        )}
+                    <td className="px-6 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {vendedor.hotelesPermitidos?.map(h => (
+                          <span key={h.id} className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                            {h.nombre}
+                          </span>
+                        ))}
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                    <td className="px-6 py-3 text-right">
                       <div className="flex justify-end gap-2">
                         <TableButton
                           variant="view"
                           icon={FileText}
-                          onClick={() => navigate(`/admin/vendedores/liquidaciones/${vendedor.id}`)}
+                          onClick={() => navigate(`/admin/personal/liquidaciones/${vendedor.id}`)}
                           title="Ver Liquidaciones"
                         />
                         <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />
@@ -281,13 +181,14 @@ const VendedoresList = () => {
               </tbody>
             </table>
           ) : (
-            <div className="p-12 text-center">
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
               <p className="text-gray-500 dark:text-gray-400">No se encontraron vendedores que coincidan con la búsqueda.</p>
             </div>
           )}
         </div>
 
-        {/* Paginación */}
+        {/* Paginación Estándar */}
         {!loading && filteredVendedores.length > 0 && (
           <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
             <div className="text-sm text-gray-500 dark:text-gray-400">

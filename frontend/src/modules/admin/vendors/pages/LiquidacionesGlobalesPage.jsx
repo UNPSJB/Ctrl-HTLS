@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Calendar, DollarSign, Search, FileText, CheckCircle2 } from 'lucide-react';
 import axiosInstance from '@api/axiosInstance';
-import { Loading } from '@ui/Loading';
+import { InnerLoading } from '@/components/ui/InnerLoading';
 import DateDisplay from '@ui/DateDisplay';
 
 // Página para consulta y generación masiva de liquidaciones
@@ -130,8 +130,8 @@ const LiquidacionesGlobalesPage = () => {
         {/* Listado de Liquidaciones */}
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="flex justify-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="flex min-h-[300px] flex-col">
+              <InnerLoading message="Consultando historial..." />
             </div>
           ) : liquidaciones.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">

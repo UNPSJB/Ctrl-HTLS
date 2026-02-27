@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Search, Plus, ChevronLeft, ChevronRight, X, Users } from 'lucide-react';
 import TableButton from '@ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
-import { Loading } from '@ui/Loading';
+import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
 
 const ITEMS_PER_PAGE = 10;
@@ -182,15 +182,9 @@ const ClientesManager = () => {
           </div>
         </div>
 
-        {/* Tabla de Resultados */}
-        <div className="overflow-x-auto min-h-[300px]">
+        <div className="overflow-x-auto min-h-[400px] flex flex-col">
           {loading ? (
-            <div className="flex h-64 items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">Cargando clientes...</p>
-              </div>
-            </div>
+            <InnerLoading message="Cargando clientes..." />
           ) : filteredClientes.length > 0 ? (
             <table className="w-full border-collapse">
               <thead>
