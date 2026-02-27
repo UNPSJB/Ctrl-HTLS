@@ -58,12 +58,26 @@ const AdministradoresList = () => {
 
     return (
         <div className="space-y-6">
+            {/* Header Estándar */}
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Administradores</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Gestión de privilegios y accesos del sistema</p>
+                </div>
+                <button
+                    onClick={handleCreate}
+                    className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                >
+                    <Plus className="h-4 w-4" />
+                    Nuevo Administrador
+                </button>
+            </div>
 
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
-                {/* Barra de Acceso Rápido */}
-                <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="relative flex-1 max-w-md">
+                {/* Barra de Búsqueda Centrada */}
+                <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+                    <div className="relative max-w-md">
                         <input
                             type="text"
                             placeholder="Buscar administrador..."
@@ -78,14 +92,6 @@ const AdministradoresList = () => {
                             </button>
                         )}
                     </div>
-
-                    <button
-                        onClick={handleCreate}
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm"
-                    >
-                        <Plus className="h-4 w-4" />
-                        Nuevo Administrador
-                    </button>
                 </div>
 
                 {/* Tabla Administradores */}
@@ -107,8 +113,8 @@ const AdministradoresList = () => {
                                     <tr key={admin.id} className="hover:bg-gray-50 transition-colors bg-white dark:bg-gray-800">
                                         <td className="px-6 py-3">
                                             <div className="flex items-center">
-                                                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                                                    <ShieldCheck className="h-4 w-4" />
+                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                                    <ShieldCheck className="h-5 w-5" />
                                                 </div>
                                                 <div className="ml-4 text-sm">
                                                     <div className="font-medium text-gray-900 dark:text-white capitalize transition-all">

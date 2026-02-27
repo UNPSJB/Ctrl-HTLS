@@ -227,7 +227,7 @@ const ClientesManager = () => {
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <div className="flex items-center">
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold dark:bg-blue-900/30 dark:text-blue-400">
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 font-bold dark:bg-blue-900/30 dark:text-blue-400">
                           {cliente.nombre.charAt(0)}{cliente.apellido.charAt(0)}
                         </div>
                         <div className="ml-4">

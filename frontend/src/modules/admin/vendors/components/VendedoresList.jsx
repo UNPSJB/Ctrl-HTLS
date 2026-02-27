@@ -78,12 +78,35 @@ const VendedoresList = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header Estándar */}
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Equipo de Ventas</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Administra el personal comercial y sus liquidaciones</p>
+        </div>
+        <div className="flex gap-2">
+          <Link
+            to="/admin/personal/liquidaciones"
+            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          >
+            <DollarSign className="h-4 w-4 text-green-600" />
+            Liquidaciones
+          </Link>
+          <button
+            onClick={handleCreate}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+          >
+            <Plus className="h-4 w-4" />
+            Nuevo Vendedor
+          </button>
+        </div>
+      </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
-        {/* Barra de Acceso Rápido: Búsqueda y Botones al mismo nivel */}
-        <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
+        {/* Barra de Búsqueda: Centrada y dentro de la tabla */}
+        <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+          <div className="relative max-w-md">
             <input
               type="text"
               placeholder="Buscar por nombre, DNI o email..."
@@ -97,23 +120,6 @@ const VendedoresList = () => {
                 <X className="h-4 w-4" />
               </button>
             )}
-          </div>
-
-          <div className="flex gap-2">
-            <Link
-              to="/admin/personal/liquidaciones"
-              className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
-            >
-              <DollarSign className="h-4 w-4 text-green-600" />
-              Liquidaciones
-            </Link>
-            <button
-              onClick={handleCreate}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm"
-            >
-              <Plus className="h-4 w-4" />
-              Nuevo Vendedor
-            </button>
           </div>
         </div>
 
@@ -137,8 +143,8 @@ const VendedoresList = () => {
                   <tr key={vendedor.id} className="hover:bg-gray-50 transition-colors bg-white dark:bg-gray-800">
                     <td className="px-6 py-3">
                       <div className="flex items-center">
-                        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                          <User className="h-4 w-4" />
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                          <User className="h-5 w-5" />
                         </div>
                         <div className="ml-4 text-sm">
                           <div className="font-medium text-gray-900 dark:text-white capitalize transition-all">
