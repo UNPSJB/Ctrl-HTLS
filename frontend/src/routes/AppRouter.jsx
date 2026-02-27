@@ -48,18 +48,24 @@ function AppRouter() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
 
-                {/* Rutas de Personal (Vendedores + Administradores) */}
+                {/* Rutas de Personal (Vendedores + Administradores + Liquidaciones) */}
                 <Route path="personal" element={<PersonalManager />}>
                   <Route index element={<Navigate to="vendedores" replace />} />
+                  
+                  {/* Vendedores */}
                   <Route path="vendedores" element={<VendedoresList />} />
+                  <Route path="vendedores/nuevo" element={<VendedorFormPage />} />
+                  <Route path="vendedores/editar/:id" element={<VendedorFormPage />} />
+                  
+                  {/* Administradores */}
                   <Route path="administradores" element={<AdministradoresList />} />
+                  <Route path="administradores/nuevo" element={<AdminFormPage />} />
+                  <Route path="administradores/editar/:id" element={<AdminFormPage />} />
+                  
+                  {/* Liquidaciones */}
+                  <Route path="liquidaciones" element={<LiquidacionesGlobalesPage />} />
+                  <Route path="liquidaciones/:id" element={<VendedorLiquidacionesPage />} />
                 </Route>
-                <Route path="vendedores/nuevo" element={<VendedorFormPage />} />
-                <Route path="vendedores/editar/:id" element={<VendedorFormPage />} />
-                <Route path="administradores/nuevo" element={<AdminFormPage />} />
-                <Route path="administradores/editar/:id" element={<AdminFormPage />} />
-                <Route path="personal/liquidaciones" element={<LiquidacionesGlobalesPage />} />
-                <Route path="personal/liquidaciones/:id" element={<VendedorLiquidacionesPage />} />
 
                 {/* Rutas de Hoteles */}
                 <Route path="hoteles" element={<AdminHotelList />} />
