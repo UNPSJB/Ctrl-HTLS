@@ -141,77 +141,56 @@ export default function HabitacionesList({ hotelId, tiposDisponibles, localRooms
             </div>
 
             {isCreating && (
-                <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 animate-in fade-in slide-in-from-top-2">
-                    {/* Formulario de Creación/Edición */}
-                    <div className="flex flex-col md:flex-row gap-4 items-end">
-                        <div className="w-24">
-                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Número</label>
+                <div className="p-5 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 animate-in fade-in slide-in-from-top-2">
+                    {/* Formulario de Creación/Edición Premium */}
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                        <div className="sm:col-span-1">
+                            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Número</label>
                             <input
                                 type="number"
                                 {...register('numero', { required: 'Requerido' })}
-                                className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                                 placeholder="101"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleSubmit(onSubmit)();
-                                    }
-                                }}
                             />
-                            {errors.numero && <span className="text-red-500 text-xs">{errors.numero.message}</span>}
+                            {errors.numero && <span className="text-red-500 text-[10px] mt-1">{errors.numero.message}</span>}
                         </div>
-                        <div className="w-24">
-                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Piso</label>
+                        <div className="sm:col-span-1">
+                            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Piso</label>
                             <input
                                 type="number"
                                 {...register('piso', { required: 'Requerido' })}
-                                className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                                 placeholder="1"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleSubmit(onSubmit)();
-                                    }
-                                }}
                             />
-                            {errors.piso && <span className="text-red-500 text-xs">{errors.piso.message}</span>}
+                            {errors.piso && <span className="text-red-500 text-[10px] mt-1">{errors.piso.message}</span>}
                         </div>
-                        <div className="flex-1 min-w-[200px]">
-                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo</label>
+                        <div className="sm:col-span-1">
+                            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Tipo</label>
                             <select
                                 {...register('tipoHabitacionId', { required: 'Requerido' })}
-                                className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleSubmit(onSubmit)();
-                                    }
-                                }}
+                                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                             >
                                 <option value="">Seleccionar...</option>
                                 {tiposDisponibles.map(t => (
-                                    <option key={t.id} value={t.id}>{t.nombre || `Tipo #${t.id}`}</option>
+                                    <option key={t.id} value={t.id}>{t.nombre}</option>
                                 ))}
                             </select>
-                            {errors.tipoHabitacionId && <span className="text-red-500 text-xs">{errors.tipoHabitacionId.message}</span>}
+                            {errors.tipoHabitacionId && <span className="text-red-500 text-[10px] mt-1">{errors.tipoHabitacionId.message}</span>}
                         </div>
-                        <div className="flex gap-2 pb-0.5">
+                        <div className="sm:col-span-1 flex gap-2">
                             <button
                                 type="button"
                                 onClick={handleSubmit(onSubmit)}
-                                className="flex items-center gap-1 px-4 py-2 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                                className="flex-1 flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-all active:scale-95"
                             >
-                                <Plus className="w-3 h-3" /> Crear
+                                {editingId ? 'Actualizar' : 'Agregar'}
                             </button>
                             <button
                                 type="button"
                                 onClick={cancelForm}
-                                className="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
                             >
-                                Cancelar
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
                     </div>

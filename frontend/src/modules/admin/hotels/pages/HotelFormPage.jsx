@@ -26,6 +26,11 @@ export default function HotelFormPage() {
   const [loadingData, setLoadingData] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Modo de selección de encargado: 'select' o 'create'
+  const [encargadoMode, setEncargadoMode] = useState('create');
+  const [encargadosExistentes, setEncargadosExistentes] = useState([]);
+  const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
+
   const [tiposSeleccionados, setTiposSeleccionados] = useState([]);
   const [selectedTipo, setSelectedTipo] = useState('');
   const [precioTemporal, setPrecioTemporal] = useState('');
@@ -99,6 +104,11 @@ export default function HotelFormPage() {
         })) || [],
       });
 
+      if (hotel.encargado?.id) {
+        setSelectedEncargadoId(hotel.encargado.id);
+        setEncargadoMode('create'); // Por defecto para ver sus datos
+      }
+
       if (hotel.tarifas) {
         const formattedTarifas = hotel.tarifas.map(t => ({
           id: t.tipoHabitacionId,
@@ -167,9 +177,23 @@ export default function HotelFormPage() {
         return;
       }
 
-      let encargadoId = null;
+      let encargadoIdParaHotel = null;
 
-      if (!isEditing) {
+      if (encargadoMode === 'select') {
+        if (isEditing && !selectedEncargadoId) {
+          toast.error('Debe seleccionar un encargado del listado');
+          setIsSubmitting(false);
+          return;
+        }
+        encargadoIdParaHotel = selectedEncargadoId;
+      } else {
+        // Modo 'create': Validar que al menos el nombre esté presente
+        if (!data.encargadoNombre) {
+          toast.error('Nombre del encargado es obligatorio');
+          setIsSubmitting(false);
+          return;
+        }
+
         const encargadoData = {
           nombre: data.encargadoNombre,
           apellido: data.encargadoApellido,
@@ -179,7 +203,7 @@ export default function HotelFormPage() {
 
         try {
           const respEncargado = await axiosInstance.post('/hotel/encargados', encargadoData);
-          encargadoId = respEncargado.data.id;
+          encargadoIdParaHotel = respEncargado.data.id;
         } catch (err) {
           console.error(err);
           toast.error('Error al registrar encargado. Verifique los datos.');
@@ -197,7 +221,7 @@ export default function HotelFormPage() {
         provinciaId: data.provinciaId,
         ciudadId: data.ciudadId,
         categoriaId: data.categoriaId,
-        ...(encargadoId && { encargadoId }),
+        encargadoId: encargadoIdParaHotel,
         tipoHabitaciones: tiposSeleccionados.map(t => ({ id: t.id, precio: t.precio })),
       };
 
@@ -347,7 +371,7 @@ export default function HotelFormPage() {
                   {activeTab === 'general' && renderGeneralTab()}
 
                   {activeTab === 'ubicacion' && (
-                    <div className="space-y-4">
+                    <div className="space-y-4 animate-in fade-in duration-300">
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Dirección *</label>
                         <input
@@ -361,11 +385,54 @@ export default function HotelFormPage() {
                   )}
 
                   {activeTab === 'encargado' && (
-                    <div className="space-y-4">
-                      <EncargadoForm register={register} errors={errors} loading={loadingResources || isSubmitting} />
-                      {isEditing && (
-                        <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 text-sm rounded-md dark:bg-yellow-900/20 dark:text-yellow-200">
-                          Nota: La edición de datos sensibles del encargado puede estar restringida.
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                      {/* Selector de Modo de Encargado */}
+                      <div className="flex p-1 bg-gray-100 dark:bg-gray-700 rounded-lg w-fit">
+                        <button
+                          type="button"
+                          onClick={() => setEncargadoMode('create')}
+                          className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${encargadoMode === 'create'
+                            ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            }`}
+                        >
+                          {isEditing ? 'Datos del Encargado' : 'Registrar Nuevo'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEncargadoMode('select')}
+                          className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${encargadoMode === 'select'
+                            ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            }`}
+                        >
+                          Seleccionar Existente
+                        </button>
+                      </div>
+
+                      {encargadoMode === 'create' ? (
+                        <div className="space-y-4">
+                          <EncargadoForm register={register} errors={errors} loading={loadingResources || isSubmitting} />
+                          {isEditing && (
+                            <div className="p-4 bg-yellow-50 text-yellow-800 text-sm rounded-md dark:bg-yellow-900/20 dark:text-yellow-200 flex items-start gap-3">
+                              <div className="mt-0.5">⚠️</div>
+                              <p>Actualmente solo puedes ver los datos del encargado asignado. La edición proactiva de sus datos estará disponible próximamente en el backend.</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="p-8 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl flex flex-col items-center justify-center text-center space-y-3">
+                            <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                              <User className="h-6 w-6 text-gray-400" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Selector de Encargados</h4>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                                Esta funcionalidad requiere un endpoint de listado en el backend. Por ahora, el encargado actual se mantiene vinculado.
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
