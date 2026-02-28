@@ -6,7 +6,7 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import DateDisplay from '@ui/DateDisplay';
 
 // Página para consulta y generación masiva de liquidaciones
-const LiquidacionesGlobalesPage = () => {
+const LiquidacionesGlobales = () => {
   const [liquidaciones, setLiquidaciones] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -176,4 +176,4 @@ const LiquidacionesGlobalesPage = () => {
   );
 };
 
-export default LiquidacionesGlobalesPage;
+export default LiquidacionesGlobales;

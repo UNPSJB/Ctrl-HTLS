@@ -8,7 +8,7 @@ import { Loading } from '@ui/Loading';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 // Detalle de ventas y liquidaciones de un vendedor
-const VendedorLiquidacionesPage = () => {
+const VendedorLiquidaciones = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -380,4 +380,4 @@ const VendedorLiquidacionesPage = () => {
     );
 };
 
-export default VendedorLiquidacionesPage;
+export default VendedorLiquidaciones;

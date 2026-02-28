@@ -14,7 +14,7 @@ const tiposDocumento = [
 ];
 
 // Formulario para registro y edición de clientes
-const ClienteFormPage = () => {
+const ClientesForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { setCrumbLabel } = useBreadcrumbs();
@@ -339,4 +339,4 @@ const ClienteFormPage = () => {
     );
 };
 
-export default ClienteFormPage;
+export default ClientesForm;

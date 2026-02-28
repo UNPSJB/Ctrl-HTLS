@@ -6,7 +6,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { Link } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
-function DashboardPage() {
+function Dashboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -233,4 +233,4 @@ function DashboardPage() {
   );
 }
 
-export default DashboardPage;
+export default Dashboard;

@@ -14,7 +14,7 @@ const tiposDocumento = [
   { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
-const VendedorFormPage = () => {
+const VendedoresForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { setCrumbLabel } = useBreadcrumbs();
@@ -404,4 +404,4 @@ const VendedorFormPage = () => {
   );
 };
 
-export default VendedorFormPage;
+export default VendedoresForm;

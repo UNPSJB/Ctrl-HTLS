@@ -14,7 +14,7 @@ const tiposDocumento = [
     { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
-const AdminFormPage = () => {
+const AdministradoresForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { setCrumbLabel } = useBreadcrumbs();
@@ -337,4 +337,4 @@ const AdminFormPage = () => {
     );
 };
 
-export default AdminFormPage;
+export default AdministradoresForm;

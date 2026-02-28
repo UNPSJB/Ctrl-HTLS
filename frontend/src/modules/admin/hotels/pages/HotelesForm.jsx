@@ -15,7 +15,7 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import HabitacionesList from '@/modules/admin/hotels/components/HabitacionesList';
 
 // Formulario para gestión de hoteles
-export default function HotelFormPage() {
+export default function HotelesForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { setCrumbLabel } = useBreadcrumbs();
