@@ -284,6 +284,28 @@ const createEncargado = async (req, res) => {
   }
 };
 
+const getEncargados = async (req, res) => {
+  try {
+    const encargados = await hotelServices.obtenerEncargados();
+    res.json(encargados);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const deleteEncargado = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const resultado = await hotelServices.deleteEncargado(id);
+    res.status(200).json(resultado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const asignarEmpleado = async (req, res) => {
   const { hotelId, vendedorId } = req.body;
   try {
@@ -328,6 +350,8 @@ module.exports = {
   setPaquetePromocional,
   getTiposDeHabitacion,
   createEncargado,
+  getEncargados,
+  deleteEncargado,
   asignarEmpleado,
   desasignarEmpleado,
 };

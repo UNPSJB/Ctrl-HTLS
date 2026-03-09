@@ -14,6 +14,7 @@ const {
   getCategorias,
   getHabitaciones,
   getPaquetes,
+  getEncargados,
   setDescuento,
   setHabitaciones,
   updateHabitacion,
@@ -21,6 +22,7 @@ const {
   setPaquetePromocional,
   getTiposDeHabitacion,
   createEncargado,
+  deleteEncargado,
   asignarEmpleado,
   desasignarEmpleado,
 } = require('../../controllers/hotel/hotelController');
@@ -28,6 +30,7 @@ const {
 const router = express.Router();
 
 router.get('/hoteles', getAllHoteles); //Ruta para obtener todos los hoteles
+router.get('/hotel/encargados', getEncargados); //Ruta para obtener todos los encargados
 router.get('/hotel/:id', validateId, getHotelById); //Ruta para obtener un hotel por id
 router.get('/hotel/:id/habitaciones', validateId, getHabitaciones); //Ruta para listar habitaciones físicas del hotel
 router.get('/hotel/:id/paquetes', validateId, getPaquetes); //Ruta para listar paquetes promocionales del hotel
@@ -43,6 +46,7 @@ router.delete(
 );
 
 router.post('/hotel/encargados', createEncargado);
+router.delete('/hotel/encargados/:id', validateId, deleteEncargado);
 
 //Rutas de tipos de habitaciones
 router.get('/obtener-tiposHabitaciones', getTiposDeHabitacion); //Ruta para obtener las categorias de los hoteles

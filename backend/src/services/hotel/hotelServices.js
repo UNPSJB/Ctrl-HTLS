@@ -99,6 +99,25 @@ const crearHotel = async (
   }
 };
 
+const obtenerEncargados = async () => {
+  try {
+    return await Encargado.findAll({
+      include: [
+        {
+          model: Hotel,
+          as: 'hotel',
+          attributes: ['id', 'nombre'],
+        },
+      ],
+    });
+  } catch (error) {
+    throw new CustomError(
+      `Error al obtener los encargados: ${error.message}`,
+      500,
+    );
+  }
+};
+
 const modificarHotel = async (
   id,
   nombre,
@@ -758,6 +777,12 @@ const deleteEncargado = async (id) => {
       throw new CustomError(`Encargado no encontrado con id ${id}`, 404); // Not Found
     }
 
+    const hotelAsignado = await Hotel.findOne({ where: { encargadoId: id } });
+
+    if (hotelAsignado) {
+      await hotelAsignado.update({ encargadoId: null });
+    }
+
     await encargado.destroy();
 
     return { message: `Encargado con id ${id} eliminado correctamente` };
@@ -1033,6 +1058,8 @@ module.exports = {
   //getHabitacionesDisponibles,
   //getPaquetesDisponibles,
   crearEncargado,
+  deleteEncargado,
   asignarEmpleadoAHotel,
   desasignarEmpleadoDeHotel,
+  obtenerEncargados,
 };

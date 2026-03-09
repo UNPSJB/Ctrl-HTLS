@@ -19,6 +19,23 @@ const Ciudad = require('../../models/core/Ciudad');
 const Provincia = require('../../models/core/Provincia');
 const Pais = require('../../models/core/Pais');
 
+const incluirCiudadCompleta = {
+  model: Ciudad,
+  as: 'ciudad',
+  include: [
+    {
+      model: Provincia,
+      as: 'provincia',
+      include: [
+        {
+          model: Pais,
+          as: 'pais',
+        },
+      ],
+    },
+  ],
+};
+
 const incluirRelacionesVendedor = [
   {
     model: Hotel,
@@ -36,23 +53,31 @@ const incluirRelacionesVendedor = [
     as: 'liquidaciones',
     attributes: ['id', 'numero', 'fecha_emision', 'fecha_pago', 'total'],
   },
-  {
-    model: Ciudad,
-    as: 'ciudad',
-    include: [
-      {
-        model: Provincia,
-        as: 'provincia',
-        include: [
-          {
-            model: Pais,
-            as: 'pais',
-          },
-        ],
-      },
-    ],
-  },
+  incluirCiudadCompleta,
 ];
+
+const mapUbicacion = (persona) => {
+  if (!persona.ciudad) {
+    return null;
+  }
+
+  return {
+    ciudadId: persona.ciudad.id,
+    ciudadNombre: persona.ciudad.nombre,
+    provinciaId: persona.ciudad.provincia ? persona.ciudad.provincia.id : null,
+    provinciaNombre: persona.ciudad.provincia
+      ? persona.ciudad.provincia.nombre
+      : null,
+    paisId:
+      persona.ciudad.provincia && persona.ciudad.provincia.pais
+        ? persona.ciudad.provincia.pais.id
+        : null,
+    paisNombre:
+      persona.ciudad.provincia && persona.ciudad.provincia.pais
+        ? persona.ciudad.provincia.pais.nombre
+        : null,
+  };
+};
 
 const formatearVendedor = (vendedor) => ({
   id: vendedor.id,
@@ -65,26 +90,7 @@ const formatearVendedor = (vendedor) => ({
   direccion: vendedor.direccion,
   ciudadId: vendedor.ciudadId,
   // Datos de ubicación extendidos para el frontend
-  ubicacion: vendedor.ciudad
-    ? {
-        ciudadId: vendedor.ciudad.id,
-        ciudadNombre: vendedor.ciudad.nombre,
-        provinciaId: vendedor.ciudad.provincia
-          ? vendedor.ciudad.provincia.id
-          : null,
-        provinciaNombre: vendedor.ciudad.provincia
-          ? vendedor.ciudad.provincia.nombre
-          : null,
-        paisId:
-          vendedor.ciudad.provincia && vendedor.ciudad.provincia.pais
-            ? vendedor.ciudad.provincia.pais.id
-            : null,
-        paisNombre:
-          vendedor.ciudad.provincia && vendedor.ciudad.provincia.pais
-            ? vendedor.ciudad.provincia.pais.nombre
-            : null,
-      }
-    : null,
+  ubicacion: mapUbicacion(vendedor),
   hotelesPermitidos: (vendedor.hoteles || []).map((hotel) => ({
     id: hotel.id,
     nombre: hotel.nombre,
@@ -103,6 +109,20 @@ const formatearVendedor = (vendedor) => ({
     fechaPago: liquidacion.fecha_pago,
     total: Number(liquidacion.total),
   })),
+});
+
+const formatearAdministrador = (administrador) => ({
+  id: administrador.id,
+  nombre: administrador.nombre,
+  apellido: administrador.apellido,
+  tipoDocumento: administrador.tipoDocumento,
+  numeroDocumento: administrador.numeroDocumento,
+  email: administrador.email,
+  telefono: administrador.telefono,
+  direccion: administrador.direccion,
+  ciudadId: administrador.ciudadId,
+  rol: administrador.rol,
+  ubicacion: mapUbicacion(administrador),
 });
 
 /**
@@ -241,6 +261,15 @@ const obtenerVendedores = async () => {
   });
 
   return vendedores.map(formatearVendedor);
+};
+
+const obtenerAdministradores = async () => {
+  const administradores = await Empleado.findAll({
+    where: { rol: 'administrador' },
+    include: [incluirCiudadCompleta],
+  });
+
+  return administradores.map(formatearAdministrador);
 };
 
 const obtenerVendedorPorId = async (id) => {
@@ -402,6 +431,7 @@ module.exports = {
   crearEmpleado,
   actualizarEmpleado,
   eliminarEmpleado,
+  obtenerAdministradores,
   obtenerVendedores,
   obtenerVendedorPorId,
   crearCliente,

@@ -2,6 +2,16 @@ const { validationResult } = require('express-validator');
 
 const personaServices = require('../../services/core/personaServices');
 
+const getAdministradores = async (req, res) => {
+  try {
+    const administradores = await personaServices.obtenerAdministradores();
+    return res.status(200).json(administradores);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const createEmpleado = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -163,6 +173,7 @@ const getClienteByDocumento = async (req, res) => {
 };
 
 module.exports = {
+  getAdministradores,
   createEmpleado,
   updateEmpleado,
   deleteEmpleado,
