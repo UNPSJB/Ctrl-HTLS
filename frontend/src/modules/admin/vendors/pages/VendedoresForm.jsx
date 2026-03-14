@@ -96,7 +96,7 @@ const VendedoresForm = () => {
     } catch (error) {
       console.error(error);
       toast.error('Error al cargar datos del vendedor');
-      navigate('/admin/vendedores');
+      navigate('/admin/personal/vendedores');
     } finally {
       setLoadingData(false);
     }
@@ -185,7 +185,7 @@ const VendedoresForm = () => {
         }
       }
 
-      navigate('/admin/vendedores');
+      navigate('/admin/personal/vendedores');
     } catch (error) {
       console.error(error);
       const mensaje = error.response?.data?.error || 'Error al guardar vendedor';
@@ -195,7 +195,7 @@ const VendedoresForm = () => {
     }
   };
 
-  const handleCancel = () => navigate('/admin/vendedores');
+  const handleCancel = () => navigate('/admin/personal/vendedores');
 
   const inputClass = 'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
   const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
@@ -211,9 +211,6 @@ const VendedoresForm = () => {
         >
           <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
         </button>
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-          <User className="h-8 w-8" />
-        </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {isEditing ? `${formData.nombre} ${formData.apellido}` : 'Nuevo Vendedor'}
@@ -384,10 +381,20 @@ const VendedoresForm = () => {
             )}
 
             <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-              <button type="button" onClick={handleCancel} disabled={loading} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 transition-colors">
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={loading}
+                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <X className="h-4 w-4" />
                 Cancelar
               </button>
-              <button type="submit" disabled={loading || loadingData} className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50">
+              <button
+                type="submit"
+                disabled={loading || loadingData}
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+              >
                 {loading ? 'Guardando...' : (
                   <>
                     <Save className="h-4 w-4" />

@@ -166,13 +166,6 @@ const ClientesForm = () => {
                 >
                     <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                 </button>
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                    {isEditing ? (
-                        <Edit className="h-6 w-6" />
-                    ) : (
-                        <UserPlus className="h-6 w-6" />
-                    )}
-                </div>
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                         {isEditing ? 'Editar Cliente' : 'Registrar Nuevo Cliente'}

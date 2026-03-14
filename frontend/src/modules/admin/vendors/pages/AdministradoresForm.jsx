@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, Lock, MapPin, Briefcase, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { User, Save, Lock, MapPin, Briefcase, ArrowLeft, ShieldCheck, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useUbicacion from '@/hooks/useUbicacion';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -90,7 +90,7 @@ const AdministradoresForm = () => {
         } catch (error) {
             console.error(error);
             toast.error('Error al cargar datos del administrador');
-            navigate('/admin/vendedores');
+            navigate('/admin/personal/administradores');
         } finally {
             setLoadingData(false);
         }
@@ -155,7 +155,7 @@ const AdministradoresForm = () => {
                 await axiosInstance.post('/empleado', payload);
                 toast.success('Administrador registrado');
             }
-            navigate('/admin/vendedores');
+            navigate('/admin/personal/administradores');
         } catch (error) {
             console.error(error);
             const mensaje = error.response?.data?.error || 'Error al guardar administrador';
@@ -165,7 +165,7 @@ const AdministradoresForm = () => {
         }
     };
 
-    const handleCancel = () => navigate('/admin/vendedores');
+    const handleCancel = () => navigate('/admin/personal/administradores');
 
     const inputClass = 'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
     const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
@@ -181,9 +181,6 @@ const AdministradoresForm = () => {
                 >
                     <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                 </button>
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                    <ShieldCheck className="h-8 w-8" />
-                </div>
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                         {isEditing ? `Editar Administrador` : 'Nuevo Administrador'}
@@ -289,10 +286,10 @@ const AdministradoresForm = () => {
                                 {activeTab === 'seguridad' && (
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
-                                            <Lock className="h-5 w-5 text-blue-600" />
+                                            <Lock className="h-5 w-5 text-gray-500" />
                                             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Credenciales de Acceso</h3>
                                         </div>
-                                        <div className="max-w-md bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-800">
+                                        <div className="max-w-md">
                                             <label htmlFor="password" className={labelClass}>{isEditing ? 'Reestablecer Contraseña' : 'Nueva Contraseña *'}</label>
                                             <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} placeholder="••••••••" className={inputClass} />
                                             <p className="mt-3 text-[11px] text-gray-500 italic flex items-center gap-1.5">
@@ -307,24 +304,25 @@ const AdministradoresForm = () => {
                             </div>
                         )}
 
-                        <div className="mt-12 flex items-center justify-end gap-4 border-t border-gray-100 pt-8 dark:border-gray-700">
+                        <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
                             <button
                                 type="button"
                                 onClick={handleCancel}
                                 disabled={loading}
-                                className="rounded-xl border border-gray-300 px-6 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 transition-all active:scale-95"
+                                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                             >
+                                <X className="h-4 w-4" />
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading || loadingData}
-                                className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-2.5 text-sm font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95 disabled:opacity-50"
+                                className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
                             >
-                                {loading ? 'Sincronizando...' : (
+                                {loading ? 'Guardando...' : (
                                     <>
                                         <Save className="h-4 w-4" />
-                                        {isEditing ? 'Confirmar Cambios' : 'Registrar Administrador'}
+                                        {isEditing ? 'Guardar Cambios' : 'Registrar Administrador'}
                                     </>
                                 )}
                             </button>

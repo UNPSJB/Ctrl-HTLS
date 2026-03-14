@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Building2, MapPin, User, Bed, DoorOpen, Save } from 'lucide-react';
+import { ArrowLeft, Building2, MapPin, User, Bed, DoorOpen, Save, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@/hooks/useHotel';
@@ -319,9 +319,6 @@ export default function HotelesForm() {
         <button onClick={() => navigate('/admin/hoteles')} className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700">
           <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
         </button>
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-          <Building2 className="h-6 w-6" />
-        </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {isEditing ? 'Editar Hotel' : 'Registrar Nuevo Hotel'}
@@ -477,18 +474,24 @@ export default function HotelesForm() {
               <button
                 type="button"
                 onClick={() => navigate('/admin/hoteles')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                disabled={isSubmitting || loadingResources || loadingData}
+                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
+                <X className="h-4 w-4" />
                 Cancelar
               </button>
               {(activeTab !== 'habitaciones' || !isEditing) && (
                 <button
                   type="submit"
                   disabled={isSubmitting || loadingResources || loadingData}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
                 >
-                  <Save className="h-4 w-4" />
-                  {isSubmitting ? 'Guardando...' : 'Guardar Hotel'}
+                  {isSubmitting ? 'Guardando...' : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Guardar Hotel
+                    </>
+                  )}
                 </button>
               )}
             </div>
