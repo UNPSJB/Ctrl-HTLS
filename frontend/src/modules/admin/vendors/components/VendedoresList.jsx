@@ -66,10 +66,6 @@ const VendedoresList = () => {
     }
   };
 
-  const handleCreate = () => {
-    navigate('/admin/personal/vendedores/nuevo');
-  };
-
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -78,30 +74,6 @@ const VendedoresList = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Estándar */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Equipo de Ventas</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Administra el personal comercial y sus liquidaciones</p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            to="/admin/personal/liquidaciones"
-            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
-          >
-            <DollarSign className="h-4 w-4 text-green-600" />
-            Liquidaciones
-          </Link>
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo Vendedor
-          </button>
-        </div>
-      </div>
-
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
         {/* Barra de Búsqueda: Centrada y dentro de la tabla */}
@@ -140,7 +112,7 @@ const VendedoresList = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {currentItems.map((vendedor) => (
-                  <tr key={vendedor.id} className="hover:bg-gray-50 transition-colors bg-white dark:bg-gray-800">
+                  <tr key={vendedor.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
                     <td className="px-6 py-3">
                       <div className="flex items-center">
                         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -187,7 +159,7 @@ const VendedoresList = () => {
               </tbody>
             </table>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex flex-col items-center justify-center p-12 text-center">
               <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
               <p className="text-gray-500 dark:text-gray-400">No se encontraron vendedores que coincidan con la búsqueda.</p>
             </div>

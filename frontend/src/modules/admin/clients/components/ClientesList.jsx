@@ -101,7 +101,7 @@ const ClientesList = () => {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {currentItems.map((cliente) => (
-                <tr key={cliente.id} className="hover:bg-gray-50 transition-colors bg-white dark:bg-gray-800">
+                <tr key={cliente.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
                   <td className="px-6 py-3">
                     <div className="flex items-center">
                       <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -133,15 +133,15 @@ const ClientesList = () => {
             </tbody>
           </table>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
+          <div className="flex flex-col items-center justify-center p-12 text-center">
             <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
-            <p className="text-gray-500 dark:text-gray-400 text-sm">No se encontraron clientes que coincidan con la búsqueda.</p>
+            <p className="text-gray-500 dark:text-gray-400">No se encontraron clientes que coincidan con la búsqueda.</p>
           </div>
         )}
       </div>
 
       {/* Paginación */}
-      {!loading && filteredClientes.length > ITEMS_PER_PAGE && (
+      {!loading && filteredClientes.length > 0 && (
         <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Mostrando <span className="font-medium">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filteredClientes.length)}</span> de <span className="font-medium">{filteredClientes.length}</span> resultados

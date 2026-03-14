@@ -64,10 +64,6 @@ const AdministradoresList = () => {
         return filteredAdmins.slice(start, start + ITEMS_PER_PAGE);
     }, [currentPage, filteredAdmins]);
 
-    const handleCreate = () => {
-        navigate('/admin/personal/administradores/nuevo');
-    };
-
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
@@ -76,21 +72,6 @@ const AdministradoresList = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header Estándar */}
-            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Administradores</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Gestión de privilegios y accesos del sistema</p>
-                </div>
-                <button
-                    onClick={handleCreate}
-                    className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-                >
-                    <Plus className="h-4 w-4" />
-                    Nuevo Administrador
-                </button>
-            </div>
-
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
                 {/* Barra de Búsqueda Centrada */}
@@ -101,7 +82,7 @@ const AdministradoresList = () => {
                             placeholder="Buscar administrador..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                         />
                         <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                         {searchTerm && (
@@ -128,7 +109,7 @@ const AdministradoresList = () => {
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {currentItems.map((admin) => (
-                                    <tr key={admin.id} className="hover:bg-gray-50 transition-colors bg-white dark:bg-gray-800">
+                                    <tr key={admin.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
                                         <td className="px-6 py-3">
                                             <div className="flex items-center">
                                                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
@@ -159,7 +140,7 @@ const AdministradoresList = () => {
                             </tbody>
                         </table>
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="flex flex-col items-center justify-center p-12 text-center">
                             <ShieldCheck className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
                             <p className="text-gray-500 dark:text-gray-400">No se encontraron administradores que coincidan con la búsqueda.</p>
                         </div>
