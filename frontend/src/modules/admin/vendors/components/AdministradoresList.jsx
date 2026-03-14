@@ -7,14 +7,10 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 
 const ITEMS_PER_PAGE = 10;
 
-const MOCK_ADMINS = [
-    { id: 'mock-1', nombre: 'Adriel', apellido: 'Admin', rol: 'administrador', email: 'admin@control.com', numeroDocumento: '12345678', tipoDocumento: 'dni', telefono: '1122334455', direccion: 'Oficina Central' },
-    { id: 'mock-2', nombre: 'Soporte', apellido: 'Técnico', rol: 'administrador', email: 'soporte@control.com', numeroDocumento: '87654321', tipoDocumento: 'dni', telefono: '5544332211', direccion: 'Soporte Remoto' }
-];
-
 const AdministradoresList = () => {
     const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -25,11 +21,27 @@ const AdministradoresList = () => {
     }, []);
 
     const fetchAdmins = async () => {
-        setLoading(true);
-        // Simular carga de mocks
-        await new Promise(resolve => setTimeout(resolve, 300));
-        setAdmins(MOCK_ADMINS);
-        setLoading(false);
+        try {
+            setLoading(true);
+            const response = await axiosInstance.get('/administradores');
+            setAdmins(response.data);
+            setError(null);
+        } catch (err) {
+            setError(err.response?.data?.error || 'Error al cargar los administradores');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar este administrador?')) {
+            try {
+                await axiosInstance.delete(`/empleado/${id}`);
+                setAdmins(prev => prev.filter((a) => a.id !== id));
+            } catch (err) {
+                alert('Error al eliminar administrador');
+            }
+        }
     };
 
     const handleEdit = (id) => {
@@ -55,6 +67,12 @@ const AdministradoresList = () => {
     const handleCreate = () => {
         navigate('/admin/personal/administradores/nuevo');
     };
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    if (error) return <div className="p-4 text-red-500">{error}</div>;
 
     return (
         <div className="space-y-6">
@@ -124,6 +142,7 @@ const AdministradoresList = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                                            <span className="font-bold border rounded px-1 text-[10px] mr-2">{admin.tipoDocumento}</span>
                                             {admin.numeroDocumento}
                                         </td>
                                         <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
@@ -132,7 +151,7 @@ const AdministradoresList = () => {
                                         <td className="px-6 py-3 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(admin.id)} />
-                                                <TableButton variant="delete" icon={Trash2} onClick={() => { }} />
+                                                <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(admin.id)} />
                                             </div>
                                         </td>
                                     </tr>
