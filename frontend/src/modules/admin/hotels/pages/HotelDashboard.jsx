@@ -16,6 +16,7 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import HabitacionesList from '@/modules/admin/hotels/components/HabitacionesList';
 import VendedoresAsignadosList from '@/modules/admin/hotels/components/VendedoresAsignadosList';
 import AjustesGeneralesTab from '@/modules/admin/hotels/components/AjustesGeneralesTab';
+import TarifasTab from '@/modules/admin/hotels/components/TarifasTab';
 
 export default function HotelDashboard() {
   const { id } = useParams();
@@ -128,14 +129,10 @@ export default function HotelDashboard() {
 
             {activeTab === 'tarifas' && (
               <div className="animate-in fade-in duration-300">
-                <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                  Tipos de Habitación y Tarifas Base
-                </h2>
-                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                  Próximamente: Interfaz para agregar y modificar los precios
-                  base de los distintos tipos de habitación en este hotel.
-                </p>
-                {/* Aquí integraremos el TiposHabitacionSelector adaptado */}
+                <TarifasTab
+                  hotelId={hotel.id}
+                  hotelTarifas={hotel.tarifas || []}
+                />
               </div>
             )}
 
