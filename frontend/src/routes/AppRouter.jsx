@@ -8,6 +8,7 @@ import HotelesForm from '@/modules/admin/hotels/pages/HotelesForm';
 import Dashboard from '@/pages/admin/Dashboard';
 import PagoPage from '@/pages/PagoPage';
 import HotelPage from '@/pages/HotelPage';
+import HotelDashboard from '@/modules/admin/hotels/pages/HotelDashboard';
 import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
 import VendedoresList from '@/modules/admin/vendors/components/VendedoresList';
@@ -72,7 +73,7 @@ function AppRouter() {
                 {/* Rutas de Hoteles */}
                 <Route path="hoteles" element={<Hoteles />} />
                 <Route path="hoteles/nuevo" element={<HotelesForm />} />
-                <Route path="hoteles/editar/:id" element={<HotelesForm />} />
+                <Route path="hoteles/:id/dashboard" element={<HotelDashboard />} />
 
                 {/* Rutas de Clientes */}
                 <Route path="clientes" element={<Clientes />} />

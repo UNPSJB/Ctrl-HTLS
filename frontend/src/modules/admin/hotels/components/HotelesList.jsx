@@ -31,16 +31,14 @@ const HotelesList = () => {
     return filteredHoteles.slice(start, start + ITEMS_PER_PAGE);
   }, [currentPage, filteredHoteles]);
 
-  const handleEdit = (id) => {
-    navigate(`/admin/hoteles/editar/${id}`);
-  };
+
 
   const handleDelete = () => {
 
   };
 
-  const handleView = () => {
-
+  const handleView = (id) => {
+    navigate(`/admin/hoteles/${id}/dashboard`);
   };
 
   // Resetear página al buscar
@@ -138,14 +136,8 @@ const HotelesList = () => {
                       <TableButton
                         variant="view"
                         icon={Eye}
-                        onClick={() => handleView()}
+                        onClick={() => handleView(hotel.hotelId)}
                         aria-label="Ver detalles"
-                      />
-                      <TableButton
-                        variant="edit"
-                        icon={Edit}
-                        onClick={() => handleEdit(hotel.hotelId)}
-                        aria-label="Editar"
                       />
                       <TableButton
                         variant="delete"
