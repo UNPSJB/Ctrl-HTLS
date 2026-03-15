@@ -57,11 +57,7 @@ export default function HotelDashboard() {
     { id: 'paquetes', icon: Tag, label: 'Paquetes Promocionales' },
   ];
 
-  const tiposDisponibles =
-    hotel?.tarifas?.map((t) => ({
-      id: t.tipoHabitacionId,
-      nombre: t.tipoHabitacionNombre,
-    })) || [];
+
 
   if (loading) {
     return <InnerLoading />;
@@ -138,19 +134,10 @@ export default function HotelDashboard() {
 
             {activeTab === 'habitaciones' && (
               <div className="animate-in fade-in duration-300">
-                <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                  Inventario Físico de Habitaciones
-                </h2>
-                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                  Aquí puedes dar de alta y administrar las habitaciones reales
-                  del hotel.
-                </p>
-                <div className="rounded-lg bg-white dark:bg-gray-800">
-                  <HabitacionesList
-                    hotelId={hotel.id}
-                    tiposDisponibles={tiposDisponibles}
-                  />
-                </div>
+                <HabitacionesList
+                  hotelId={hotel.id}
+                  tarifasAsignadas={hotel.tarifas || []}
+                />
               </div>
             )}
 
