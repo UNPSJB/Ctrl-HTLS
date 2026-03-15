@@ -17,6 +17,7 @@ import HabitacionesList from '@/modules/admin/hotels/components/HabitacionesList
 import VendedoresAsignadosList from '@/modules/admin/hotels/components/VendedoresAsignadosList';
 import AjustesGeneralesTab from '@/modules/admin/hotels/components/AjustesGeneralesTab';
 import TarifasTab from '@/modules/admin/hotels/components/TarifasTab';
+import TemporadasTab from '@/modules/admin/hotels/components/TemporadasTab';
 
 export default function HotelDashboard() {
   const { id } = useParams();
@@ -155,13 +156,14 @@ export default function HotelDashboard() {
 
             {activeTab === 'temporadas' && (
               <div className="animate-in fade-in duration-300">
-                <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                  Temporadas y Descuentos
-                </h2>
-                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                  Próximamente: Configuración de fechas de temporada alta/baja y
-                  promociones globales.
-                </p>
+                <div className="rounded-lg bg-white dark:bg-gray-800">
+                  <TemporadasTab
+                    hotelId={hotel.id}
+                    initialTemporadas={hotel?.temporadas || []}
+                    initialDescuentos={hotel?.descuentos || []}
+                    onUpdate={fetchHotelDashboardData}
+                  />
+                </div>
               </div>
             )}
 
