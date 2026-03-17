@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { Bed, Save, Info, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
@@ -6,9 +7,19 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 
 export default function TarifasTab({ hotelId, hotelTarifas }) {
   const [tiposGlobales, setTiposGlobales] = useState([]);
-  const [tarifasEditables, setTarifasEditables] = useState({});
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isDirty }
+  } = useForm({
+    defaultValues: {
+      tarifas: {}
+    }
+  });
 
   useEffect(() => {
     fetchData();
@@ -17,12 +28,10 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
   const fetchData = async () => {
     try {
       setLoading(true);
-      // 1. Obtener todos los tipos de habitación del sistema
       const response = await axiosInstance.get('/obtener-tiposHabitaciones');
       const tipos = response.data;
       setTiposGlobales(tipos);
 
-      // 2. Mapear las tarifas actuales del hotel a un objeto de fácil acceso { tipoId: precio }
       const initialTarifas = {};
       tipos.forEach((tipo) => {
         const tarifaExistente = hotelTarifas?.find(
@@ -30,7 +39,8 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
         );
         initialTarifas[tipo.id] = tarifaExistente ? tarifaExistente.precio : '';
       });
-      setTarifasEditables(initialTarifas);
+      
+      reset({ tarifas: initialTarifas });
     } catch (error) {
       console.error(error);
       toast.error('Error al cargar los tipos de habitación');
@@ -39,20 +49,11 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
     }
   };
 
-  const handlePriceChange = (tipoId, value) => {
-    setTarifasEditables((prev) => ({
-      ...prev,
-      [tipoId]: value,
-    }));
-  };
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
 
     try {
-      // Preparar el payload según el requerimiento para el backend
-      const payload = Object.entries(tarifasEditables)
+      const payload = Object.entries(data.tarifas)
         .filter(([, precio]) => precio !== '' && precio !== null)
         .map(([id, precio]) => ({
           tipoHabitacionId: parseInt(id),
@@ -65,19 +66,16 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
         return;
       }
 
-      // IMPORTANTE: Este endpoint PUT /hotel/:id/tarifas es el que solicitamos al backend.
-      // Si aún no existe, fallará, por lo que manejamos el error con gracia.
       await axiosInstance.put(`/hotel/${hotelId}/tarifas`, {
         tarifas: payload,
       });
 
       toast.success('Tarifas actualizadas correctamente');
+      reset(data); // Marcar como no sucio tras guardar exitoso
     } catch (error) {
       console.error(error);
       if (error.response?.status === 404) {
-        toast.error(
-          'Funcionalidad de guardado pendiente de implementación en el Backend.'
-        );
+        toast.error('Funcionalidad de guardado pendiente en Backend.');
       } else {
         toast.error('Error al guardar las tarifas');
       }
@@ -112,58 +110,65 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
       </div>
 
       {/* FILA 2: Grid de Configuración */}
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700/50 dark:text-gray-300">
               <tr>
-                <th className="px-6 py-4 font-semibold">Tipo de Habitación</th>
+                <th className="px-6 py-4 font-semibold text-center md:text-left">Tipo de Habitación</th>
                 <th className="px-6 py-4 font-semibold">Capacidad</th>
-                <th className="px-6 py-4 font-semibold">Precio Base ($)</th>
+                <th className="px-6 py-4 font-semibold text-right">Precio Base ($)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {tiposGlobales.map((tipo) => (
-                <tr
-                  key={tipo.id}
-                  className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
-                >
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                        <Bed className="h-4 w-4" />
+              {tiposGlobales.map((tipo) => {
+                const hasError = !!errors.tarifas?.[tipo.id];
+                return (
+                  <tr
+                    key={tipo.id}
+                    className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
+                  >
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                          <Bed className="h-4 w-4" />
+                        </div>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          {tipo.nombre}
+                        </span>
                       </div>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {tipo.nombre}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                        {tipo.capacidad}{' '}
+                        {tipo.capacidad === 1 ? 'persona' : 'personas'}
                       </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                      {tipo.capacidad}{' '}
-                      {tipo.capacidad === 1 ? 'persona' : 'personas'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="relative max-w-[150px]">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        $
-                      </span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={tarifasEditables[tipo.id] || ''}
-                        onChange={(e) =>
-                          handlePriceChange(tipo.id, e.target.value)
-                        }
-                        placeholder="Ej: 4500.00"
-                        className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-7 pr-3 text-right outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="relative ml-auto max-w-[150px]">
+                        <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${hasError ? 'text-red-400' : 'text-gray-400'}`}>
+                          $
+                        </span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          {...register(`tarifas.${tipo.id}`, {
+                            min: { value: 0, message: 'Mínimo 0' },
+                            validate: (val) => val === '' || !isNaN(val) || 'Invalido'
+                          })}
+                          placeholder="0.00"
+                          className={`w-full rounded-lg border ${hasError ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-200 bg-gray-50 text-gray-700 focus:border-blue-500 focus:ring-blue-500/20'} py-2 pl-7 pr-3 text-right outline-none transition-all dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100`}
+                        />
+                        {hasError && (
+                          <div className="absolute right-0 top-full mt-1 animate-in fade-in slide-in-from-top-1 text-[10px] font-bold text-red-500">
+                            {errors.tarifas[tipo.id]?.message}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -186,7 +191,7 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isDirty}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
           >
             <Save className="h-4 w-4" />
