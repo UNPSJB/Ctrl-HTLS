@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft } from 'lucide-react';
@@ -21,37 +22,50 @@ const VendedoresForm = () => {
   const isEditing = Boolean(id);
 
   const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors, isValid }
+  } = useForm({
+    defaultValues: {
+      nombre: '',
+      apellido: '',
+      email: '',
+      telefono: '',
+      tipoDocumento: 'dni',
+      numeroDocumento: '',
+      direccion: '',
+      password: '',
+      rol: 'vendedor',
+    },
+    mode: 'onChange'
+  });
+
+  const {
     paises,
     provincias,
     ciudades,
     paisId,
     provinciaId,
     ciudadId,
-    handlePaisChange,
-    handleProvinciaChange,
-    handleCiudadChange,
+    handlePaisChange: originalHandlePaisChange,
+    handleProvinciaChange: originalHandleProvinciaChange,
+    handleCiudadChange: originalHandleCiudadChange,
     isProvinciasDisabled,
     isCiudadesDisabled,
     setInitialUbicacion,
   } = useUbicacion();
-
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: '',
-    tipoDocumento: 'dni',
-    numeroDocumento: '',
-    direccion: '',
-    password: '',
-    rol: 'vendedor',
-  });
 
   const [assignedHotels, setAssignedHotels] = useState([]);
   const [initialHotels, setInitialHotels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
+
+  const tipoDocumento = watch('tipoDocumento');
+  const rol = watch('rol');
 
   useEffect(() => {
     if (isEditing) {
@@ -71,7 +85,7 @@ const VendedoresForm = () => {
 
       const userHotels = data.hotelesPermitidos ? data.hotelesPermitidos : [];
 
-      setFormData({
+      reset({
         nombre: data.nombre || '',
         apellido: data.apellido || '',
         email: data.email || '',
@@ -80,7 +94,7 @@ const VendedoresForm = () => {
         numeroDocumento: data.numeroDocumento || '',
         direccion: data.direccion || '',
         password: '',
-        rol: 'vendedor',
+        rol: data.rol || 'vendedor',
       });
 
       setAssignedHotels(userHotels);
@@ -102,14 +116,6 @@ const VendedoresForm = () => {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handleRemoveHotel = (hotelId) => {
     if (window.confirm('¿Seguro que desea quitar el acceso a este hotel? Esta acción se aplicará al guardar.')) {
       setAssignedHotels(prev => prev.filter(h => h.id !== hotelId));
@@ -118,46 +124,45 @@ const VendedoresForm = () => {
 
   const handleDocumentoChange = (e) => {
     const { value } = e.target;
-    const tipo = formData.tipoDocumento;
-    let procesado = value.replace(tipo === 'pasaporte' ? /[^a-zA-Z0-9]/g : /\D/g, '');
-    if (tipo === 'pasaporte') procesado = procesado.toUpperCase();
-
-    setFormData((prev) => ({ ...prev, numeroDocumento: procesado }));
+    let procesado = value.replace(tipoDocumento === 'pasaporte' ? /[^a-zA-Z0-9]/g : /\D/g, '');
+    if (tipoDocumento === 'pasaporte') procesado = procesado.toUpperCase();
+    setValue('numeroDocumento', procesado);
   };
 
   const handleNumericChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, '') }));
+    const { value } = e.target;
+    setValue(e.target.name, value.replace(/\D/g, ''));
   };
 
   const handleTipoChange = (e) => {
-    setFormData((prev) => ({ ...prev, tipoDocumento: e.target.value, numeroDocumento: '' }));
+    setValue('tipoDocumento', e.target.value);
+    setValue('numeroDocumento', '');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handlePaisChange = (val) => {
+    originalHandlePaisChange(val);
+  };
 
-    if (
-      !formData.nombre ||
-      !formData.apellido ||
-      !formData.numeroDocumento ||
-      !formData.email ||
-      (!isEditing && !formData.password) ||
-      !formData.direccion ||
-      !ciudadId
-    ) {
-      toast.error('Por favor complete todos los campos obligatorios');
-      setLoading(false);
+  const handleProvinciaChange = (val) => {
+    originalHandleProvinciaChange(val);
+  };
+
+  const handleCiudadChange = (val) => {
+    originalHandleCiudadChange(val);
+  };
+
+  const onSubmit = async (data) => {
+    if (!ciudadId) {
+      toast.error('La ciudad es obligatoria');
+      setActiveTab('ubicacion');
       return;
     }
 
+    setLoading(true);
     const payload = {
-      ...formData,
+      ...data,
       ciudadId: ciudadId,
     };
-
-    delete payload.hotelIds;
 
     if (isEditing && !payload.password) delete payload.password;
 
@@ -166,11 +171,11 @@ const VendedoresForm = () => {
 
       if (isEditing) {
         await axiosInstance.put(`/empleado/${id}`, payload);
-        toast.success('Datos del vendedor actualizados');
+        toast.success('Datos actualizados correctamente');
       } else {
         const res = await axiosInstance.post('/empleado', payload);
         vendedorId = res.data.id;
-        toast.success('Vendedor registrado');
+        toast.success('Registro exitoso');
       }
 
       if (vendedorId && isEditing) {
@@ -181,14 +186,14 @@ const VendedoresForm = () => {
           await Promise.all(removedHotels.map(h =>
             axiosInstance.post('/hotel/desasignar-empleado', { hotelId: h.id, vendedorId })
           ));
-          toast.success('Se quitaron los permisos de hoteles seleccionados');
+          toast.success('Permisos de hoteles actualizados');
         }
       }
 
       navigate('/admin/personal/vendedores');
     } catch (error) {
       console.error(error);
-      const mensaje = error.response?.data?.error || 'Error al guardar vendedor';
+      const mensaje = error.response?.data?.error || 'Error al guardar los datos';
       toast.error(mensaje);
     } finally {
       setLoading(false);
@@ -197,8 +202,10 @@ const VendedoresForm = () => {
 
   const handleCancel = () => navigate('/admin/personal/vendedores');
 
-  const inputClass = 'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all`;
   const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -213,11 +220,11 @@ const VendedoresForm = () => {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {isEditing ? `${formData.nombre} ${formData.apellido}` : 'Nuevo Vendedor'}
+            {isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Nuevo Vendedor'}
           </h1>
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <Briefcase className="h-4 w-4" />
-            <span>Rol: {formData.rol === 'administrador' ? 'Administrador' : 'Vendedor'}</span>
+            <span>Rol: {rol === 'administrador' ? 'Administrador' : 'Vendedor'}</span>
             {isEditing && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">Activo</span>}
           </div>
         </div>
@@ -234,7 +241,7 @@ const VendedoresForm = () => {
             <button type="button" onClick={() => setActiveTab('ubicacion')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'ubicacion' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
               <MapPin className="h-4 w-4" /> Ubicación y Contacto
             </button>
-            {formData.rol === 'vendedor' && (
+            {rol === 'vendedor' && (
               <button type="button" onClick={() => setActiveTab('hoteles')} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeTab === 'hoteles' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
                 <Building2 className="h-4 w-4" /> Acceso a Hoteles
               </button>
@@ -259,25 +266,55 @@ const VendedoresForm = () => {
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
                         <label htmlFor="nombre" className={labelClass}>Nombre *</label>
-                        <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} className={inputClass} />
+                        <input
+                          type="text"
+                          id="nombre"
+                          {...register('nombre', { required: 'El nombre es obligatorio' })}
+                          className={inputClass(errors.nombre)}
+                        />
+                        {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
                       </div>
                       <div>
                         <label htmlFor="apellido" className={labelClass}>Apellido *</label>
-                        <input type="text" id="apellido" name="apellido" value={formData.apellido} onChange={handleChange} className={inputClass} />
+                        <input
+                          type="text"
+                          id="apellido"
+                          {...register('apellido', { required: 'El apellido es obligatorio' })}
+                          className={inputClass(errors.apellido)}
+                        />
+                        {errors.apellido && <p className={errorClass}>{errors.apellido.message}</p>}
                       </div>
                       <div>
                         <label htmlFor="tipoDocumento" className={labelClass}>Tipo Documento *</label>
-                        <select id="tipoDocumento" name="tipoDocumento" value={formData.tipoDocumento} onChange={handleTipoChange} className={inputClass}>
+                        <select
+                          id="tipoDocumento"
+                          {...register('tipoDocumento', { onChange: handleTipoChange })}
+                          className={inputClass(errors.tipoDocumento)}
+                        >
                           {tiposDocumento.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
                         </select>
                       </div>
                       <div>
                         <label htmlFor="numeroDocumento" className={labelClass}>Número Documento *</label>
-                        <input type="text" id="numeroDocumento" name="numeroDocumento" value={formData.numeroDocumento} onChange={handleDocumentoChange} className={inputClass} maxLength={15} />
+                        <input
+                          type="text"
+                          id="numeroDocumento"
+                          {...register('numeroDocumento', {
+                            required: 'El documento es obligatorio',
+                            onChange: handleDocumentoChange
+                          })}
+                          className={inputClass(errors.numeroDocumento)}
+                          maxLength={15}
+                        />
+                        {errors.numeroDocumento && <p className={errorClass}>{errors.numeroDocumento.message}</p>}
                       </div>
                       <div>
                         <label htmlFor="rol" className={labelClass}>Rol en el Sistema *</label>
-                        <select id="rol" name="rol" value={formData.rol} onChange={handleChange} className={inputClass}>
+                        <select
+                          id="rol"
+                          {...register('rol')}
+                          className={inputClass(errors.rol)}
+                        >
                           <option value="vendedor">Vendedor</option>
                           <option value="administrador">Administrador</option>
                         </select>
@@ -292,33 +329,66 @@ const VendedoresForm = () => {
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
                         <label htmlFor="email" className={labelClass}>Email *</label>
-                        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} />
+                        <input
+                          type="email"
+                          id="email"
+                          {...register('email', {
+                            required: 'El email es obligatorio',
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: 'Email inválido'
+                            }
+                          })}
+                          className={inputClass(errors.email)}
+                        />
+                        {errors.email && <p className={errorClass}>{errors.email.message}</p>}
                       </div>
                       <div>
                         <label htmlFor="telefono" className={labelClass}>Teléfono</label>
-                        <input type="text" id="telefono" name="telefono" value={formData.telefono} onChange={handleNumericChange} className={inputClass} />
+                        <input
+                          type="text"
+                          id="telefono"
+                          {...register('telefono', { onChange: handleNumericChange })}
+                          className={inputClass(errors.telefono)}
+                        />
                       </div>
                       <div className="col-span-full">
                         <label htmlFor="direccion" className={labelClass}>Dirección *</label>
-                        <input type="text" id="direccion" name="direccion" value={formData.direccion} onChange={handleChange} className={inputClass} />
+                        <input
+                          type="text"
+                          id="direccion"
+                          {...register('direccion', { required: 'La dirección es obligatoria' })}
+                          className={inputClass(errors.direccion)}
+                        />
+                        {errors.direccion && <p className={errorClass}>{errors.direccion.message}</p>}
                       </div>
                       <div>
                         <label className={labelClass}>País *</label>
-                        <select value={paisId} onChange={(e) => handlePaisChange(e.target.value)} className={inputClass}>
+                        <select value={paisId} onChange={(e) => handlePaisChange(e.target.value)} className={inputClass()}>
                           <option value="">Seleccione país</option>
                           {paises.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                         </select>
                       </div>
                       <div>
                         <label className={labelClass}>Provincia *</label>
-                        <select value={provinciaId} onChange={(e) => handlePaisChange ? handleProvinciaChange(e.target.value) : null} className={inputClass} disabled={isProvinciasDisabled}>
+                        <select
+                          value={provinciaId}
+                          onChange={(e) => handleProvinciaChange(e.target.value)}
+                          className={inputClass()}
+                          disabled={isProvinciasDisabled}
+                        >
                           <option value="">Seleccione provincia</option>
                           {provincias.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                         </select>
                       </div>
                       <div>
                         <label className={labelClass}>Ciudad *</label>
-                        <select value={ciudadId} onChange={(e) => handlePaisChange ? handleCiudadChange(e.target.value) : null} className={inputClass} disabled={isCiudadesDisabled}>
+                        <select
+                          value={ciudadId}
+                          onChange={(e) => handleCiudadChange(e.target.value)}
+                          className={inputClass(!ciudadId && activeTab === 'ubicacion' ? { message: 'Requerido' } : null)}
+                          disabled={isCiudadesDisabled}
+                        >
                           <option value="">Seleccione ciudad</option>
                           {ciudades.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                         </select>
@@ -371,9 +441,19 @@ const VendedoresForm = () => {
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
                     <div className="max-w-md">
-                      <label htmlFor="password" className={labelClass}>{isEditing ? 'Nueva Contraseña' : 'Contraseña *'}</label>
-                      <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} placeholder="••••••••" className={inputClass} />
-                      {isEditing && <p className="mt-1 text-xs text-gray-500">Deje el campo vacío para mantener la contraseña actual.</p>}
+                      <label htmlFor="password" className={labelClass}>{isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña *'}</label>
+                      <input
+                        type="password"
+                        id="password"
+                        {...register('password', {
+                          required: !isEditing ? 'La contraseña es obligatoria' : false,
+                          minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+                        })}
+                        placeholder="••••••••"
+                        className={inputClass(errors.password)}
+                      />
+                      {errors.password && <p className={errorClass}>{errors.password.message}</p>}
+                      {isEditing && <p className="mt-1 text-xs text-gray-500 italic">Deje en blanco para mantener la contraseña actual.</p>}
                     </div>
                   </div>
                 )}
@@ -392,13 +472,18 @@ const VendedoresForm = () => {
               </button>
               <button
                 type="submit"
-                disabled={loading || loadingData}
+                disabled={loading || loadingData || !isValid}
                 className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
               >
-                {loading ? 'Guardando...' : (
+                {loading ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Guardando...
+                  </>
+                ) : (
                   <>
                     <Save className="h-4 w-4" />
-                    {isEditing ? 'Guardar Cambios' : `Registrar ${formData.rol === 'administrador' ? 'Administrador' : 'Vendedor'}`}
+                    {isEditing ? 'Guardar Cambios' : `Registrar ${rol === 'administrador' ? 'Administrador' : 'Vendedor'}`}
                   </>
                 )}
               </button>
