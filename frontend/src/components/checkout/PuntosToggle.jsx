@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useCliente } from '@context/ClienteContext';
 
 // Toggle para habilitar el uso de puntos acumulados como descuento

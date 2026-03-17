@@ -18,6 +18,7 @@ import VendedoresAsignadosList from '@/modules/admin/hotels/components/Vendedore
 import AjustesGeneralesTab from '@/modules/admin/hotels/components/AjustesGeneralesTab';
 import TarifasTab from '@/modules/admin/hotels/components/TarifasTab';
 import TemporadasTab from '@/modules/admin/hotels/components/TemporadasTab';
+import PaquetesTab from '@/modules/admin/hotels/components/PaquetesTab';
 
 export default function HotelDashboard() {
   const { id } = useParams();
@@ -169,12 +170,7 @@ export default function HotelDashboard() {
 
             {activeTab === 'paquetes' && (
               <div className="animate-in fade-in duration-300">
-                <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                  Paquetes Promocionales
-                </h2>
-                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                  Próximamente: Creador de paquetes cerrados de estadía.
-                </p>
+                <PaquetesTab hotelId={hotel.id} />
               </div>
             )}
           </div>
