@@ -86,22 +86,27 @@ const ClientesList = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto min-h-[400px] flex flex-col">
-        {loading ? (
-          <InnerLoading message="Cargando base de clientes..." />
-        ) : filteredClientes.length > 0 ? (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Cliente</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Identificación</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Contacto</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {currentItems.map((cliente) => (
-                <tr key={cliente.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
+      <div className="relative flex flex-col min-h-[400px]">
+        {loading && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+            <InnerLoading message="Hidratando base de clientes..." />
+          </div>
+        )}
+
+        <div className="overflow-x-auto">
+          {filteredClientes.length > 0 ? (
+            <table className="w-full border-collapse text-left text-sm">
+              <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                <tr>
+                  <th className="px-6 py-4">Información del Cliente</th>
+                  <th className="px-6 py-4">Identificación</th>
+                  <th className="px-6 py-4">Contacto</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                {currentItems.map((cliente) => (
+                  <tr key={cliente.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
                   <td className="px-6 py-3">
                     <div className="flex items-center">
                       <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -132,12 +137,13 @@ const ClientesList = () => {
               ))}
             </tbody>
           </table>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-12 text-center">
-            <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
-            <p className="text-gray-500 dark:text-gray-400">No se encontraron clientes que coincidan con la búsqueda.</p>
-          </div>
-        )}
+          ) : (
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
+              <p className="text-gray-500 dark:text-gray-400">No se encontraron clientes que coincidan con la búsqueda.</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Paginación */}

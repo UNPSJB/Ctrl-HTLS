@@ -84,7 +84,6 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
     }
   };
 
-  if (loading) return <InnerLoading message="Cargando tipos y tarifas..." />;
 
   return (
     <div className="animate-in fade-in space-y-8 duration-300">
@@ -111,7 +110,12 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
 
       {/* FILA 2: Grid de Configuración */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+              <InnerLoading message="Cargando tipos y tarifas..." />
+            </div>
+          )}
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700/50 dark:text-gray-300">
               <tr>
@@ -191,7 +195,7 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            disabled={isSubmitting || !isDirty}
+            disabled={isSubmitting || !isDirty || loading}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
           >
             <Save className="h-4 w-4" />
@@ -199,6 +203,7 @@ export default function TarifasTab({ hotelId, hotelTarifas }) {
           </button>
         </div>
       </form>
+      {/* Nota Informativa */}
     </div>
   );
 }

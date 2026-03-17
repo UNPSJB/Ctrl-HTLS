@@ -171,8 +171,6 @@ export default function HabitacionesList({
     return a.numero - b.numero;
   });
 
-  if (loading && !isCreating)
-    return <InnerLoading message="Cargando inventario..." />;
 
   // Filtrar tipos que tienen precio asignado en este hotel
   const tiposFiltrados = isLocalMode
@@ -199,7 +197,8 @@ export default function HabitacionesList({
         {!isCreating && (
           <button
             onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95"
+            disabled={loading}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" /> Registrar Habitación
           </button>
@@ -300,7 +299,12 @@ export default function HabitacionesList({
       )}
 
       {/* Listado de Habitaciones */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        {loading && !isCreating && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+            <InnerLoading message="Cargando inventario..." />
+          </div>
+        )}
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700/50 dark:text-gray-300">
             <tr>

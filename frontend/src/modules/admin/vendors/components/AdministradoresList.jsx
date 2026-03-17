@@ -94,57 +94,63 @@ const AdministradoresList = () => {
                 </div>
 
                 {/* Tabla Administradores */}
-                <div className="overflow-x-auto min-h-[400px] flex flex-col">
-                    {loading ? (
-                        <InnerLoading message="Consultando privilegios..." />
-                    ) : filteredAdmins.length > 0 ? (
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
-                                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Administrador</th>
-                                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Documento</th>
-                                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Email</th>
-                                    <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                {currentItems.map((admin) => (
-                                    <tr key={admin.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
-                                        <td className="px-6 py-3">
-                                            <div className="flex items-center">
-                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                                                    <ShieldCheck className="h-5 w-5" />
-                                                </div>
-                                                <div className="ml-4 text-sm">
-                                                    <div className="font-medium text-gray-900 dark:text-white capitalize transition-all">
-                                                        {admin.nombre.toLowerCase()} {admin.apellido.toLowerCase()}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                                            <span className="font-bold border rounded px-1 text-[10px] mr-2">{admin.tipoDocumento}</span>
-                                            {admin.numeroDocumento}
-                                        </td>
-                                        <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                                            {admin.email}
-                                        </td>
-                                        <td className="px-6 py-3 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(admin.id)} />
-                                                <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(admin.id)} />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center p-12 text-center">
-                            <ShieldCheck className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
-                            <p className="text-gray-500 dark:text-gray-400">No se encontraron administradores que coincidan con la búsqueda.</p>
+                <div className="relative flex flex-col min-h-[400px]">
+                    {loading && (
+                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+                            <InnerLoading message="Consultando privilegios..." />
                         </div>
                     )}
+
+                    <div className="overflow-x-auto">
+                        {filteredAdmins.length > 0 ? (
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
+                                        <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Administrador</th>
+                                        <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Documento</th>
+                                        <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Email</th>
+                                        <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                    {currentItems.map((admin) => (
+                                        <tr key={admin.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
+                                            <td className="px-6 py-3">
+                                                <div className="flex items-center">
+                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                                        <ShieldCheck className="h-5 w-5" />
+                                                    </div>
+                                                    <div className="ml-4 text-sm">
+                                                        <div className="font-medium text-gray-900 dark:text-white capitalize transition-all">
+                                                            {admin.nombre.toLowerCase()} {admin.apellido.toLowerCase()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="font-bold border rounded px-1 text-[10px] mr-2">{admin.tipoDocumento}</span>
+                                                {admin.numeroDocumento}
+                                            </td>
+                                            <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                                                {admin.email}
+                                            </td>
+                                            <td className="px-6 py-3 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(admin.id)} />
+                                                    <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(admin.id)} />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center p-12 text-center">
+                                <ShieldCheck className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
+                                <p className="text-gray-500 dark:text-gray-400">No se encontraron administradores que coincidan con la búsqueda.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Paginación Estándar */}

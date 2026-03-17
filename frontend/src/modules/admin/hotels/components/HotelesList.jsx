@@ -70,33 +70,30 @@ const HotelesList = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto min-h-[400px] flex flex-col">
-        {loading ? (
-          <InnerLoading message="Cargando hoteles..." />
-        ) : filteredHoteles.length > 0 ? (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
-                <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Hotel
-                </th>
-                <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Ubicación
-                </th>
-                <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Categoría
-                </th>
-                <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {currentItems.map((hotel) => (
-                <tr
-                  key={hotel.hotelId}
-                  className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800"
-                >
+      <div className="relative flex flex-col min-h-[400px]">
+        {loading && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+            <InnerLoading message="Sincronizando hoteles..." />
+          </div>
+        )}
+
+        <div className="overflow-x-auto">
+          {filteredHoteles.length > 0 ? (
+            <table className="w-full border-collapse text-left text-sm">
+              <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                <tr>
+                  <th className="px-6 py-4">Información del Hotel</th>
+                  <th className="px-6 py-4">Ubicación</th>
+                  <th className="px-6 py-4">Categoría</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                {currentItems.map((hotel) => (
+                  <tr
+                    key={hotel.hotelId}
+                    className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
+                  >
                   <td className="px-6 py-3">
                     <div className="flex items-center">
                       <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -156,14 +153,15 @@ const HotelesList = () => {
             <Building2 className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
             <p className="text-gray-500 dark:text-gray-400">No se encontraron hoteles que coincidan con la búsqueda.</p>
           </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Paginación Estándar */}
       {!loading && filteredHoteles.length > 0 && (
         <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Mostrando <span className="font-medium">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filteredHoteles.length)}</span> de <span className="font-medium">{filteredHoteles.length}</span> resultados
+            Mostrando <span className="font-medium text-gray-900 dark:text-white">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="font-medium text-gray-900 dark:text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredHoteles.length)}</span> de <span className="font-medium text-gray-900 dark:text-white">{filteredHoteles.length}</span> resultados
           </div>
           <div className="flex gap-2">
             <button

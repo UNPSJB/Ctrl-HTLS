@@ -96,74 +96,80 @@ const VendedoresList = () => {
         </div>
 
         {/* Tabla Estándar */}
-        <div className="overflow-x-auto min-h-[400px] flex flex-col">
-          {loading ? (
-            <InnerLoading message="Cargando personal de ventas..." />
-          ) : filteredVendedores.length > 0 ? (
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Personal</th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Identificación</th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Contacto</th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Hoteles</th>
-                  <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {currentItems.map((vendedor) => (
-                  <tr key={vendedor.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
-                    <td className="px-6 py-3">
-                      <div className="flex items-center">
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                          <User className="h-5 w-5" />
-                        </div>
-                        <div className="ml-4 text-sm">
-                          <div className="font-medium text-gray-900 dark:text-white capitalize transition-all">
-                            {vendedor.nombre.toLowerCase()} {vendedor.apellido.toLowerCase()}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      <span className="font-bold border rounded px-1 text-[10px] mr-2">{vendedor.tipoDocumento}</span>
-                      {vendedor.numeroDocumento}
-                    </td>
-                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      <div>{vendedor.email}</div>
-                      <div className="text-[11px] text-gray-500">{vendedor.telefono}</div>
-                    </td>
-                    <td className="px-6 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {vendedor.hotelesPermitidos?.map(h => (
-                          <span key={h.id} className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                            {h.nombre}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                      <div className="flex justify-end gap-2">
-                        <TableButton
-                          variant="view"
-                          icon={FileText}
-                          onClick={() => navigate(`/admin/personal/liquidaciones/${vendedor.id}`)}
-                          title="Ver Liquidaciones"
-                        />
-                        <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />
-                        <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(vendedor.id)} />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
-              <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
-              <p className="text-gray-500 dark:text-gray-400">No se encontraron vendedores que coincidan con la búsqueda.</p>
+        <div className="relative flex flex-col min-h-[400px]">
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+              <InnerLoading message="Cargando personal de ventas..." />
             </div>
           )}
+
+          <div className="overflow-x-auto">
+            {filteredVendedores.length > 0 ? (
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
+                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Personal</th>
+                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Identificación</th>
+                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Contacto</th>
+                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Hoteles</th>
+                    <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {currentItems.map((vendedor) => (
+                    <tr key={vendedor.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
+                      <td className="px-6 py-3">
+                        <div className="flex items-center">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                            <User className="h-5 w-5" />
+                          </div>
+                          <div className="ml-4 text-sm">
+                            <div className="font-medium text-gray-900 dark:text-white capitalize transition-all">
+                              {vendedor.nombre.toLowerCase()} {vendedor.apellido.toLowerCase()}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                        <span className="font-bold border rounded px-1 text-[10px] mr-2">{vendedor.tipoDocumento}</span>
+                        {vendedor.numeroDocumento}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div>{vendedor.email}</div>
+                        <div className="text-[11px] text-gray-500">{vendedor.telefono}</div>
+                      </td>
+                      <td className="px-6 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {vendedor.hotelesPermitidos?.map(h => (
+                            <span key={h.id} className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                              {h.nombre}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-6 py-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          <TableButton
+                            variant="view"
+                            icon={FileText}
+                            onClick={() => navigate(`/admin/personal/liquidaciones/${vendedor.id}`)}
+                            title="Ver Liquidaciones"
+                          />
+                          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />
+                          <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(vendedor.id)} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
+                <p className="text-gray-500 dark:text-gray-400">No se encontraron vendedores que coincidan con la búsqueda.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Paginación Estándar */}

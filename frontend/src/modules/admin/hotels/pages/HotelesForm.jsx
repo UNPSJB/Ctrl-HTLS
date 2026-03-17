@@ -311,7 +311,9 @@ export default function HotelesForm() {
             {/* Cuerpo del Formulario */}
             <div className="flex-1">
               {loadingResources || loadingData ? (
-                <InnerLoading />
+                <div className="flex-1 flex items-center justify-center">
+                  <InnerLoading message="Preparando formulario de hotel..." />
+                </div>
               ) : (
                 <div className="animate-in fade-in duration-300">
                   {activeTab === 'general' && renderGeneralTab()}

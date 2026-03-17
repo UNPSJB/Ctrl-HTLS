@@ -71,7 +71,6 @@ export default function PaquetesTab({ hotelId }) {
     }
   };
 
-  if (loadingInitial) return <InnerLoading />;
 
   return (
     <div className="animate-in fade-in space-y-8 duration-500">
@@ -87,7 +86,8 @@ export default function PaquetesTab({ hotelId }) {
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95"
+          disabled={loadingInitial}
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
         >
           {showForm ? <Plus className="h-4 w-4 rotate-45" /> : <Plus className="h-4 w-4" />}
           {showForm ? 'Cancelar' : 'Nuevo Paquete'}
@@ -145,23 +145,24 @@ export default function PaquetesTab({ hotelId }) {
               <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Seleccione las habitaciones a incluir:
               </label>
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-                    <tr>
-                      <th className="px-4 py-3 w-12 text-center">Inclusión</th>
-                      <th className="px-4 py-3">Piso - Número</th>
-                      <th className="px-4 py-3">Tipo de Habitación</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {habitaciones.length === 0 ? (
-                      <tr key="empty-rooms">
-                        <td colSpan="3" className="px-4 py-8 text-center text-sm text-gray-500 italic">
-                          No hay habitaciones registradas en este hotel.
-                        </td>
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 flex flex-col">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                      <tr>
+                        <th className="px-4 py-3 w-12 text-center">Inclusión</th>
+                        <th className="px-6 py-4">Piso - Número</th>
+                        <th className="px-6 py-4">Tipo de Habitación</th>
                       </tr>
-                    ) : (
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {habitaciones.length === 0 ? (
+                        <tr key="empty-rooms">
+                          <td colSpan="3" className="px-4 py-8 text-center text-sm text-gray-500 italic">
+                            No hay habitaciones registradas en este hotel.
+                          </td>
+                        </tr>
+                      ) : (
                       habitaciones.map((hab, idx) => (
                         <tr key={hab.id || `hab-${hab.piso}-${hab.numero}-${idx}`} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 has-[:checked]:bg-blue-50/50 dark:has-[:checked]:bg-blue-900/10">
                           <td className="px-4 py-3 text-center align-middle">
@@ -181,8 +182,9 @@ export default function PaquetesTab({ hotelId }) {
                         </tr>
                       ))
                     )}
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
 
@@ -200,19 +202,25 @@ export default function PaquetesTab({ hotelId }) {
       )}
 
       {/* Listado de Paquetes */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50/50 text-xs uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-            <tr>
-              <th className="px-6 py-4 font-bold">Nombre del Paquete</th>
-              <th className="px-6 py-4 font-bold text-center">Desde</th>
-              <th className="px-6 py-4 font-bold text-center">Hasta</th>
-              <th className="px-6 py-4 font-bold text-center">Descuento</th>
-              <th className="px-6 py-4 font-bold">Habitaciones</th>
-              <th className="px-6 py-4 text-center font-bold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+      <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        {loadingInitial && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+            <InnerLoading message="Sincronizando paquetes..." />
+          </div>
+        )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+              <tr>
+                <th className="px-6 py-4">Nombre del Paquete</th>
+                <th className="px-6 py-4 text-center">Desde</th>
+                <th className="px-6 py-4 text-center">Hasta</th>
+                <th className="px-6 py-4 text-center">Descuento</th>
+                <th className="px-6 py-4">Habitaciones</th>
+                <th className="px-6 py-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
             {paquetes.length === 0 ? (
               <tr key="empty-packages">
                 <td colSpan="6" className="px-6 py-12 text-center text-gray-400 italic">
@@ -271,6 +279,7 @@ export default function PaquetesTab({ hotelId }) {
           </tbody>
         </table>
       </div>
+    </div>
 
     </div>
   );

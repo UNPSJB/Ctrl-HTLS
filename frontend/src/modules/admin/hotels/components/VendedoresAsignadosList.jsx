@@ -258,22 +258,24 @@ export default function VendedoresAsignadosList({
       )}
 
       {/* Tabla de Asignados */}
-      <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col min-h-[400px]">
         {loading && !isAssigning && (
-           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-sm dark:bg-gray-800/50">
-             <InnerLoading message="Actualizando personal..." />
-           </div>
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+            <InnerLoading message="Actualizando personal..." />
+          </div>
         )}
-        <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50/50 text-xs uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-            <tr>
-              <th className="px-6 py-4 font-bold">Personal de Ventas</th>
-              <th className="px-6 py-4 font-bold">Documento</th>
-              <th className="px-6 py-4 font-bold">Contacto</th>
-              <th className="px-6 py-4 text-right font-bold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+              <tr>
+                <th className="px-6 py-4">Personal de Ventas</th>
+                <th className="px-6 py-4">Documento</th>
+                <th className="px-6 py-4">Contacto</th>
+                <th className="px-6 py-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
             {asignados.length === 0 ? (
               <tr>
                 <td colSpan="4" className="px-6 py-12 text-center text-gray-400">
@@ -336,5 +338,6 @@ export default function VendedoresAsignadosList({
         </table>
       </div>
     </div>
-  );
+  </div>
+);
 }
