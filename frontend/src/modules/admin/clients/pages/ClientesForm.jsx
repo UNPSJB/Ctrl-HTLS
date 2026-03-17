@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { UserPlus, Save, X, Edit, ArrowLeft } from 'lucide-react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { Save, X, ArrowLeft } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 
@@ -20,17 +21,29 @@ const ClientesForm = () => {
     const { setCrumbLabel } = useBreadcrumbs();
     const isEditing = Boolean(id);
 
-    const [formData, setFormData] = useState({
-        nombre: '',
-        apellido: '',
-        email: '',
-        telefono: '',
-        tipoDocumento: 'dni',
-        numeroDocumento: '',
+    const {
+        register,
+        handleSubmit,
+        reset,
+        setValue,
+        watch,
+        formState: { errors, isValid }
+    } = useForm({
+        defaultValues: {
+            nombre: '',
+            apellido: '',
+            email: '',
+            telefono: '',
+            tipoDocumento: 'dni',
+            numeroDocumento: '',
+        },
+        mode: 'onChange'
     });
 
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
+
+    const tipoDocumento = watch('tipoDocumento');
 
     useEffect(() => {
         if (isEditing) {
@@ -48,7 +61,8 @@ const ClientesForm = () => {
             if (data.nombre) {
                 setCrumbLabel(id, `${data.nombre} ${data.apellido || ''}`.trim());
             }
-            setFormData({
+
+            reset({
                 nombre: data.nombre || '',
                 apellido: data.apellido || '',
                 email: data.email || '',
@@ -65,99 +79,60 @@ const ClientesForm = () => {
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    // Formatea el número de documento según el tipo
+    // Formateadores automáticos
     const handleDocumentoChange = (e) => {
         const { value } = e.target;
-        const tipo = formData.tipoDocumento;
         let procesado = value;
-
-        if (['dni', 'li', 'le'].includes(tipo)) {
+        if (['dni', 'li', 'le'].includes(tipoDocumento)) {
             procesado = value.replace(/\D/g, '');
         } else {
             procesado = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
         }
-
-        setFormData((prev) => ({
-            ...prev,
-            numeroDocumento: procesado,
-        }));
+        setValue('numeroDocumento', procesado);
     };
 
     const handleTelefonoChange = (e) => {
         const { value } = e.target;
-        const numericValue = value.replace(/\D/g, '');
-        setFormData((prev) => ({
-            ...prev,
-            telefono: numericValue,
-        }));
+        setValue('telefono', value.replace(/\D/g, ''));
     };
 
     const handleTipoChange = (e) => {
         const { value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            tipoDocumento: value,
-            numeroDocumento: '',
-        }));
+        setValue('tipoDocumento', value);
+        setValue('numeroDocumento', ''); // Limpiar documento al cambiar tipo
     };
 
-    // Valida y envía el formulario
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // Envío del formulario
+    const onSubmit = async (data) => {
         setLoading(true);
-
-        if (
-            !formData.nombre ||
-            !formData.apellido ||
-            !formData.numeroDocumento ||
-            !formData.email
-        ) {
-            toast.error('Por favor complete todos los campos obligatorios');
-            setLoading(false);
-            return;
-        }
-
         try {
             if (isEditing) {
-                await axiosInstance.put(`/cliente/${id}`, formData);
+                await axiosInstance.put(`/cliente/${id}`, data);
                 toast.success('Cliente actualizado exitosamente');
             } else {
-                await axiosInstance.post('/cliente', formData);
+                await axiosInstance.post('/cliente', data);
                 toast.success('Cliente registrado exitosamente');
             }
             navigate('/admin/clientes');
         } catch (error) {
             console.error(error);
-            const mensaje = isEditing
-                ? (error.response?.data?.error || 'Error al actualizar cliente')
-                : (error.response?.data?.error || 'Error al crear cliente');
+            const mensaje = error.response?.data?.error || (isEditing ? 'Error al actualizar cliente' : 'Error al crear cliente');
             toast.error(mensaje);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCancel = () => {
-        navigate('/admin/clientes');
-    };
+    const handleCancel = () => navigate('/admin/clientes');
 
-    const inputClass =
-        'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
+    const inputClass = (error) =>
+        `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all`;
 
-    const labelClass =
-        'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+    const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+    const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
     return (
         <div className="mx-auto max-w-5xl space-y-6">
-
             {/* Encabezado Externo */}
             <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <button
@@ -184,55 +159,43 @@ const ClientesForm = () => {
                         <InnerLoading message="Cargando perfil del cliente..." />
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="p-6 flex-1 flex flex-col">
+                    <form onSubmit={handleSubmit(onSubmit)} className="p-6 flex-1 flex flex-col">
                         <div className="flex-1 space-y-6 animate-in fade-in duration-500">
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div>
-                                    <label htmlFor="nombre" className={labelClass}>
-                                        Nombre *
-                                    </label>
+                                    <label htmlFor="nombre" className={labelClass}>Nombre *</label>
                                     <input
                                         type="text"
                                         id="nombre"
-                                        name="nombre"
-                                        value={formData.nombre}
-                                        onChange={handleChange}
+                                        {...register('nombre', { required: 'El nombre es obligatorio' })}
                                         placeholder="Ej: Juan"
-                                        className={inputClass}
+                                        className={inputClass(errors.nombre)}
                                     />
+                                    {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label htmlFor="apellido" className={labelClass}>
-                                        Apellido *
-                                    </label>
+                                    <label htmlFor="apellido" className={labelClass}>Apellido *</label>
                                     <input
                                         type="text"
                                         id="apellido"
-                                        name="apellido"
-                                        value={formData.apellido}
-                                        onChange={handleChange}
+                                        {...register('apellido', { required: 'El apellido es obligatorio' })}
                                         placeholder="Ej: Pérez"
-                                        className={inputClass}
+                                        className={inputClass(errors.apellido)}
                                     />
+                                    {errors.apellido && <p className={errorClass}>{errors.apellido.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label htmlFor="tipoDocumento" className={labelClass}>
-                                        Tipo de Documento *
-                                    </label>
+                                    <label htmlFor="tipoDocumento" className={labelClass}>Tipo de Documento *</label>
                                     <div className="relative">
                                         <select
                                             id="tipoDocumento"
-                                            name="tipoDocumento"
-                                            value={formData.tipoDocumento}
-                                            onChange={handleTipoChange}
-                                            className={`${inputClass} appearance-none`}
+                                            {...register('tipoDocumento', { onChange: handleTipoChange })}
+                                            className={`${inputClass(errors.tipoDocumento)} appearance-none`}
                                         >
                                             {tiposDocumento.map((tipo) => (
-                                                <option key={tipo.id} value={tipo.id}>
-                                                    {tipo.nombre}
-                                                </option>
+                                                <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
                                             ))}
                                         </select>
                                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
@@ -244,52 +207,47 @@ const ClientesForm = () => {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="numeroDocumento" className={labelClass}>
-                                        Número de Documento *
-                                    </label>
+                                    <label htmlFor="numeroDocumento" className={labelClass}>Número de Documento *</label>
                                     <input
                                         type="text"
                                         id="numeroDocumento"
-                                        name="numeroDocumento"
-                                        value={formData.numeroDocumento}
-                                        onChange={handleDocumentoChange}
-                                        placeholder={
-                                            formData.tipoDocumento === 'pasaporte'
-                                                ? 'Ej: A1234567'
-                                                : 'Ej: 12345678'
-                                        }
-                                        className={inputClass}
+                                        {...register('numeroDocumento', {
+                                            required: 'El documento es obligatorio',
+                                            onChange: handleDocumentoChange
+                                        })}
+                                        placeholder={tipoDocumento === 'pasaporte' ? 'Ej: A1234567' : 'Ej: 12345678'}
+                                        className={inputClass(errors.numeroDocumento)}
                                         maxLength={15}
                                     />
+                                    {errors.numeroDocumento && <p className={errorClass}>{errors.numeroDocumento.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label htmlFor="email" className={labelClass}>
-                                        Correo Electrónico *
-                                    </label>
+                                    <label htmlFor="email" className={labelClass}>Correo Electrónico *</label>
                                     <input
                                         type="email"
                                         id="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
+                                        {...register('email', {
+                                            required: 'El email es obligatorio',
+                                            pattern: {
+                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                message: 'Email inválido'
+                                            }
+                                        })}
                                         placeholder="juan@ejemplo.com"
-                                        className={inputClass}
+                                        className={inputClass(errors.email)}
                                     />
+                                    {errors.email && <p className={errorClass}>{errors.email.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label htmlFor="telefono" className={labelClass}>
-                                        Teléfono
-                                    </label>
+                                    <label htmlFor="telefono" className={labelClass}>Teléfono</label>
                                     <input
                                         type="text"
                                         id="telefono"
-                                        name="telefono"
-                                        value={formData.telefono}
-                                        onChange={handleTelefonoChange}
+                                        {...register('telefono', { onChange: handleTelefonoChange })}
                                         placeholder="Ej: 1123456789"
-                                        className={inputClass}
+                                        className={inputClass(errors.telefono)}
                                     />
                                 </div>
                             </div>
@@ -309,7 +267,7 @@ const ClientesForm = () => {
 
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading || !isValid}
                                 className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
                             >
                                 {loading ? (
