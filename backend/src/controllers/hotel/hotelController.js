@@ -93,6 +93,38 @@ const getHotelById = async (req, res) => {
   }
 };
 
+const getTarifas = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const tarifas = await hotelServices.obtenerTarifasDeHotel(id);
+    res.json(tarifas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const updateTarifas = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+  const { tarifas } = req.body;
+
+  try {
+    const tarifasActualizadas = await hotelServices.actualizarTarifasDeHotel(
+      id,
+      tarifas,
+    );
+    res.json(tarifasActualizadas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getCategorias = async (req, res) => {
   try {
     const categorias = await hotelServices.obtenerCategorias();
@@ -342,6 +374,7 @@ module.exports = {
   getCategorias,
   getHabitaciones,
   getPaquetes,
+  getTarifas,
   setTemporada,
   setHabitaciones,
   setDescuento,
@@ -354,4 +387,5 @@ module.exports = {
   deleteEncargado,
   asignarEmpleado,
   desasignarEmpleado,
+  updateTarifas,
 };

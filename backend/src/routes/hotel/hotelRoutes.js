@@ -3,6 +3,7 @@ const express = require('express');
 const {
   validateHotel,
   validateId,
+  validateTarifasPayload,
 } = require('../../validators/hotel/hotelValidators');
 
 const {
@@ -14,6 +15,7 @@ const {
   getCategorias,
   getHabitaciones,
   getPaquetes,
+  getTarifas,
   getEncargados,
   setDescuento,
   setHabitaciones,
@@ -25,6 +27,7 @@ const {
   deleteEncargado,
   asignarEmpleado,
   desasignarEmpleado,
+  updateTarifas,
 } = require('../../controllers/hotel/hotelController');
 
 const router = express.Router();
@@ -34,8 +37,15 @@ router.get('/hotel/encargados', getEncargados); //Ruta para obtener todos los en
 router.get('/hotel/:id', validateId, getHotelById); //Ruta para obtener un hotel por id
 router.get('/hotel/:id/habitaciones', validateId, getHabitaciones); //Ruta para listar habitaciones físicas del hotel
 router.get('/hotel/:id/paquetes', validateId, getPaquetes); //Ruta para listar paquetes promocionales del hotel
+router.get('/hotel/:id/tarifas', validateId, getTarifas); //Ruta para obtener tarifas por tipo de habitación
 router.post('/hotel', validateHotel, createHotel); //Ruta para crear un hotel
 router.put('/hotel/:id', validateId, validateHotel, updateHotel); //Ruta para modificar un hotel
+router.put(
+  '/hotel/:id/tarifas',
+  validateId,
+  validateTarifasPayload,
+  updateTarifas,
+); //Ruta para actualizar tarifas del hotel
 router.get('/categorias', getCategorias); //Ruta para obtener las categorias de los hoteles
 router.post('/hotel/:id/habitacion', validateId, setHabitaciones); //Ruta para crear una habitacion en un hotel
 router.put('/hotel/:id/habitacion/:idHabitacion', validateId, updateHabitacion); //Ruta para crear una habitacion en un hotel

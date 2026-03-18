@@ -46,4 +46,20 @@ const validateId = [
   param('id').isInt().withMessage('El id debe ser un número entero'),
 ];
 
-module.exports = { validateHotel, validateId };
+const validateTarifasPayload = [
+  body('tarifas')
+    .exists()
+    .withMessage('El campo "tarifas" es requerido')
+    .isArray({ min: 1 })
+    .withMessage(
+      'El campo "tarifas" debe ser un arreglo con al menos un elemento',
+    ),
+  body('tarifas.*.tipoHabitacionId')
+    .isInt({ min: 1 })
+    .withMessage('Cada tarifa debe incluir un "tipoHabitacionId" válido'),
+  body('tarifas.*.precio')
+    .isFloat({ min: 0 })
+    .withMessage('Cada tarifa debe incluir un "precio" mayor o igual a 0'),
+];
+
+module.exports = { validateHotel, validateId, validateTarifasPayload };

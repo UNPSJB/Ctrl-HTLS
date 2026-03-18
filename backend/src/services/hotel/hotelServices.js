@@ -320,6 +320,91 @@ const getTiposHabitacionesHotel = async (idHotel) => {
   }
 };
 
+const obtenerTarifasDeHotel = async (hotelId) => {
+  await verificarIdHotel(hotelId);
+
+  const tiposHabitacion = await TipoHabitacion.findAll({
+    attributes: ['id', 'nombre', 'capacidad'],
+    raw: true,
+  });
+
+  const tarifasHotel = await HotelTipoHabitacion.findAll({
+    where: { hotelId },
+    attributes: ['tipoHabitacionId', 'precio'],
+    raw: true,
+  });
+
+  const mapaTarifas = tarifasHotel.reduce((acc, tarifa) => {
+    acc[tarifa.tipoHabitacionId] = tarifa.precio;
+    return acc;
+  }, {});
+
+  return tiposHabitacion.map((tipo) => ({
+    id: tipo.id,
+    nombre: tipo.nombre,
+    capacidad: tipo.capacidad,
+    precio: mapaTarifas[tipo.id] ?? 0,
+  }));
+};
+
+const actualizarTarifasDeHotel = async (hotelId, tarifas) => {
+  await verificarIdHotel(hotelId);
+
+  if (!Array.isArray(tarifas)) {
+    throw new CustomError('El campo "tarifas" debe ser un arreglo', 400);
+  }
+
+  const transaction = await sequelize.transaction();
+  try {
+    for (const tarifa of tarifas) {
+      const { tipoHabitacionId, precio } = tarifa;
+
+      if (!tipoHabitacionId || precio === undefined) {
+        throw new CustomError(
+          'Cada tarifa debe incluir "tipoHabitacionId" y "precio"',
+          400,
+        );
+      }
+
+      const precioNumerico = Number(precio);
+      if (Number.isNaN(precioNumerico) || precioNumerico < 0) {
+        throw new CustomError(
+          'El "precio" debe ser un número mayor o igual a 0',
+          400,
+        );
+      }
+
+      const tipoHabitacion = await TipoHabitacion.findByPk(tipoHabitacionId, {
+        transaction,
+      });
+
+      if (!tipoHabitacion) {
+        throw new CustomError(
+          `El tipo de habitación con ID ${tipoHabitacionId} no existe`,
+          404,
+        );
+      }
+
+      const [registro, creado] = await HotelTipoHabitacion.findOrCreate({
+        where: { hotelId, tipoHabitacionId },
+        defaults: { precio: precioNumerico },
+        transaction,
+      });
+
+      if (!creado) {
+        registro.precio = precioNumerico;
+        await registro.save({ transaction });
+      }
+    }
+
+    await transaction.commit();
+    return obtenerTarifasDeHotel(hotelId);
+  } catch (error) {
+    await transaction.rollback();
+    throw new CustomError(error.message, error.statusCode || 500);
+  }
+};
+
 const getNombreEncargado = async (encargadoId) => {
   const encargado = await Encargado.findByPk(encargadoId, {
     attributes: ['nombre', 'apellido'],
@@ -1062,4 +1147,6 @@ module.exports = {
   asignarEmpleadoAHotel,
   desasignarEmpleadoDeHotel,
   obtenerEncargados,
+  obtenerTarifasDeHotel,
+  actualizarTarifasDeHotel,
 };
