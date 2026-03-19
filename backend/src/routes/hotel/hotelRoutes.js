@@ -21,6 +21,7 @@ const {
   getTarifas,
   getEncargados,
   setDescuento,
+  getDescuentos,
   setHabitaciones,
   updateHabitacion,
   deleteHabitacion,
@@ -86,7 +87,8 @@ router.delete(
 //IMPLEMENTAR
 // router.put('/hotel/:id/temporada/:idTemporada', validateId, updateTemporada); //Ruta para modificar una temporada en un hotel
 
-router.post('/hotel/:id/descuentos', validateId, setDescuento); //Ruta para crear una habitacion en un hotel
+router.get('/hotel/:id/descuentos', validateId, getDescuentos); //Ruta para obtener descuentos de un hotel
+router.post('/hotel/:id/descuentos', validateId, setDescuento); //Ruta para crear descuentos en un hotel
 
 router.post('/hotel/asignar-empleado', asignarEmpleado); //Ruta para asingar un empleado a un hotel
 

@@ -21,6 +21,7 @@ const Ciudad = require('../../models/core/Ciudad');
 const Provincia = require('../../models/core/Provincia');
 const Pais = require('../../models/core/Pais');
 const Descuento = require('../../models/hotel/Descuento');
+const Empleado = require('../../models/core/Empleado');
 const paquetePromocionalServices = require('./paquetePromocionalServices');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
 const temporadaServices = require('./temporadaServices');
@@ -212,6 +213,18 @@ const getHotelById = async (hotelId) => {
           },
         ],
       },
+      {
+        model: Empleado,
+        as: 'empleados',
+        attributes: [
+          'id',
+          'nombre',
+          'apellido',
+          'email',
+          'tipoDocumento',
+          'numeroDocumento',
+        ],
+      },
     ],
   });
 
@@ -220,12 +233,13 @@ const getHotelById = async (hotelId) => {
   }
 
   const hotelData = hotel.toJSON();
+  const { empleados, ...restHotelData } = hotelData;
   const ciudad = hotelData.ciudad;
   const provincia = ciudad?.provincia;
   const pais = provincia?.pais;
 
   return {
-    ...hotelData,
+    ...restHotelData,
     encargado: hotelData.encargado
       ? {
           id: hotelData.encargado.id,
@@ -252,6 +266,14 @@ const getHotelById = async (hotelId) => {
       tipoHabitacionNombre: registro.tipoHabitacion?.nombre,
       capacidad: registro.tipoHabitacion?.capacidad,
       precio: registro.precio,
+    })),
+    vendedores: hotelData.empleados?.map((emp) => ({
+      empleadoId: emp.id,
+      empleadoNombre: emp.nombre,
+      empleadoApellido: emp.apellido,
+      empleadoEmail: emp.email,
+      empleadoTipoDocumento: emp.tipoDocumento,
+      empleadoNumeroDocumento: emp.numeroDocumento,
     })),
   };
 };
@@ -1148,6 +1170,7 @@ module.exports = {
   obtenerTemporadasDeHotel,
   eliminarTemporadaDeHotel,
   agregarDescuentos,
+  getDescuentosDeHotel,
   getDisponibilidadPorHotel,
   getHotelesPorCiudad,
   obtenerTiposDeHabitacion,

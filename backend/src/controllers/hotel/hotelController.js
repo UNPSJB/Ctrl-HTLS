@@ -322,6 +322,23 @@ const setDescuento = async (req, res) => {
   }
 };
 
+const getDescuentos = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const descuentos = await hotelServices.getDescuentosDeHotel(id);
+    res.json(descuentos);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getTiposDeHabitacion = async (req, res) => {
   try {
     const tipos = await hotelServices.obtenerTiposDeHabitacion();
@@ -417,6 +434,7 @@ module.exports = {
   deleteTemporada,
   setHabitaciones,
   setDescuento,
+  getDescuentos,
   updateHabitacion,
   deleteHabitacion,
   setPaquetePromocional,
