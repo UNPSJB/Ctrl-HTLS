@@ -272,6 +272,43 @@ const setTemporada = async (req, res) => {
   }
 };
 
+const getTemporadas = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const temporadas = await hotelServices.obtenerTemporadasDeHotel(id);
+    res.json(temporadas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const deleteTemporada = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id, idTemporada } = req.params;
+
+  try {
+    const resultado = await hotelServices.eliminarTemporadaDeHotel(
+      id,
+      idTemporada,
+    );
+    res.json(resultado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const setDescuento = async (req, res) => {
   const { id } = req.params;
   const descuento = req.body;
@@ -376,6 +413,8 @@ module.exports = {
   getPaquetes,
   getTarifas,
   setTemporada,
+  getTemporadas,
+  deleteTemporada,
   setHabitaciones,
   setDescuento,
   updateHabitacion,

@@ -622,6 +622,16 @@ const agregarTemporada = async (idHotel, temporada) => {
   return temporadaNueva;
 };
 
+const obtenerTemporadasDeHotel = async (hotelId) => {
+  await verificarIdHotel(hotelId);
+  return temporadaServices.obtenerTemporadasPorHotel(hotelId);
+};
+
+const eliminarTemporadaDeHotel = async (hotelId, temporadaId) => {
+  await verificarIdHotel(hotelId);
+  return temporadaServices.eliminarTemporada(hotelId, temporadaId);
+};
+
 const agregarDescuentos = async (idHotel, descuento) => {
   // Verificar si el hotel existe
   await verificarIdHotel(idHotel);
@@ -1135,6 +1145,8 @@ module.exports = {
   agregarPaquetePromocional,
   obtenerPaquetesDeHotel,
   agregarTemporada,
+  obtenerTemporadasDeHotel,
+  eliminarTemporadaDeHotel,
   agregarDescuentos,
   getDisponibilidadPorHotel,
   getHotelesPorCiudad,

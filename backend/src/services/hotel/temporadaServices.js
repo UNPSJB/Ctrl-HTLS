@@ -98,8 +98,49 @@ const obtenerTemporadaActual = async (idHotel, fechaInicio, fechaFin) => {
   };
 };
 
+const obtenerTemporadasPorHotel = async (hotelId) => {
+  try {
+    const temporadas = await Temporada.findAll({
+      where: { hotelId },
+      attributes: ['id', 'tipo', 'fechaInicio', 'fechaFin', 'porcentaje'],
+      order: [['fechaInicio', 'ASC']],
+    });
+    return temporadas;
+  } catch (error) {
+    throw new CustomError(
+      `Error al obtener las temporadas del hotel: ${error.message}`,
+      500,
+    );
+  }
+};
+
+const eliminarTemporada = async (hotelId, temporadaId) => {
+  try {
+    const temporada = await Temporada.findOne({
+      where: { id: temporadaId, hotelId },
+    });
+
+    if (!temporada) {
+      throw new CustomError(
+        'La temporada no existe o no pertenece a este hotel',
+        404,
+      );
+    }
+
+    await temporada.destroy();
+    return { message: 'Temporada eliminada correctamente' };
+  } catch (error) {
+    throw new CustomError(
+      `Error al eliminar la temporada: ${error.message}`,
+      error.statusCode || 500,
+    );
+  }
+};
+
 module.exports = {
   crearTemporada,
   verificarTemporadas,
   obtenerTemporadaActual,
+  obtenerTemporadasPorHotel,
+  eliminarTemporada,
 };

@@ -62,4 +62,15 @@ const validateTarifasPayload = [
     .withMessage('Cada tarifa debe incluir un "precio" mayor o igual a 0'),
 ];
 
-module.exports = { validateHotel, validateId, validateTarifasPayload };
+const validateTemporadaId = [
+  param('idTemporada')
+    .isInt()
+    .withMessage('El idTemporada debe ser un número entero'),
+];
+
+module.exports = {
+  validateHotel,
+  validateId,
+  validateTarifasPayload,
+  validateTemporadaId,
+};
