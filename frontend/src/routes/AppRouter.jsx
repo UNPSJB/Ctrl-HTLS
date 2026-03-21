@@ -49,25 +49,19 @@ function AppRouter() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Dashboard />} />
 
-                {/* Rutas Individuales de Formularios de Personal (Fuera del Tab Layout) */}
+                {/* Rutas Individuales de Personal (Fuera del Tab Layout) */}
                 <Route path="personal/vendedores/nuevo" element={<VendedoresForm />} />
                 <Route path="personal/vendedores/editar/:id" element={<VendedoresForm />} />
                 <Route path="personal/administradores/nuevo" element={<AdministradoresForm />} />
                 <Route path="personal/administradores/editar/:id" element={<AdministradoresForm />} />
+                <Route path="personal/liquidaciones" element={<LiquidacionesGlobales />} />
+                <Route path="personal/liquidaciones/:id" element={<VendedorLiquidaciones />} />
 
                 {/* Rutas de Personal (Listados con Tabs integrados) */}
                 <Route path="personal" element={<Personal />}>
                   <Route index element={<Navigate to="vendedores" replace />} />
-
-                  {/* Vendedores */}
                   <Route path="vendedores" element={<VendedoresList />} />
-
-                  {/* Administradores */}
                   <Route path="administradores" element={<AdministradoresList />} />
-
-                  {/* Liquidaciones */}
-                  <Route path="liquidaciones" element={<LiquidacionesGlobales />} />
-                  <Route path="liquidaciones/:id" element={<VendedorLiquidaciones />} />
                 </Route>
 
                 {/* Rutas de Hoteles */}
