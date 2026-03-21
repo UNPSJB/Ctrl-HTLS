@@ -137,10 +137,7 @@ export default function HotelDashboard() {
                 )}
 
                 {activeTab === 'tarifas' && (
-                  <TarifasTab
-                    hotelId={hotel.id}
-                    hotelTarifas={hotel.tarifas || []}
-                  />
+                  <TarifasTab hotelId={hotel.id} />
                 )}
 
                 {activeTab === 'habitaciones' && (
