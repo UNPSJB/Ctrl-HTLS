@@ -148,11 +148,7 @@ export default function HotelDashboard() {
                 )}
 
                 {activeTab === 'personal' && (
-                  <VendedoresAsignadosList
-                    hotelId={hotel.id}
-                    asignadosIniciales={hotel?.vendedores || []}
-                    onUpdateAsignados={fetchHotelDashboardData}
-                  />
+                  <VendedoresAsignadosList hotelId={hotel.id} />
                 )}
 
                 {activeTab === 'temporadas' && (
