@@ -156,12 +156,7 @@ export default function HotelDashboard() {
                 )}
 
                 {activeTab === 'temporadas' && (
-                  <TemporadasTab
-                    hotelId={hotel.id}
-                    initialTemporadas={hotel?.temporadas || []}
-                    initialDescuentos={hotel?.descuentos || []}
-                    onUpdate={fetchHotelDashboardData}
-                  />
+                  <TemporadasTab hotelId={hotel.id} />
                 )}
 
                 {activeTab === 'paquetes' && (
