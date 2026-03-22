@@ -3,7 +3,7 @@ import { Calendar, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import { InnerLoading } from '@/components/ui/InnerLoading';
+import TemporadasList from './TemporadasList';
 
 export default function TemporadasSection({ hotelId }) {
   const [temporadas, setTemporadas] = useState([]);
@@ -139,75 +139,7 @@ export default function TemporadasSection({ hotelId }) {
       )}
 
       {/* Tabla */}
-      <div className="relative flex flex-col min-h-[300px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-            <InnerLoading message="Sincronizando temporadas..." />
-          </div>
-        )}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-              <tr>
-                <th className="px-4 py-3">Tipo</th>
-                <th className="px-4 py-3">Inicio</th>
-                <th className="px-4 py-3">Fin</th>
-                <th className="px-4 py-3 text-center">Ajuste</th>
-                <th className="px-4 py-3 text-right">Acción</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {temporadas.length === 0 && !loading ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic">
-                    <div className="flex flex-col items-center gap-2">
-                      <Calendar className="h-8 w-8 opacity-20" />
-                      <p>No hay temporadas configuradas.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                temporadas.map((t) => (
-                  <tr key={t.id} className="group transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-2 font-semibold uppercase tracking-wider text-sm">
-                        {t.tipo === 'alta' ? (
-                          <TrendingUp className="h-4 w-4 text-emerald-500" />
-                        ) : (
-                          <TrendingDown className="h-4 w-4 text-orange-500" />
-                        )}
-                        <span className={t.tipo === 'alta' ? 'text-emerald-700 dark:text-emerald-400' : 'text-orange-700 dark:text-orange-400'}>
-                          {t.tipo}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                      {new Date(t.fechaInicio).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                      {new Date(t.fechaFin).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-2.5 text-center">
-                      <span className="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        {parseInt(t.porcentaje)}%
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-right">
-                      <button
-                        onClick={() => handleDelete(t.id)}
-                        disabled={loading}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-red-50 hover:text-red-600 disabled:opacity-40 dark:hover:bg-red-900/20"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <TemporadasList data={temporadas} loading={loading} onDelete={handleDelete} />
     </section>
   );
 }

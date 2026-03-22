@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { ChevronRight, Pencil, Trash2, ArrowRight, Search, ChevronLeft, ChevronRight as ChevronRightNav } from 'lucide-react';
+import { ChevronRight, Pencil, Trash2, ArrowRight, Search } from 'lucide-react';
+import TablePagination from '@/components/ui/TablePagination';
 
 const PAGE_SIZE = 15;
 
@@ -58,12 +59,12 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40">
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">#</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Nombre</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">#</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Nombre</th>
                 {tipo === 'ciudad' && (
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Código Postal</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Código Postal</th>
                 )}
-                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
+                <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -72,18 +73,18 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
                   key={item.id}
                   className="group transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/20"
                 >
-                  <td className="px-5 py-3.5 text-gray-400 dark:text-gray-500 text-xs">
+                  <td className="px-6 py-3 text-gray-400 dark:text-gray-500 text-xs">
                     {(safePage - 1) * PAGE_SIZE + idx + 1}
                   </td>
-                  <td className="px-5 py-3.5 font-medium text-gray-800 dark:text-gray-200">
+                  <td className="px-6 py-3 font-medium text-gray-800 dark:text-gray-200">
                     {item.nombre}
                   </td>
                   {tipo === 'ciudad' && (
-                    <td className="px-5 py-3.5 text-gray-500 dark:text-gray-400 font-mono text-xs">
+                    <td className="px-6 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs">
                       {item.codigoPostal}
                     </td>
                   )}
-                  <td className="px-5 py-3.5">
+                  <td className="px-6 py-3">
                     <div className="flex items-center justify-end gap-1">
                       {/* Editar */}
                       <button
@@ -124,32 +125,13 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
       </div>
 
       {/* Paginación */}
-      {filtered.length > PAGE_SIZE && (
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          <span className="text-xs">
-            Mostrando {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} de {filtered.length}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={safePage === 1}
-              className="rounded-lg border border-gray-200 p-1.5 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <span className="px-2 text-xs font-medium">
-              {safePage} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={safePage === totalPages}
-              className="rounded-lg border border-gray-200 p-1.5 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors"
-            >
-              <ChevronRightNav className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
+      <TablePagination
+        currentPage={page}
+        totalItems={filtered.length}
+        itemsPerPage={PAGE_SIZE}
+        onPageChange={setPage}
+        disabled={loading}
+      />
     </div>
   );
 }

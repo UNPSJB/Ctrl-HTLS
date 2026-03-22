@@ -13,8 +13,8 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import HabitacionesList from '@/modules/admin/hotels/components/HabitacionesList';
-import VendedoresAsignadosList from '@/modules/admin/hotels/components/VendedoresAsignadosList';
+import HabitacionesTab from '@/modules/admin/hotels/components/HabitacionesTab';
+import PersonalAsignadoTab from '@/modules/admin/hotels/components/PersonalAsignadoTab';
 import AjustesGeneralesTab from '@/modules/admin/hotels/components/AjustesGeneralesTab';
 import TarifasTab from '@/modules/admin/hotels/components/TarifasTab';
 import TemporadasTab from '@/modules/admin/hotels/components/TemporadasTab';
@@ -141,14 +141,14 @@ export default function HotelDashboard() {
                 )}
 
                 {activeTab === 'habitaciones' && (
-                  <HabitacionesList
+                  <HabitacionesTab
                     hotelId={hotel.id}
                     tarifasAsignadas={hotel.tarifas || []}
                   />
                 )}
 
                 {activeTab === 'personal' && (
-                  <VendedoresAsignadosList hotelId={hotel.id} />
+                  <PersonalAsignadoTab hotelId={hotel.id} />
                 )}
 
                 {activeTab === 'temporadas' && (

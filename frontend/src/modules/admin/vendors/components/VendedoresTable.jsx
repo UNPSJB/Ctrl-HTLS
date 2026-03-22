@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Edit, Trash2, Search, Plus, ChevronLeft, ChevronRight, X, DollarSign, FileText, User, Users } from 'lucide-react';
+import { Edit, Trash2, Search, Plus, X, DollarSign, FileText, User, Users } from 'lucide-react';
 import TableButton from '@/components/ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
+import TablePagination from '@/components/ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 100;
 
-const VendedoresList = () => {
+const VendedoresTable = () => {
   const [vendedores, setVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -81,13 +82,14 @@ const VendedoresList = () => {
           <div className="relative max-w-md">
             <input
               type="text"
-              placeholder="Buscar por nombre, DNI o email..."
+              placeholder="Buscar por nombre o documento..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              disabled={loading}
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:disabled:bg-gray-800"
             />
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-            {searchTerm && (
+            {searchTerm && !loading && (
               <button onClick={() => setSearchTerm('')} className="absolute right-3 top-2.5 text-gray-400">
                 <X className="h-4 w-4" />
               </button>
@@ -107,12 +109,12 @@ const VendedoresList = () => {
             {filteredVendedores.length > 0 ? (
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
-                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Personal</th>
-                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Identificación</th>
-                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Contacto</th>
-                    <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Hoteles</th>
-                    <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
+                  <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                    <th className="px-6 py-4 text-left">Nombre Completo</th>
+                    <th className="px-6 py-4 text-left">Documento</th>
+                    <th className="px-6 py-4 text-left">Contacto</th>
+                    <th className="px-6 py-4 text-left">Hoteles</th>
+                    <th className="px-6 py-4 text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -131,20 +133,24 @@ const VendedoresList = () => {
                         </div>
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                        <span className="font-bold border rounded px-1 text-[10px] mr-2">{vendedor.tipoDocumento}</span>
+                        <span className="font-semibold uppercase mr-2">{vendedor.tipoDocumento}</span>
                         {vendedor.numeroDocumento}
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                        <div>{vendedor.email}</div>
-                        <div className="text-[11px] text-gray-500">{vendedor.telefono}</div>
+                        <div className="flex flex-col">
+                          <span>{vendedor.email || <span className="italic text-gray-400">—</span>}</span>
+                          <span className="text-gray-500">
+                            {vendedor.telefono || <span className="italic text-gray-400">—</span>}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-6 py-3">
                         <div className="flex flex-wrap gap-1">
-                          {vendedor.hotelesPermitidos?.map(h => (
-                            <span key={h.id} className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                          {vendedor.hotelesPermitidos?.length > 0 ? vendedor.hotelesPermitidos.map(h => (
+                            <span key={h.id} className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                               {h.nombre}
                             </span>
-                          ))}
+                          )) : <span className="italic text-gray-400">—</span>}
                         </div>
                       </td>
                       <td className="px-6 py-3 text-right">
@@ -172,33 +178,17 @@ const VendedoresList = () => {
           </div>
         </div>
 
-        {/* Paginación Estándar */}
-        {!loading && filteredVendedores.length > 0 && (
-          <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Mostrando <span className="font-medium">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filteredVendedores.length)}</span> de <span className="font-medium">{filteredVendedores.length}</span> resultados
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="rounded-lg border border-gray-300 p-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-400"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="rounded-lg border border-gray-300 p-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-400"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Paginación */}
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredVendedores.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+          disabled={loading}
+        />
       </div>
     </div>
   );
 };
 
-export default VendedoresList;
+export default VendedoresTable;

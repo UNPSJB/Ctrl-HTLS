@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Search, X, Users, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, Search, X, Users, User } from 'lucide-react';
 import TableButton from '@/components/ui/TableButton';
 import axiosInstance from '@/api/axiosInstance';
+import TablePagination from '@/components/ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 100;
 
 const EncargadosTable = () => {
   const [encargados, setEncargados] = useState([]);
@@ -85,10 +86,11 @@ const EncargadosTable = () => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+            disabled={loading}
+            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:disabled:bg-gray-800"
           />
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-          {searchTerm && (
+          {searchTerm && !loading && (
             <button onClick={() => setSearchTerm('')} className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
               <X className="h-4 w-4" />
             </button>
@@ -108,10 +110,10 @@ const EncargadosTable = () => {
             <table className="w-full border-collapse text-left text-sm">
               <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4">Encargado</th>
+                  <th className="px-6 py-4">Nombre Completo</th>
                   <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Teléfono</th>
-                  <th className="px-6 py-4">Estado / Asignación</th>
+                  <th className="px-6 py-4">Contacto</th>
+                  <th className="px-6 py-4">Hotel</th>
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -134,15 +136,20 @@ const EncargadosTable = () => {
 
                     {/* Documento */}
                     <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      <span className="font-bold border rounded px-1 text-[10px] mr-2 uppercase dark:border-gray-600">
+                      <span className="font-semibold uppercase mr-2">
                         {encargado.tipoDocumento}
                       </span>
                       {encargado.dni}
                     </td>
 
-                    {/* Teléfono */}
+                    {/* Contacto */}
                     <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      {encargado.telefono ? encargado.telefono : <span className="italic text-gray-400">—</span>}
+                      <div className="flex flex-col">
+                        <span>{encargado.email || <span className="italic text-gray-400">—</span>}</span>
+                        <span className="text-gray-500">
+                          {encargado.telefono || <span className="italic text-gray-400">—</span>}
+                        </span>
+                      </div>
                     </td>
 
                     {/* Estado de Asignación */}
@@ -152,9 +159,7 @@ const EncargadosTable = () => {
                           {encargado.hotel.nombre}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-                          Sin Asignar
-                        </span>
+                        <span className="italic text-gray-400">—</span>
                       )}
                     </td>
 
@@ -179,29 +184,13 @@ const EncargadosTable = () => {
       </div>
 
       {/* Paginación */}
-      {!loading && filteredEncargados.length > 0 && (
-        <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Mostrando <span className="font-medium">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filteredEncargados.length)}</span> de <span className="font-medium">{filteredEncargados.length}</span> resultados
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="rounded-lg border border-gray-300 p-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-400"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage >= totalPages}
-              className="rounded-lg border border-gray-300 p-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-400"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
+      <TablePagination
+        currentPage={currentPage}
+        totalItems={filteredEncargados.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+        onPageChange={setCurrentPage}
+        disabled={loading}
+      />
     </div>
   );
 };

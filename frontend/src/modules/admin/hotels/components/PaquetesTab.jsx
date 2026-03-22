@@ -3,7 +3,7 @@ import { Tag, Plus, Info, Calendar as CalendarIcon, Users, BedDouble } from 'luc
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import { InnerLoading } from '@/components/ui/InnerLoading';
+import PaquetesList from './PaquetesList';
 
 export default function PaquetesTab({ hotelId }) {
   const [paquetes, setPaquetes] = useState([]);
@@ -202,84 +202,7 @@ export default function PaquetesTab({ hotelId }) {
       )}
 
       {/* Listado de Paquetes */}
-      <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {loadingInitial && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-            <InnerLoading message="Sincronizando paquetes..." />
-          </div>
-        )}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-              <tr>
-                <th className="px-6 py-4">Nombre del Paquete</th>
-                <th className="px-6 py-4 text-center">Desde</th>
-                <th className="px-6 py-4 text-center">Hasta</th>
-                <th className="px-6 py-4 text-center">Descuento</th>
-                <th className="px-6 py-4">Habitaciones</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {paquetes.length === 0 ? (
-              <tr key="empty-packages">
-                <td colSpan="6" className="px-6 py-12 text-center text-gray-400 italic">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Tag className="h-8 w-8 opacity-20" />
-                    <p>No se han configurado paquetes promocionales.</p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              paquetes.map((paquete, pIdx) => (
-                <tr key={paquete.id || `pkg-${pIdx}`} className="group transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-gray-900 dark:text-white">
-                      {paquete.nombre}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
-                      {new Date(paquete.fecha_inicio).toLocaleDateString()}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
-                      {new Date(paquete.fecha_fin).toLocaleDateString()}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
-                      {Math.abs(Math.round(paquete.coeficiente_descuento * 100))}%
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col gap-1 overflow-y-auto max-h-24 pr-2 custom-scrollbar">
-                      {paquete.habitaciones && paquete.habitaciones.length > 0 ? (
-                        paquete.habitaciones.map((hab, hIdx) => (
-                          <div key={hab.id || `pkg-hab-${hIdx}`} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                            <BedDouble className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-                            <span className="font-medium whitespace-nowrap">Piso {hab.piso} - N° {hab.numero}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <span className="text-xs text-gray-400 italic">Ninguna</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                     <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-gray-400 rounded-lg bg-gray-50 px-2 py-1.5 dark:bg-gray-800" title="Edición en desarrollo por backend">
-                       <Info className="h-3.5 w-3.5" />
-                       No editable
-                     </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <PaquetesList data={paquetes} loading={loadingInitial} />
 
     </div>
   );

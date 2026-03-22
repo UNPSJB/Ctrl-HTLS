@@ -3,7 +3,7 @@ import { Tag, Plus, Info } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import { InnerLoading } from '@/components/ui/InnerLoading';
+import DescuentosList from './DescuentosList';
 
 export default function DescuentosSection({ hotelId }) {
   const [descuentos, setDescuentos] = useState([]);
@@ -115,48 +115,7 @@ export default function DescuentosSection({ hotelId }) {
       )}
 
       {/* Tabla */}
-      <div className="relative flex flex-col min-h-[160px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-            <InnerLoading message="Sincronizando descuentos..." />
-          </div>
-        )}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-              <tr>
-                <th className="px-4 py-3">Mínimo de Habitaciones</th>
-                <th className="px-4 py-3 text-center">Descuento (%)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {descuentos.length === 0 && !loading ? (
-                <tr>
-                  <td colSpan="2" className="px-6 py-12 text-center text-gray-400 italic">
-                    <div className="flex flex-col items-center gap-2">
-                      <Tag className="h-8 w-8 opacity-20" />
-                      <p>No hay descuentos configurados.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                descuentos.map((d) => (
-                  <tr key={d.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                    <td className="px-4 py-2.5 font-medium text-gray-800 dark:text-gray-200">
-                      {d.cantidad_de_habitaciones} {d.cantidad_de_habitaciones === 1 ? 'habitación' : 'habitaciones'}
-                    </td>
-                    <td className="px-4 py-2.5 text-center">
-                      <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
-                        {parseInt(d.porcentaje)}%
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DescuentosList data={descuentos} loading={loading} />
 
       {/* Nota informativa */}
       <div className="flex items-start gap-3 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">

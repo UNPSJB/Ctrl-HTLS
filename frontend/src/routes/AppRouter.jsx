@@ -11,11 +11,11 @@ import HotelPage from '@/pages/HotelPage';
 import HotelDashboard from '@/modules/admin/hotels/pages/HotelDashboard';
 import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
-import VendedoresList from '@/modules/admin/vendors/components/VendedoresList';
+import VendedoresTable from '@/modules/admin/vendors/components/VendedoresTable';
 import ClientesForm from '@/modules/admin/clients/pages/ClientesForm';
 // Importaremos placeholder o componentes reales según existan
 import Clientes from '@/modules/admin/clients/pages/Clientes';
-import AdministradoresList from '@/modules/admin/vendors/components/AdministradoresList';
+import AdministradoresTable from '@/modules/admin/vendors/components/AdministradoresTable';
 import VendedoresForm from '@/modules/admin/vendors/pages/VendedoresForm';
 import LiquidacionesGlobales from '@/modules/admin/vendors/pages/LiquidacionesGlobales';
 import VendedorLiquidaciones from '@/modules/admin/vendors/pages/VendedorLiquidaciones';
@@ -63,8 +63,8 @@ function AppRouter() {
                 {/* Rutas de Personal (Listados con Tabs integrados) */}
                 <Route path="personal" element={<Personal />}>
                   <Route index element={<Navigate to="vendedores" replace />} />
-                  <Route path="vendedores" element={<VendedoresList />} />
-                  <Route path="administradores" element={<AdministradoresList />} />
+                  <Route path="vendedores" element={<VendedoresTable />} />
+                  <Route path="administradores" element={<AdministradoresTable />} />
                 </Route>
 
                 {/* Rutas de Hoteles */}

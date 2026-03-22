@@ -11,13 +11,13 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import { InnerLoading } from '@/components/ui/InnerLoading';
+import PersonalAsignadoList from './PersonalAsignadoList';
 
 /**
  * Gestión de personal (vendedores) asignados a un hotel específico.
  * Componente autónomo: carga su propia lista de asignados desde getHotelById.
  */
-export default function VendedoresAsignadosList({ hotelId }) {
+export default function PersonalAsignadoTab({ hotelId }) {
   const [asignados, setAsignados] = useState([]);
   const [todosVendedores, setTodosVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -250,75 +250,12 @@ export default function VendedoresAsignadosList({ hotelId }) {
       )}
 
       {/* Tabla de asignados */}
-      <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {(loading || loadingAction) && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-            <InnerLoading message="Actualizando personal..." />
-          </div>
-        )}
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-              <tr>
-                <th className="px-4 py-3">Nombre</th>
-                <th className="px-4 py-3">Documento</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {asignados.length === 0 && !loading ? (
-                <tr>
-                  <td colSpan="4" className="px-6 py-12 text-center text-gray-400">
-                    <div className="flex flex-col items-center gap-2 italic">
-                      <Users className="h-8 w-8 opacity-20" />
-                      <p>No hay personal asignado actualmente.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                asignados.map((v) => (
-                  <tr
-                    key={v.empleadoId}
-                    className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30"
-                  >
-                    {/* Nombre */}
-                    <td className="px-4 py-2.5 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                      {v.empleadoNombre} {v.empleadoApellido}
-                    </td>
-
-                    {/* Documento en una línea */}
-                    <td className="px-4 py-2.5 text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                      <span className="text-xs font-bold uppercase text-gray-400 mr-1">
-                        {v.empleadoTipoDocumento || 'DNI'}
-                      </span>
-                      {v.empleadoNumeroDocumento}
-                    </td>
-
-                    {/* Email */}
-                    <td className="px-4 py-2.5 text-gray-600 dark:text-gray-300">
-                      {v.empleadoEmail}
-                    </td>
-
-                    {/* Acción */}
-                    <td className="px-4 py-2.5 text-right">
-                      <button
-                        onClick={() => handleDesasignar(v.empleadoId)}
-                        disabled={loadingAction}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-red-50 hover:text-red-600 disabled:opacity-40 dark:hover:bg-red-900/20"
-                        title="Revocar Acceso"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <PersonalAsignadoList
+        data={asignados}
+        loading={loading}
+        loadingAction={loadingAction}
+        onDesasignar={handleDesasignar}
+      />
     </div>
   );
 }

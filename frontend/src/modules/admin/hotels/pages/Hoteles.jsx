@@ -1,4 +1,4 @@
-import HotelesList from '../components/HotelesList';
+import HotelesTable from '../components/HotelesTable';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,7 +27,7 @@ const Hoteles = () => {
             </div>
 
             {/* Listado de Hoteles */}
-            <HotelesList />
+            <HotelesTable />
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import { UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ClientesList from '../components/ClientesList';
+import ClientesTable from '../components/ClientesTable';
 
 const Clientes = () => {
     const navigate = useNavigate();
@@ -23,7 +23,7 @@ const Clientes = () => {
             </div>
 
             {/* Componente de Lista (Datos) */}
-            <ClientesList />
+            <ClientesTable />
         </div>
     );
 };
