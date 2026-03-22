@@ -4,9 +4,9 @@ import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { User, Save, Lock, MapPin, Briefcase, ArrowLeft, ShieldCheck, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import useUbicacion from '@/hooks/useUbicacion';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@/context/BreadcrumbContext';
+import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },
@@ -39,24 +39,14 @@ const AdministradoresForm = () => {
             direccion: '',
             password: '',
             rol: 'administrador',
+            paisId: '',
+            provinciaId: '',
+            ciudadId: '',
         },
         mode: 'onChange'
     });
 
-    const {
-        paises,
-        provincias,
-        ciudades,
-        paisId,
-        provinciaId,
-        ciudadId,
-        handlePaisChange: originalHandlePaisChange,
-        handleProvinciaChange: originalHandleProvinciaChange,
-        handleCiudadChange: originalHandleCiudadChange,
-        isProvinciasDisabled,
-        isCiudadesDisabled,
-        setInitialUbicacion,
-    } = useUbicacion();
+
 
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
@@ -93,11 +83,9 @@ const AdministradoresForm = () => {
             });
 
             if (data.ubicacion) {
-                setInitialUbicacion(
-                    data.ubicacion.paisId,
-                    data.ubicacion.provinciaId,
-                    data.ubicacion.ciudadId
-                );
+                setValue('paisId', data.ubicacion.paisId);
+                setValue('provinciaId', data.ubicacion.provinciaId);
+                setValue('ciudadId', data.ubicacion.ciudadId);
             }
         } catch (error) {
             console.error(error);
@@ -124,31 +112,19 @@ const AdministradoresForm = () => {
         setValue('numeroDocumento', '');
     };
 
-    const handlePaisChange = (val) => originalHandlePaisChange(val);
-    const handleProvinciaChange = (val) => originalHandleProvinciaChange(val);
-    const handleCiudadChange = (val) => originalHandleCiudadChange(val);
+
 
     const onSubmit = async (data) => {
-        if (!ciudadId) {
-            toast.error('La ciudad es obligatoria');
-            setActiveTab('ubicacion');
-            return;
-        }
-
         setLoading(true);
-        const payload = {
-            ...data,
-            ciudadId: ciudadId,
-        };
 
-        if (isEditing && !payload.password) delete payload.password;
+        if (isEditing && !data.password) delete data.password;
 
         try {
             if (isEditing) {
-                await axiosInstance.put(`/empleado/${id}`, payload);
+                await axiosInstance.put(`/empleado/${id}`, data);
                 toast.success('Administrador actualizado');
             } else {
-                await axiosInstance.post('/empleado', payload);
+                await axiosInstance.post('/empleado', data);
                 toast.success('Administrador registrado');
             }
             navigate('/admin/personal/administradores');
@@ -311,27 +287,12 @@ const AdministradoresForm = () => {
                                                 />
                                                 {errors.direccion && <p className={errorClass}>{errors.direccion.message}</p>}
                                             </div>
-                                            <div>
-                                                <label className={labelClass}>Estado / País *</label>
-                                                <select value={paisId} onChange={(e) => handlePaisChange(e.target.value)} className={inputClass()}>
-                                                    <option value="">Seleccione país</option>
-                                                    {paises.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className={labelClass}>Provincia / Región *</label>
-                                                <select value={provinciaId} onChange={(e) => handleProvinciaChange(e.target.value)} className={inputClass()} disabled={isProvinciasDisabled}>
-                                                    <option value="">Seleccione provincia</option>
-                                                    {provincias.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className={labelClass}>Ciudad / Distrito *</label>
-                                                <select value={ciudadId} onChange={(e) => handleCiudadChange(e.target.value)} className={inputClass(!ciudadId && activeTab === 'ubicacion' ? { message: 'Requerido' } : null)} disabled={isCiudadesDisabled}>
-                                                    <option value="">Seleccione ciudad</option>
-                                                    {ciudades.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                                                </select>
-                                            </div>
+                                            <UbicacionSelector
+                                                errors={errors}
+                                                register={register}
+                                                setValue={setValue}
+                                                watch={watch}
+                                            />
                                         </div>
                                     </div>
                                 )}
