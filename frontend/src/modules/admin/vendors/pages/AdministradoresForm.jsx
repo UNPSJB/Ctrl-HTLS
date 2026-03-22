@@ -169,7 +169,7 @@ const AdministradoresForm = () => {
     const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
     return (
-        <div className="mx-auto max-w-5xl space-y-6">
+        <div className="space-y-6">
 
             {/* Perfil del Administrador / Encabezado */}
             <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -189,25 +189,25 @@ const AdministradoresForm = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+            <div className="flex flex-col gap-6 lg:flex-row">
 
                 {/* Menú Lateral de Secciones */}
-                <div className="lg:col-span-1">
+                <aside className="w-full lg:w-80 shrink-0">
                     <nav className="flex flex-col space-y-1 rounded-xl border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                        <button type="button" onClick={() => setActiveTab('general')} className={`flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === 'general' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
-                            <User className="h-4 w-4" /> Principal
+                        <button type="button" onClick={() => setActiveTab('general')} className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === 'general' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
+                            <User className="h-5 w-5" /> Principal
                         </button>
-                        <button type="button" onClick={() => setActiveTab('ubicacion')} className={`flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === 'ubicacion' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
-                            <MapPin className="h-4 w-4" /> Contacto
+                        <button type="button" onClick={() => setActiveTab('ubicacion')} className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === 'ubicacion' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
+                            <MapPin className="h-5 w-5" /> Contacto
                         </button>
-                        <button type="button" onClick={() => setActiveTab('seguridad')} className={`flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === 'seguridad' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
-                            <Lock className="h-4 w-4" /> Seguridad
+                        <button type="button" onClick={() => setActiveTab('seguridad')} className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === 'seguridad' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'}`}>
+                            <Lock className="h-5 w-5" /> Seguridad
                         </button>
                     </nav>
-                </div>
+                </aside>
 
                 {/* Formulario Prinicipal */}
-                <div className="lg:col-span-3">
+                <div className="flex-1 w-full min-w-0">
                     <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
 
                         {loadingData ? (

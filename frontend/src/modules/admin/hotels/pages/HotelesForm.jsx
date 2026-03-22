@@ -258,7 +258,7 @@ export default function HotelesForm() {
   );
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="space-y-6">
       {/* Encabezado del Hotel */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <button
@@ -277,9 +277,9 @@ export default function HotelesForm() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Navegación por Pestañas */}
-        <aside className="lg:col-span-1">
+        <aside className="w-full lg:w-80 shrink-0">
           <nav className="flex flex-col space-y-1 rounded-xl border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             {[
               { id: 'general', icon: Building2, label: 'General' },
@@ -289,13 +289,13 @@ export default function HotelesForm() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                   activeTab === item.id
                     ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                     : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
                 }`}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-5 w-5" />
                 {item.label}
               </button>
             ))}
@@ -303,7 +303,7 @@ export default function HotelesForm() {
         </aside>
 
         {/* Contenido de la Pestaña Activa */}
-        <main className="lg:col-span-3">
+        <main className="flex-1 w-full min-w-0">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="flex min-h-[400px] flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"

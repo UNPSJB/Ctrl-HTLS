@@ -66,7 +66,7 @@ const LiquidacionesGlobales = () => {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="space-y-6">
 
       {/* Encabezado con botón volver */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -86,7 +86,7 @@ const LiquidacionesGlobales = () => {
         <button
           onClick={handleLiquidarMasivo}
           disabled={loading}
-          className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 shadow-sm transition-all"
+          className="flex items-center gap-2 rounded-lg bg-green-600 px-4 h-10 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 shadow-sm transition-colors"
         >
           <DollarSign className="h-4 w-4" />
           Liquidar Periodo

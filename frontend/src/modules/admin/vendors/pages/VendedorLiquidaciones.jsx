@@ -94,7 +94,7 @@ const VendedorLiquidaciones = () => {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="space-y-6">
 
       {/* Encabezado con Datos del Vendedor */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">

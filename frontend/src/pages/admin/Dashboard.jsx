@@ -54,17 +54,10 @@ function Dashboard() {
     fetchData();
   }, []);
 
-  const headerDate = new Date().toLocaleDateString('es-ES', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="space-y-6">
       {/* Encabezado Externo de Bienvenida */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="space-y-1">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             Panel de Control
@@ -72,10 +65,6 @@ function Dashboard() {
           <p className="text-gray-500 dark:text-gray-400">
             Bienvenido, <span className="font-semibold text-blue-600 dark:text-blue-400">{user?.nombre || 'Administrador'}</span>. Gestión de operaciones y estadísticas.
           </p>
-        </div>
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 px-4 py-2 rounded-full border border-gray-100 dark:border-gray-700">
-          <Calendar className="w-4 h-4" />
-          <span className="capitalize">{headerDate}</span>
         </div>
       </div>
 
@@ -90,48 +79,48 @@ function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Total Hoteles */}
               <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-2">
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalHoteles}</p>
                 </div>
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total Hoteles</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalHoteles}</p>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Hoteles</h3>
               </div>
 
               {/* Total Vendedores */}
               <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-purple-200 dark:hover:border-purple-800">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-2">
                   <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                     <UserCheck className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.vendedoresActivos}</p>
                 </div>
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Vendedores Activos</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.vendedoresActivos}</p>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Vendedores Activos</h3>
               </div>
 
               {/* Total Clientes */}
               <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-orange-200 dark:hover:border-orange-800">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-2">
                   <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                     <Users className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                   </div>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalClientes}</p>
                 </div>
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total Clientes</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalClientes}</p>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Clientes</h3>
               </div>
 
               {/* Ingresos Mensuales */}
               <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-green-200 dark:hover:border-green-800">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-2">
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
                   </div>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(stats.ingresosMensuales)}
+                  </p>
                 </div>
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Ingresos (Est. Mes)</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(stats.ingresosMensuales)}
-                </p>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Ingresos (Est. Mes)</h3>
               </div>
             </div>
 
@@ -197,7 +186,7 @@ function Dashboard() {
                     <ArrowRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
                   </Link>
 
-                  <Link to="/admin/vendedores/nuevo" className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20 hover:bg-purple-50 dark:hover:bg-purple-900/10 hover:border-purple-200 transition-all group">
+                  <Link to="/admin/personal/vendedores/nuevo" className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20 hover:bg-purple-50 dark:hover:bg-purple-900/10 hover:border-purple-200 transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 rounded-lg group-hover:scale-110 transition-transform">
                         <UserCheck className="w-5 h-5" />

@@ -60,7 +60,7 @@ export default function HotelDashboard() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="space-y-6">
       {/* Encabezado del Dashboard (Shell) */}
       <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center gap-4">
@@ -85,20 +85,20 @@ export default function HotelDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Navegación por Pestañas (Shell) */}
-        <aside className="lg:col-span-1">
+        <aside className="w-full lg:w-80 shrink-0">
           <nav className="flex flex-col space-y-1 rounded-xl border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             {TABS.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 disabled={loading && !hotel}
-                className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 ${
                   activeTab === item.id
                     ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                     : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
-                } disabled:opacity-50`}
+                }`}
               >
                 <item.icon className="h-5 w-5" />
                 {item.label}
@@ -108,7 +108,7 @@ export default function HotelDashboard() {
         </aside>
 
         {/* Contenido Dinámico */}
-        <main className="lg:col-span-4">
+        <main className="flex-1 w-full min-w-0">
           <div className="min-h-[500px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 relative flex flex-col">
             {loading ? (
               <div className="flex-1 flex items-center justify-center">

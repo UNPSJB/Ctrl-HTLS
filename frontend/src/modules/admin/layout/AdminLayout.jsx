@@ -28,7 +28,7 @@ function AdminLayout() {
             overflowY: 'auto',
           }}
         >
-          <div className="container mx-auto px-4 py-6">
+          <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <Breadcrumbs />
             <Outlet />
           </div>
