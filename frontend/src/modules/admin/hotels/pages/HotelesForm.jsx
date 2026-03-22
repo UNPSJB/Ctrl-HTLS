@@ -9,7 +9,6 @@ import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 
 import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import EncargadosList from '@/components/selectors/EncargadosList';
-import EncargadoForm from '@/components/forms/EncargadoForm';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 // Formulario para creación y edición básica de hoteles
@@ -24,9 +23,8 @@ export default function HotelesForm() {
   const [loadingData, setLoadingData] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Modo de selección de encargado: 'select' o 'create'
-  const [encargadoMode, setEncargadoMode] = useState('create');
   const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
+  const [initialEncargadoId, setInitialEncargadoId] = useState(null);
 
   const form = useForm({
     defaultValues: {
@@ -96,7 +94,7 @@ export default function HotelesForm() {
 
       if (hotel.encargado?.id) {
         setSelectedEncargadoId(hotel.encargado.id);
-        setEncargadoMode('create'); // Por defecto para ver sus datos
+        setInitialEncargadoId(hotel.encargado.id);
       }
     } catch (error) {
       console.error(error);
@@ -111,43 +109,7 @@ export default function HotelesForm() {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      let encargadoIdParaHotel = null;
-
-      if (encargadoMode === 'select') {
-        if (isEditing && !selectedEncargadoId) {
-          toast.error('Debe seleccionar un encargado del listado');
-          setIsSubmitting(false);
-          return;
-        }
-        encargadoIdParaHotel = selectedEncargadoId;
-      } else {
-        // Modo 'create': Validar que al menos el nombre esté presente
-        if (!data.encargadoNombre) {
-          toast.error('Nombre del encargado es obligatorio');
-          setIsSubmitting(false);
-          return;
-        }
-
-        const encargadoData = {
-          nombre: data.encargadoNombre,
-          apellido: data.encargadoApellido,
-          tipoDocumento: data.encargadoTipoDocumento,
-          numeroDocumento: data.encargadoNumeroDocumento,
-        };
-
-        try {
-          const respEncargado = await axiosInstance.post(
-            '/hotel/encargados',
-            encargadoData
-          );
-          encargadoIdParaHotel = respEncargado.data.id;
-        } catch (err) {
-          console.error(err);
-          toast.error('Error al registrar encargado. Verifique los datos.');
-          setIsSubmitting(false);
-          return;
-        }
-      }
+      const encargadoIdParaHotel = selectedEncargadoId;
 
       const hotelPayload = {
         nombre: data.nombre,
@@ -169,7 +131,7 @@ export default function HotelesForm() {
       } else {
         const createRes = await axiosInstance.post('/hotel', hotelPayload);
         toast.success('Hotel creado exitosamente');
-        
+
         // Redirigir al dashboard para terminar de configurarlo (flujo unificado)
         const newId = createRes.data?.id || createRes.data?.hotelId;
         if (newId) {
@@ -273,7 +235,7 @@ export default function HotelesForm() {
             Registrar Nuevo Hotel
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-             Complete la información para dar de alta un hotel
+            Complete la información para dar de alta un hotel
           </p>
         </div>
       </div>
@@ -290,11 +252,10 @@ export default function HotelesForm() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                  activeTab === item.id
+                className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === item.id
                     ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                     : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 <item.icon className="h-5 w-5" />
                 {item.label}
@@ -347,62 +308,26 @@ export default function HotelesForm() {
                   )}
 
                   {activeTab === 'encargado' && (
-                    <div className="animate-in fade-in space-y-6 duration-300">
-                      {/* Selector de Modo de Encargado */}
-                      <div className="flex w-fit rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-                        <button
-                          type="button"
-                          onClick={() => setEncargadoMode('create')}
-                          className={`rounded-md px-4 py-1.5 text-xs font-medium transition-all ${
-                            encargadoMode === 'create'
-                              ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
-                              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                          }`}
-                        >
-                          {isEditing
-                            ? 'Datos del Encargado'
-                            : 'Registrar Nuevo'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEncargadoMode('select')}
-                          className={`rounded-md px-4 py-1.5 text-xs font-medium transition-all ${
-                            encargadoMode === 'select'
-                              ? 'bg-white text-violet-600 shadow-sm dark:bg-gray-600 dark:text-violet-400'
-                              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                          }`}
-                        >
-                          Seleccionar Existente
-                        </button>
+                    <div className="animate-in fade-in space-y-4 duration-300 flex flex-col h-full">
+                      <EncargadosList
+                        value={selectedEncargadoId}
+                        onChange={setSelectedEncargadoId}
+                        exclude={initialEncargadoId}
+                      />
+                      <div className="mt-4 flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-800 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-300">
+                        <User className="h-5 w-5 text-blue-500" />
+                        <p>
+                          ¿El encargado que buscas no aparece o no está registrado?{' '}
+                          <a
+                            href="/admin/encargados/nuevo"
+                            className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Hacé clic acá para gestionarlos
+                          </a>.
+                        </p>
                       </div>
-
-                      {encargadoMode === 'create' ? (
-                        <div className="space-y-4">
-                          <EncargadoForm
-                            register={register}
-                            errors={errors}
-                            loading={loadingResources || isSubmitting}
-                          />
-                          {isEditing && (
-                            <div className="flex items-start gap-3 rounded-md bg-yellow-50 p-4 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
-                              <div className="mt-0.5">⚠️</div>
-                              <p>
-                                Actualmente solo puedes ver los datos del
-                                encargado asignado. La edición proactiva de sus
-                                datos estará disponible próximamente en el
-                                backend.
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <EncargadosList
-                            value={selectedEncargadoId}
-                            onChange={setSelectedEncargadoId}
-                          />
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>

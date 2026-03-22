@@ -50,14 +50,14 @@ function AdminSidebar({ onClose }) {
       path: '/admin/clientes',
     },
     {
-      title: 'Ubicación',
-      icon: MapPin,
-      path: '/admin/ubicacion',
-    },
-    {
       title: 'Encargados',
       icon: Contact,
       path: '/admin/encargados',
+    },
+    {
+      title: 'Ubicación',
+      icon: MapPin,
+      path: '/admin/ubicacion',
     },
   ];
 

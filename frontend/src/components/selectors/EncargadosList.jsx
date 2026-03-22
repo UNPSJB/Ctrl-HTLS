@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { User, Search, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import axiosInstance from '@/api/axiosInstance';
+import TablePagination from '@/components/ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+
+const ITEMS_PER_PAGE = 100;
 
 /**
  * Lista de encargados disponibles (sin hotel asignado) en formato de tabla.
@@ -15,6 +18,7 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchEncargados();
@@ -48,6 +52,13 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
     );
   }, [encargados, searchTerm]);
 
+  const currentItems = useMemo(() => {
+    return filtered.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+    );
+  }, [filtered, currentPage]);
+
   if (error) {
     return (
       <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/30 dark:bg-red-900/10">
@@ -67,7 +78,10 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
             type="text"
             placeholder="Buscar por nombre o DNI..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
           />
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -111,14 +125,14 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
             <table className="w-full border-collapse text-left text-sm">
               <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-3">Encargado</th>
-                  <th className="px-6 py-3">Documento</th>
-                  <th className="px-6 py-3">Teléfono</th>
-                  <th className="px-6 py-3 text-right">Seleccionar</th>
+                  <th className="px-6 py-4">Nombre Completo</th>
+                  <th className="px-6 py-4">Documento</th>
+                  <th className="px-6 py-4">Contacto</th>
+                  <th className="px-6 py-4 text-right">Seleccionar</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                {filtered.map((e) => {
+                {currentItems.map((e) => {
                   const isSelected = value === e.id;
                   return (
                     <tr
@@ -131,32 +145,42 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
                       }`}
                     >
                       {/* Nombre */}
+                      {/* Nombre Completo */}
                       <td className="px-6 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                        <div className="flex items-center">
+                          <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg transition-colors ${
                             isSelected
                               ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
-                              : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                              : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                           }`}>
-                            <User className="h-4 w-4" />
+                            <User className="h-5 w-5" />
                           </div>
-                          <p className={`font-medium ${isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                            {e.nombre} {e.apellido}
-                          </p>
+                          <div className="ml-4">
+                            <div className={`text-sm font-medium capitalize transition-all ${
+                              isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'
+                            }`}>
+                              {e.nombre?.toLowerCase()} {e.apellido?.toLowerCase()}
+                            </div>
+                          </div>
                         </div>
                       </td>
 
                       {/* Documento */}
-                      <td className="px-6 py-3 text-gray-600 dark:text-gray-300">
-                        <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-semibold uppercase text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                        <span className="font-semibold uppercase mr-2">
                           {e.tipoDocumento}
                         </span>
-                        <span className="ml-2 text-sm">{e.dni}</span>
+                        {e.dni}
                       </td>
 
-                      {/* Teléfono */}
-                      <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
-                        {e.telefono || <span className="italic text-gray-400">—</span>}
+                      {/* Contacto */}
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex flex-col">
+                          <span>{e.email || <span className="italic text-gray-400">—</span>}</span>
+                          <span className="text-gray-500">
+                            {e.telefono || <span className="italic text-gray-400">—</span>}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Acción */}
@@ -180,6 +204,15 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
           )}
         </div>
       </div>
+
+      {/* Paginación */}
+      <TablePagination
+        currentPage={currentPage}
+        totalItems={filtered.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+        onPageChange={setCurrentPage}
+        disabled={loading}
+      />
     </div>
   );
 }

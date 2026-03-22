@@ -7,7 +7,6 @@ import useHotel from '@/hooks/useHotel';
 
 import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import EncargadosList from '@/components/selectors/EncargadosList';
-import EncargadoForm from '@/components/forms/EncargadoForm';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 export default function AjustesGeneralesTab({
@@ -19,8 +18,6 @@ export default function AjustesGeneralesTab({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState('general');
-  // Modo de encargado: 'view' = ver datos actuales, 'change' = seleccionar otro
-  const [encargadoMode, setEncargadoMode] = useState('view');
   const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
 
   const form = useForm({
@@ -85,10 +82,8 @@ export default function AjustesGeneralesTab({
         provinciaId: data.provinciaId,
         ciudadId: data.ciudadId,
         categoriaId: data.categoriaId,
-        // Incluir el encargado: si está en modo cambio usamos el seleccionado, si no el actual
-        encargadoId: encargadoMode === 'change' && selectedEncargadoId
-          ? selectedEncargadoId
-          : initialData?.encargado?.id ?? null,
+        // Incluir el encargado directamente desde el state
+        encargadoId: selectedEncargadoId,
       };
 
       await axiosInstance.put(`/hotel/${hotelId}`, hotelPayload);
@@ -311,59 +306,42 @@ export default function AjustesGeneralesTab({
 
         {/* Sección: Encargado */}
         {activeSubTab === 'encargado' && (
-        <div className="animate-in fade-in duration-300">
-          <div className="mb-6 flex justify-end">
-            <div className="flex w-fit rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-              <button
-                type="button"
-                onClick={() => setEncargadoMode('view')}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
-                  encargadoMode === 'view'
-                    ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                }`}
+        <div className="animate-in fade-in duration-300 flex flex-col h-full">
+          <EncargadosList
+            value={selectedEncargadoId}
+            onChange={setSelectedEncargadoId}
+            exclude={initialData?.encargado?.id}
+          />
+          
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-800 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-300">
+            <User className="h-5 w-5 text-blue-500" />
+            <p>
+              ¿El encargado que buscas no aparece o no está registrado?{' '}
+              <a 
+                href="/admin/encargados/nuevo"
+                className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Datos Actuales
-              </button>
-              <button
-                type="button"
-                onClick={() => setEncargadoMode('change')}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
-                  encargadoMode === 'change'
-                    ? 'bg-white text-violet-600 shadow-sm dark:bg-gray-600 dark:text-violet-400'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                }`}
-              >
-                Cambiar Encargado
-              </button>
-            </div>
+                Hacé clic acá para gestionarlos
+              </a>.
+            </p>
           </div>
 
-          {encargadoMode === 'view' ? (
-            <div className="pointer-events-none opacity-80">
-              <EncargadoForm register={register} errors={errors} loading={false} />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <EncargadosList
-                value={selectedEncargadoId}
-                onChange={setSelectedEncargadoId}
-                exclude={initialData?.encargado?.id}
-              />
-              {selectedEncargadoId && selectedEncargadoId !== initialData?.encargado?.id && (
-                <div className="mt-4 flex justify-end pt-4">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all ${
-                      isSubmitting ? 'cursor-not-allowed bg-gray-400' : 'bg-violet-600 hover:bg-violet-700'
-                    }`}
-                  >
-                    <Save className="h-4 w-4" />
-                    {isSubmitting ? 'Guardando...' : 'Guardar Encargado'}
-                  </button>
-                </div>
-              )}
+          {selectedEncargadoId !== initialData?.encargado?.id && (
+            <div className="mt-6 flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  isSubmitting
+                    ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
+                    : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700'
+                }`}
+              >
+                <Save className="h-4 w-4" />
+                {isSubmitting ? 'Guardando...' : 'Guardar Encargado'}
+              </button>
             </div>
           )}
         </div>
