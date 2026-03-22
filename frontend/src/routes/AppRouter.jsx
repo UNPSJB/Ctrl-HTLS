@@ -22,6 +22,8 @@ import VendedorLiquidaciones from '@/modules/admin/vendors/pages/VendedorLiquida
 import Personal from '@/modules/admin/vendors/pages/Personal';
 import AdministradoresForm from '@/modules/admin/vendors/pages/AdministradoresForm';
 import Ubicacion from '@/modules/admin/ubicacion/pages/Ubicacion';
+import Encargados from '@/modules/admin/encargados/pages/Encargados';
+import EncargadosForm from '@/modules/admin/encargados/pages/EncargadosForm';
 
 function AppRouter() {
   const { user, loading } = useAuth();
@@ -77,6 +79,10 @@ function AppRouter() {
 
                 {/* Rutas de Ubicación */}
                 <Route path="ubicacion" element={<Ubicacion />} />
+
+                {/* Rutas de Encargados */}
+                <Route path="encargados" element={<Encargados />} />
+                <Route path="encargados/nuevo" element={<EncargadosForm />} />
 
                 {/* Fallback admin */}
                 <Route path="*" element={<Navigate to="/admin" replace />} />
