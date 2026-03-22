@@ -137,7 +137,6 @@ export default function AjustesGeneralesTab({
           encargado: { active: 'border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400', icon: 'text-violet-500' },
         };
         const inactive = 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300';
-
         return (
           <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
             <button
@@ -168,13 +167,7 @@ export default function AjustesGeneralesTab({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Sección: Información Básica */}
         {activeSubTab === 'general' && (
-        <div className="animate-in fade-in duration-300 rounded-xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-700/50 dark:bg-gray-800/50">
-          <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-700">
-            <Building2 className="h-5 w-5 text-gray-400" />
-            <h3 className="text-md font-medium text-gray-800 dark:text-gray-200">
-              Información Básica
-            </h3>
-          </div>
+        <div className="animate-in fade-in duration-300">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -253,7 +246,7 @@ export default function AjustesGeneralesTab({
               )}
             </div>
           </div>
-          <div className="mt-6 flex justify-end border-t border-gray-100 pt-4 dark:border-gray-700">
+          <div className="mt-6 flex justify-end pt-4">
             <button
               type="submit"
               disabled={isSubmitting}
@@ -272,15 +265,9 @@ export default function AjustesGeneralesTab({
 
         {/* Sección: Ubicación */}
         {activeSubTab === 'ubicacion' && (
-        <div className="animate-in fade-in duration-300 rounded-xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-700/50 dark:bg-gray-800/50">
-          <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-700">
-            <MapPin className="h-5 w-5 text-gray-400" />
-            <h3 className="text-md font-medium text-gray-800 dark:text-gray-200">
-              Ubicación Geográfica
-            </h3>
-          </div>
-          <div className="space-y-4">
-            <div className="max-w-2xl space-y-2">
+        <div className="animate-in fade-in duration-300">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Dirección *
               </label>
@@ -305,7 +292,7 @@ export default function AjustesGeneralesTab({
               watch={watch}
             />
           </div>
-          <div className="mt-6 flex justify-end border-t border-gray-100 pt-4 dark:border-gray-700">
+          <div className="mt-6 flex justify-end pt-4">
             <button
               type="submit"
               disabled={isSubmitting}
@@ -324,15 +311,8 @@ export default function AjustesGeneralesTab({
 
         {/* Sección: Encargado */}
         {activeSubTab === 'encargado' && (
-        <div className="animate-in fade-in duration-300 rounded-xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-700/50 dark:bg-gray-800/50">
-          <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <User className="h-5 w-5 text-gray-400" />
-              <h3 className="text-md font-medium text-gray-800 dark:text-gray-200">
-                Encargado del Hotel
-              </h3>
-            </div>
-            {/* Toggle ver/cambiar */}
+        <div className="animate-in fade-in duration-300">
+          <div className="mb-6 flex justify-end">
             <div className="flex w-fit rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
               <button
                 type="button"
@@ -362,20 +342,16 @@ export default function AjustesGeneralesTab({
           {encargadoMode === 'view' ? (
             <div className="pointer-events-none opacity-80">
               <EncargadoForm register={register} errors={errors} loading={false} />
-              <p className="mt-4 text-xs italic text-gray-400">La edición directa de datos del encargado estará disponible próximamente.</p>
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Seleccioná un encargado disponible para reasignar este hotel. Solo se muestran los que no tienen hotel asignado.
-              </p>
               <EncargadosList
                 value={selectedEncargadoId}
                 onChange={setSelectedEncargadoId}
                 exclude={initialData?.encargado?.id}
               />
               {selectedEncargadoId && selectedEncargadoId !== initialData?.encargado?.id && (
-                <div className="mt-4 flex justify-end border-t border-gray-100 pt-4 dark:border-gray-700">
+                <div className="mt-4 flex justify-end pt-4">
                   <button
                     type="submit"
                     disabled={isSubmitting}
