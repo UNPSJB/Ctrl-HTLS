@@ -117,41 +117,41 @@ export default function AjustesGeneralesTab({
         </p>
       </div>
 
-      <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
-        <button
-          onClick={() => setActiveSubTab('general')}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-            activeSubTab === 'general'
-              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          }`}
-        >
-          <Building2 className="h-4 w-4" />
-          Información Básica
-        </button>
-        <button
-          onClick={() => setActiveSubTab('ubicacion')}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-            activeSubTab === 'ubicacion'
-              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          }`}
-        >
-          <MapPin className="h-4 w-4" />
-          Ubicación Geográfica
-        </button>
-        <button
-          onClick={() => setActiveSubTab('encargado')}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-            activeSubTab === 'encargado'
-              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          }`}
-        >
-          <User className="h-4 w-4" />
-          Encargado Actual
-        </button>
-      </div>
+      {/* Paleta de estilos activos por pestaña (strings completos para Tailwind) */}
+      {(() => {
+        const TAB_STYLES = {
+          general:   { active: 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400', icon: 'text-blue-500' },
+          ubicacion: { active: 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400', icon: 'text-indigo-500' },
+          encargado: { active: 'border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400', icon: 'text-violet-500' },
+        };
+        const inactive = 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300';
+
+        return (
+          <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setActiveSubTab('general')}
+              className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'general' ? TAB_STYLES.general.active : inactive}`}
+            >
+              <Building2 className={`h-4 w-4 ${activeSubTab === 'general' ? TAB_STYLES.general.icon : ''}`} />
+              Información Básica
+            </button>
+            <button
+              onClick={() => setActiveSubTab('ubicacion')}
+              className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'ubicacion' ? TAB_STYLES.ubicacion.active : inactive}`}
+            >
+              <MapPin className={`h-4 w-4 ${activeSubTab === 'ubicacion' ? TAB_STYLES.ubicacion.icon : ''}`} />
+              Ubicación Geográfica
+            </button>
+            <button
+              onClick={() => setActiveSubTab('encargado')}
+              className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'encargado' ? TAB_STYLES.encargado.active : inactive}`}
+            >
+              <User className={`h-4 w-4 ${activeSubTab === 'encargado' ? TAB_STYLES.encargado.icon : ''}`} />
+              Encargado Actual
+            </button>
+          </div>
+        );
+      })()}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Sección: Información Básica */}
