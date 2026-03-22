@@ -6,7 +6,8 @@ import {
   UserCheck,
   LogOut,
   Moon,
-  Sun
+  Sun,
+  MapPin
 } from 'lucide-react';
 import { ThemeContext } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
@@ -46,6 +47,11 @@ function AdminSidebar({ onClose }) {
       title: 'Clientes',
       icon: Users,
       path: '/admin/clientes',
+    },
+    {
+      title: 'Ubicación',
+      icon: MapPin,
+      path: '/admin/ubicacion',
     },
   ];
 

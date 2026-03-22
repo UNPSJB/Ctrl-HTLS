@@ -21,6 +21,7 @@ import LiquidacionesGlobales from '@/modules/admin/vendors/pages/LiquidacionesGl
 import VendedorLiquidaciones from '@/modules/admin/vendors/pages/VendedorLiquidaciones';
 import Personal from '@/modules/admin/vendors/pages/Personal';
 import AdministradoresForm from '@/modules/admin/vendors/pages/AdministradoresForm';
+import Ubicacion from '@/modules/admin/ubicacion/pages/Ubicacion';
 
 function AppRouter() {
   const { user, loading } = useAuth();
@@ -73,6 +74,9 @@ function AppRouter() {
                 <Route path="clientes" element={<Clientes />} />
                 <Route path="clientes/nuevo" element={<ClientesForm />} />
                 <Route path="clientes/editar/:id" element={<ClientesForm />} />
+
+                {/* Rutas de Ubicación */}
+                <Route path="ubicacion" element={<Ubicacion />} />
 
                 {/* Fallback admin */}
                 <Route path="*" element={<Navigate to="/admin" replace />} />
