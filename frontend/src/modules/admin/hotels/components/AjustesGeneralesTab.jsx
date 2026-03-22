@@ -6,6 +6,7 @@ import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@/hooks/useHotel';
 
 import UbicacionSelector from '@/components/selectors/UbicacionSelector';
+import EncargadosList from '@/components/selectors/EncargadosList';
 import EncargadoForm from '@/components/forms/EncargadoForm';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
@@ -16,8 +17,11 @@ export default function AjustesGeneralesTab({
 }) {
   const { categorias, loading: loadingResources } = useHotel();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loadingComplete, setLoadingComplete] = useState(false); 
+  const [loadingComplete, setLoadingComplete] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState('general');
+  // Modo de encargado: 'view' = ver datos actuales, 'change' = seleccionar otro
+  const [encargadoMode, setEncargadoMode] = useState('view');
+  const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
 
   const form = useForm({
     defaultValues: {
@@ -62,6 +66,10 @@ export default function AjustesGeneralesTab({
         encargadoNumeroDocumento: initialData.encargado?.numeroDocumento || '',
       });
       setLoadingComplete(true);
+      // Inicializar el encargado seleccionado con el actual del hotel
+      if (initialData.encargado?.id) {
+        setSelectedEncargadoId(initialData.encargado.id);
+      }
     }
   }, [initialData, reset]);
 
@@ -77,6 +85,10 @@ export default function AjustesGeneralesTab({
         provinciaId: data.provinciaId,
         ciudadId: data.ciudadId,
         categoriaId: data.categoriaId,
+        // Incluir el encargado: si está en modo cambio usamos el seleccionado, si no el actual
+        encargadoId: encargadoMode === 'change' && selectedEncargadoId
+          ? selectedEncargadoId
+          : initialData?.encargado?.id ?? null,
       };
 
       await axiosInstance.put(`/hotel/${hotelId}`, hotelPayload);
@@ -310,31 +322,74 @@ export default function AjustesGeneralesTab({
         </div>
         )}
 
-        {/* Sección: Encargado Actual (Solo Lectura por ahora) */}
+        {/* Sección: Encargado */}
         {activeSubTab === 'encargado' && (
-        <div className="animate-in fade-in duration-300 cursor-not-allowed rounded-xl border border-gray-100 bg-gray-50/50 p-6 opacity-80 dark:border-gray-700/50 dark:bg-gray-800/50">
+        <div className="animate-in fade-in duration-300 rounded-xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-700/50 dark:bg-gray-800/50">
           <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <User className="h-5 w-5 text-gray-400" />
               <h3 className="text-md font-medium text-gray-800 dark:text-gray-200">
-                Datos del Encargado (Lectura)
+                Encargado del Hotel
               </h3>
             </div>
-            <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-              Próximamente Editable
-            </span>
+            {/* Toggle ver/cambiar */}
+            <div className="flex w-fit rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+              <button
+                type="button"
+                onClick={() => setEncargadoMode('view')}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                  encargadoMode === 'view'
+                    ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+              >
+                Datos Actuales
+              </button>
+              <button
+                type="button"
+                onClick={() => setEncargadoMode('change')}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                  encargadoMode === 'change'
+                    ? 'bg-white text-violet-600 shadow-sm dark:bg-gray-600 dark:text-violet-400'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+              >
+                Cambiar Encargado
+              </button>
+            </div>
           </div>
 
-          <div className="pointer-events-none">
-            <EncargadoForm
-              register={register}
-              errors={errors}
-              loading={false}
-            />
-          </div>
-          <div className="mt-6 flex justify-end border-t border-gray-100 pt-4 dark:border-gray-700">
-             <p className="text-xs text-gray-400 italic">La edición del encargado estará habilitada en una fase posterior.</p>
-          </div>
+          {encargadoMode === 'view' ? (
+            <div className="pointer-events-none opacity-80">
+              <EncargadoForm register={register} errors={errors} loading={false} />
+              <p className="mt-4 text-xs italic text-gray-400">La edición directa de datos del encargado estará disponible próximamente.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Seleccioná un encargado disponible para reasignar este hotel. Solo se muestran los que no tienen hotel asignado.
+              </p>
+              <EncargadosList
+                value={selectedEncargadoId}
+                onChange={setSelectedEncargadoId}
+                exclude={initialData?.encargado?.id}
+              />
+              {selectedEncargadoId && selectedEncargadoId !== initialData?.encargado?.id && (
+                <div className="mt-4 flex justify-end border-t border-gray-100 pt-4 dark:border-gray-700">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all ${
+                      isSubmitting ? 'cursor-not-allowed bg-gray-400' : 'bg-violet-600 hover:bg-violet-700'
+                    }`}
+                  >
+                    <Save className="h-4 w-4" />
+                    {isSubmitting ? 'Guardando...' : 'Guardar Encargado'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         )}
 

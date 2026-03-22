@@ -8,6 +8,7 @@ import useHotel from '@/hooks/useHotel';
 import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 
 import UbicacionSelector from '@/components/selectors/UbicacionSelector';
+import EncargadosList from '@/components/selectors/EncargadosList';
 import EncargadoForm from '@/components/forms/EncargadoForm';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
@@ -367,7 +368,7 @@ export default function HotelesForm() {
                           onClick={() => setEncargadoMode('select')}
                           className={`rounded-md px-4 py-1.5 text-xs font-medium transition-all ${
                             encargadoMode === 'select'
-                              ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
+                              ? 'bg-white text-violet-600 shadow-sm dark:bg-gray-600 dark:text-violet-400'
                               : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                           }`}
                         >
@@ -396,21 +397,10 @@ export default function HotelesForm() {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          <div className="flex flex-col items-center justify-center space-y-3 rounded-xl border-2 border-dashed border-gray-200 p-8 text-center dark:border-gray-700">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-                              <User className="h-6 w-6 text-gray-400" />
-                            </div>
-                            <div className="space-y-1">
-                              <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                                Selector de Encargados
-                              </h4>
-                              <p className="max-w-xs text-xs text-gray-500 dark:text-gray-400">
-                                Esta funcionalidad requiere un endpoint de
-                                listado en el backend. Por ahora, el encargado
-                                actual se mantiene vinculado.
-                              </p>
-                            </div>
-                          </div>
+                          <EncargadosList
+                            value={selectedEncargadoId}
+                            onChange={setSelectedEncargadoId}
+                          />
                         </div>
                       )}
                     </div>
