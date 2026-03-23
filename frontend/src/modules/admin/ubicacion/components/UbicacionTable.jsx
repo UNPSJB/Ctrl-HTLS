@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { ChevronRight, Pencil, Trash2, ArrowRight, Search } from 'lucide-react';
-import TablePagination from '@/components/ui/TablePagination';
-import TableButton from '@/components/ui/TableButton';
+import TablePagination from '@admin-ui/TablePagination';
+import TableButton from '@admin-ui/TableButton';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { SearchInput } from '@form';
 
 const PAGE_SIZE = 15;
 
@@ -35,16 +36,14 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
         <div className="flex-1">
           {headerContent}
         </div>
-        <div className="relative w-full md:w-80">
-          <input
-            type="text"
+        <div className="w-full md:w-80">
+          <SearchInput
+            placeholder={`Buscar ${tipo === 'pais' ? 'países' : tipo === 'provincia' ? 'provincias' : 'ciudades'}...`}
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
+            onClear={() => handleSearch('')}
             disabled={loading}
-            placeholder={`Buscar ${tipo === 'pais' ? 'países' : tipo === 'provincia' ? 'provincias' : 'ciudades'}...`}
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:disabled:bg-gray-800"
           />
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
         </div>
       </div>
 

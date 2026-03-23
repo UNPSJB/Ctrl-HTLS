@@ -27,10 +27,10 @@
         "components/ui/*"
       ],
       "@layouts/*": [
-        "layouts/*"
+        "modules/vendor/layout/*"
       ],
       "@pages/*": [
-        "pages/*"
+        "modules/vendor/pages/*"
       ],
       "@routes/*": [
         "routes/*"
@@ -39,19 +39,40 @@
         "modules/*"
       ],
       "@hotel/*": [
-        "components/hotel/*"
+        "modules/vendor/components/hotel/*"
+      ],
+      "@admin-ui/*": [
+        "modules/admin/shared/components/ui/*"
+      ],
+      "@admin-context/*": [
+        "modules/admin/shared/context/*"
       ],
       "@client/*": [
-        "components/client/*"
+        "modules/vendor/components/client/*"
       ],
       "@cart/*": [
-        "components/cart/*"
+        "modules/vendor/components/cart/*"
       ],
       "@data/*": [
         "data/*"
       ],
       "@checkout/*": [
-        "components/checkout/*"
+        "modules/vendor/components/checkout/*"
+      ],
+      "@vendor-context/*": [
+        "modules/vendor/context/*"
+      ],
+      "@vendor-hooks/*": [
+        "modules/vendor/hooks/*"
+      ],
+      "@admin-hooks/*": [
+        "modules/admin/shared/hooks/*"
+      ],
+      "@form/*": [
+        "src/components/ui/form/*"
+      ],
+      "@form": [
+        "src/components/ui/form/index.js"
       ]
     },
     // Opciones recomendadas para un proyecto React moderno

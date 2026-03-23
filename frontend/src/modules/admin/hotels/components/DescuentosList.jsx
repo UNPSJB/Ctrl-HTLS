@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Tag } from 'lucide-react';
-import TablePagination from '@/components/ui/TablePagination';
+import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 const ITEMS_PER_PAGE = 100;

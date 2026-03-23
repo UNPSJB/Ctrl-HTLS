@@ -5,7 +5,15 @@ import { toast } from 'react-hot-toast';
 import { Save, X, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { useBreadcrumbs } from '@/context/BreadcrumbContext';
+import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+import { 
+    FormField, 
+    TextInput, 
+    EmailInput, 
+    TelInput, 
+    SelectInput,
+    RedirectLink
+} from '@form';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },
@@ -125,11 +133,6 @@ const ClientesForm = () => {
 
     const handleCancel = () => navigate('/admin/clientes');
 
-    const inputClass = (error) =>
-        `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all`;
-
-    const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
-    const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
     return (
         <div className="space-y-6">
@@ -162,71 +165,44 @@ const ClientesForm = () => {
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1 flex flex-col">
                         <div>
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                <div>
-                                    <label className={labelClass}>
-                                        Nombre <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
+                                <FormField label="Nombre" required error={errors.nombre}>
+                                    <TextInput
                                         {...register('nombre', { required: 'El nombre es obligatorio' })}
                                         placeholder="Ej: Juan Carlos"
-                                        className={inputClass(errors.nombre)}
                                     />
-                                    {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
-                                </div>
+                                </FormField>
 
-                                <div>
-                                    <label className={labelClass}>
-                                        Apellido <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
+                                <FormField label="Apellido" required error={errors.apellido}>
+                                    <TextInput
                                         {...register('apellido', { required: 'El apellido es obligatorio' })}
                                         placeholder="Ej: García López"
-                                        className={inputClass(errors.apellido)}
                                     />
-                                    {errors.apellido && <p className={errorClass}>{errors.apellido.message}</p>}
-                                </div>
+                                </FormField>
 
-                                <div>
-                                    <label className={labelClass}>
-                                        Tipo de Documento <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
+                                <FormField label="Tipo de Documento" required error={errors.tipoDocumento}>
+                                    <SelectInput
                                         {...register('tipoDocumento', { onChange: handleTipoChange })}
-                                        className={inputClass(errors.tipoDocumento)}
                                     >
                                         {tiposDocumento.map((tipo) => (
                                             <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
                                         ))}
-                                    </select>
-                                    {errors.tipoDocumento && <p className={errorClass}>{errors.tipoDocumento.message}</p>}
-                                </div>
+                                    </SelectInput>
+                                </FormField>
 
-                                <div>
-                                    <label className={labelClass}>
-                                        Número de Documento <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
+                                <FormField label="Número de Documento" required error={errors.numeroDocumento}>
+                                    <TextInput
                                         {...register('numeroDocumento', {
                                             required: 'El documento es obligatorio',
                                             minLength: { value: 7, message: 'Mínimo 7 caracteres' },
                                             onChange: handleDocumentoChange
                                         })}
                                         placeholder={tipoDocumento === 'pasaporte' ? 'Ej: A1234567' : 'Ej: 12345678'}
-                                        className={inputClass(errors.numeroDocumento)}
                                         maxLength={15}
                                     />
-                                    {errors.numeroDocumento && <p className={errorClass}>{errors.numeroDocumento.message}</p>}
-                                </div>
+                                </FormField>
 
-                                <div>
-                                    <label className={labelClass}>
-                                        Email <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="email"
+                                <FormField label="Email" required error={errors.email}>
+                                    <EmailInput
                                         {...register('email', {
                                             required: 'El email es obligatorio',
                                             pattern: {
@@ -235,34 +211,26 @@ const ClientesForm = () => {
                                             }
                                         })}
                                         placeholder="hotel@ejemplo.com"
-                                        className={inputClass(errors.email)}
                                     />
-                                    {errors.email && <p className={errorClass}>{errors.email.message}</p>}
-                                </div>
+                                </FormField>
 
-                                <div>
-                                    <label className={labelClass}>Teléfono</label>
-                                    <input
-                                        type="text"
+                                <FormField label="Teléfono" error={errors.telefono}>
+                                    <TelInput
                                         {...register('telefono', { onChange: handleTelefonoChange })}
                                         placeholder="Ej: 3811234567"
-                                        className={inputClass(errors.telefono)}
                                     />
-                                </div>
+                                </FormField>
                             </div>
                         </div>
 
                         {/* Botones de Acción */}
                         <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-                            <button
-                                type="button"
-                                onClick={handleCancel}
-                                disabled={loading}
-                                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                            >
-                                <X className="h-4 w-4" />
-                                Cancelar
-                            </button>
+                            <RedirectLink
+                                to="/admin/clientes"
+                                label="Cancelar"
+                                icon={X}
+                                className="px-5 py-2.5"
+                            />
 
                             <button
                                 type="submit"

@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import { ThemeProvider, ThemeContext } from './context/ThemeContext';
-import { CarritoProvider } from './context/CarritoContext';
-import { BusquedaProvider } from '@context/BusquedaContext';
-import { ClienteProvider } from '@context/ClienteContext';
-import { PagoProvider } from '@context/PagoContext';
+import { CarritoProvider } from '@vendor-context/CarritoContext';
+import { BusquedaProvider } from '@vendor-context/BusquedaContext';
+import { ClienteProvider } from '@vendor-context/ClienteContext';
+import { PagoProvider } from '@vendor-context/PagoContext';
 import AppRouter from './routes/AppRouter';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';

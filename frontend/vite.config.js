@@ -19,15 +19,21 @@ export default defineConfig({
       '@utils': resolve(__dirname, './src/utils'), // Alias para utilidades
       '@assets': resolve(__dirname, './src/assets'), // Alias para assets
       '@ui': resolve(__dirname, './src/components/ui'), // Alias para componentes UI
-      '@layouts': resolve(__dirname, './src/layouts'), // Alias para layouts
-      '@pages': resolve(__dirname, './src/pages'), // Alias para páginas
+      '@layouts': resolve(__dirname, './src/modules/vendor/layout'), // Alias para layouts vendor
+      '@pages': resolve(__dirname, './src/modules/vendor/pages'), // Alias para páginas vendor
       '@routes': resolve(__dirname, './src/routes'), // Alias para rutas
       '@modules': resolve(__dirname, './src/modules'), // Alias para módulos
-      '@hotel': resolve(__dirname, './src/components/hotel'), // Alias para componentes de hotel
-      '@client': resolve(__dirname, './src/components/client'), // Alias para componentes de cliente
-      '@cart': resolve(__dirname, './src/components/cart'), // Alias para componentes de carrito
+      '@hotel': resolve(__dirname, './src/modules/vendor/components/hotel'), // Alias para componentes de hotel vendor
+      '@admin-ui': resolve(__dirname, './src/modules/admin/shared/components/ui'), // Alias para componentes UI admin
+      '@admin-context': resolve(__dirname, './src/modules/admin/shared/context'), // Alias para contextos admin
+      '@client': resolve(__dirname, './src/modules/vendor/components/client'), // Alias para componentes de cliente
+      '@cart': resolve(__dirname, './src/modules/vendor/components/cart'), // Alias para componentes de carrito vendor
       '@data': resolve(__dirname, './src/data'), // Alias para datos
-      '@checkout': resolve(__dirname, './src/components/checkout'), // Alias para componentes de checkout
+      '@checkout': resolve(__dirname, './src/modules/vendor/components/checkout'), // Alias para componentes de checkout vendor
+      '@vendor-context': resolve(__dirname, './src/modules/vendor/context'), // Alias para contextos vendor
+      '@vendor-hooks': resolve(__dirname, './src/modules/vendor/hooks'), // Alias para hooks vendor
+      '@admin-hooks': resolve(__dirname, './src/modules/admin/shared/hooks'), // Alias para hooks admin
+      '@form': resolve(__dirname, './src/components/ui/form'),
     },
   },
 });

@@ -13,6 +13,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import HabitacionesList from './HabitacionesList';
+import { 
+  FormField, 
+  SelectInput, 
+  NumberInput 
+} from '@form';
 
 const EMPTY_ARRAY = [];
 
@@ -180,11 +185,6 @@ export default function HabitacionesTab({
         tarifasAsignadas.some((ta) => ta.tipoHabitacionId === t.id)
       );
 
-  const inputClass = (error) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
-
-  const labelClass = 'mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase text-gray-700 dark:text-gray-300';
-  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
   return (
     <div className="animate-in fade-in space-y-6 duration-300">
@@ -231,49 +231,40 @@ export default function HabitacionesTab({
             onSubmit={handleSubmit(onSubmit)}
             className="grid grid-cols-1 gap-6 md:grid-cols-4 items-start"
           >
-            <div>
-              <label className={labelClass}>
-                <Hash className="h-3.5 w-3.5 text-blue-500" /> Número
-              </label>
-              <input
-                type="number"
+            <FormField 
+              label="Número" 
+              required 
+              error={errors.numero} 
+              icon={<Hash className="h-3.5 w-3.5 text-blue-500" />}
+            >
+              <NumberInput
                 {...register('numero', { required: 'Campo obligatorio' })}
-                className={inputClass(errors.numero)}
                 placeholder="Ej: 101"
               />
-              {errors.numero && (
-                <p className={errorClass}>
-                  {errors.numero.message}
-                </p>
-              )}
-            </div>
+            </FormField>
 
-            <div>
-              <label className={labelClass}>
-                <Layers className="h-3.5 w-3.5 text-blue-500" /> Piso
-              </label>
-              <input
-                type="number"
+            <FormField 
+              label="Piso" 
+              required 
+              error={errors.piso} 
+              icon={<Layers className="h-3.5 w-3.5 text-blue-500" />}
+            >
+              <NumberInput
                 {...register('piso', { required: 'Campo obligatorio' })}
-                className={inputClass(errors.piso)}
                 placeholder="Ej: 1"
               />
-              {errors.piso && (
-                <p className={errorClass}>
-                  {errors.piso.message}
-                </p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="md:col-span-1">
-              <label className={labelClass}>
-                <Bed className="h-3.5 w-3.5 text-blue-500" /> Tipo
-              </label>
-              <select
+            <FormField 
+              label="Tipo" 
+              required 
+              error={errors.tipoHabitacionId} 
+              icon={<Bed className="h-3.5 w-3.5 text-blue-500" />}
+            >
+              <SelectInput
                 {...register('tipoHabitacionId', {
                   required: 'Campo obligatorio',
                 })}
-                className={inputClass(errors.tipoHabitacionId)}
               >
                 <option value="">Seleccione tipo...</option>
                 {tiposFiltrados.map((t) => (
@@ -281,13 +272,8 @@ export default function HabitacionesTab({
                     {t.nombre}
                   </option>
                 ))}
-              </select>
-              {errors.tipoHabitacionId && (
-                <p className={errorClass}>
-                  {errors.tipoHabitacionId.message}
-                </p>
-              )}
-            </div>
+              </SelectInput>
+            </FormField>
 
             <div className="flex flex-col h-full pt-[21px]">
               <button

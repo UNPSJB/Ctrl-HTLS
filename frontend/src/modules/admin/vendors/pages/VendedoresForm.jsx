@@ -5,8 +5,17 @@ import { toast } from 'react-hot-toast';
 import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { useBreadcrumbs } from '@/context/BreadcrumbContext';
-import UbicacionSelector from '@/components/selectors/UbicacionSelector';
+import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
+import { 
+    FormField, 
+    TextInput, 
+    EmailInput, 
+    TelInput, 
+    SelectInput,
+    PasswordInput,
+    RedirectLink
+} from '@form';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
@@ -178,10 +187,6 @@ const VendedoresForm = () => {
 
   const handleCancel = () => navigate('/admin/personal/vendedores');
 
-  const inputClass = (error) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
-  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
-  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
 
   return (
     <div className="space-y-6">
@@ -240,72 +245,46 @@ const VendedoresForm = () => {
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <div>
-                        <label htmlFor="nombre" className={labelClass}>
-                          Nombre <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
+                      <FormField label="Nombre" required error={errors.nombre}>
+                        <TextInput
                           id="nombre"
                           {...register('nombre', { required: 'El nombre es obligatorio' })}
-                          className={inputClass(errors.nombre)}
                         />
-                        {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="apellido" className={labelClass}>
-                          Apellido <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
+                      </FormField>
+                      <FormField label="Apellido" required error={errors.apellido}>
+                        <TextInput
                           id="apellido"
                           {...register('apellido', { required: 'El apellido es obligatorio' })}
-                          className={inputClass(errors.apellido)}
                         />
-                        {errors.apellido && <p className={errorClass}>{errors.apellido.message}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="tipoDocumento" className={labelClass}>
-                          Tipo Documento <span className="text-red-500">*</span>
-                        </label>
-                        <select
+                      </FormField>
+                      <FormField label="Tipo Documento" required error={errors.tipoDocumento}>
+                        <SelectInput
                           id="tipoDocumento"
                           {...register('tipoDocumento', { onChange: handleTipoChange })}
-                          className={inputClass(errors.tipoDocumento)}
                         >
                           {tiposDocumento.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label htmlFor="numeroDocumento" className={labelClass}>
-                          Número Documento <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
+                        </SelectInput>
+                      </FormField>
+                      <FormField label="Número Documento" required error={errors.numeroDocumento}>
+                        <TextInput
                           id="numeroDocumento"
                           {...register('numeroDocumento', {
                             required: 'El documento es obligatorio',
                             minLength: { value: 7, message: 'Mínimo 7 caracteres' },
                             onChange: handleDocumentoChange
                           })}
-                          className={inputClass(errors.numeroDocumento)}
                           maxLength={15}
                         />
-                        {errors.numeroDocumento && <p className={errorClass}>{errors.numeroDocumento.message}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="rol" className={labelClass}>
-                          Rol en el Sistema <span className="text-red-500">*</span>
-                        </label>
-                        <select
+                      </FormField>
+                      <FormField label="Rol en el Sistema" required error={errors.rol}>
+                        <SelectInput
                           id="rol"
                           {...register('rol')}
-                          className={inputClass(errors.rol)}
                         >
                           <option value="vendedor">Vendedor</option>
                           <option value="administrador">Administrador</option>
-                        </select>
-                      </div>
+                        </SelectInput>
+                      </FormField>
                     </div>
                   </div>
                 )}
@@ -314,12 +293,8 @@ const VendedoresForm = () => {
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación y Contacto</h3>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <div>
-                        <label htmlFor="email" className={labelClass}>
-                          Email <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="email"
+                      <FormField label="Email" required error={errors.email}>
+                        <EmailInput
                           id="email"
                           {...register('email', {
                             required: 'El email es obligatorio',
@@ -329,33 +304,22 @@ const VendedoresForm = () => {
                             }
                           })}
                           placeholder="vendedor@empresa.com"
-                          className={inputClass(errors.email)}
                         />
-                        {errors.email && <p className={errorClass}>{errors.email.message}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="telefono" className={labelClass}>Teléfono</label>
-                        <input
-                          type="text"
+                      </FormField>
+                      <FormField label="Teléfono" error={errors.telefono}>
+                        <TelInput
                           id="telefono"
                           {...register('telefono', { onChange: handleNumericChange })}
                           placeholder="Ej: 3764556677"
-                          className={inputClass(errors.telefono)}
                         />
-                      </div>
-                      <div className="col-span-full">
-                        <label htmlFor="direccion" className={labelClass}>
-                          Dirección <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
+                      </FormField>
+                      <FormField label="Dirección" required error={errors.direccion} containerClassName="col-span-full">
+                        <TextInput
                           id="direccion"
                           {...register('direccion', { required: 'La dirección es obligatoria' })}
                           placeholder="Calle, Número, Depto"
-                          className={inputClass(errors.direccion)}
                         />
-                        {errors.direccion && <p className={errorClass}>{errors.direccion.message}</p>}
-                      </div>
+                      </FormField>
                       <UbicacionSelector
                         errors={errors}
                         register={register}
@@ -410,23 +374,20 @@ const VendedoresForm = () => {
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <div>
-                        <label htmlFor="password" className={labelClass}>
-                          {isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña'} {!isEditing && <span className="text-red-500">*</span>}
-                        </label>
-                        <input
-                          type="password"
+                      <FormField 
+                        label={isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña'} 
+                        required={!isEditing} 
+                        error={errors.password}
+                      >
+                        <PasswordInput
                           id="password"
                           {...register('password', {
                             required: !isEditing ? 'La contraseña es obligatoria' : false,
                             minLength: { value: 6, message: 'Mínimo 6 caracteres' }
                           })}
-                          placeholder="••••••••"
-                          className={inputClass(errors.password)}
                         />
-                        {errors.password && <p className={errorClass}>{errors.password.message}</p>}
-                        {isEditing && <p className="mt-1 text-xs text-gray-500 italic">Deje en blanco para mantener la contraseña actual.</p>}
-                      </div>
+                      </FormField>
+                      {isEditing && <p className="mt-1 text-xs text-gray-500 italic flex items-center gap-1.5"><ShieldCheck className="w-3 h-3"/> Deje en blanco para mantener la contraseña actual.</p>}
                     </div>
                   </div>
                 )}
@@ -434,15 +395,12 @@ const VendedoresForm = () => {
             )}
 
             <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={loading}
-                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <X className="h-4 w-4" />
-                Cancelar
-              </button>
+               <RedirectLink
+                to="/admin/usuarios"
+                label="Cancelar"
+                icon={X}
+                className="px-5 py-2.5"
+              />
               <button
                 type="submit"
                 disabled={loading || loadingData || !isValid}

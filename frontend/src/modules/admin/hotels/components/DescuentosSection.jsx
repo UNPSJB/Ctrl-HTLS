@@ -4,6 +4,10 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import DescuentosList from './DescuentosList';
+import { 
+  FormField, 
+  NumberInput 
+} from '@form';
 
 export default function DescuentosSection({ hotelId }) {
   const [descuentos, setDescuentos] = useState([]);
@@ -46,10 +50,6 @@ export default function DescuentosSection({ hotelId }) {
     }
   };
 
-  const inputClass = (error) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-sm md:text-base text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
-
-  const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400';
 
   return (
     <section className="animate-in fade-in duration-300 space-y-6">
@@ -81,30 +81,20 @@ export default function DescuentosSection({ hotelId }) {
             onSubmit={form.handleSubmit(handleAdd)}
             className="grid grid-cols-1 gap-6 md:grid-cols-2 items-end"
           >
-            <div>
-              <label className={labelClass}>
-                Cantidad de Habitaciones
-              </label>
-              <input
-                type="number"
+            <FormField label="Cantidad de Habitaciones" required error={form.formState.errors.cantidad_de_habitaciones}>
+              <NumberInput
                 min="1"
                 placeholder="Ej: 3"
                 {...form.register('cantidad_de_habitaciones', { required: true, min: 1 })}
-                className={inputClass()}
               />
-            </div>
-            <div>
-              <label className={labelClass}>
-                Porcentaje de Descuento (%)
-              </label>
+            </FormField>
+            <FormField label="Porcentaje de Descuento (%)" required error={form.formState.errors.porcentaje}>
               <div className="flex items-center gap-2">
-                <input
-                  type="number"
+                <NumberInput
                   step="0.01"
                   min="0"
                   placeholder="Ej: 5.00"
                   {...form.register('porcentaje', { required: true, min: 0 })}
-                  className={inputClass()}
                 />
                 <button
                   type="submit"
@@ -114,7 +104,7 @@ export default function DescuentosSection({ hotelId }) {
                   <Plus className="h-5 w-5" />
                 </button>
               </div>
-            </div>
+            </FormField>
           </form>
         </div>
       )}

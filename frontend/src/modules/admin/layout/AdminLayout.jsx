@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import AdminSidebar from '@/modules/admin/layout/AdminSidebar';
-import Breadcrumbs from '@/components/ui/Breadcrumbs';
+import Breadcrumbs from '@admin-ui/Breadcrumbs';
 import { Outlet } from 'react-router-dom';
-import { BreadcrumbProvider } from '@/context/BreadcrumbContext';
+import { BreadcrumbProvider } from '@admin-context/BreadcrumbContext';
 
 // Estructura principal para el área de administración
 function AdminLayout() {

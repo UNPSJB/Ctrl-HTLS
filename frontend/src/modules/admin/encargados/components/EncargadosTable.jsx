@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Search, X, Users, User } from 'lucide-react';
-import TableButton from '@/components/ui/TableButton';
+import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@/api/axiosInstance';
-import TablePagination from '@/components/ui/TablePagination';
+import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
+import { SearchInput } from '@form';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -77,24 +78,17 @@ const EncargadosTable = () => {
     <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {/* Barra de Búsqueda Interna */}
       <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-        <div className="relative max-w-md">
-          <input
-            type="text"
+        <div className="max-w-md">
+          <SearchInput
             placeholder="Buscar por nombre o documento..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
+            onClear={() => setSearchTerm('')}
             disabled={loading}
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:disabled:bg-gray-800"
           />
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-          {searchTerm && !loading && (
-            <button onClick={() => setSearchTerm('')} className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
-              <X className="h-4 w-4" />
-            </button>
-          )}
         </div>
       </div>
 
