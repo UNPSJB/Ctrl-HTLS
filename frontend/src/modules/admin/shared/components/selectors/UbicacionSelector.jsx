@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import useUbicacion from '@/hooks/useUbicacion';
+import { FormField, SelectInput } from '@form';
 
-// Selector cascada de ubicación: País -> Provincia -> Ciudad
+// Selector cascada de ubicación: País -> Provincia -> Ciudad refactorizado con suite @form
 const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
   const {
     paises,
@@ -64,23 +65,13 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
     setValue('ciudadId', value);
   };
 
-  const inputClass = (error, disabled) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm ${disabled ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-800 opacity-60' : ''}`;
-
-  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
-  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
-
   return (
     <>
-      <div>
-        <label className={labelClass}>
-          País <span className="text-red-500">*</span>
-        </label>
-        <select
+      <FormField label="País" required error={errors.paisId}>
+        <SelectInput
           {...register('paisId', { required: 'Debe seleccionar un país' })}
           value={paisId}
           onChange={(e) => handlePaisChangeInternal(e.target.value)}
-          className={inputClass(errors.paisId)}
         >
           <option value="">Seleccionar país</option>
           {(paises || []).map((pais) => (
@@ -88,24 +79,17 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
               {pais.nombre}
             </option>
           ))}
-        </select>
-        {errors.paisId && (
-          <p className={errorClass}>{errors.paisId.message}</p>
-        )}
-      </div>
+        </SelectInput>
+      </FormField>
 
-      <div>
-        <label className={labelClass}>
-          Provincia/Estado <span className="text-red-500">*</span>
-        </label>
-        <select
+      <FormField label="Provincia/Estado" required error={errors.provinciaId}>
+        <SelectInput
           {...register('provinciaId', {
             required: 'Debe seleccionar una provincia',
           })}
           value={provinciaId}
           onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
           disabled={isProvinciasDisabled}
-          className={inputClass(errors.provinciaId, isProvinciasDisabled)}
         >
           <option value="">
             {paisId ? 'Seleccionar provincia' : 'Primero seleccione un país'}
@@ -115,24 +99,17 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
               {provincia.nombre}
             </option>
           ))}
-        </select>
-        {errors.provinciaId && (
-          <p className={errorClass}>{errors.provinciaId.message}</p>
-        )}
-      </div>
+        </SelectInput>
+      </FormField>
 
-      <div>
-        <label className={labelClass}>
-          Ciudad <span className="text-red-500">*</span>
-        </label>
-        <select
+      <FormField label="Ciudad" required error={errors.ciudadId}>
+        <SelectInput
           {...register('ciudadId', {
             required: 'Debe seleccionar una ciudad',
           })}
           value={ciudadId}
           onChange={(e) => handleCiudadChangeInternal(e.target.value)}
           disabled={isCiudadesDisabled}
-          className={inputClass(errors.ciudadId, isCiudadesDisabled)}
         >
           <option value="">
             {provinciaId
@@ -144,11 +121,8 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
               {ciudad.nombre}
             </option>
           ))}
-        </select>
-        {errors.ciudadId && (
-          <p className={errorClass}>{errors.ciudadId.message}</p>
-        )}
-      </div>
+        </SelectInput>
+      </FormField>
 
       {/* Redirección a Gestión de Ubicaciones */}
       <div className="col-span-full mt-2 flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-800 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-300">

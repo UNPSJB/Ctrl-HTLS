@@ -6,6 +6,13 @@ import TiposHabitacionSelector from '@/modules/admin/shared/components/selectors
 import EncargadoForm from '@/modules/admin/encargados/components/EncargadoForm';
 import useHotel from '@admin-hooks/useHotel';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { 
+  FormField, 
+  TextInput, 
+  EmailInput, 
+  TelInput, 
+  SelectInput 
+} from '@form';
 
 export default function AdminCreateHotelForm() {
   const navigate = useNavigate();
@@ -33,11 +40,6 @@ export default function AdminCreateHotelForm() {
   const handleFormSubmit = (data) => onSubmit(data);
   const handleCancel = () => navigate('/admin/hoteles');
 
-  const inputClass = (error) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
-
-  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
-  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -82,78 +84,44 @@ export default function AdminCreateHotelForm() {
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <label htmlFor="nombre" className={labelClass}>
-                      Nombre del Hotel <span className="text-red-500">*</span>
-                    </label>
-                    <input
+                  <FormField label="Nombre del Hotel" required error={errors.nombre}>
+                    <TextInput
                       id="nombre"
-                      type="text"
                       placeholder="Ej: Hotel Paradise Resort"
                       disabled={loading || isSubmitting}
                       {...register('nombre', {
                         required: 'El nombre es obligatorio',
                       })}
-                      className={inputClass(errors.nombre)}
                     />
-                    {errors.nombre && (
-                      <p className={errorClass}>
-                        {errors.nombre.message}
-                      </p>
-                    )}
-                  </div>
+                  </FormField>
 
-                  <div>
-                    <label htmlFor="telefono" className={labelClass}>
-                      Teléfono <span className="text-red-500">*</span>
-                    </label>
-                    <input
+                  <FormField label="Teléfono" required error={errors.telefono}>
+                    <TelInput
                       id="telefono"
-                      type="text"
                       placeholder="Ej: +54 376 4123456"
                       disabled={loading || isSubmitting}
                       {...register('telefono', {
                         required: 'El teléfono es obligatorio',
                       })}
-                      className={inputClass(errors.telefono)}
                     />
-                    {errors.telefono && (
-                      <p className={errorClass}>
-                        {errors.telefono.message}
-                      </p>
-                    )}
-                  </div>
+                  </FormField>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <label htmlFor="direccion" className={labelClass}>
-                      Dirección <span className="text-red-500">*</span>
-                    </label>
-                    <input
+                  <FormField label="Dirección" required error={errors.direccion}>
+                    <TextInput
                       id="direccion"
-                      type="text"
                       placeholder="Ej: Av. Principal 123"
                       disabled={loading || isSubmitting}
                       {...register('direccion', {
                         required: 'La dirección es obligatoria',
                       })}
-                      className={inputClass(errors.direccion)}
                     />
-                    {errors.direccion && (
-                      <p className={errorClass}>
-                        {errors.direccion.message}
-                      </p>
-                    )}
-                  </div>
+                  </FormField>
 
-                  <div>
-                    <label htmlFor="email" className={labelClass}>
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <input
+                  <FormField label="Email" required error={errors.email}>
+                    <EmailInput
                       id="email"
-                      type="email"
                       placeholder="Ej: contacto@hotel.com"
                       disabled={loading || isSubmitting}
                       {...register('email', {
@@ -163,27 +131,17 @@ export default function AdminCreateHotelForm() {
                           message: 'Email inválido',
                         },
                       })}
-                      className={inputClass(errors.email)}
                     />
-                    {errors.email && (
-                      <p className={errorClass}>
-                        {errors.email.message}
-                      </p>
-                    )}
-                  </div>
+                  </FormField>
                 </div>
 
-                <div>
-                  <label className={labelClass}>
-                    Categoría <span className="text-red-500">*</span>
-                  </label>
-                  <select
+                <FormField label="Categoría" required error={errors.categoriaId}>
+                  <SelectInput
                     {...register('categoriaId', {
                       required: 'Debe seleccionar una categoría',
                     })}
                     value={watch('categoriaId') || ''}
                     disabled={loading || isSubmitting}
-                    className={inputClass(errors.categoriaId)}
                   >
                     <option value="">
                       {loading
@@ -195,13 +153,8 @@ export default function AdminCreateHotelForm() {
                         {categoria.nombre}
                       </option>
                     ))}
-                  </select>
-                  {errors.categoriaId && (
-                    <p className={errorClass}>
-                      {errors.categoriaId.message}
-                    </p>
-                  )}
-                </div>
+                  </SelectInput>
+                </FormField>
               </section>
 
               {/* Ubicación */}

@@ -1,4 +1,8 @@
-import { X, Plus, DollarSign } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
+import { 
+  SelectInput, 
+  NumberInput 
+} from '@form';
 
 // Selector interactivo para asociar tipos de habitación y precios a un hotel
 const TiposHabitacionSelector = ({
@@ -14,11 +18,6 @@ const TiposHabitacionSelector = ({
   loading = false,
   errors = {},
 }) => {
-  const inputClass = (error) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
-
-  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
-  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
   const getTipoHabitacionNombre = (id) => {
     return (
@@ -43,7 +42,7 @@ const TiposHabitacionSelector = ({
       </div>
 
       <div className="space-y-4">
-        <label className={labelClass}>
+        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
           Agregar Tipos de Habitaciones con Precios <span className="text-red-500">*</span>
         </label>
 
@@ -52,11 +51,10 @@ const TiposHabitacionSelector = ({
             <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider dark:text-gray-400">
               Tipo de Habitación
             </label>
-            <select
+            <SelectInput
               value={selectedTipo}
               onChange={(e) => setSelectedTipo(e.target.value)}
               disabled={loading}
-              className={inputClass()}
             >
               <option value="">
                 {loading ? 'Cargando tipos...' : 'Seleccionar tipo'}
@@ -72,25 +70,21 @@ const TiposHabitacionSelector = ({
                   {tipo.nombre}
                 </option>
               ))}
-            </select>
+            </SelectInput>
           </div>
 
           <div className="md:col-span-4">
             <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider dark:text-gray-400">
               Precio por Noche
             </label>
-            <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="number"
-                placeholder="Ej: 50000"
-                value={precioTemporal}
-                onChange={(e) => setPrecioTemporal(e.target.value)}
-                disabled={loading}
-                className={`${inputClass()} pl-10`}
-                min="0"
-              />
-            </div>
+            <NumberInput
+              placeholder="Ej: 50000"
+              value={precioTemporal}
+              onChange={(e) => setPrecioTemporal(e.target.value)}
+              disabled={loading}
+              min="0"
+              icon={true}
+            />
           </div>
 
           <div className="md:col-span-2">

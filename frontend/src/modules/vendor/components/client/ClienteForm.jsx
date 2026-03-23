@@ -1,6 +1,13 @@
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { useState } from 'react';
+import { 
+  FormField, 
+  TextInput, 
+  EmailInput, 
+  TelInput, 
+  SelectInput 
+} from '@/components/ui/form';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
@@ -9,7 +16,7 @@ const tiposDocumento = [
   { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
-// Formulario para la creación de un nuevo cliente
+// Formulario para la creación de un nuevo cliente refactorizado con componentes UI estandarizados
 function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
   const {
     register,
@@ -26,6 +33,7 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
       telefono: '',
     },
   });
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
 
@@ -44,10 +52,6 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
     }
   };
 
-  const inputBaseClasses =
-    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200';
-  const selectBaseClasses = `${inputBaseClasses} appearance-none`;
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
@@ -55,110 +59,75 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
       </h3>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Nombre *
-          </label>
-          <input
+        <FormField label="Nombre" required error={errors.nombre}>
+          <TextInput
             {...register('nombre', { required: 'El nombre es obligatorio' })}
-            className={inputBaseClasses}
+            placeholder="Ej: Juan"
           />
-          {errors.nombre && (
-            <p className="mt-1 text-sm text-red-500">{errors.nombre.message}</p>
-          )}
-        </div>
+        </FormField>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Apellido *
-          </label>
-          <input
-            {...register('apellido', {
-              required: 'El apellido es obligatorio',
-            })}
-            className={inputBaseClasses}
+        <FormField label="Apellido" required error={errors.apellido}>
+          <TextInput
+            {...register('apellido', { required: 'El apellido es obligatorio' })}
+            placeholder="Ej: Pérez"
           />
-          {errors.apellido && (
-            <p className="mt-1 text-sm text-red-500">
-              {errors.apellido.message}
-            </p>
-          )}
-        </div>
+        </FormField>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Tipo de Documento *
-          </label>
-          <select
-            {...register('tipoDocumento', { required: 'Seleccione un tipo' })}
-            className={selectBaseClasses}
-          >
+        <FormField label="Tipo de Documento" required error={errors.tipoDocumento}>
+          <SelectInput {...register('tipoDocumento', { required: 'Seleccione un tipo' })}>
             {tiposDocumento.map((tipo) => (
               <option key={tipo.id} value={tipo.id}>
                 {tipo.nombre}
               </option>
             ))}
-          </select>
-        </div>
+          </SelectInput>
+        </FormField>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Número de Documento *
-          </label>
-          <input
-            {...register('numeroDocumento', {
-              required: 'El documento es obligatorio',
-            })}
+        <FormField label="Número de Documento" required error={errors.numeroDocumento}>
+          <TextInput
+            {...register('numeroDocumento', { required: 'El documento es obligatorio' })}
             readOnly
-            className={`${inputBaseClasses} cursor-not-allowed bg-gray-100 dark:bg-gray-800`}
+            disabled
           />
-        </div>
+        </FormField>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Email *
-          </label>
-          <input
-            type="email"
-            {...register('email', { required: 'El email es obligatorio' })}
-            className={inputBaseClasses}
+        <FormField label="Email" required error={errors.email}>
+          <EmailInput
+            {...register('email', { 
+              required: 'El email es obligatorio',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Email inválido"
+              }
+            })}
           />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-          )}
-        </div>
+        </FormField>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Teléfono
-          </label>
-          <input
-            type="text"
-            inputMode="numeric"
+        <FormField label="Teléfono" error={errors.telefono}>
+          <TelInput
             {...register('telefono')}
             onChange={(e) => {
               const numericValue = e.target.value.replace(/\D/g, '');
               setValue('telefono', numericValue, { shouldValidate: true });
             }}
-            className={inputBaseClasses}
           />
-        </div>
+        </FormField>
       </div>
 
-      {apiError && <p className="mt-2 text-sm text-red-500">{apiError}</p>}
+      {apiError && <p className="mt-2 text-sm text-red-500 animate-in fade-in">{apiError}</p>}
 
       <div className="flex justify-end gap-3 pt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+          className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
         >
           {isSubmitting ? 'Guardando...' : 'Guardar Cliente'}
         </button>
@@ -168,3 +137,4 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
 }
 
 export default ClienteForm;
+

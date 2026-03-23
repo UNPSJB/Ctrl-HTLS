@@ -1,7 +1,13 @@
-import { useState } from 'react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { UserPlus, Save, X } from 'lucide-react';
+import { 
+  FormField, 
+  TextInput, 
+  SelectInput, 
+  EmailInput, 
+  TelInput 
+} from '@form';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },
@@ -115,11 +121,6 @@ const CrearCliente = () => {
     toast('Formulario limpiado', { icon: '🧹' });
   };
 
-  const inputClass =
-    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all';
-
-  const labelClass =
-    'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -140,111 +141,75 @@ const CrearCliente = () => {
 
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <label htmlFor="nombre" className={labelClass}>
-                Nombre *
-              </label>
-              <input
-                type="text"
+            <FormField label="Nombre" required>
+              <TextInput
                 id="nombre"
                 name="nombre"
                 value={formData.nombre}
                 onChange={handleChange}
                 placeholder="Ej: Juan"
-                className={inputClass}
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label htmlFor="apellido" className={labelClass}>
-                Apellido *
-              </label>
-              <input
-                type="text"
+            <FormField label="Apellido" required>
+              <TextInput
                 id="apellido"
                 name="apellido"
                 value={formData.apellido}
                 onChange={handleChange}
                 placeholder="Ej: Pérez"
-                className={inputClass}
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label htmlFor="tipoDocumento" className={labelClass}>
-                Tipo de Documento *
-              </label>
-              <div className="relative">
-                <select
-                  id="tipoDocumento"
-                  name="tipoDocumento"
-                  value={formData.tipoDocumento}
-                  onChange={handleTipoChange} 
-                  className={`${inputClass} appearance-none`}
-                >
-                  {tiposDocumento.map((tipo) => (
-                    <option key={tipo.id} value={tipo.id}>
-                      {tipo.nombre}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+            <FormField label="Tipo de Documento" required>
+              <SelectInput
+                id="tipoDocumento"
+                name="tipoDocumento"
+                value={formData.tipoDocumento}
+                onChange={handleTipoChange}
+              >
+                {tiposDocumento.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </option>
+                ))}
+              </SelectInput>
+            </FormField>
 
-            <div>
-              <label htmlFor="numeroDocumento" className={labelClass}>
-                Número de Documento *
-              </label>
-              <input
-                type="text"
+            <FormField label="Número de Documento" required>
+              <TextInput
                 id="numeroDocumento"
                 name="numeroDocumento"
                 value={formData.numeroDocumento}
-                onChange={handleDocumentoChange} 
+                onChange={handleDocumentoChange}
                 placeholder={
                   formData.tipoDocumento === 'pasaporte'
                     ? 'Ej: A1234567'
                     : 'Ej: 12345678'
                 }
-                className={inputClass}
                 maxLength={15}
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label htmlFor="email" className={labelClass}>
-                Correo Electrónico *
-              </label>
-              <input
-                type="email"
+            <FormField label="Correo Electrónico" required>
+              <EmailInput
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="juan@ejemplo.com"
-                className={inputClass}
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label htmlFor="telefono" className={labelClass}>
-                Teléfono
-              </label>
-              <input
-                type="text"
+            <FormField label="Teléfono">
+              <TelInput
                 id="telefono"
                 name="telefono"
                 value={formData.telefono}
                 onChange={handleTelefonoChange}
                 placeholder="Ej: 1123456789"
-                className={inputClass}
               />
-            </div>
+            </FormField>
           </div>
 
           <div className="mt-8 flex items-center justify-end gap-4 border-t border-gray-100 pt-6 dark:border-gray-700">

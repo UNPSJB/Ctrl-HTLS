@@ -7,6 +7,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
+import { 
+    FormField, 
+    TextInput, 
+    EmailInput, 
+    TelInput, 
+    SelectInput,
+    PasswordInput
+} from '@form';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },
@@ -139,10 +147,6 @@ const AdministradoresForm = () => {
 
     const handleCancel = () => navigate('/admin/personal/administradores');
 
-    const inputClass = (error) =>
-        `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
-    const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
-    const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
 
     return (
         <div className="space-y-6">
@@ -194,62 +198,40 @@ const AdministradoresForm = () => {
                                     <div className="space-y-6 animate-in fade-in duration-300">
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Identidad Administrativa</h3>
                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                            <div>
-                                                <label htmlFor="nombre" className={labelClass}>
-                                                    Nombres Completos <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    type="text"
+                                            <FormField label="Nombres Completos" required error={errors.nombre}>
+                                                <TextInput
                                                     id="nombre"
                                                     {...register('nombre', { required: 'El nombre es obligatorio' })}
-                                                    className={inputClass(errors.nombre)}
                                                     placeholder="Ej: Juan Antonio"
                                                 />
-                                                {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
-                                            </div>
-                                            <div>
-                                                <label htmlFor="apellido" className={labelClass}>
-                                                    Apellidos <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    type="text"
+                                            </FormField>
+                                            <FormField label="Apellidos" required error={errors.apellido}>
+                                                <TextInput
                                                     id="apellido"
                                                     {...register('apellido', { required: 'El apellido es obligatorio' })}
-                                                    className={inputClass(errors.apellido)}
                                                     placeholder="Ej: Pérez García"
                                                 />
-                                                {errors.apellido && <p className={errorClass}>{errors.apellido.message}</p>}
-                                            </div>
-                                            <div>
-                                                <label htmlFor="tipoDocumento" className={labelClass}>
-                                                    Identificación <span className="text-red-500">*</span>
-                                                </label>
-                                                <select
+                                            </FormField>
+                                            <FormField label="Identificación" required error={errors.tipoDocumento}>
+                                                <SelectInput
                                                     id="tipoDocumento"
                                                     {...register('tipoDocumento', { onChange: handleTipoChange })}
-                                                    className={inputClass(errors.tipoDocumento)}
                                                 >
                                                     {tiposDocumento.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label htmlFor="numeroDocumento" className={labelClass}>
-                                                    Nº de Documento <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    type="text"
+                                                </SelectInput>
+                                            </FormField>
+                                            <FormField label="Nº de Documento" required error={errors.numeroDocumento}>
+                                                <TextInput
                                                     id="numeroDocumento"
                                                     {...register('numeroDocumento', {
                                                         required: 'El documento es obligatorio',
                                                         minLength: { value: 7, message: 'Mínimo 7 caracteres' },
                                                         onChange: handleDocumentoChange
                                                     })}
-                                                    className={inputClass(errors.numeroDocumento)}
                                                     maxLength={15}
                                                     placeholder="Sin puntos ni guiones"
                                                 />
-                                                {errors.numeroDocumento && <p className={errorClass}>{errors.numeroDocumento.message}</p>}
-                                            </div>
+                                            </FormField>
                                         </div>
                                     </div>
                                 )}
@@ -258,12 +240,8 @@ const AdministradoresForm = () => {
                                     <div className="space-y-6 animate-in fade-in duration-300">
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación Geográfica</h3>
                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                            <div>
-                                                <label htmlFor="email" className={labelClass}>
-                                                    Email Corporativo <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    type="email"
+                                            <FormField label="Email Corporativo" required error={errors.email}>
+                                                <EmailInput
                                                     id="email"
                                                     {...register('email', {
                                                         required: 'El email es obligatorio',
@@ -272,34 +250,23 @@ const AdministradoresForm = () => {
                                                             message: 'Email inválido'
                                                         }
                                                     })}
-                                                    className={inputClass(errors.email)}
                                                     placeholder="admin@empresa.com"
                                                 />
-                                                {errors.email && <p className={errorClass}>{errors.email.message}</p>}
-                                            </div>
-                                            <div>
-                                                <label htmlFor="telefono" className={labelClass}>Línea de Contacto</label>
-                                                <input
-                                                    type="text"
+                                            </FormField>
+                                            <FormField label="Línea de Contacto" error={errors.telefono}>
+                                                <TelInput
                                                     id="telefono"
                                                     {...register('telefono', { onChange: handleNumericChange })}
-                                                    className={inputClass(errors.telefono)}
                                                     placeholder="Cod. área + número"
                                                 />
-                                            </div>
-                                            <div className="col-span-full">
-                                                <label htmlFor="direccion" className={labelClass}>
-                                                    Residencia Física <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    type="text"
+                                            </FormField>
+                                            <FormField label="Residencia Física" required error={errors.direccion} containerClassName="col-span-full">
+                                                <TextInput
                                                     id="direccion"
                                                     {...register('direccion', { required: 'La dirección es obligatoria' })}
-                                                    className={inputClass(errors.direccion)}
                                                     placeholder="Ej: Av. Principal 123, Depto B"
                                                 />
-                                                {errors.direccion && <p className={errorClass}>{errors.direccion.message}</p>}
-                                            </div>
+                                            </FormField>
                                             <UbicacionSelector
                                                 errors={errors}
                                                 register={register}
@@ -317,28 +284,27 @@ const AdministradoresForm = () => {
                                             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Credenciales de Acceso</h3>
                                         </div>
                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                            <div>
-                                                <label htmlFor="password" className={labelClass}>
-                                                    {isEditing ? 'Reestablecer Contraseña (opcional)' : 'Nueva Contraseña'} {!isEditing && <span className="text-red-500">*</span>}
-                                                </label>
-                                                <input
-                                                    type="password"
+                                            <FormField 
+                                                label={isEditing ? 'Reestablecer Contraseña (opcional)' : 'Nueva Contraseña'} 
+                                                required={!isEditing} 
+                                                error={errors.password}
+                                            >
+                                                <PasswordInput
                                                     id="password"
                                                     {...register('password', {
                                                         required: !isEditing ? 'La contraseña es obligatoria' : false,
                                                         minLength: { value: 6, message: 'Mínimo 6 caracteres' }
                                                     })}
-                                                    placeholder="••••••••"
-                                                    className={inputClass(errors.password)}
                                                 />
-                                                {errors.password && <p className={errorClass}>{errors.password.message}</p>}
-                                                <p className="mt-3 text-[11px] text-gray-500 italic flex items-center gap-1.5">
-                                                    <ShieldCheck className="w-3 h-3" />
-                                                    {isEditing
-                                                        ? 'Complete solo si desea cambiar la clave actual de este administrador.'
-                                                        : 'Se recomienda usar una mezcla de letras, números y símbolos.'}
-                                                </p>
-                                            </div>
+                                            </FormField>
+                                        </div>
+                                        <div className="mt-3 text-[11px] text-gray-500 italic flex items-center gap-1.5">
+                                            <ShieldCheck className="w-3 h-3" />
+                                            <p>
+                                                {isEditing
+                                                    ? 'Complete solo si desea cambiar la clave actual de este administrador.'
+                                                    : 'Se recomienda usar una mezcla de letras, números y símbolos.'}
+                                            </p>
                                         </div>
                                     </div>
                                 )}

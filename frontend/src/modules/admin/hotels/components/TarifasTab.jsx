@@ -4,6 +4,7 @@ import { Bed, Save, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { NumberInput } from '@form';
 
 // Pestaña de configuración de tarifas por tipo de habitación.
 // Usa el endpoint dedicado GET /hotel/:id/tarifas que devuelve tipos + precio configurado para este hotel.
@@ -137,16 +138,8 @@ export default function TarifasTab({ hotelId }) {
 
                     {/* Input de precio */}
                     <td className="px-6 py-4 text-right">
-                      <div className="relative ml-auto max-w-[160px]">
-                        <span
-                          className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                            hasError ? 'text-red-400' : 'text-gray-400'
-                          }`}
-                        >
-                          $
-                        </span>
-                        <input
-                          type="number"
+                      <div className="ml-auto max-w-[160px]">
+                        <NumberInput
                           step="0.01"
                           {...register(`precios.${tipo.id}`, {
                             min: { value: 0, message: 'Mínimo 0' },
@@ -154,17 +147,11 @@ export default function TarifasTab({ hotelId }) {
                               val === '' || !isNaN(val) || 'Valor inválido',
                           })}
                           placeholder="0.00"
-                          className={`w-full rounded-lg border ${
-                            hasError
-                              ? 'border-red-500 bg-white ring-red-500/20'
-                              : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-blue-500/20'
-                          } py-2.5 pl-7 pr-3 text-right outline-none transition-all focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500`}
+                          icon={true}
+                          className="text-right"
+                          hideError={false}
+                          error={errors.precios?.[tipo.id]}
                         />
-                        {hasError && (
-                          <div className="absolute right-0 top-full mt-1 animate-in fade-in slide-in-from-top-1 text-[10px] font-bold text-red-500">
-                            {errors.precios[tipo.id]?.message}
-                          </div>
-                        )}
                       </div>
                     </td>
                   </tr>

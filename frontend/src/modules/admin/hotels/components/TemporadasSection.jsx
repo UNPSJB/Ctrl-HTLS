@@ -4,6 +4,12 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import TemporadasList from './TemporadasList';
+import { 
+  FormField, 
+  SelectInput, 
+  TextInput, 
+  NumberInput 
+} from '@form';
 
 export default function TemporadasSection({ hotelId }) {
   const [temporadas, setTemporadas] = useState([]);
@@ -59,11 +65,6 @@ export default function TemporadasSection({ hotelId }) {
     }
   };
 
-  const inputClass = (error) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-sm md:text-base text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
-
-  const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400';
-  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
   return (
     <section className="animate-in fade-in duration-300 space-y-6">
@@ -95,41 +96,32 @@ export default function TemporadasSection({ hotelId }) {
             onSubmit={form.handleSubmit(handleAdd)}
             className="grid grid-cols-1 gap-6 md:grid-cols-4 items-end"
           >
-            <div>
-              <label className={labelClass}>Tipo</label>
-              <select
+            <FormField label="Tipo" required error={form.formState.errors.tipo}>
+              <SelectInput
                 {...form.register('tipo', { required: true })}
-                className={inputClass()}
               >
                 <option value="alta">Temporada Alta (+)</option>
                 <option value="baja">Temporada Baja (-)</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>Inicio</label>
-              <input
+              </SelectInput>
+            </FormField>
+            <FormField label="Inicio" required error={form.formState.errors.fechaInicio}>
+              <TextInput
                 type="date"
                 {...form.register('fechaInicio', { required: true })}
-                className={inputClass()}
               />
-            </div>
-            <div>
-              <label className={labelClass}>Fin</label>
-              <input
+            </FormField>
+            <FormField label="Fin" required error={form.formState.errors.fechaFin}>
+              <TextInput
                 type="date"
                 {...form.register('fechaFin', { required: true })}
-                className={inputClass()}
               />
-            </div>
-            <div>
-              <label className={labelClass}>Ajuste (%)</label>
+            </FormField>
+            <FormField label="Ajuste (%)" required error={form.formState.errors.porcentaje}>
               <div className="flex items-center gap-2">
-                <input
-                  type="number"
+                <NumberInput
                   step="0.01"
                   placeholder="Ej: 15.00"
                   {...form.register('porcentaje', { required: true, min: 0 })}
-                  className={inputClass()}
                 />
                 <button
                   type="submit"
@@ -139,7 +131,7 @@ export default function TemporadasSection({ hotelId }) {
                   <Plus className="h-5 w-5" />
                 </button>
               </div>
-            </div>
+            </FormField>
           </form>
         </div>
       )}

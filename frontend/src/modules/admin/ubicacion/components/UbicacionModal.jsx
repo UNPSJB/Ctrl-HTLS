@@ -1,14 +1,6 @@
-import { useState, useEffect } from 'react';
 import { X, MapPin, Globe, Building, Map } from 'lucide-react';
+import { FormField, TextInput } from '@form';
 
-const inputClass = (hasError) =>
-  `w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors ${
-    hasError
-      ? 'border-red-400 bg-red-50 dark:bg-red-900/10 focus:border-red-500'
-      : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 focus:border-blue-500'
-  } text-gray-900 dark:text-white placeholder:text-gray-400`;
-
-const labelClass = 'block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5';
 
 const TIPO_STYLES = {
   pais:      { iconBg: 'bg-blue-50 dark:bg-blue-900/20',   iconText: 'text-blue-600 dark:text-blue-400',   submitBtn: 'bg-blue-600 hover:bg-blue-700' },
@@ -117,36 +109,24 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Nombre */}
-          <div>
-            <label className={labelClass}>Nombre *</label>
-            <input
-              type="text"
+          <FormField label="Nombre" required error={errors.nombre}>
+            <TextInput
               value={nombre}
               onChange={(e) => { setNombre(e.target.value); setErrors((p) => ({ ...p, nombre: undefined })); }}
-              className={inputClass(!!errors.nombre)}
               placeholder={`Ej: ${tipo === 'pais' ? 'Argentina' : tipo === 'provincia' ? 'Buenos Aires' : 'La Plata'}`}
               autoFocus
             />
-            {errors.nombre && (
-              <p className="mt-1 text-xs font-medium text-red-500">{errors.nombre}</p>
-            )}
-          </div>
+          </FormField>
 
           {/* Código Postal (solo ciudades) */}
           {tipo === 'ciudad' && (
-            <div>
-              <label className={labelClass}>Código Postal *</label>
-              <input
-                type="text"
+            <FormField label="Código Postal" required error={errors.codigoPostal}>
+              <TextInput
                 value={codigoPostal}
                 onChange={(e) => { setCodigoPostal(e.target.value); setErrors((p) => ({ ...p, codigoPostal: undefined })); }}
-                className={inputClass(!!errors.codigoPostal)}
                 placeholder="Ej: 1900"
               />
-              {errors.codigoPostal && (
-                <p className="mt-1 text-xs font-medium text-red-500">{errors.codigoPostal}</p>
-              )}
-            </div>
+            </FormField>
           )}
 
           {/* Botones */}

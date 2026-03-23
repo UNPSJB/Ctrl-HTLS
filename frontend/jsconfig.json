@@ -67,6 +67,12 @@
       ],
       "@admin-hooks/*": [
         "modules/admin/shared/hooks/*"
+      ],
+      "@form/*": [
+        "src/components/ui/form/*"
+      ],
+      "@form": [
+        "src/components/ui/form/index.js"
       ]
     },
     // Opciones recomendadas para un proyecto React moderno

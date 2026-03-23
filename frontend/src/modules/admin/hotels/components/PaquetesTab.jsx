@@ -4,6 +4,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import PaquetesList from './PaquetesList';
+import { 
+  FormField, 
+  TextInput, 
+  NumberInput 
+} from '@form';
 
 export default function PaquetesTab({ hotelId }) {
   const [paquetes, setPaquetes] = useState([]);
@@ -71,11 +76,6 @@ export default function PaquetesTab({ hotelId }) {
     }
   };
 
-  const inputClass = (error) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-sm md:text-base text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
-
-  const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400';
-  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
   return (
     <div className="animate-in fade-in space-y-8 duration-500">
@@ -103,47 +103,33 @@ export default function PaquetesTab({ hotelId }) {
         <div className="animate-in slide-in-from-top-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-6 duration-300 dark:border-blue-900/20 dark:bg-blue-900/10">
           <form onSubmit={handleSubmit(handleCreatePaquete)} className="space-y-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-              <div className="md:col-span-1">
-                <label className={labelClass}>Nombre del Paquete</label>
-                <input
-                  type="text"
+              <FormField label="Nombre del Paquete" required error={errors.nombre}>
+                <TextInput
                   placeholder="Ej: Finde Romántico"
                   {...register('nombre', { required: 'Requerido' })}
-                  className={inputClass(errors.nombre)}
                 />
-                {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
-              </div>
-              <div>
-                <label className={labelClass}>Desde</label>
-                <input
+              </FormField>
+              <FormField label="Desde" required error={errors.fecha_inicio}>
+                <TextInput
                   type="date"
                   min={new Date().toISOString().split('T')[0]}
                   {...register('fecha_inicio', { required: 'Requerido' })}
-                  className={inputClass(errors.fecha_inicio)}
                 />
-                {errors.fecha_inicio && <p className={errorClass}>{errors.fecha_inicio.message}</p>}
-              </div>
-              <div>
-                <label className={labelClass}>Hasta</label>
-                <input
+              </FormField>
+              <FormField label="Hasta" required error={errors.fecha_fin}>
+                <TextInput
                   type="date"
                   min={fechaInicio || new Date().toISOString().split('T')[0]}
                   {...register('fecha_fin', { required: 'Requerido' })}
-                  className={inputClass(errors.fecha_fin)}
                 />
-                {errors.fecha_fin && <p className={errorClass}>{errors.fecha_fin.message}</p>}
-              </div>
-              <div>
-                <label className={labelClass}>Descuento (%)</label>
-                <input
-                  type="number"
+              </FormField>
+              <FormField label="Descuento (%)" required error={errors.coeficiente_descuento}>
+                <NumberInput
                   step="0.01"
                   placeholder="Ej: 20.00"
                   {...register('coeficiente_descuento', { required: 'Requerido', min: 0.1, max: 100 })}
-                  className={inputClass(errors.coeficiente_descuento)}
                 />
-                {errors.coeficiente_descuento && <p className={errorClass}>Valor inválido</p>}
-              </div>
+              </FormField>
             </div>
 
             <div className="space-y-4">

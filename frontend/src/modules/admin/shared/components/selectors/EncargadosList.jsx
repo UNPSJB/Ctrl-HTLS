@@ -4,6 +4,7 @@ import axiosInstance from '@/api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
+import { SearchInput } from '@form';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -74,27 +75,16 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
 
       {/* Barra de búsqueda */}
       <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
-        <div className="relative max-w-sm">
-          <input
-            type="text"
+        <div className="max-w-sm">
+          <SearchInput
             placeholder="Buscar por nombre o DNI..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+            onClear={() => setSearchTerm('')}
           />
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-          {searchTerm && (
-            <button
-              type="button"
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
         </div>
       </div>
 

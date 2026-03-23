@@ -33,6 +33,7 @@ export default defineConfig({
       '@vendor-context': resolve(__dirname, './src/modules/vendor/context'), // Alias para contextos vendor
       '@vendor-hooks': resolve(__dirname, './src/modules/vendor/hooks'), // Alias para hooks vendor
       '@admin-hooks': resolve(__dirname, './src/modules/admin/shared/hooks'), // Alias para hooks admin
+      '@form': resolve(__dirname, './src/components/ui/form'),
     },
   },
 });
