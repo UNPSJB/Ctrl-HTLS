@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import useUbicacion from '@/hooks/useUbicacion';
+import RedirectLink from '@/components/ui/form/RedirectLink';
 
 // Selector cascada de ubicación: País -> Provincia -> Ciudad
 const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
@@ -151,22 +152,13 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
       </div>
 
       {/* Redirección a Gestión de Ubicaciones */}
-      <div className="col-span-full mt-2 flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-800 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-300">
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
-          <MapPin className="h-4 w-4" />
-        </div>
-        <p>
-          ¿No encuentras la ubicación que buscas?{' '}
-          <a
-            href="/admin/ubicacion"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-blue-700 underline transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            Gestionar ubicaciones aquí
-          </a>
-        </p>
-      </div>
+      <RedirectLink
+        to="/admin/ubicacion"
+        text="¿No encuentras la ubicación que buscas?"
+        label="Gestionar ubicaciones aquí"
+        newTab
+        className="col-span-full mt-2"
+      />
     </>
   );
 };

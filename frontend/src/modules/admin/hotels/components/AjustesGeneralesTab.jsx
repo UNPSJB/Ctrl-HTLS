@@ -8,6 +8,7 @@ import useHotel from '@/hooks/useHotel';
 import UbicacionSelector from '@/components/selectors/UbicacionSelector';
 import EncargadosList from '@/components/selectors/EncargadosList';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import RedirectLink from '@/components/ui/form/RedirectLink';
 
 export default function AjustesGeneralesTab({
   hotelId,
@@ -318,20 +319,13 @@ export default function AjustesGeneralesTab({
             exclude={initialData?.encargado?.id}
           />
           
-          <div className="mt-4 flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-800 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-300">
-            <User className="h-5 w-5 text-blue-500" />
-            <p>
-              ¿El encargado que buscas no aparece o no está registrado?{' '}
-              <a 
-                href="/admin/encargados/nuevo"
-                className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Hacé clic acá para gestionarlos
-              </a>.
-            </p>
-          </div>
+          <RedirectLink
+            to="/admin/encargados/nuevo"
+            text="¿El encargado que buscas no aparece o no está registrado?"
+            label="Hacé clic acá para gestionarlos."
+            newTab
+            className="mt-4"
+          />
 
           {selectedEncargadoId !== initialData?.encargado?.id && (
             <div className="mt-6 flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
