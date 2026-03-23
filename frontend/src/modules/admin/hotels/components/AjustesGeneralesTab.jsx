@@ -8,17 +8,14 @@ import useHotel from '@admin-hooks/useHotel';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-<<<<<<< HEAD
-import RedirectLink from '@/components/ui/form/RedirectLink';
-=======
 import { 
   FormField, 
   TextInput, 
   EmailInput, 
   TelInput, 
-  SelectInput 
+  SelectInput,
+  RedirectLink
 } from '@form';
->>>>>>> eeba6416e9a2ac039c2bd8cf7245fbce4daf3eba
 
 export default function AjustesGeneralesTab({
   hotelId,
