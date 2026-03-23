@@ -149,9 +149,13 @@ export default function TarifasTab({ hotelId }) {
                           placeholder="0.00"
                           icon={true}
                           className="text-right"
-                          hideError={false}
                           error={errors.precios?.[tipo.id]}
                         />
+                        {errors.precios?.[tipo.id] && (
+                          <p className="mt-1 text-right text-[10px] font-medium text-red-500 animate-in fade-in slide-in-from-top-1">
+                            {errors.precios[tipo.id]?.message}
+                          </p>
+                        )}
                       </div>
                     </td>
                   </tr>
