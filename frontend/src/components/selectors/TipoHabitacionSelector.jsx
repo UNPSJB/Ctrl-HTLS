@@ -14,6 +14,12 @@ const TiposHabitacionSelector = ({
   loading = false,
   errors = {},
 }) => {
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
+
+  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+
   const getTipoHabitacionNombre = (id) => {
     return (
       tiposHabitaciones.find((tipo) => tipo.id == id)?.nombre || ''
@@ -28,28 +34,29 @@ const TiposHabitacionSelector = ({
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 dark:text-white dark:border-gray-700">
-        Tipos de Habitaciones
-      </h3>
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
+        <div className="h-4 w-1 rounded-full bg-blue-600"></div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Tipos de Habitaciones
+        </h3>
+      </div>
 
       <div className="space-y-4">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Agregar Tipos de Habitaciones con Precios *
+        <label className={labelClass}>
+          Agregar Tipos de Habitaciones con Precios <span className="text-red-500">*</span>
         </label>
 
-        { }
-        <div className="flex gap-3 items-end">
-          <div className="flex-1">
-            <label className="block text-sm text-gray-600 mb-1 dark:text-gray-400">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-gray-50/50 p-4 rounded-xl border border-gray-100 dark:bg-gray-800/50 dark:border-gray-700">
+          <div className="md:col-span-6">
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider dark:text-gray-400">
               Tipo de Habitación
             </label>
             <select
               value={selectedTipo}
               onChange={(e) => setSelectedTipo(e.target.value)}
               disabled={loading}
-              className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''
-                }`}
+              className={inputClass()}
             >
               <option value="">
                 {loading ? 'Cargando tipos...' : 'Seleccionar tipo'}
@@ -68,42 +75,42 @@ const TiposHabitacionSelector = ({
             </select>
           </div>
 
-          <div className="flex-1">
-            <label className="block text-sm text-gray-600 mb-1 dark:text-gray-400">
+          <div className="md:col-span-4">
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider dark:text-gray-400">
               Precio por Noche
             </label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="number"
-                placeholder="50000"
+                placeholder="Ej: 50000"
                 value={precioTemporal}
                 onChange={(e) => setPrecioTemporal(e.target.value)}
                 disabled={loading}
-                className={`w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''
-                  }`}
+                className={`${inputClass()} pl-10`}
                 min="0"
               />
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onAgregar}
-            disabled={!canAdd || loading}
-            className={`px-4 py-2 rounded-md text-white font-medium flex items-center gap-1 ${canAdd && !loading
-              ? 'bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500'
-              : 'bg-gray-400 cursor-not-allowed dark:bg-gray-600'
-              }`}
-          >
-            <Plus className="h-4 w-4" />
-            {loading ? '...' : 'Agregar'}
-          </button>
+          <div className="md:col-span-2">
+            <button
+              type="button"
+              onClick={onAgregar}
+              disabled={!canAdd || loading}
+              className={`w-full px-4 py-2.5 rounded-lg text-white font-semibold flex items-center justify-center gap-2 transition-all shadow-sm ${canAdd && !loading
+                ? 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                : 'bg-gray-400 cursor-not-allowed dark:bg-gray-600'
+                }`}
+            >
+              <Plus className="h-5 w-5" />
+              {loading ? '...' : 'Agregar'}
+            </button>
+          </div>
         </div>
 
-        { }
         {errors.tiposHabitaciones && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md dark:bg-red-900/20 dark:border-red-800">
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800 animate-in fade-in slide-in-from-top-2">
             <p className="text-red-600 text-sm font-medium dark:text-red-400">
               {errors.tiposHabitaciones.message}
             </p>

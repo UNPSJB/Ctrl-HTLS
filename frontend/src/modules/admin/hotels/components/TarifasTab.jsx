@@ -136,8 +136,8 @@ export default function TarifasTab({ hotelId }) {
                     </td>
 
                     {/* Input de precio */}
-                    <td className="px-6 py-4">
-                      <div className="relative ml-auto max-w-[150px]">
+                    <td className="px-6 py-4 text-right">
+                      <div className="relative ml-auto max-w-[160px]">
                         <span
                           className={`absolute left-3 top-1/2 -translate-y-1/2 ${
                             hasError ? 'text-red-400' : 'text-gray-400'
@@ -156,9 +156,9 @@ export default function TarifasTab({ hotelId }) {
                           placeholder="0.00"
                           className={`w-full rounded-lg border ${
                             hasError
-                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-500/20'
-                              : 'border-gray-200 bg-gray-50 text-gray-700 focus:border-blue-500 focus:ring-blue-500/20'
-                          } py-2 pl-7 pr-3 text-right outline-none transition-all dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100`}
+                              ? 'border-red-500 bg-white ring-red-500/20'
+                              : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-blue-500/20'
+                          } py-2.5 pl-7 pr-3 text-right outline-none transition-all focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500`}
                         />
                         {hasError && (
                           <div className="absolute right-0 top-full mt-1 animate-in fade-in slide-in-from-top-1 text-[10px] font-bold text-red-500">
@@ -184,14 +184,23 @@ export default function TarifasTab({ hotelId }) {
         </div>
 
         {/* Botón Guardar */}
-        <div className="flex justify-end pt-2">
+        <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
           <button
             type="submit"
             disabled={isSubmitting || !isDirty || loading}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
           >
-            <Save className="h-4 w-4" />
-            {isSubmitting ? 'Actualizando...' : 'Actualizar Tarifas Base'}
+            {isSubmitting ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Actualizando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Actualizar Tarifas Base
+              </>
+            )}
           </button>
         </div>
       </form>

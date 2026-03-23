@@ -179,9 +179,9 @@ const VendedoresForm = () => {
   const handleCancel = () => navigate('/admin/personal/vendedores');
 
   const inputClass = (error) =>
-    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all`;
-  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
   const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
 
   return (
     <div className="space-y-6">
@@ -230,7 +230,7 @@ const VendedoresForm = () => {
 
         {/* Formulario Dinámico */}
         <div className="flex-1 w-full min-w-0">
-          <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
+          <form onSubmit={handleSubmit(onSubmit)} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
 
             {loadingData ? (
               <InnerLoading message="Cargando perfil..." />
@@ -241,7 +241,9 @@ const VendedoresForm = () => {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
-                        <label htmlFor="nombre" className={labelClass}>Nombre *</label>
+                        <label htmlFor="nombre" className={labelClass}>
+                          Nombre <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="text"
                           id="nombre"
@@ -251,7 +253,9 @@ const VendedoresForm = () => {
                         {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
                       </div>
                       <div>
-                        <label htmlFor="apellido" className={labelClass}>Apellido *</label>
+                        <label htmlFor="apellido" className={labelClass}>
+                          Apellido <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="text"
                           id="apellido"
@@ -261,7 +265,9 @@ const VendedoresForm = () => {
                         {errors.apellido && <p className={errorClass}>{errors.apellido.message}</p>}
                       </div>
                       <div>
-                        <label htmlFor="tipoDocumento" className={labelClass}>Tipo Documento *</label>
+                        <label htmlFor="tipoDocumento" className={labelClass}>
+                          Tipo Documento <span className="text-red-500">*</span>
+                        </label>
                         <select
                           id="tipoDocumento"
                           {...register('tipoDocumento', { onChange: handleTipoChange })}
@@ -271,12 +277,15 @@ const VendedoresForm = () => {
                         </select>
                       </div>
                       <div>
-                        <label htmlFor="numeroDocumento" className={labelClass}>Número Documento *</label>
+                        <label htmlFor="numeroDocumento" className={labelClass}>
+                          Número Documento <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="text"
                           id="numeroDocumento"
                           {...register('numeroDocumento', {
                             required: 'El documento es obligatorio',
+                            minLength: { value: 7, message: 'Mínimo 7 caracteres' },
                             onChange: handleDocumentoChange
                           })}
                           className={inputClass(errors.numeroDocumento)}
@@ -285,7 +294,9 @@ const VendedoresForm = () => {
                         {errors.numeroDocumento && <p className={errorClass}>{errors.numeroDocumento.message}</p>}
                       </div>
                       <div>
-                        <label htmlFor="rol" className={labelClass}>Rol en el Sistema *</label>
+                        <label htmlFor="rol" className={labelClass}>
+                          Rol en el Sistema <span className="text-red-500">*</span>
+                        </label>
                         <select
                           id="rol"
                           {...register('rol')}
@@ -304,7 +315,9 @@ const VendedoresForm = () => {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación y Contacto</h3>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
-                        <label htmlFor="email" className={labelClass}>Email *</label>
+                        <label htmlFor="email" className={labelClass}>
+                          Email <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="email"
                           id="email"
@@ -315,6 +328,7 @@ const VendedoresForm = () => {
                               message: 'Email inválido'
                             }
                           })}
+                          placeholder="vendedor@empresa.com"
                           className={inputClass(errors.email)}
                         />
                         {errors.email && <p className={errorClass}>{errors.email.message}</p>}
@@ -325,15 +339,19 @@ const VendedoresForm = () => {
                           type="text"
                           id="telefono"
                           {...register('telefono', { onChange: handleNumericChange })}
+                          placeholder="Ej: 3764556677"
                           className={inputClass(errors.telefono)}
                         />
                       </div>
                       <div className="col-span-full">
-                        <label htmlFor="direccion" className={labelClass}>Dirección *</label>
+                        <label htmlFor="direccion" className={labelClass}>
+                          Dirección <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="text"
                           id="direccion"
                           {...register('direccion', { required: 'La dirección es obligatoria' })}
+                          placeholder="Calle, Número, Depto"
                           className={inputClass(errors.direccion)}
                         />
                         {errors.direccion && <p className={errorClass}>{errors.direccion.message}</p>}
@@ -391,20 +409,24 @@ const VendedoresForm = () => {
                 {activeTab === 'seguridad' && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
-                    <div className="max-w-md">
-                      <label htmlFor="password" className={labelClass}>{isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña *'}</label>
-                      <input
-                        type="password"
-                        id="password"
-                        {...register('password', {
-                          required: !isEditing ? 'La contraseña es obligatoria' : false,
-                          minLength: { value: 6, message: 'Mínimo 6 caracteres' }
-                        })}
-                        placeholder="••••••••"
-                        className={inputClass(errors.password)}
-                      />
-                      {errors.password && <p className={errorClass}>{errors.password.message}</p>}
-                      {isEditing && <p className="mt-1 text-xs text-gray-500 italic">Deje en blanco para mantener la contraseña actual.</p>}
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div>
+                        <label htmlFor="password" className={labelClass}>
+                          {isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña'} {!isEditing && <span className="text-red-500">*</span>}
+                        </label>
+                        <input
+                          type="password"
+                          id="password"
+                          {...register('password', {
+                            required: !isEditing ? 'La contraseña es obligatoria' : false,
+                            minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+                          })}
+                          placeholder="••••••••"
+                          className={inputClass(errors.password)}
+                        />
+                        {errors.password && <p className={errorClass}>{errors.password.message}</p>}
+                        {isEditing && <p className="mt-1 text-xs text-gray-500 italic">Deje en blanco para mantener la contraseña actual.</p>}
+                      </div>
                     </div>
                   </div>
                 )}

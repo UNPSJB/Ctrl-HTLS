@@ -46,6 +46,11 @@ export default function DescuentosSection({ hotelId }) {
     }
   };
 
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-sm md:text-base text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
+
+  const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400';
+
   return (
     <section className="animate-in fade-in duration-300 space-y-6">
       {/* Encabezado + botón */}
@@ -74,10 +79,10 @@ export default function DescuentosSection({ hotelId }) {
         <div className="animate-in slide-in-from-top-4 rounded-2xl border border-indigo-100 bg-indigo-50/30 p-6 duration-300 dark:border-indigo-900/20 dark:bg-indigo-900/10">
           <form
             onSubmit={form.handleSubmit(handleAdd)}
-            className="grid grid-cols-1 gap-6 md:grid-cols-2"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 items-end"
           >
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div>
+              <label className={labelClass}>
                 Cantidad de Habitaciones
               </label>
               <input
@@ -85,11 +90,11 @@ export default function DescuentosSection({ hotelId }) {
                 min="1"
                 placeholder="Ej: 3"
                 {...form.register('cantidad_de_habitaciones', { required: true, min: 1 })}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass()}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div>
+              <label className={labelClass}>
                 Porcentaje de Descuento (%)
               </label>
               <div className="flex items-center gap-2">
@@ -99,12 +104,12 @@ export default function DescuentosSection({ hotelId }) {
                   min="0"
                   placeholder="Ej: 5.00"
                   {...form.register('porcentaje', { required: true, min: 0 })}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className={inputClass()}
                 />
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-indigo-600 p-2.5 text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700 disabled:opacity-50"
+                  className="rounded-lg bg-indigo-600 p-3 text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700 disabled:opacity-50"
                 >
                   <Plus className="h-5 w-5" />
                 </button>

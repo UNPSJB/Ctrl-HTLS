@@ -33,6 +33,12 @@ export default function AdminCreateHotelForm() {
   const handleFormSubmit = (data) => onSubmit(data);
   const handleCancel = () => navigate('/admin/hoteles');
 
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
+
+  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Encabezado Externo */}
@@ -56,7 +62,7 @@ export default function AdminCreateHotelForm() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col">
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12">
             <InnerLoading message="Preparando formulario de registro..." />
@@ -64,7 +70,7 @@ export default function AdminCreateHotelForm() {
         ) : (
           <form
             onSubmit={handleSubmit(handleFormSubmit)}
-            className="p-6 flex-1 flex flex-col"
+            className="p-6 flex-1 flex flex-col space-y-8"
           >
             <div className="flex-1 space-y-8 animate-in fade-in duration-500">
               {/* Información Básica */}
@@ -76,12 +82,9 @@ export default function AdminCreateHotelForm() {
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="nombre"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Nombre del Hotel *
+                  <div>
+                    <label htmlFor="nombre" className={labelClass}>
+                      Nombre del Hotel <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="nombre"
@@ -91,21 +94,18 @@ export default function AdminCreateHotelForm() {
                       {...register('nombre', {
                         required: 'El nombre es obligatorio',
                       })}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all shadow-sm"
+                      className={inputClass(errors.nombre)}
                     />
                     {errors.nombre && (
-                      <p className="text-xs text-red-500">
+                      <p className={errorClass}>
                         {errors.nombre.message}
                       </p>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="telefono"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Teléfono *
+                  <div>
+                    <label htmlFor="telefono" className={labelClass}>
+                      Teléfono <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="telefono"
@@ -115,10 +115,10 @@ export default function AdminCreateHotelForm() {
                       {...register('telefono', {
                         required: 'El teléfono es obligatorio',
                       })}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all shadow-sm"
+                      className={inputClass(errors.telefono)}
                     />
                     {errors.telefono && (
-                      <p className="text-xs text-red-500">
+                      <p className={errorClass}>
                         {errors.telefono.message}
                       </p>
                     )}
@@ -126,12 +126,9 @@ export default function AdminCreateHotelForm() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label
-                      htmlFor="direccion"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Dirección *
+                  <div>
+                    <label htmlFor="direccion" className={labelClass}>
+                      Dirección <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="direccion"
@@ -141,21 +138,18 @@ export default function AdminCreateHotelForm() {
                       {...register('direccion', {
                         required: 'La dirección es obligatoria',
                       })}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all shadow-sm"
+                      className={inputClass(errors.direccion)}
                     />
                     {errors.direccion && (
-                      <p className="text-xs text-red-500">
+                      <p className={errorClass}>
                         {errors.direccion.message}
                       </p>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Email *
+                  <div>
+                    <label htmlFor="email" className={labelClass}>
+                      Email <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="email"
@@ -169,19 +163,19 @@ export default function AdminCreateHotelForm() {
                           message: 'Email inválido',
                         },
                       })}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all shadow-sm"
+                      className={inputClass(errors.email)}
                     />
                     {errors.email && (
-                      <p className="text-xs text-red-500">
+                      <p className={errorClass}>
                         {errors.email.message}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Categoría *
+                <div>
+                  <label className={labelClass}>
+                    Categoría <span className="text-red-500">*</span>
                   </label>
                   <select
                     {...register('categoriaId', {
@@ -189,7 +183,7 @@ export default function AdminCreateHotelForm() {
                     })}
                     value={watch('categoriaId') || ''}
                     disabled={loading || isSubmitting}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all shadow-sm"
+                    className={inputClass(errors.categoriaId)}
                   >
                     <option value="">
                       {loading
@@ -203,7 +197,7 @@ export default function AdminCreateHotelForm() {
                     ))}
                   </select>
                   {errors.categoriaId && (
-                    <p className="text-xs text-red-500">
+                    <p className={errorClass}>
                       {errors.categoriaId.message}
                     </p>
                   )}
@@ -243,7 +237,7 @@ export default function AdminCreateHotelForm() {
             </div>
 
             {/* Footer de Acciones */}
-            <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+            <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -256,7 +250,7 @@ export default function AdminCreateHotelForm() {
               <button
                 type="submit"
                 disabled={loading || isSubmitting}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 text-white"
               >
                 {isSubmitting ? (
                   <>

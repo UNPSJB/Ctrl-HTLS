@@ -153,66 +153,65 @@ const ClientesForm = () => {
                 </div>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col">
                 {loadingData ? (
-                    <div className="flex-1 flex items-center justify-center p-12">
+                    <div className="flex-1 flex items-center justify-center p-6">
                         <InnerLoading message="Cargando perfil del cliente..." />
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit(onSubmit)} className="p-6 flex-1 flex flex-col">
-                        <div className="flex-1 space-y-6 animate-in fade-in duration-500">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1 flex flex-col">
+                        <div>
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div>
-                                    <label htmlFor="nombre" className={labelClass}>Nombre *</label>
+                                    <label className={labelClass}>
+                                        Nombre <span className="text-red-500">*</span>
+                                    </label>
                                     <input
                                         type="text"
-                                        id="nombre"
                                         {...register('nombre', { required: 'El nombre es obligatorio' })}
-                                        placeholder="Ej: Juan"
+                                        placeholder="Ej: Juan Carlos"
                                         className={inputClass(errors.nombre)}
                                     />
                                     {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label htmlFor="apellido" className={labelClass}>Apellido *</label>
+                                    <label className={labelClass}>
+                                        Apellido <span className="text-red-500">*</span>
+                                    </label>
                                     <input
                                         type="text"
-                                        id="apellido"
                                         {...register('apellido', { required: 'El apellido es obligatorio' })}
-                                        placeholder="Ej: Pérez"
+                                        placeholder="Ej: García López"
                                         className={inputClass(errors.apellido)}
                                     />
                                     {errors.apellido && <p className={errorClass}>{errors.apellido.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label htmlFor="tipoDocumento" className={labelClass}>Tipo de Documento *</label>
-                                    <div className="relative">
-                                        <select
-                                            id="tipoDocumento"
-                                            {...register('tipoDocumento', { onChange: handleTipoChange })}
-                                            className={`${inputClass(errors.tipoDocumento)} appearance-none`}
-                                        >
-                                            {tiposDocumento.map((tipo) => (
-                                                <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
-                                            ))}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                                            <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                                                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                                            </svg>
-                                        </div>
-                                    </div>
+                                    <label className={labelClass}>
+                                        Tipo de Documento <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        {...register('tipoDocumento', { onChange: handleTipoChange })}
+                                        className={inputClass(errors.tipoDocumento)}
+                                    >
+                                        {tiposDocumento.map((tipo) => (
+                                            <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
+                                        ))}
+                                    </select>
+                                    {errors.tipoDocumento && <p className={errorClass}>{errors.tipoDocumento.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label htmlFor="numeroDocumento" className={labelClass}>Número de Documento *</label>
+                                    <label className={labelClass}>
+                                        Número de Documento <span className="text-red-500">*</span>
+                                    </label>
                                     <input
                                         type="text"
-                                        id="numeroDocumento"
                                         {...register('numeroDocumento', {
                                             required: 'El documento es obligatorio',
+                                            minLength: { value: 7, message: 'Mínimo 7 caracteres' },
                                             onChange: handleDocumentoChange
                                         })}
                                         placeholder={tipoDocumento === 'pasaporte' ? 'Ej: A1234567' : 'Ej: 12345678'}
@@ -223,10 +222,11 @@ const ClientesForm = () => {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="email" className={labelClass}>Correo Electrónico *</label>
+                                    <label className={labelClass}>
+                                        Email <span className="text-red-500">*</span>
+                                    </label>
                                     <input
                                         type="email"
-                                        id="email"
                                         {...register('email', {
                                             required: 'El email es obligatorio',
                                             pattern: {
@@ -234,19 +234,18 @@ const ClientesForm = () => {
                                                 message: 'Email inválido'
                                             }
                                         })}
-                                        placeholder="juan@ejemplo.com"
+                                        placeholder="hotel@ejemplo.com"
                                         className={inputClass(errors.email)}
                                     />
                                     {errors.email && <p className={errorClass}>{errors.email.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label htmlFor="telefono" className={labelClass}>Teléfono</label>
+                                    <label className={labelClass}>Teléfono</label>
                                     <input
                                         type="text"
-                                        id="telefono"
                                         {...register('telefono', { onChange: handleTelefonoChange })}
-                                        placeholder="Ej: 1123456789"
+                                        placeholder="Ej: 3811234567"
                                         className={inputClass(errors.telefono)}
                                     />
                                 </div>
@@ -254,7 +253,7 @@ const ClientesForm = () => {
                         </div>
 
                         {/* Botones de Acción */}
-                        <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+                        <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
                             <button
                                 type="button"
                                 onClick={handleCancel}

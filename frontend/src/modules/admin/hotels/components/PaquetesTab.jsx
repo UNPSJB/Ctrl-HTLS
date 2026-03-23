@@ -71,6 +71,11 @@ export default function PaquetesTab({ hotelId }) {
     }
   };
 
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-sm md:text-base text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
+
+  const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
 
   return (
     <div className="animate-in fade-in space-y-8 duration-500">
@@ -98,46 +103,46 @@ export default function PaquetesTab({ hotelId }) {
         <div className="animate-in slide-in-from-top-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-6 duration-300 dark:border-blue-900/20 dark:bg-blue-900/10">
           <form onSubmit={handleSubmit(handleCreatePaquete)} className="space-y-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-              <div className="space-y-2 md:col-span-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Nombre del Paquete</label>
+              <div className="md:col-span-1">
+                <label className={labelClass}>Nombre del Paquete</label>
                 <input
                   type="text"
                   placeholder="Ej: Finde Romántico"
                   {...register('nombre', { required: 'Requerido' })}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className={inputClass(errors.nombre)}
                 />
-                {errors.nombre && <p className="text-xs text-red-500">{errors.nombre.message}</p>}
+                {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Desde</label>
+              <div>
+                <label className={labelClass}>Desde</label>
                 <input
                   type="date"
                   min={new Date().toISOString().split('T')[0]}
                   {...register('fecha_inicio', { required: 'Requerido' })}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className={inputClass(errors.fecha_inicio)}
                 />
-                {errors.fecha_inicio && <p className="text-xs text-red-500">{errors.fecha_inicio.message}</p>}
+                {errors.fecha_inicio && <p className={errorClass}>{errors.fecha_inicio.message}</p>}
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Hasta</label>
+              <div>
+                <label className={labelClass}>Hasta</label>
                 <input
                   type="date"
                   min={fechaInicio || new Date().toISOString().split('T')[0]}
                   {...register('fecha_fin', { required: 'Requerido' })}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className={inputClass(errors.fecha_fin)}
                 />
-                {errors.fecha_fin && <p className="text-xs text-red-500">{errors.fecha_fin.message}</p>}
+                {errors.fecha_fin && <p className={errorClass}>{errors.fecha_fin.message}</p>}
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Descuento (%)</label>
+              <div>
+                <label className={labelClass}>Descuento (%)</label>
                 <input
                   type="number"
                   step="0.01"
                   placeholder="Ej: 20.00"
                   {...register('coeficiente_descuento', { required: 'Requerido', min: 0.1, max: 100 })}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className={inputClass(errors.coeficiente_descuento)}
                 />
-                {errors.coeficiente_descuento && <p className="text-xs text-red-500">Valor inválido</p>}
+                {errors.coeficiente_descuento && <p className={errorClass}>Valor inválido</p>}
               </div>
             </div>
 
@@ -188,13 +193,18 @@ export default function PaquetesTab({ hotelId }) {
               </div>
             </div>
 
-            <div className="flex justify-end pt-4">
+            <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
               <button
                 type="submit"
                 disabled={loadingAction}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 disabled:opacity-50"
               >
-                {loadingAction ? 'Guardando...' : 'Crear Paquete'}
+                {loadingAction ? (
+                   <>
+                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                   Guardando...
+                 </>
+                ) : 'Crear Paquete'}
               </button>
             </div>
           </form>

@@ -59,6 +59,12 @@ export default function TemporadasSection({ hotelId }) {
     }
   };
 
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-sm md:text-base text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
+
+  const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+
   return (
     <section className="animate-in fade-in duration-300 space-y-6">
       {/* Encabezado + botón */}
@@ -87,48 +93,48 @@ export default function TemporadasSection({ hotelId }) {
         <div className="animate-in slide-in-from-top-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-6 duration-300 dark:border-blue-900/20 dark:bg-blue-900/10">
           <form
             onSubmit={form.handleSubmit(handleAdd)}
-            className="grid grid-cols-1 gap-6 md:grid-cols-4"
+            className="grid grid-cols-1 gap-6 md:grid-cols-4 items-end"
           >
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Tipo</label>
+            <div>
+              <label className={labelClass}>Tipo</label>
               <select
                 {...form.register('tipo', { required: true })}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass()}
               >
                 <option value="alta">Temporada Alta (+)</option>
                 <option value="baja">Temporada Baja (-)</option>
               </select>
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Inicio</label>
+            <div>
+              <label className={labelClass}>Inicio</label>
               <input
                 type="date"
                 {...form.register('fechaInicio', { required: true })}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass()}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Fin</label>
+            <div>
+              <label className={labelClass}>Fin</label>
               <input
                 type="date"
                 {...form.register('fechaFin', { required: true })}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass()}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Ajuste (%)</label>
+            <div>
+              <label className={labelClass}>Ajuste (%)</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   step="0.01"
                   placeholder="Ej: 15.00"
                   {...form.register('porcentaje', { required: true, min: 0 })}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className={inputClass()}
                 />
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-blue-600 p-2.5 text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 disabled:opacity-50"
+                  className="rounded-lg bg-blue-600 p-3 text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 disabled:opacity-50"
                 >
                   <Plus className="h-5 w-5" />
                 </button>

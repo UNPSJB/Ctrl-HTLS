@@ -140,9 +140,9 @@ const AdministradoresForm = () => {
     const handleCancel = () => navigate('/admin/personal/administradores');
 
     const inputClass = (error) =>
-        `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all`;
-    const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+        `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
     const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+    const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
 
     return (
         <div className="space-y-6">
@@ -184,7 +184,7 @@ const AdministradoresForm = () => {
 
                 {/* Formulario Prinicipal */}
                 <div className="flex-1 w-full min-w-0">
-                    <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
+                    <form onSubmit={handleSubmit(onSubmit)} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[400px] flex flex-col">
 
                         {loadingData ? (
                             <InnerLoading message="Consultando privilegios..." />
@@ -195,7 +195,9 @@ const AdministradoresForm = () => {
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Identidad Administrativa</h3>
                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                             <div>
-                                                <label htmlFor="nombre" className={labelClass}>Nombres Completos *</label>
+                                                <label htmlFor="nombre" className={labelClass}>
+                                                    Nombres Completos <span className="text-red-500">*</span>
+                                                </label>
                                                 <input
                                                     type="text"
                                                     id="nombre"
@@ -206,7 +208,9 @@ const AdministradoresForm = () => {
                                                 {errors.nombre && <p className={errorClass}>{errors.nombre.message}</p>}
                                             </div>
                                             <div>
-                                                <label htmlFor="apellido" className={labelClass}>Apellidos *</label>
+                                                <label htmlFor="apellido" className={labelClass}>
+                                                    Apellidos <span className="text-red-500">*</span>
+                                                </label>
                                                 <input
                                                     type="text"
                                                     id="apellido"
@@ -217,7 +221,9 @@ const AdministradoresForm = () => {
                                                 {errors.apellido && <p className={errorClass}>{errors.apellido.message}</p>}
                                             </div>
                                             <div>
-                                                <label htmlFor="tipoDocumento" className={labelClass}>Identificación *</label>
+                                                <label htmlFor="tipoDocumento" className={labelClass}>
+                                                    Identificación <span className="text-red-500">*</span>
+                                                </label>
                                                 <select
                                                     id="tipoDocumento"
                                                     {...register('tipoDocumento', { onChange: handleTipoChange })}
@@ -227,12 +233,15 @@ const AdministradoresForm = () => {
                                                 </select>
                                             </div>
                                             <div>
-                                                <label htmlFor="numeroDocumento" className={labelClass}>Nº de Documento *</label>
+                                                <label htmlFor="numeroDocumento" className={labelClass}>
+                                                    Nº de Documento <span className="text-red-500">*</span>
+                                                </label>
                                                 <input
                                                     type="text"
                                                     id="numeroDocumento"
                                                     {...register('numeroDocumento', {
                                                         required: 'El documento es obligatorio',
+                                                        minLength: { value: 7, message: 'Mínimo 7 caracteres' },
                                                         onChange: handleDocumentoChange
                                                     })}
                                                     className={inputClass(errors.numeroDocumento)}
@@ -250,7 +259,9 @@ const AdministradoresForm = () => {
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación Geográfica</h3>
                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                             <div>
-                                                <label htmlFor="email" className={labelClass}>Email Corporativo *</label>
+                                                <label htmlFor="email" className={labelClass}>
+                                                    Email Corporativo <span className="text-red-500">*</span>
+                                                </label>
                                                 <input
                                                     type="email"
                                                     id="email"
@@ -277,7 +288,9 @@ const AdministradoresForm = () => {
                                                 />
                                             </div>
                                             <div className="col-span-full">
-                                                <label htmlFor="direccion" className={labelClass}>Residencia Física *</label>
+                                                <label htmlFor="direccion" className={labelClass}>
+                                                    Residencia Física <span className="text-red-500">*</span>
+                                                </label>
                                                 <input
                                                     type="text"
                                                     id="direccion"
@@ -303,25 +316,29 @@ const AdministradoresForm = () => {
                                             <Lock className="h-5 w-5 text-gray-500" />
                                             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Credenciales de Acceso</h3>
                                         </div>
-                                        <div className="max-w-md">
-                                            <label htmlFor="password" className={labelClass}>{isEditing ? 'Reestablecer Contraseña (opcional)' : 'Nueva Contraseña *'}</label>
-                                            <input
-                                                type="password"
-                                                id="password"
-                                                {...register('password', {
-                                                    required: !isEditing ? 'La contraseña es obligatoria' : false,
-                                                    minLength: { value: 6, message: 'Mínimo 6 caracteres' }
-                                                })}
-                                                placeholder="••••••••"
-                                                className={inputClass(errors.password)}
-                                            />
-                                            {errors.password && <p className={errorClass}>{errors.password.message}</p>}
-                                            <p className="mt-3 text-[11px] text-gray-500 italic flex items-center gap-1.5">
-                                                <ShieldCheck className="w-3 h-3" />
-                                                {isEditing
-                                                    ? 'Complete solo si desea cambiar la clave actual de este administrador.'
-                                                    : 'Se recomienda usar una mezcla de letras, números y símbolos.'}
-                                            </p>
+                                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                            <div>
+                                                <label htmlFor="password" className={labelClass}>
+                                                    {isEditing ? 'Reestablecer Contraseña (opcional)' : 'Nueva Contraseña'} {!isEditing && <span className="text-red-500">*</span>}
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    id="password"
+                                                    {...register('password', {
+                                                        required: !isEditing ? 'La contraseña es obligatoria' : false,
+                                                        minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+                                                    })}
+                                                    placeholder="••••••••"
+                                                    className={inputClass(errors.password)}
+                                                />
+                                                {errors.password && <p className={errorClass}>{errors.password.message}</p>}
+                                                <p className="mt-3 text-[11px] text-gray-500 italic flex items-center gap-1.5">
+                                                    <ShieldCheck className="w-3 h-3" />
+                                                    {isEditing
+                                                        ? 'Complete solo si desea cambiar la clave actual de este administrador.'
+                                                        : 'Se recomienda usar una mezcla de letras, números y símbolos.'}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 )}

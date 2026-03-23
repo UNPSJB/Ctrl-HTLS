@@ -114,6 +114,11 @@ export default function PersonalAsignadoTab({ hotelId }) {
     );
   });
 
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
+
+  const labelClass = 'mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase text-gray-700 dark:text-gray-300';
+
   return (
     <div className="animate-in fade-in space-y-8 duration-300">
       {/* Encabezado */}
@@ -171,7 +176,7 @@ export default function PersonalAsignadoTab({ hotelId }) {
                 placeholder="Buscar por DNI, Nombre o Email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-blue-200 bg-white px-11 py-3 text-sm outline-none transition-all focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={`${inputClass()} pl-11`}
               />
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 

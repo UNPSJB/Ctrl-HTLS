@@ -20,6 +20,11 @@ export default function AjustesGeneralesTab({
   const [activeSubTab, setActiveSubTab] = useState('general');
   const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
 
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all`;
+  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+
   const form = useForm({
     defaultValues: {
       nombre: '',
@@ -164,33 +169,33 @@ export default function AjustesGeneralesTab({
         {activeSubTab === 'general' && (
         <div className="animate-in fade-in duration-300">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Nombre del Hotel *
+            <div>
+              <label className={labelClass}>
+                Nombre del Hotel <span className="text-red-500">*</span>
               </label>
               <input
                 {...register('nombre', {
                   required: 'El nombre es obligatorio',
                 })}
-                className="w-full rounded-md border px-3 py-2 outline-none transition-all focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass(errors.nombre)}
                 placeholder="Ej: Hotel Paradise Resort"
               />
               {errors.nombre && (
-                <span className="text-xs text-red-500">
+                <p className={errorClass}>
                   {errors.nombre.message}
-                </span>
+                </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Categoría *
+            <div>
+              <label className={labelClass}>
+                Categoría <span className="text-red-500">*</span>
               </label>
               <select
                 {...register('categoriaId', {
                   required: 'Seleccione una categoría',
                 })}
-                className="w-full rounded-md border px-3 py-2 outline-none transition-all focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass(errors.categoriaId)}
               >
                 <option value="">Seleccionar...</option>
                 {categorias?.map((c) => (
@@ -200,44 +205,44 @@ export default function AjustesGeneralesTab({
                 ))}
               </select>
               {errors.categoriaId && (
-                <span className="text-xs text-red-500">
+                <p className={errorClass}>
                   {errors.categoriaId.message}
-                </span>
+                </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Teléfono *
+            <div>
+              <label className={labelClass}>
+                Teléfono <span className="text-red-500">*</span>
               </label>
               <input
                 {...register('telefono', {
                   required: 'El teléfono es obligatorio',
                 })}
-                className="w-full rounded-md border px-3 py-2 outline-none transition-all focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass(errors.telefono)}
                 placeholder="+54 ..."
               />
               {errors.telefono && (
-                <span className="text-xs text-red-500">
+                <p className={errorClass}>
                   {errors.telefono.message}
-                </span>
+                </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email *
+            <div>
+              <label className={labelClass}>
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
                 {...register('email', { required: 'El email es obligatorio' })}
-                className="w-full rounded-md border px-3 py-2 outline-none transition-all focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass(errors.email)}
                 placeholder="hotel@ejemplo.com"
               />
               {errors.email && (
-                <span className="text-xs text-red-500">
+                <p className={errorClass}>
                   {errors.email.message}
-                </span>
+                </p>
               )}
             </div>
           </div>
@@ -262,21 +267,21 @@ export default function AjustesGeneralesTab({
         {activeSubTab === 'ubicacion' && (
         <div className="animate-in fade-in duration-300">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Dirección *
+            <div>
+              <label className={labelClass}>
+                Dirección <span className="text-red-500">*</span>
               </label>
               <input
                 {...register('direccion', {
                   required: 'La dirección es obligatoria',
                 })}
-                className="w-full rounded-md border px-3 py-2 outline-none transition-all focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className={inputClass(errors.direccion)}
                 placeholder="Calle, Número, Piso..."
               />
               {errors.direccion && (
-                <span className="text-xs text-red-500">
+                <p className={errorClass}>
                   {errors.direccion.message}
-                </span>
+                </p>
               )}
             </div>
 

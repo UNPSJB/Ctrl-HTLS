@@ -180,6 +180,12 @@ export default function HabitacionesTab({
         tarifasAsignadas.some((ta) => ta.tipoHabitacionId === t.id)
       );
 
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 transition-all shadow-sm`;
+
+  const labelClass = 'mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase text-gray-700 dark:text-gray-300';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+
   return (
     <div className="animate-in fade-in space-y-6 duration-300">
       {/* Encabezado con estadísticas rápidas o descripción */}
@@ -223,51 +229,51 @@ export default function HabitacionesTab({
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="grid grid-cols-1 gap-6 md:grid-cols-4"
+            className="grid grid-cols-1 gap-6 md:grid-cols-4 items-start"
           >
-            <div className="space-y-2">
-              <label className="flex items-center gap-1.5 text-xs font-bold uppercase text-gray-700 dark:text-gray-300">
-                <Hash className="h-3 w-3" /> Número
+            <div>
+              <label className={labelClass}>
+                <Hash className="h-3.5 w-3.5 text-blue-500" /> Número
               </label>
               <input
                 type="number"
                 {...register('numero', { required: 'Campo obligatorio' })}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                className={inputClass(errors.numero)}
                 placeholder="Ej: 101"
               />
               {errors.numero && (
-                <span className="text-xs text-red-500">
+                <p className={errorClass}>
                   {errors.numero.message}
-                </span>
+                </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <label className="flex items-center gap-1.5 text-xs font-bold uppercase text-gray-700 dark:text-gray-300">
-                <Layers className="h-3 w-3" /> Piso
+            <div>
+              <label className={labelClass}>
+                <Layers className="h-3.5 w-3.5 text-blue-500" /> Piso
               </label>
               <input
                 type="number"
                 {...register('piso', { required: 'Campo obligatorio' })}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                className={inputClass(errors.piso)}
                 placeholder="Ej: 1"
               />
               {errors.piso && (
-                <span className="text-xs text-red-500">
+                <p className={errorClass}>
                   {errors.piso.message}
-                </span>
+                </p>
               )}
             </div>
 
-            <div className="space-y-2 md:col-span-1">
-              <label className="flex items-center gap-1.5 text-xs font-bold uppercase text-gray-700 dark:text-gray-300">
-                < Bed className="h-3 w-3" /> Tipo
+            <div className="md:col-span-1">
+              <label className={labelClass}>
+                <Bed className="h-3.5 w-3.5 text-blue-500" /> Tipo
               </label>
               <select
                 {...register('tipoHabitacionId', {
                   required: 'Campo obligatorio',
                 })}
-                className="w-full appearance-none rounded-lg border border-gray-200 bg-right bg-no-repeat px-4 py-2 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                className={inputClass(errors.tipoHabitacionId)}
               >
                 <option value="">Seleccione tipo...</option>
                 {tiposFiltrados.map((t) => (
@@ -277,19 +283,16 @@ export default function HabitacionesTab({
                 ))}
               </select>
               {errors.tipoHabitacionId && (
-                <span className="text-xs text-red-500">
+                <p className={errorClass}>
                   {errors.tipoHabitacionId.message}
-                </span>
+                </p>
               )}
             </div>
 
-            <div className="flex flex-col justify-end space-y-2">
-              <label className="hidden text-xs font-bold opacity-0 md:block">
-                Acción
-              </label>
+            <div className="flex flex-col h-full pt-[21px]">
               <button
                 type="submit"
-                className="flex h-[42px] w-full items-center justify-center gap-2 rounded-lg bg-blue-600 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95"
+                className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95"
               >
                 <Plus className="h-4 w-4" />
                 {editingId ? 'Guardar' : 'Registrar'}

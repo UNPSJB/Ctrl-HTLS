@@ -91,28 +91,22 @@ const EncargadosForm = () => {
                     onClick={handleCancel}
                     className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700 transition-colors"
                 >
-                    <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                    <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                 </button>
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                         Registrar Nuevo Encargado
                     </h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                         El encargado quedará disponible para ser asignado posteriormente a un hotel.
                     </p>
                 </div>
             </div>
 
             {/* Contenedor del Formulario */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    {/* Columna Principal - Datos Personales */}
-                    <div className="lg:col-span-2 space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                        <div className="border-b border-gray-100 pb-4 dark:border-gray-700 flex items-center gap-2">
-                            <UserCog className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h2>
-                        </div>
-
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1 flex flex-col">
+                    <div>
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label className={labelClass}>
@@ -174,73 +168,65 @@ const EncargadosForm = () => {
                                     className={inputClass(errors.numeroDocumento)}
                                     {...register('numeroDocumento', {
                                         required: 'El documento es obligatorio',
-                                        minLength: { value: 6, message: 'Documento muy corto' },
+                                        minLength: { value: 7, message: 'Mínimo 7 caracteres' },
                                         maxLength: { value: 15, message: 'Documento muy largo' }
                                     })}
                                     onChange={handleDocumentoChange}
                                 />
                                 {errors.numeroDocumento && <p className={errorClass}>{errors.numeroDocumento.message}</p>}
                             </div>
+
+                            <div>
+                                <label className={labelClass}>Teléfono</label>
+                                <input
+                                    type="tel"
+                                    placeholder="Ej: 3811234567"
+                                    className={inputClass(errors.telefono)}
+                                    {...register('telefono', {
+                                        pattern: {
+                                            value: /^[0-9]*$/,
+                                            message: 'Solo se permiten números'
+                                        }
+                                    })}
+                                    onChange={handleTelefonoChange}
+                                />
+                                {errors.telefono && <p className={errorClass}>{errors.telefono.message}</p>}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Columna Secundaria - Info Adicional */}
-                    <div className="space-y-6">
-                        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                            <div className="border-b border-gray-100 pb-4 mb-4 dark:border-gray-700">
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Contacto</h2>
-                            </div>
-                            
-                            <div className="space-y-4">
-                                <div>
-                                    <label className={labelClass}>Teléfono</label>
-                                    <input
-                                        type="tel"
-                                        placeholder="Ej: 3811234567"
-                                        className={inputClass(errors.telefono)}
-                                        {...register('telefono', {
-                                            pattern: {
-                                                value: /^[0-9]*$/,
-                                                message: 'Solo se permiten números'
-                                            }
-                                        })}
-                                        onChange={handleTelefonoChange}
-                                    />
-                                    {errors.telefono && <p className={errorClass}>{errors.telefono.message}</p>}
-                                </div>
-                            </div>
-                        </div>
+                    {/* Botones de Acción */}
+                    <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={loading}
+                            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                            <X className="h-4 w-4" />
+                            Cancelar
+                        </button>
 
-                        {/* Caja de Acciones Rápidas */}
-                        <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                            <button
-                                type="submit"
-                                disabled={loading || !isValid}
-                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:focus:ring-offset-gray-900"
-                            >
-                                {loading ? (
-                                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                ) : (
-                                    <>
-                                        <Save className="h-4 w-4" />
-                                        Registrar Encargado
-                                    </>
-                                )}
-                            </button>
-                            
-                            <button
-                                type="button"
-                                onClick={handleCancel}
-                                disabled={loading}
-                                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                            >
-                                <X className="h-4 w-4" />
-                                Cancelar
-                            </button>
-                        </div>
+                        <button
+                            type="submit"
+                            disabled={loading || !isValid}
+                            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    Registrando...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="h-4 w-4" />
+                                    Registrar Encargado
+                                </>
+                            )}
+                        </button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     );
 };

@@ -9,16 +9,25 @@ const tiposDocumento = [
 
 // Sección del formulario para capturar datos del encargado del hotel
 const EncargadoForm = ({ register, errors, loading }) => {
-  return (
-    <div className="space-y-4">
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm`;
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label
-            htmlFor="encargadoNombre"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Nombre *
+  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-700">
+        <div className="h-4 w-1 rounded-full bg-blue-600"></div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Información del Encargado Administrador
+        </h3>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label htmlFor="encargadoNombre" className={labelClass}>
+            Nombre <span className="text-red-500">*</span>
           </label>
           <input
             id="encargadoNombre"
@@ -32,22 +41,18 @@ const EncargadoForm = ({ register, errors, loading }) => {
                 message: 'El nombre debe tener al menos 2 caracteres',
               },
             })}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.encargadoNombre ? 'border-red-500' : 'border-gray-300'
-              } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
+            className={inputClass(errors.encargadoNombre)}
           />
           {errors.encargadoNombre && (
-            <p className="text-red-500 text-sm">
+            <p className={errorClass}>
               {errors.encargadoNombre.message}
             </p>
           )}
         </div>
 
-        <div className="space-y-2">
-          <label
-            htmlFor="encargadoApellido"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Apellido *
+        <div>
+          <label htmlFor="encargadoApellido" className={labelClass}>
+            Apellido <span className="text-red-500">*</span>
           </label>
           <input
             id="encargadoApellido"
@@ -61,31 +66,27 @@ const EncargadoForm = ({ register, errors, loading }) => {
                 message: 'El apellido debe tener al menos 2 caracteres',
               },
             })}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.encargadoApellido ? 'border-red-500' : 'border-gray-300'
-              } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
+            className={inputClass(errors.encargadoApellido)}
           />
           {errors.encargadoApellido && (
-            <p className="text-red-500 text-sm">
+            <p className={errorClass}>
               {errors.encargadoApellido.message}
             </p>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Tipo de Documento *
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className={labelClass}>
+            Tipo de Documento <span className="text-red-500">*</span>
           </label>
           <select
             {...register('encargadoTipoDocumento', {
               required: 'El tipo de documento es obligatorio',
             })}
             disabled={loading}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.encargadoTipoDocumento
-              ? 'border-red-500'
-              : 'border-gray-300'
-              } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
+            className={inputClass(errors.encargadoTipoDocumento)}
           >
             <option value="">Seleccionar tipo de documento</option>
             {tiposDocumento.map((tipo) => (
@@ -95,18 +96,15 @@ const EncargadoForm = ({ register, errors, loading }) => {
             ))}
           </select>
           {errors.encargadoTipoDocumento && (
-            <p className="text-red-500 text-sm">
+            <p className={errorClass}>
               {errors.encargadoTipoDocumento.message}
             </p>
           )}
         </div>
 
-        <div className="space-y-2">
-          <label
-            htmlFor="encargadoNumeroDocumento"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Número de Documento *
+        <div>
+          <label htmlFor="encargadoNumeroDocumento" className={labelClass}>
+            Número de Documento <span className="text-red-500">*</span>
           </label>
           <input
             id="encargadoNumeroDocumento"
@@ -126,13 +124,10 @@ const EncargadoForm = ({ register, errors, loading }) => {
                   'El número de documento debe tener al menos 6 caracteres',
               },
             })}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.encargadoNumeroDocumento
-              ? 'border-red-500'
-              : 'border-gray-300'
-              } ${loading ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
+            className={inputClass(errors.encargadoNumeroDocumento)}
           />
           {errors.encargadoNumeroDocumento && (
-            <p className="text-red-500 text-sm">
+            <p className={errorClass}>
               {errors.encargadoNumeroDocumento.message}
             </p>
           )}

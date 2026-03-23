@@ -64,105 +64,109 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
     setValue('ciudadId', value);
   };
 
+  const inputClass = (error, disabled) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-200'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all shadow-sm ${disabled ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-800 opacity-60' : ''}`;
+
+  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+
   return (
     <>
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            País *
-          </label>
-          <select
-            {...register('paisId', { required: 'Debe seleccionar un país' })}
-            value={paisId}
-            onChange={(e) => handlePaisChangeInternal(e.target.value)}
-            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.paisId ? 'border-red-500' : 'border-gray-300'
-              }`}
-          >
-            <option value="">Seleccionar país</option>
-            {(paises || []).map((pais) => (
-              <option key={pais.id} value={pais.id.toString()}>
-                {pais.nombre}
-              </option>
-            ))}
-          </select>
-          {errors.paisId && (
-            <p className="text-sm text-red-500">{errors.paisId.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Provincia/Estado *
-          </label>
-          <select
-            {...register('provinciaId', {
-              required: 'Debe seleccionar una provincia',
-            })}
-            value={provinciaId}
-            onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
-            disabled={isProvinciasDisabled}
-            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.provinciaId ? 'border-red-500' : 'border-gray-300'
-              } ${isProvinciasDisabled ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : ''}`}
-          >
-            <option value="">
-              {paisId ? 'Seleccionar provincia' : 'Primero seleccione un país'}
+      <div>
+        <label className={labelClass}>
+          País <span className="text-red-500">*</span>
+        </label>
+        <select
+          {...register('paisId', { required: 'Debe seleccionar un país' })}
+          value={paisId}
+          onChange={(e) => handlePaisChangeInternal(e.target.value)}
+          className={inputClass(errors.paisId)}
+        >
+          <option value="">Seleccionar país</option>
+          {(paises || []).map((pais) => (
+            <option key={pais.id} value={pais.id.toString()}>
+              {pais.nombre}
             </option>
-            {(provincias || []).map((provincia) => (
-              <option key={provincia.id} value={provincia.id.toString()}>
-                {provincia.nombre}
-              </option>
-            ))}
-          </select>
-          {errors.provinciaId && (
-            <p className="text-sm text-red-500">{errors.provinciaId.message}</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Ciudad *
-          </label>
-          <select
-            {...register('ciudadId', {
-              required: 'Debe seleccionar una ciudad',
-            })}
-            value={ciudadId}
-            onChange={(e) => handleCiudadChangeInternal(e.target.value)}
-            disabled={isCiudadesDisabled}
-            className={`w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.ciudadId ? 'border-red-500' : 'border-gray-300'
-              } ${isCiudadesDisabled ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : ''}`}
-          >
-            <option value="">
-              {provinciaId
-                ? 'Seleccionar ciudad'
-                : 'Primero seleccione una provincia'}
-            </option>
-            {(ciudades || []).map((ciudad) => (
-              <option key={ciudad.id} value={ciudad.id.toString()}>
-                {ciudad.nombre}
-              </option>
-            ))}
-          </select>
-          {errors.ciudadId && (
-            <p className="text-sm text-red-500">{errors.ciudadId.message}</p>
-          )}
-        </div>
+          ))}
+        </select>
+        {errors.paisId && (
+          <p className={errorClass}>{errors.paisId.message}</p>
+        )}
+      </div>
 
-        {/* Redirección a Gestión de Ubicaciones */}
-        <div className="col-span-full mt-2 flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-800 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-300">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
-            <MapPin className="h-4 w-4" />
-          </div>
-          <p>
-            ¿No encuentras la ubicación que buscas?{' '}
-            <a
-              href="/admin/ubicacion"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-blue-700 underline transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Gestionar ubicaciones aquí
-            </a>
-          </p>
+      <div>
+        <label className={labelClass}>
+          Provincia/Estado <span className="text-red-500">*</span>
+        </label>
+        <select
+          {...register('provinciaId', {
+            required: 'Debe seleccionar una provincia',
+          })}
+          value={provinciaId}
+          onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
+          disabled={isProvinciasDisabled}
+          className={inputClass(errors.provinciaId, isProvinciasDisabled)}
+        >
+          <option value="">
+            {paisId ? 'Seleccionar provincia' : 'Primero seleccione un país'}
+          </option>
+          {(provincias || []).map((provincia) => (
+            <option key={provincia.id} value={provincia.id.toString()}>
+              {provincia.nombre}
+            </option>
+          ))}
+        </select>
+        {errors.provinciaId && (
+          <p className={errorClass}>{errors.provinciaId.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label className={labelClass}>
+          Ciudad <span className="text-red-500">*</span>
+        </label>
+        <select
+          {...register('ciudadId', {
+            required: 'Debe seleccionar una ciudad',
+          })}
+          value={ciudadId}
+          onChange={(e) => handleCiudadChangeInternal(e.target.value)}
+          disabled={isCiudadesDisabled}
+          className={inputClass(errors.ciudadId, isCiudadesDisabled)}
+        >
+          <option value="">
+            {provinciaId
+              ? 'Seleccionar ciudad'
+              : 'Primero seleccione una provincia'}
+          </option>
+          {(ciudades || []).map((ciudad) => (
+            <option key={ciudad.id} value={ciudad.id.toString()}>
+              {ciudad.nombre}
+            </option>
+          ))}
+        </select>
+        {errors.ciudadId && (
+          <p className={errorClass}>{errors.ciudadId.message}</p>
+        )}
+      </div>
+
+      {/* Redirección a Gestión de Ubicaciones */}
+      <div className="col-span-full mt-2 flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-800 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-300">
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
+          <MapPin className="h-4 w-4" />
         </div>
+        <p>
+          ¿No encuentras la ubicación que buscas?{' '}
+          <a
+            href="/admin/ubicacion"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-blue-700 underline transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            Gestionar ubicaciones aquí
+          </a>
+        </p>
+      </div>
     </>
   );
 };

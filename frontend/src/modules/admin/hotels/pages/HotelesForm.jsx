@@ -149,29 +149,35 @@ export default function HotelesForm() {
     }
   };
 
+  const inputClass = (error) =>
+    `w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2.5 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 transition-all`;
+
+  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300';
+  const errorClass = 'mt-1 text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1';
+
   const renderGeneralTab = () => (
     <div className="animate-in fade-in grid grid-cols-1 gap-6 duration-300 md:grid-cols-2">
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Nombre del Hotel *
+      <div>
+        <label className={labelClass}>
+          Nombre del Hotel <span className="text-red-500">*</span>
         </label>
         <input
           {...register('nombre', { required: 'El nombre es obligatorio' })}
-          className="w-full rounded-md border px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+          className={inputClass(errors.nombre)}
           placeholder="Ej: Hotel Paradise Resort"
         />
         {errors.nombre && (
-          <span className="text-xs text-red-500">{errors.nombre.message}</span>
+          <p className={errorClass}>{errors.nombre.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Categoría *
+      <div>
+        <label className={labelClass}>
+          Categoría <span className="text-red-500">*</span>
         </label>
         <select
           {...register('categoriaId', { required: 'Seleccione una categoría' })}
-          className="w-full rounded-md border px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+          className={inputClass(errors.categoriaId)}
         >
           <option value="">Seleccionar...</option>
           {categorias?.map((c) => (
@@ -181,40 +187,40 @@ export default function HotelesForm() {
           ))}
         </select>
         {errors.categoriaId && (
-          <span className="text-xs text-red-500">
+          <p className={errorClass}>
             {errors.categoriaId.message}
-          </span>
+          </p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Teléfono *
+      <div>
+        <label className={labelClass}>
+          Teléfono <span className="text-red-500">*</span>
         </label>
         <input
           {...register('telefono', { required: 'El teléfono es obligatorio' })}
-          className="w-full rounded-md border px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-          placeholder="+54 ..."
+          className={inputClass(errors.telefono)}
+          placeholder="Ej: +54 376 4123456"
         />
         {errors.telefono && (
-          <span className="text-xs text-red-500">
+          <p className={errorClass}>
             {errors.telefono.message}
-          </span>
+          </p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Email *
+      <div>
+        <label className={labelClass}>
+          Email <span className="text-red-500">*</span>
         </label>
         <input
           type="email"
           {...register('email', { required: 'El email es obligatorio' })}
-          className="w-full rounded-md border px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+          className={inputClass(errors.email)}
           placeholder="hotel@ejemplo.com"
         />
         {errors.email && (
-          <span className="text-xs text-red-500">{errors.email.message}</span>
+          <p className={errorClass}>{errors.email.message}</p>
         )}
       </div>
     </div>
@@ -268,7 +274,7 @@ export default function HotelesForm() {
         <main className="flex-1 w-full min-w-0">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="flex min-h-[400px] flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            className="flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 space-y-6"
           >
             {/* Cuerpo del Formulario */}
             <div className="flex-1">
@@ -281,21 +287,22 @@ export default function HotelesForm() {
                   {activeTab === 'general' && renderGeneralTab()}
 
                   {activeTab === 'ubicacion' && (
-                    <div className="animate-in fade-in space-y-4 duration-300">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Dirección *
+                    <div className="animate-in fade-in space-y-6 duration-300">
+                      <div>
+                        <label className={labelClass}>
+                          Dirección <span className="text-red-500">*</span>
                         </label>
                         <input
                           {...register('direccion', {
                             required: 'La dirección es obligatoria',
                           })}
-                          className="w-full rounded-md border px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                          placeholder="Ej: Av. Principal 123"
+                          className={inputClass(errors.direccion)}
                         />
                         {errors.direccion && (
-                          <span className="text-xs text-red-500">
+                          <p className={errorClass}>
                             {errors.direccion.message}
-                          </span>
+                          </p>
                         )}
                       </div>
                       <UbicacionSelector
@@ -335,7 +342,7 @@ export default function HotelesForm() {
             </div>
 
             {/* Footer Estático */}
-            <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+            <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
               <button
                 type="button"
                 onClick={() => navigate('/admin/hoteles')}
@@ -351,7 +358,10 @@ export default function HotelesForm() {
                 className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
               >
                 {isSubmitting ? (
-                  'Guardando...'
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Guardando...
+                  </>
                 ) : (
                   <>
                     <Save className="h-4 w-4" />
