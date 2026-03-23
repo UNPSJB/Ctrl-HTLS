@@ -13,6 +13,7 @@ import {
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { RedirectLink } from '@form';
 
 // Detalle de ventas y liquidaciones de un vendedor
 const VendedorLiquidaciones = () => {
@@ -98,12 +99,11 @@ const VendedorLiquidaciones = () => {
 
       {/* Encabezado con Datos del Vendedor */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <button
-          onClick={() => navigate('/admin/personal/vendedores')}
+        <RedirectLink
+          to="/admin/personal/vendedores"
+          icon={ArrowLeft}
           className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-500 dark:text-gray-400" />
-        </button>
+        />
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
           <DollarSign className="h-6 w-6" />
         </div>

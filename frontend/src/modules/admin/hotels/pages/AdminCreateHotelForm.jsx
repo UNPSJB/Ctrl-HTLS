@@ -11,7 +11,9 @@ import {
   TextInput, 
   EmailInput, 
   TelInput, 
-  SelectInput 
+  TelInput, 
+  SelectInput,
+  RedirectLink
 } from '@form';
 
 export default function AdminCreateHotelForm() {
@@ -45,12 +47,11 @@ export default function AdminCreateHotelForm() {
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Encabezado Externo */}
       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <button
-          onClick={handleCancel}
+        <RedirectLink
+          to="/admin/hoteles"
+          icon={ArrowLeft}
           className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700 transition-colors"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-        </button>
+        />
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
           <Building2 className="h-6 w-6" />
         </div>
@@ -191,15 +192,12 @@ export default function AdminCreateHotelForm() {
 
             {/* Footer de Acciones */}
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={loading || isSubmitting}
-                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <X className="h-4 w-4" />
-                Cancelar
-              </button>
+               <RedirectLink
+                to="/admin/hoteles"
+                label="Cancelar Registro"
+                icon={X}
+                className="px-5 py-2.5"
+              />
               <button
                 type="submit"
                 disabled={loading || isSubmitting}

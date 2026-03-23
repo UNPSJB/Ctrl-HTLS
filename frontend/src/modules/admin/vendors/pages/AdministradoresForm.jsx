@@ -13,7 +13,8 @@ import {
     EmailInput, 
     TelInput, 
     SelectInput,
-    PasswordInput
+    PasswordInput,
+    RedirectLink
 } from '@form';
 
 const tiposDocumento = [
@@ -312,15 +313,12 @@ const AdministradoresForm = () => {
                         )}
 
                         <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-                            <button
-                                type="button"
-                                onClick={handleCancel}
-                                disabled={loading}
-                                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                            >
-                                <X className="h-4 w-4" />
-                                Cancelar
-                            </button>
+                        <RedirectLink
+                            to="/admin/usuarios"
+                            label="Cancelar"
+                            icon={X}
+                            className="px-5 py-2.5"
+                        />
                             <button
                                 type="submit"
                                 disabled={loading || loadingData || !isValid}

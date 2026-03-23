@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { RedirectLink } from '@form';
 import HabitacionesTab from '@/modules/admin/hotels/components/HabitacionesTab';
 import PersonalAsignadoTab from '@/modules/admin/hotels/components/PersonalAsignadoTab';
 import AjustesGeneralesTab from '@/modules/admin/hotels/components/AjustesGeneralesTab';
@@ -64,12 +65,11 @@ export default function HotelDashboard() {
       {/* Encabezado del Dashboard (Shell) */}
       <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/admin/hoteles')}
+          <RedirectLink
+            to="/admin/hoteles"
+            icon={ArrowLeft}
             className="rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-          </button>
+          />
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white min-h-[32px]">
               {loading ? (
