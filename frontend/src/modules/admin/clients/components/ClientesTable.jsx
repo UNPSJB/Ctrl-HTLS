@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Search, X, Users, User } from 'lucide-react';
-import TableButton from '@ui/TableButton';
+import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
-import TablePagination from '@/components/ui/TablePagination';
+import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
 

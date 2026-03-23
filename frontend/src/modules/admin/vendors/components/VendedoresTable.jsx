@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Edit, Trash2, Search, Plus, X, DollarSign, FileText, User, Users } from 'lucide-react';
-import TableButton from '@/components/ui/TableButton';
+import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
-import TablePagination from '@/components/ui/TablePagination';
+import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 const ITEMS_PER_PAGE = 100;

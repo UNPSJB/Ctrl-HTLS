@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import { useBreadcrumbs } from '@/context/BreadcrumbContext';
+import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import HabitacionesTab from '@/modules/admin/hotels/components/HabitacionesTab';
 import PersonalAsignadoTab from '@/modules/admin/hotels/components/PersonalAsignadoTab';

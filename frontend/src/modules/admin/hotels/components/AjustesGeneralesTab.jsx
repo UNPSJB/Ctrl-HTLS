@@ -3,10 +3,10 @@ import { useForm } from 'react-hook-form';
 import { Building2, MapPin, User, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import useHotel from '@/hooks/useHotel';
+import useHotel from '@admin-hooks/useHotel';
 
-import UbicacionSelector from '@/components/selectors/UbicacionSelector';
-import EncargadosList from '@/components/selectors/EncargadosList';
+import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
+import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 export default function AjustesGeneralesTab({

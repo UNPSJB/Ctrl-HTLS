@@ -4,11 +4,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Building2, MapPin, User, Save, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import useHotel from '@/hooks/useHotel';
-import { useBreadcrumbs } from '@/context/BreadcrumbContext';
+import useHotel from '@admin-hooks/useHotel';
+import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 
-import UbicacionSelector from '@/components/selectors/UbicacionSelector';
-import EncargadosList from '@/components/selectors/EncargadosList';
+import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
+import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 // Formulario para creación y edición básica de hoteles

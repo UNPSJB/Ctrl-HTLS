@@ -5,8 +5,8 @@ import { toast } from 'react-hot-toast';
 import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { useBreadcrumbs } from '@/context/BreadcrumbContext';
-import UbicacionSelector from '@/components/selectors/UbicacionSelector';
+import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 
 const tiposDocumento = [
   { id: 'dni', nombre: 'DNI' },

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronRight, Pencil, Trash2, ArrowRight, Search } from 'lucide-react';
-import TablePagination from '@/components/ui/TablePagination';
-import TableButton from '@/components/ui/TableButton';
+import TablePagination from '@admin-ui/TablePagination';
+import TableButton from '@admin-ui/TableButton';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 const PAGE_SIZE = 15;

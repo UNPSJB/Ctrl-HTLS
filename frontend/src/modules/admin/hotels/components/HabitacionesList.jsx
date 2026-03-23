@@ -5,9 +5,9 @@ import {
   DoorOpen,
   Layers,
 } from 'lucide-react';
-import TablePagination from '@/components/ui/TablePagination';
+import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import TableButton from '@/components/ui/TableButton';
+import TableButton from '@admin-ui/TableButton';
 
 const ITEMS_PER_PAGE = 100;
 

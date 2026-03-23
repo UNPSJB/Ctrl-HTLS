@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Edit, Trash2, Eye, Plus, Search, MapPin, Star, Building2, X, User } from 'lucide-react';
-import TableButton from '@/components/ui/TableButton';
-import { useHotelsData } from '@/hooks/useHotelsData';
-import TablePagination from '@/components/ui/TablePagination';
+import TableButton from '@admin-ui/TableButton';
+import { useHotelsData } from '@admin-hooks/useHotelsData';
+import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useNavigate } from 'react-router-dom';
 

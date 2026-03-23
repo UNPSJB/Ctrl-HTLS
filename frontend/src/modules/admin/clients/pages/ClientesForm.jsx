@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { Save, X, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { useBreadcrumbs } from '@/context/BreadcrumbContext';
+import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },

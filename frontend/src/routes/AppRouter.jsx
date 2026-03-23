@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import MainLayout from '@/layouts/MainLayout';
+import MainLayout from '@/modules/vendor/layout/MainLayout';
 import AdminLayout from '@/modules/admin/layout/AdminLayout';
-import HomePage from '@/pages/HomePage';
+import HomePage from '@/modules/vendor/pages/HomePage';
 import Hoteles from '@/modules/admin/hotels/pages/Hoteles';
 import HotelesForm from '@/modules/admin/hotels/pages/HotelesForm';
-import Dashboard from '@/pages/admin/Dashboard';
-import PagoPage from '@/pages/PagoPage';
-import HotelPage from '@/pages/HotelPage';
+import Dashboard from '@/modules/admin/dashboard/pages/Dashboard';
+import PagoPage from '@/modules/vendor/pages/PagoPage';
+import HotelPage from '@/modules/vendor/pages/HotelPage';
 import HotelDashboard from '@/modules/admin/hotels/pages/HotelDashboard';
 import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
