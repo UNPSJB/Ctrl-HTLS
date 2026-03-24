@@ -37,7 +37,11 @@ export default function DescuentosSection({ hotelId }) {
   const handleAdd = async (data) => {
     try {
       setSubmitting(true);
-      await axiosInstance.post(`/hotel/${hotelId}/descuentos`, data);
+      const payload = {
+        ...data,
+        porcentaje: parseFloat(data.porcentaje) / 100
+      };
+      await axiosInstance.post(`/hotel/${hotelId}/descuentos`, payload);
       toast.success('Descuento agregado correctamente');
       setShowForm(false);
       form.reset();
@@ -91,10 +95,8 @@ export default function DescuentosSection({ hotelId }) {
             <FormField label="Porcentaje de Descuento (%)" required error={form.formState.errors.porcentaje}>
               <div className="flex items-center gap-2">
                 <NumberInput
-                  step="0.01"
-                  min="0"
-                  placeholder="Ej: 5.00"
-                  {...form.register('porcentaje', { required: true, min: 0 })}
+                  placeholder="Ej: 5"
+                  {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
                 />
                 <button
                   type="submit"

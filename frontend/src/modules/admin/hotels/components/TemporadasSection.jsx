@@ -39,7 +39,11 @@ export default function TemporadasSection({ hotelId }) {
   const handleAdd = async (data) => {
     try {
       setSubmitting(true);
-      await axiosInstance.post(`/hotel/${hotelId}/temporada`, data);
+      const payload = {
+        ...data,
+        porcentaje: parseFloat(data.porcentaje) / 100
+      };
+      await axiosInstance.post(`/hotel/${hotelId}/temporada`, payload);
       toast.success('Temporada agregada correctamente');
       setShowForm(false);
       form.reset();
@@ -119,9 +123,8 @@ export default function TemporadasSection({ hotelId }) {
             <FormField label="Ajuste (%)" required error={form.formState.errors.porcentaje}>
               <div className="flex items-center gap-2">
                 <NumberInput
-                  step="0.01"
-                  placeholder="Ej: 15.00"
-                  {...form.register('porcentaje', { required: true, min: 0 })}
+                  placeholder="Ej: 15"
+                  {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
                 />
                 <button
                   type="submit"

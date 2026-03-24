@@ -5,7 +5,7 @@ import DescuentosSection from './DescuentosSection';
 
 const TAB_STYLES = {
   temporadas: { active: 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400', icon: 'text-blue-500' },
-  descuentos:  { active: 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400', icon: 'text-indigo-500' },
+  descuentos: { active: 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400', icon: 'text-indigo-500' },
 };
 const TAB_INACTIVE = 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300';
 
@@ -14,15 +14,6 @@ export default function TemporadasTab({ hotelId }) {
 
   return (
     <div className="animate-in fade-in duration-300">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Temporadas y Descuentos
-        </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Gestione temporadas de alta/baja y descuentos por volumen de habitaciones.
-        </p>
-      </div>
-
       {/* Barra de pestañas */}
       <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
         <button
@@ -42,7 +33,7 @@ export default function TemporadasTab({ hotelId }) {
       </div>
 
       {activeSubTab === 'temporadas' && <TemporadasSection hotelId={hotelId} />}
-      {activeSubTab === 'descuentos'  && <DescuentosSection hotelId={hotelId} />}
+      {activeSubTab === 'descuentos' && <DescuentosSection hotelId={hotelId} />}
     </div>
   );
 }

@@ -47,7 +47,7 @@ export default function DescuentosList({ data = [], loading = false }) {
                   </td>
                   <td className="px-6 py-3 text-center">
                     <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
-                      {parseInt(d.porcentaje)}%
+                      {(d.porcentaje * 100).toFixed(0)}%
                     </span>
                   </td>
                 </tr>

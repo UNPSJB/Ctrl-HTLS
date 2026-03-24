@@ -66,7 +66,7 @@ export default function TemporadasList({ data = [], loading = false, onDelete })
                   </td>
                   <td className="px-6 py-3 text-center">
                     <span className="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                      {parseInt(t.porcentaje)}%
+                      {(t.porcentaje * 100).toFixed(0)}%
                     </span>
                   </td>
                   <td className="px-6 py-3 text-right">
