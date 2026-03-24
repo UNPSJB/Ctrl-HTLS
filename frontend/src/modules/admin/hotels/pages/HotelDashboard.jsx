@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
+  Building2,
   ArrowLeft,
   Bed,
   DoorOpen,
@@ -13,6 +14,7 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { PageHeader } from '@admin-ui';
 import { RedirectLink } from '@form';
 import HabitacionesTab from '@/modules/admin/hotels/dashboard/HabitacionesTab';
 import PersonalAsignadoTab from '@/modules/admin/hotels/dashboard/PersonalAsignadoTab';
@@ -62,28 +64,14 @@ export default function HotelDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Encabezado del Dashboard (Shell) */}
-      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="flex items-center gap-4">
-          <RedirectLink
-            to="/admin/hoteles"
-            icon={ArrowLeft}
-            className="rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-          />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white min-h-[32px]">
-              {loading ? (
-                <div className="h-8 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-              ) : (
-                hotel?.nombre || 'Hotel'
-              )}
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {loading ? 'Sincronizando datos...' : 'Dashboard de Configuración'}
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Encabezado del Dashboard */}
+      <PageHeader
+        title={hotel?.nombre || 'Hotel'}
+        description={loading ? 'Sincronizando datos...' : 'Dashboard de Configuración'}
+        backTo="/admin/hoteles"
+        icon={Building2}
+        loading={loading}
+      />
 
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Navegación por Pestañas (Shell) */}

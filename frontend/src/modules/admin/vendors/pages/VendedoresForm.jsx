@@ -6,6 +6,7 @@ import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft } from 'lu
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+import { PageHeader } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import { 
     FormField, 
@@ -191,25 +192,25 @@ const VendedoresForm = () => {
   return (
     <div className="space-y-6">
 
-      {/* Perfil del Vendedor / Encabezado Externo */}
-      <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <button
-          onClick={handleCancel}
-          className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700 transition-colors"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Nuevo Vendedor'}
-          </h1>
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Briefcase className="h-4 w-4" />
-            <span>Rol: {rol === 'administrador' ? 'Administrador' : 'Vendedor'}</span>
-            {isEditing && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">Activo</span>}
+      {/* Perfil del Vendedor / Encabezado */}
+      <PageHeader
+        title={isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Nuevo Vendedor'}
+        description={isEditing ? 'Gestione el perfil y accesos del personal' : 'Complete la información para dar de alta un vendedor'}
+        onBack={handleCancel}
+        icon={Briefcase}
+        loading={loadingData}
+        extra={isEditing && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase text-gray-400">Rol:</span>
+            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              {rol === 'administrador' ? 'Administrador' : 'Vendedor'}
+            </span>
+            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              Activo
+            </span>
           </div>
-        </div>
-      </div>
+        )}
+      />
 
       <div className="flex flex-col gap-6 lg:flex-row">
 

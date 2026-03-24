@@ -13,7 +13,7 @@ import {
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { RedirectLink } from '@form';
+import { PageHeader } from '@admin-ui';
 
 // Detalle de ventas y liquidaciones de un vendedor
 const VendedorLiquidaciones = () => {
@@ -98,28 +98,13 @@ const VendedorLiquidaciones = () => {
     <div className="space-y-6">
 
       {/* Encabezado con Datos del Vendedor */}
-      <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <RedirectLink
-          to="/admin/personal/vendedores"
-          icon={ArrowLeft}
-          className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        />
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-          <DollarSign className="h-6 w-6" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white min-h-[32px]">
-            {loading && !vendedor ? (
-              <div className="h-8 w-64 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-            ) : (
-              `Liquidaciones: ${vendedor?.nombre} ${vendedor?.apellido}`
-            )}
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {vendedor ? `${vendedor.tipoDocumento}: ${vendedor.numeroDocumento}` : 'Obteniendo información...'}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title={vendedor ? `Liquidaciones: ${vendedor.nombre} ${vendedor.apellido}` : 'Liquidaciones'}
+        description={vendedor ? `${vendedor.tipoDocumento}: ${vendedor.numeroDocumento}` : 'Obteniendo información...'}
+        backTo="/admin/personal/vendedores"
+        icon={DollarSign}
+        loading={loading && !vendedor}
+      />
 
       {/* Selector de Pestañas */}
       <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-xl px-6">

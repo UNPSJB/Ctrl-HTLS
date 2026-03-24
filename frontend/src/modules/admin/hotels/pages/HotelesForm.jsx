@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Building2, MapPin, User, Save, X } from 'lucide-react';
+import { Building2, MapPin, User, Save, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@admin-hooks/useHotel';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+import { PageHeader } from '@admin-ui';
 
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
@@ -199,22 +200,12 @@ export default function HotelesForm() {
   return (
     <div className="space-y-6">
       {/* Encabezado del Hotel */}
-      <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <button
-          onClick={() => navigate('/admin/hoteles')}
-          className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Registrar Nuevo Hotel
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Complete la información para dar de alta un hotel
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title={isEditing ? 'Editar Hotel' : 'Registrar Nuevo Hotel'}
+        description={isEditing ? 'Actualice la información básica del hotel' : 'Complete la información para dar de alta un hotel'}
+        backTo="/admin/hoteles"
+        icon={Building2}
+      />
 
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Navegación por Pestañas */}

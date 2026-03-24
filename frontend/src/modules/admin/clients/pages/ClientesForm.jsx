@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { Save, X, ArrowLeft } from 'lucide-react';
+import { Save, X, Users } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+import { PageHeader } from '@admin-ui';
 import { 
     FormField, 
     TextInput, 
@@ -136,25 +137,14 @@ const ClientesForm = () => {
 
     return (
         <div className="space-y-6">
-            {/* Encabezado Externo */}
-            <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <button
-                    onClick={handleCancel}
-                    className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700 transition-colors"
-                >
-                    <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                </button>
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {isEditing ? 'Editar Cliente' : 'Registrar Nuevo Cliente'}
-                    </h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {isEditing
-                            ? 'Actualice los datos del cliente seleccionado'
-                            : 'Ingrese los datos personales para dar de alta un cliente'}
-                    </p>
-                </div>
-            </div>
+            {/* Perfil del Cliente / Encabezado */}
+            <PageHeader
+                title={isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Registrar Nuevo Cliente'}
+                description={isEditing ? 'Actualice la información personal y de contacto del cliente' : 'Ingrese los datos básicos para registrar un nuevo cliente'}
+                onBack={handleCancel}
+                icon={Users}
+                loading={loadingData}
+            />
 
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col">
                 {loadingData ? (

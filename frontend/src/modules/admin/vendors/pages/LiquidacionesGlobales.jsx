@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { ArrowLeft, DollarSign, Search, FileText, CheckCircle2 } from 'lucide-react';
 import axiosInstance from '@api/axiosInstance';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { RedirectLink } from '@form';
+import { PageHeader } from '@admin-ui';
 
 // Página para consulta y generación masiva de liquidaciones
 const LiquidacionesGlobales = () => {
@@ -69,29 +69,23 @@ const LiquidacionesGlobales = () => {
   return (
     <div className="space-y-6">
 
-      {/* Encabezado con botón volver */}
-      <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <RedirectLink
-          to="/admin/personal/vendedores"
-          icon={ArrowLeft}
-          className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        />
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
-          <DollarSign className="h-6 w-6" />
-        </div>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Liquidaciones Globales</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Historial y generación masiva de pagos</p>
-        </div>
-        <button
-          onClick={handleLiquidarMasivo}
-          disabled={loading}
-          className="flex items-center gap-2 rounded-lg bg-green-600 px-4 h-10 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 shadow-sm transition-colors"
-        >
-          <DollarSign className="h-4 w-4" />
-          Liquidar Periodo
-        </button>
-      </div>
+      {/* Encabezado Global */}
+      <PageHeader
+        title="Liquidaciones Globales"
+        description="Historial y generación masiva de pagos"
+        backTo="/admin/personal/vendedores"
+        icon={DollarSign}
+        extra={
+          <button
+            onClick={handleLiquidarMasivo}
+            disabled={loading}
+            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 h-10 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 shadow-sm transition-colors"
+          >
+            <DollarSign className="h-4 w-4" />
+            Liquidar Periodo
+          </button>
+        }
+      />
 
       {/* Panel de filtros y tabla */}
       <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">

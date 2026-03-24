@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { Save, ArrowLeft, UserCog, X } from 'lucide-react';
+import { Save, UserCog, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { PageHeader } from '@admin-ui';
 import { 
     FormField, 
     TextInput, 
@@ -87,23 +88,13 @@ const EncargadosForm = () => {
 
     return (
         <div className="space-y-6">
-            {/* Encabezado Externo */}
-            <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <button
-                    onClick={handleCancel}
-                    className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700 transition-colors"
-                >
-                    <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                </button>
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        Registrar Nuevo Encargado
-                    </h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        El encargado quedará disponible para ser asignado posteriormente a un hotel.
-                    </p>
-                </div>
-            </div>
+            {/* Encabezado del Encargado */}
+            <PageHeader
+                title="Registrar Nuevo Encargado"
+                description="El encargado quedará disponible para ser asignado posteriormente a un hotel."
+                onBack={handleCancel}
+                icon={UserCog}
+            />
 
             {/* Contenedor del Formulario */}
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">

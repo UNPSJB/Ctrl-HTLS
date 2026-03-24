@@ -6,6 +6,7 @@ import { User, Save, Lock, MapPin, Briefcase, ArrowLeft, ShieldCheck, X } from '
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+import { PageHeader } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import { 
     FormField, 
@@ -153,22 +154,24 @@ const AdministradoresForm = () => {
         <div className="space-y-6">
 
             {/* Perfil del Administrador / Encabezado */}
-            <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <button
-                    onClick={handleCancel}
-                    className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-700 transition-colors"
-                >
-                    <ArrowLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                </button>
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {isEditing ? `Editar Administrador` : 'Nuevo Administrador'}
-                    </h1>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span>{isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Gestión de accesos'}</span>
+            <PageHeader
+                title={isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Nuevo Administrador'}
+                description={isEditing ? 'Gestione el perfil y seguridad del administrador' : 'Complete la información para dar de alta un administrador'}
+                onBack={handleCancel}
+                icon={ShieldCheck}
+                loading={loadingData}
+                extra={isEditing && (
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold uppercase text-gray-400">Rol:</span>
+                        <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                            Administrador
+                        </span>
+                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            Activo
+                        </span>
                     </div>
-                </div>
-            </div>
+                )}
+            />
 
             <div className="flex flex-col gap-6 lg:flex-row">
 
