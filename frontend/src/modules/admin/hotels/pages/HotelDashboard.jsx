@@ -14,7 +14,7 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { PageHeader } from '@admin-ui';
+import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import { RedirectLink } from '@form';
 import HabitacionesTab from '@/modules/admin/hotels/dashboard/HabitacionesTab';
 import PersonalAsignadoTab from '@/modules/admin/hotels/dashboard/PersonalAsignadoTab';
@@ -73,31 +73,18 @@ export default function HotelDashboard() {
         loading={loading}
       />
 
-      <div className="flex flex-col gap-6 lg:flex-row">
-        {/* Navegación por Pestañas (Shell) */}
-        <aside className="w-full lg:w-80 shrink-0">
-          <nav className="flex flex-col space-y-1 rounded-xl border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-            {TABS.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                disabled={loading && !hotel}
-                className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 ${
-                  activeTab === item.id
-                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
-                }`}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        </aside>
+      <SidebarLayout
+        sidebar={
+          <PageSidebar
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            loading={loading && !hotel}
+          />
+        }
+      >
+        <PageContentCard className="min-h-[500px]">
 
-        {/* Contenido Dinámico */}
-        <main className="flex-1 w-full min-w-0">
-          <div className="min-h-[500px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 relative flex flex-col">
             {loading ? (
               <div className="flex-1 flex items-center justify-center">
                 <InnerLoading message="Hidratando dashboard..." />
@@ -148,9 +135,8 @@ export default function HotelDashboard() {
                 )}
               </div>
             )}
-          </div>
-        </main>
-      </div>
+        </PageContentCard>
+      </SidebarLayout>
     </div>
   );
 }
