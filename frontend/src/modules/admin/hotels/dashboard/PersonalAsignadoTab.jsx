@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import PersonalAsignadoList from './PersonalAsignadoList';
+import PersonalAsignadoList from '../components/PersonalAsignadoList';
 import { SearchInput } from '@form';
 
 /**

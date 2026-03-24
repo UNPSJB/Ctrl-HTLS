@@ -12,7 +12,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import HabitacionesList from './HabitacionesList';
+import HabitacionesList from '../components/HabitacionesList';
 import { 
   FormField, 
   SelectInput, 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Calendar, Tag } from 'lucide-react';
-import TemporadasSection from './TemporadasSection';
-import DescuentosSection from './DescuentosSection';
+import TemporadasSection from '../components/TemporadasSection';
+import DescuentosSection from '../components/DescuentosSection';
 
 const TAB_STYLES = {
   temporadas: { active: 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400', icon: 'text-blue-500' },

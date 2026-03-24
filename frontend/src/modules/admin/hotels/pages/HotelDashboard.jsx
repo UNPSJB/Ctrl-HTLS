@@ -14,12 +14,12 @@ import axiosInstance from '@/api/axiosInstance';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { RedirectLink } from '@form';
-import HabitacionesTab from '@/modules/admin/hotels/components/HabitacionesTab';
-import PersonalAsignadoTab from '@/modules/admin/hotels/components/PersonalAsignadoTab';
-import AjustesGeneralesTab from '@/modules/admin/hotels/components/AjustesGeneralesTab';
-import TarifasTab from '@/modules/admin/hotels/components/TarifasTab';
-import TemporadasTab from '@/modules/admin/hotels/components/TemporadasTab';
-import PaquetesTab from '@/modules/admin/hotels/components/PaquetesTab';
+import HabitacionesTab from '@/modules/admin/hotels/dashboard/HabitacionesTab';
+import PersonalAsignadoTab from '@/modules/admin/hotels/dashboard/PersonalAsignadoTab';
+import AjustesGeneralesTab from '@/modules/admin/hotels/dashboard/AjustesGeneralesTab';
+import TarifasTab from '@/modules/admin/hotels/dashboard/TarifasTab';
+import TemporadasTab from '@/modules/admin/hotels/dashboard/TemporadasTab';
+import PaquetesTab from '@/modules/admin/hotels/dashboard/PaquetesTab';
 
 export default function HotelDashboard() {
   const { id } = useParams();

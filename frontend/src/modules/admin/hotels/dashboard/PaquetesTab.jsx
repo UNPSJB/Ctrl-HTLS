@@ -3,7 +3,7 @@ import { Tag, Plus, Info, Calendar as CalendarIcon, Users, BedDouble } from 'luc
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import PaquetesList from './PaquetesList';
+import PaquetesList from '../components/PaquetesList';
 import { 
   FormField, 
   TextInput, 
