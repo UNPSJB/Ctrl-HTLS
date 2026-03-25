@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   Plus,
-  Trash2,
-  Edit2,
-  X,
   DoorOpen,
   Layers,
   Hash,
@@ -13,10 +10,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import HabitacionesList from '../components/HabitacionesList';
-import { 
-  FormField, 
-  SelectInput, 
-  NumberInput 
+import { ActionModal } from '@admin-ui';
+import {
+  FormField,
+  SelectInput,
+  NumberInput
 } from '@form';
 
 const EMPTY_ARRAY = [];
@@ -36,13 +34,15 @@ export default function HabitacionesTab({
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [tarifasCompletas, setTarifasCompletas] = useState([]);
 
   const {
     register,
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm();
 
   const isLocalMode = !hotelId;
@@ -77,11 +77,15 @@ export default function HabitacionesTab({
   const fetchHabitaciones = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get(`/hotel/${hotelId}/habitaciones`);
-      setHabitaciones(res.data);
+      const [resHab, resTar] = await Promise.all([
+        axiosInstance.get(`/hotel/${hotelId}/habitaciones`),
+        axiosInstance.get(`/hotel/${hotelId}/tarifas`)
+      ]);
+      setHabitaciones(resHab.data);
+      setTarifasCompletas(resTar.data);
     } catch (error) {
-      console.error('Failed to fetch habitaciones', error);
-      toast.error('Error al cargar habitaciones');
+      console.error('Failed to fetch data', error);
+      toast.error('Error al cargar datos de habitaciones');
     } finally {
       setLoading(false);
     }
@@ -89,6 +93,7 @@ export default function HabitacionesTab({
 
   const onSubmit = async (data) => {
     try {
+      setSubmitting(true);
       const payload = {
         numero: Number(data.numero),
         piso: Number(data.piso),
@@ -131,6 +136,8 @@ export default function HabitacionesTab({
       toast.error(
         error.response?.data?.error || 'Error al procesar habitación'
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -179,11 +186,22 @@ export default function HabitacionesTab({
 
 
   // Filtrar tipos que tienen precio asignado en este hotel
+  const sourceTarifas = hotelId ? tarifasCompletas : tarifasAsignadas;
   const tiposFiltrados = isLocalMode
     ? tiposGlobales
-    : tiposGlobales.filter((t) =>
-        tarifasAsignadas.some((ta) => ta.tipoHabitacionId === t.id)
-      );
+    : tiposGlobales
+      .map((t) => {
+        const matchingTarifa = sourceTarifas.find(
+          (ta) => Number(ta.tipoHabitacionId || ta.id) === Number(t.id)
+        );
+        // Omitir si no hay tarifa o si el precio es 0 (no habilitada)
+        if (!matchingTarifa || Number(matchingTarifa.precio) === 0) return null;
+        return {
+          ...t,
+          precio: matchingTarifa.precio,
+        };
+      })
+      .filter(Boolean);
 
 
   return (
@@ -201,65 +219,57 @@ export default function HabitacionesTab({
           </p>
         </div>
 
-        {!isCreating && (
-          <button
-            onClick={() => setIsCreating(true)}
-            disabled={loading}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
-          >
-            <Plus className="h-4 w-4" /> Registrar Habitación
-          </button>
-        )}
+        <button
+          onClick={() => setIsCreating(true)}
+          disabled={loading}
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+        >
+          <Plus className="h-4 w-4" /> Registrar Habitación
+        </button>
       </div>
 
-      {/* Formulario de Alta/Edición */}
-      {isCreating && (
-        <div className="animate-in slide-in-from-top-4 rounded-xl border border-gray-200 bg-gray-50 p-6 duration-300 dark:border-gray-700 dark:bg-gray-700/30">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400">
-              {editingId ? 'Editando Habitación' : 'Nueva Habitación'}
-            </h3>
-            <button
-              onClick={cancelForm}
-              className="text-gray-400 transition-colors hover:text-gray-600"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="grid grid-cols-1 gap-6 md:grid-cols-4 items-start"
+      {/* Formulario de Alta/Edición en Modal */}
+      <ActionModal
+        isOpen={isCreating}
+        onClose={cancelForm}
+        title={editingId ? 'Editar Habitación' : 'Nueva Habitación'}
+        description={editingId ? 'Modifique los datos de la habitación física' : 'Complete los datos para registrar una nueva unidad'}
+        onConfirm={handleSubmit(onSubmit)}
+        loading={submitting}
+        confirmLabel={editingId ? 'Guardar Cambios' : 'Registrar'}
+        confirmIcon={Plus}
+      >
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <FormField
+            label="Número"
+            required
+            error={errors.numero}
+            icon={Hash}
           >
-            <FormField 
-              label="Número" 
-              required 
-              error={errors.numero} 
-              icon={<Hash className="h-3.5 w-3.5 text-blue-500" />}
-            >
-              <NumberInput
-                {...register('numero', { required: 'Campo obligatorio' })}
-                placeholder="Ej: 101"
-              />
-            </FormField>
+            <NumberInput
+              {...register('numero', { required: 'Campo obligatorio' })}
+              placeholder="Ej: 101"
+            />
+          </FormField>
 
-            <FormField 
-              label="Piso" 
-              required 
-              error={errors.piso} 
-              icon={<Layers className="h-3.5 w-3.5 text-blue-500" />}
-            >
-              <NumberInput
-                {...register('piso', { required: 'Campo obligatorio' })}
-                placeholder="Ej: 1"
-              />
-            </FormField>
+          <FormField
+            label="Piso"
+            required
+            error={errors.piso}
+            icon={Layers}
+          >
+            <NumberInput
+              {...register('piso', { required: 'Campo obligatorio' })}
+              placeholder="Ej: 1"
+            />
+          </FormField>
 
-            <FormField 
-              label="Tipo" 
-              required 
-              error={errors.tipoHabitacionId} 
-              icon={<Bed className="h-3.5 w-3.5 text-blue-500" />}
+          <div className="sm:col-span-2">
+            <FormField
+              label="Tipo de Habitación"
+              required
+              error={errors.tipoHabitacionId}
+              icon={Bed}
             >
               <SelectInput
                 {...register('tipoHabitacionId', {
@@ -269,24 +279,14 @@ export default function HabitacionesTab({
                 <option value="">Seleccione tipo...</option>
                 {tiposFiltrados.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.nombre}
+                    {t.nombre} {t.precio !== undefined ? `- $${t.precio}` : ''}
                   </option>
                 ))}
               </SelectInput>
             </FormField>
-
-            <div className="flex flex-col h-full pt-[21px]">
-              <button
-                type="submit"
-                className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95"
-              >
-                <Plus className="h-4 w-4" />
-                {editingId ? 'Guardar' : 'Registrar'}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
-      )}
+      </ActionModal>
 
       {/* Listado de Habitaciones */}
       <HabitacionesList
