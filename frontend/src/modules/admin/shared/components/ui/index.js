@@ -4,3 +4,4 @@ export { default as TablePagination } from './TablePagination';
 export { default as Breadcrumbs } from './Breadcrumbs';
 export { SidebarLayout, PageSidebar, PageContentCard } from './LayoutComponents';
 export { default as ActionModal } from './ActionModal';
+export { default as ListHeader } from './ListHeader';
