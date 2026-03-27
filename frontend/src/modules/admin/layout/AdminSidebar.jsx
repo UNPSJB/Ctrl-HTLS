@@ -8,7 +8,8 @@ import {
   Moon,
   Sun,
   MapPin,
-  Contact
+  Contact,
+  Shield
 } from 'lucide-react';
 import { ThemeContext } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
@@ -43,6 +44,16 @@ function AdminSidebar({ onClose }) {
       title: 'Personal',
       icon: UserCheck,
       path: '/admin/personal',
+    },
+    {
+      title: 'Administradores',
+      icon: Shield,
+      path: '/admin/administradores',
+    },
+    {
+      title: 'Vendedores',
+      icon: UserCheck,
+      path: '/admin/vendedores',
     },
     {
       title: 'Clientes',
