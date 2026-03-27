@@ -24,13 +24,16 @@ const {
   getAdministradores,
   createEmpleado,
   updateEmpleado,
+  updateAdministrador,
   deleteEmpleado,
   createCliente,
   getVendedores,
   getVendedor,
+  getVentasVendedor,
   getClientes,
   getClienteById,
   getClienteByDocumento,
+  getVentasCliente,
   updateCliente,
   deleteCliente,
 } = require('../../controllers/core/personaController');
@@ -54,9 +57,16 @@ router.get('/ciudades/:id', validateId, getCiudadById); //Ruta para obtener una 
 //#region Rutas de Empleados
 router.post('/empleado', validateEmpleado, createEmpleado); //Ruta para crear un administrador/vendedor
 router.put('/empleado/:id', validateId, validateEmpleado, updateEmpleado); //Ruta para actualizar un administrador/vendedor
+router.put(
+  '/administrador/:id',
+  validateId,
+  validateEmpleado,
+  updateAdministrador,
+); //Ruta para actualizar solo administradores
 router.delete('/empleado/:id', validateId, deleteEmpleado); //Ruta para eliminar un administrador/vendedor
 router.get('/administradores', getAdministradores); //Ruta para obtener todos los administradores
 router.get('/vendedor/:id', validateId, getVendedor); //Ruta para obtener un vendedor por su ID
+router.get('/vendedor/:id/ventas', validateId, getVentasVendedor); //Ruta para obtener las ventas de un vendedor
 router.get('/vendedores', getVendedores); //Ruta para obtener todos los vendedores
 //#endregion
 
@@ -65,6 +75,7 @@ router.post('/cliente', validateCliente, createCliente); //Ruta para crear un cl
 router.get('/clientes', getClientes); //Ruta para obtener todos los clientes
 router.get('/cliente/documento/:documento', getClienteByDocumento); // Ruta para obtener un cliente por su número de documento
 router.get('/cliente/:id', validateId, getClienteById); //Ruta para obtener un cliente por su ID
+router.get('/cliente/:id/ventas', validateId, getVentasCliente); //Ruta para obtener las ventas de un cliente
 router.put('/cliente/:id', validateId, validateCliente, updateCliente); //Ruta para actualizar un cliente
 router.delete('/cliente/:id', validateId, deleteCliente); //Ruta para eliminar un cliente
 //#endregion

@@ -618,6 +618,31 @@ const agregarPaquetePromocional = async (idHotel, paquete) => {
   return paqueteCompleto;
 };
 
+const eliminarPaqueteDeHotel = async (idHotel, idPaquete) => {
+  await verificarIdHotel(idHotel);
+  return paquetePromocionalServices.eliminarPaquete(idHotel, idPaquete);
+};
+
+const actualizarPaqueteDeHotel = async (idHotel, idPaquete, datosPaquete) => {
+  await verificarIdHotel(idHotel);
+
+  // Verificar fechas si se enviaron
+  if (datosPaquete.fecha_inicio && datosPaquete.fecha_fin) {
+    await verificarFechas(datosPaquete.fecha_inicio, datosPaquete.fecha_fin);
+  }
+
+  // Verificar que las habitaciones pertenecen al hotel si se enviaron
+  if (datosPaquete.habitaciones && datosPaquete.habitaciones.length > 0) {
+    await verificarHabitacionesHotel(idHotel, datosPaquete.habitaciones);
+  }
+
+  return paquetePromocionalServices.actualizarPaquete(
+    idHotel,
+    idPaquete,
+    datosPaquete,
+  );
+};
+
 const obtenerPaquetesDeHotel = async (idHotel) => {
   await verificarIdHotel(idHotel);
   const paquetes =
@@ -652,6 +677,28 @@ const obtenerTemporadasDeHotel = async (hotelId) => {
 const eliminarTemporadaDeHotel = async (hotelId, temporadaId) => {
   await verificarIdHotel(hotelId);
   return temporadaServices.eliminarTemporada(hotelId, temporadaId);
+};
+
+const actualizarTemporadaDeHotel = async (
+  hotelId,
+  temporadaId,
+  datosTemporada,
+) => {
+  await verificarIdHotel(hotelId);
+
+  if (datosTemporada.fechaInicio && datosTemporada.fechaFin) {
+    await verificarFechas(datosTemporada.fechaInicio, datosTemporada.fechaFin);
+  }
+
+  if (datosTemporada.porcentaje !== undefined) {
+    await verificarPorcentaje(datosTemporada.porcentaje);
+  }
+
+  return temporadaServices.actualizarTemporada(
+    hotelId,
+    temporadaId,
+    datosTemporada,
+  );
 };
 
 const agregarDescuentos = async (idHotel, descuento) => {
@@ -1165,10 +1212,13 @@ module.exports = {
   obtenerTodosLosHoteles,
   obtenerCategorias,
   agregarPaquetePromocional,
+  eliminarPaqueteDeHotel,
+  actualizarPaqueteDeHotel,
   obtenerPaquetesDeHotel,
   agregarTemporada,
   obtenerTemporadasDeHotel,
   eliminarTemporadaDeHotel,
+  actualizarTemporadaDeHotel,
   agregarDescuentos,
   getDescuentosDeHotel,
   getDisponibilidadPorHotel,

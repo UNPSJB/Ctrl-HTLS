@@ -5,6 +5,7 @@ const {
   validateId,
   validateTarifasPayload,
   validateTemporadaId,
+  validatePaqueteId,
 } = require('../../validators/hotel/hotelValidators');
 
 const {
@@ -22,10 +23,13 @@ const {
   getEncargados,
   setDescuento,
   getDescuentos,
+  updateTemporada,
   setHabitaciones,
   updateHabitacion,
   deleteHabitacion,
   setPaquetePromocional,
+  deletePaquetePromocional,
+  updatePaquetePromocional,
   getTiposDeHabitacion,
   createEncargado,
   deleteEncargado,
@@ -71,9 +75,18 @@ router.post(
   setPaquetePromocional,
 ); //Ruta para crear un paquete promocional en un hotel
 
-//IMPLEMENTAR
-// router.put('/hotel/:id/paquete-promocional/:idPaquete', validateId, updatePaquetePromocional); //Ruta para modificar un paquete promocional en un hotel
-// router.delete('/hotel/:id/paquete-promocional/:idPaquete', validateId, deletePaquetePromocional); //Ruta para eliminar un paquete promocional en un hotel
+router.put(
+  '/hotel/:id/paquete-promocional/:idPaquete',
+  validateId,
+  validatePaqueteId,
+  updatePaquetePromocional,
+); //Ruta para modificar un paquete promocional en un hotel
+router.delete(
+  '/hotel/:id/paquete-promocional/:idPaquete',
+  validateId,
+  validatePaqueteId,
+  deletePaquetePromocional,
+); //Ruta para eliminar un paquete promocional en un hotel
 
 router.post('/hotel/:id/temporada', validateId, setTemporada); //Ruta para crear una temporada en un hotel
 router.get('/hotel/:id/temporadas', validateId, getTemporadas); //Ruta para obtener temporadas de un hotel
@@ -84,8 +97,12 @@ router.delete(
   deleteTemporada,
 ); //Ruta para eliminar una temporada de un hotel
 
-//IMPLEMENTAR
-// router.put('/hotel/:id/temporada/:idTemporada', validateId, updateTemporada); //Ruta para modificar una temporada en un hotel
+router.put(
+  '/hotel/:id/temporada/:idTemporada',
+  validateId,
+  validateTemporadaId,
+  updateTemporada,
+); //Ruta para modificar una temporada en un hotel
 
 router.get('/hotel/:id/descuentos', validateId, getDescuentos); //Ruta para obtener descuentos de un hotel
 router.post('/hotel/:id/descuentos', validateId, setDescuento); //Ruta para crear descuentos en un hotel

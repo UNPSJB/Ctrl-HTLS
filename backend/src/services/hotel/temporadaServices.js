@@ -137,10 +137,73 @@ const eliminarTemporada = async (hotelId, temporadaId) => {
   }
 };
 
+const actualizarTemporada = async (hotelId, temporadaId, datosTemporada) => {
+  const temporada = await Temporada.findOne({
+    where: { id: temporadaId, hotelId },
+  });
+
+  if (!temporada) {
+    throw new CustomError(
+      'La temporada no existe o no pertenece a este hotel',
+      404,
+    );
+  }
+
+  // Verificar superposición con otras temporadas (excluyendo la actual)
+  if (datosTemporada.fechaInicio && datosTemporada.fechaFin) {
+    const temporadasSuperpuestas = await Temporada.findAll({
+      where: {
+        hotelId,
+        id: { [Op.ne]: temporadaId },
+        [Op.or]: [
+          {
+            fechaInicio: {
+              [Op.between]: [
+                datosTemporada.fechaInicio,
+                datosTemporada.fechaFin,
+              ],
+            },
+          },
+          {
+            fechaFin: {
+              [Op.between]: [
+                datosTemporada.fechaInicio,
+                datosTemporada.fechaFin,
+              ],
+            },
+          },
+          {
+            [Op.and]: [
+              {
+                fechaInicio: {
+                  [Op.lte]: datosTemporada.fechaInicio,
+                },
+              },
+              {
+                fechaFin: {
+                  [Op.gte]: datosTemporada.fechaFin,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (temporadasSuperpuestas.length > 0) {
+      throw new CustomError('Ya existe una temporada en esas fechas', 409);
+    }
+  }
+
+  await temporada.update(datosTemporada);
+  return temporada;
+};
+
 module.exports = {
   crearTemporada,
   verificarTemporadas,
   obtenerTemporadaActual,
   obtenerTemporadasPorHotel,
   eliminarTemporada,
+  actualizarTemporada,
 };
