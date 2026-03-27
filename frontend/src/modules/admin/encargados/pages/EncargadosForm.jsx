@@ -110,7 +110,7 @@ const EncargadosForm = () => {
                 }
             >
                 <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="flex-1 space-y-6">
+                    <div className="flex-1">
                         {/* Información Personal */}
                         <div className={activeTab === 'personal' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>

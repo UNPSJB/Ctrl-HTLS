@@ -192,7 +192,7 @@ export default function HotelesForm() {
                 <InnerLoading message="Preparando formulario de hotel..." />
               </div>
             ) : (
-              <div className="space-y-6">
+              <div>
                 {/* Información General */}
                 <div className={activeTab === 'general' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información General</h3>
