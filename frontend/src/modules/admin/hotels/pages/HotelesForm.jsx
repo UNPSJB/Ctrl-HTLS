@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, MapPin, User, Save, X } from 'lucide-react';
+import { Building2, MapPin, User, Save, X, Phone } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@admin-hooks/useHotel';
@@ -30,7 +30,6 @@ export default function HotelesForm() {
 
   const [activeTab, setActiveTab] = useState('general');
   const [loadingData, setLoadingData] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
   const [initialEncargadoId, setInitialEncargadoId] = useState(null);
@@ -51,6 +50,7 @@ export default function HotelesForm() {
       encargadoNumeroDocumento: '',
       tiposHabitaciones: [],
     },
+    mode: 'onChange'
   });
 
   const {
@@ -59,7 +59,7 @@ export default function HotelesForm() {
     setValue,
     watch,
     reset,
-    formState: { errors },
+    formState: { errors, isValid, isSubmitting },
   } = form;
 
   // Carga inicial de datos para edición
@@ -116,7 +116,6 @@ export default function HotelesForm() {
 
   // Procesa el envío del formulario
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
     try {
       const encargadoIdParaHotel = selectedEncargadoId;
 
@@ -153,56 +152,21 @@ export default function HotelesForm() {
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.error || 'Error al guardar el hotel');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
 
-  const renderGeneralTab = () => (
-    <div className="animate-in fade-in grid grid-cols-1 gap-6 duration-300 md:grid-cols-2">
-      <FormField label="Nombre del Hotel" required error={errors.nombre}>
-        <TextInput
-          {...register('nombre', { required: 'El nombre es obligatorio' })}
-          placeholder="Ej: Hotel Paradise Resort"
-        />
-      </FormField>
-
-      <FormField label="Categoría" required error={errors.categoriaId}>
-        <SelectInput
-          {...register('categoriaId', { required: 'Seleccione una categoría' })}
-        >
-          <option value="">Seleccionar...</option>
-          {categorias?.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nombre}
-            </option>
-          ))}
-        </SelectInput>
-      </FormField>
-
-      <FormField label="Teléfono" required error={errors.telefono}>
-        <TelInput
-          {...register('telefono', { required: 'El teléfono es obligatorio' })}
-          placeholder="Ej: +54 376 4123456"
-        />
-      </FormField>
-
-      <FormField label="Email" required error={errors.email}>
-        <EmailInput
-          {...register('email', { required: 'El email es obligatorio' })}
-          placeholder="hotel@ejemplo.com"
-        />
-      </FormField>
-    </div>
-  );
+  const handleNumericChange = (e) => {
+    const { value } = e.target;
+    setValue(e.target.name, value.replace(/\D/g, ''), { shouldValidate: true });
+  };
 
   return (
     <div className="space-y-6">
       {/* Encabezado del Hotel */}
       <PageHeader
         title={isEditing ? 'Editar Hotel' : 'Registrar Nuevo Hotel'}
-        description={isEditing ? 'Actualice la información básica del hotel' : 'Complete la información para dar de alta un hotel'}
+        description={isEditing ? 'Gestione la información básica y de contacto del hotel' : 'Complete la información para dar de alta un hotel'}
         backTo="/admin/hoteles"
         icon={Building2}
       />
@@ -211,8 +175,9 @@ export default function HotelesForm() {
         sidebar={
           <PageSidebar
             tabs={[
-              { id: 'general', icon: Building2, label: 'General' },
-              { id: 'ubicacion', icon: MapPin, label: 'Ubicación' },
+              { id: 'general', icon: Building2, label: 'Información General' },
+              { id: 'contacto', icon: Phone, label: 'Medios de Contacto' },
+              { id: 'ubicacion', icon: MapPin, label: 'Ubicación Geográfica' },
               { id: 'encargado', icon: User, label: 'Encargado' },
             ]}
             activeTab={activeTab}
@@ -221,81 +186,125 @@ export default function HotelesForm() {
         }
       >
         <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="flex-1">
+            {loadingResources || loadingData ? (
+              <div className="flex-1 flex items-center justify-center py-12">
+                <InnerLoading message="Preparando formulario de hotel..." />
+              </div>
+            ) : (
+              <div>
+                {/* Información General */}
+                <div className={activeTab === 'general' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información General</h3>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <FormField label="Nombre" required error={errors.nombre}>
+                      <TextInput
+                        id="nombre"
+                        {...register('nombre', { required: 'El nombre es obligatorio' })}
+                        placeholder="Ej: Hotel Paradise Resort"
+                      />
+                    </FormField>
 
-            {/* Cuerpo del Formulario */}
-            <div className="flex-1">
-              {loadingResources || loadingData ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <InnerLoading message="Preparando formulario de hotel..." />
+                    <FormField label="Categoría" required error={errors.categoriaId}>
+                      <SelectInput
+                        id="categoriaId"
+                        {...register('categoriaId', { required: 'Seleccione una categoría' })}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {categorias?.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.nombre}
+                          </option>
+                        ))}
+                      </SelectInput>
+                    </FormField>
+                  </div>
                 </div>
+
+                {/* Medios de Contacto */}
+                <div className={activeTab === 'contacto' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Medios de Contacto</h3>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <FormField label="Email" required error={errors.email}>
+                      <EmailInput
+                        id="email"
+                        {...register('email', {
+                          required: 'El email es obligatorio',
+                          pattern: { value: /^\S+@\S+$/i, message: 'Email inválido' }
+                        })}
+                        placeholder="contacto@hotel.com"
+                      />
+                    </FormField>
+                    <FormField label="Teléfono" error={errors.telefono}>
+                      <TelInput
+                        id="telefono"
+                        {...register('telefono', { onChange: handleNumericChange })}
+                        placeholder="Ej: 3764556677"
+                      />
+                    </FormField>
+                  </div>
+                </div>
+
+                {/* Ubicación Geográfica */}
+                <div className={activeTab === 'ubicacion' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación Geográfica</h3>
+                  <div className="">
+                    <UbicacionSelector
+                      errors={errors}
+                      register={register}
+                      setValue={setValue}
+                      watch={watch}
+                      showAddress={true}
+                    />
+                  </div>
+                </div>
+
+                {/* Encargado */}
+                <div className={activeTab === 'encargado' ? 'space-y-4 animate-in fade-in duration-300 flex flex-col h-full' : 'hidden'}>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Encargado del Hotel</h3>
+                  <EncargadosList
+                    value={selectedEncargadoId}
+                    onChange={setSelectedEncargadoId}
+                    exclude={initialEncargadoId}
+                  />
+                  <RedirectLink
+                    to="/admin/encargados/nuevo"
+                    label="Hacé clic acá para gestionarlos."
+                    newTab
+                    className="mt-4"
+                  />
+                  <p className="text-xs text-gray-500 italic mt-1 text-center">¿El encargado que buscas no aparece o no está registrado?</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer Estático */}
+          <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+            <RedirectLink
+              to="/admin/hoteles"
+              label="Cancelar"
+              className="px-5 py-2.5"
+              disabled={isSubmitting}
+            />
+            <button
+              type="submit"
+              disabled={!isValid || isSubmitting || loadingResources || loadingData}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Guardando...
+                </>
               ) : (
-                <div className="animate-in fade-in duration-300">
-                  {activeTab === 'general' && renderGeneralTab()}
-
-                  {activeTab === 'ubicacion' && (
-                    <div className="animate-in fade-in space-y-6 duration-300">
-                      <FormField label="Dirección" required error={errors.direccion}>
-                        <TextInput
-                          {...register('direccion', {
-                            required: 'La dirección es obligatoria',
-                          })}
-                          placeholder="Ej: Av. Principal 123"
-                        />
-                      </FormField>
-                      <UbicacionSelector
-                        errors={errors}
-                        register={register}
-                        setValue={setValue}
-                        watch={watch}
-                      />
-                    </div>
-                  )}
-
-                  {activeTab === 'encargado' && (
-                    <div className="animate-in fade-in space-y-4 duration-300 flex flex-col h-full">
-                      <EncargadosList
-                        value={selectedEncargadoId}
-                        onChange={setSelectedEncargadoId}
-                        exclude={initialEncargadoId}
-                      />
-                      <RedirectLink
-                        to="/admin/encargados/nuevo"
-                        text="¿El encargado que buscas no aparece o no está registrado?"
-                        label="Hacé clic acá para gestionarlos."
-                        newTab
-                        className="mt-4"
-                      />
-                    </div>
-                  )}
-                </div>
+                <>
+                  <Save className="h-4 w-4" />
+                  {isEditing ? 'Actualizar Hotel' : 'Guardar Hotel'}
+                </>
               )}
-            </div>
-
-            {/* Footer Estático */}
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-                <RedirectLink
-                 to="/admin/hoteles"
-                 label="Cancelar"
-                 className="px-5 py-2.5"
-               />
-              <button
-                type="submit"
-                disabled={isSubmitting || loadingResources || loadingData}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Guardar Hotel
-                  </>
-                )}
-              </button>
-            </div>
+            </button>
+          </div>
         </PageContentCard>
       </SidebarLayout>
     </div>

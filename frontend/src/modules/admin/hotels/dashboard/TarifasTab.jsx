@@ -17,9 +17,10 @@ export default function TarifasTab({ hotelId }) {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, isValid },
   } = useForm({
     defaultValues: { precios: {} },
+    mode: 'onChange'
   });
 
   useEffect(() => {
@@ -71,9 +72,9 @@ export default function TarifasTab({ hotelId }) {
   };
 
   return (
-    <div className="animate-in fade-in space-y-8 duration-300">
+    <div className="animate-in fade-in duration-300">
       {/* Encabezado */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-8">
         <div className="max-w-2xl space-y-1">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             Tarifas y Tipos de Habitación
@@ -91,8 +92,8 @@ export default function TarifasTab({ hotelId }) {
       </div>
 
       {/* Formulario con tabla */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <form onSubmit={handleSubmit(onSubmit)} className="">
+        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
           {/* Overlay de carga */}
           {loading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
@@ -174,12 +175,15 @@ export default function TarifasTab({ hotelId }) {
           </table>
         </div>
 
-        {/* Botón Guardar */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+        <div className="mt-10 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
           <button
             type="submit"
-            disabled={isSubmitting || !isDirty || loading}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+            disabled={isSubmitting || !isValid || loading}
+            className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                isSubmitting || !isValid || loading
+                  ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
+                  : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 shadow-blue-500/20'
+              }`}
           >
             {isSubmitting ? (
               <>

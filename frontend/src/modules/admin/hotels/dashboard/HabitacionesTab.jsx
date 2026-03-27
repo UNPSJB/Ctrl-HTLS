@@ -43,7 +43,9 @@ export default function HabitacionesTab({
     reset,
     setValue,
     formState: { errors, isValid },
-  } = useForm();
+  } = useForm({
+    mode: 'onChange'
+  });
 
   const isLocalMode = !hotelId;
 
@@ -205,7 +207,7 @@ export default function HabitacionesTab({
 
 
   return (
-    <div className="animate-in fade-in space-y-6 duration-300">
+    <div className="animate-in fade-in duration-300">
       {/* Encabezado con estadísticas rápidas o descripción */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-1">
@@ -228,6 +230,8 @@ export default function HabitacionesTab({
         </button>
       </div>
 
+      <div className="mt-8">
+
       {/* Formulario de Alta/Edición en Modal */}
       <ActionModal
         isOpen={isCreating}
@@ -236,6 +240,7 @@ export default function HabitacionesTab({
         description={editingId ? 'Modifique los datos de la habitación física' : 'Complete los datos para registrar una nueva unidad'}
         onConfirm={handleSubmit(onSubmit)}
         loading={submitting}
+        confirmDisabled={!isValid || submitting}
         confirmLabel={editingId ? 'Guardar Cambios' : 'Registrar'}
         confirmIcon={Plus}
       >
@@ -297,6 +302,7 @@ export default function HabitacionesTab({
         onEdit={startEdit}
         onDelete={handleDelete}
       />
+      </div>
     </div>
   );
 }

@@ -18,7 +18,9 @@ export default function PaquetesTab({ hotelId }) {
   const [loadingAction, setLoadingAction] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, watch, formState: { errors, isValid } } = useForm({
+    mode: 'onChange'
+  });
   
   // Observar fecha inicio para limitar fecha fin
   const fechaInicio = watch('fecha_inicio');
@@ -79,7 +81,7 @@ export default function PaquetesTab({ hotelId }) {
 
 
   return (
-    <div className="animate-in fade-in space-y-8 duration-500">
+    <div className="animate-in fade-in duration-500">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
@@ -100,110 +102,112 @@ export default function PaquetesTab({ hotelId }) {
         </button>
       </div>
 
-      {/* Modal de Paquete */}
-      <ActionModal
-        isOpen={showForm}
-        onClose={() => {
-          setShowForm(false);
-          reset();
-        }}
-        title="Crear Paquete Promocional"
-        description="Agrupe habitaciones y defina un descuento especial para este periodo."
-        onConfirm={handleSubmit(handleCreatePaquete)}
-        loading={loadingAction}
-        confirmLabel="Crear Paquete"
-        confirmIcon={Plus}
-        size="lg"
-      >
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="lg:col-span-2">
-              <FormField label="Nombre del Paquete" required error={errors.nombre}>
+      <div className="mt-8">
+        {/* Modal de Paquete */}
+        <ActionModal
+          isOpen={showForm}
+          onClose={() => {
+            setShowForm(false);
+            reset();
+          }}
+          title="Crear Paquete Promocional"
+          description="Agrupe habitaciones y defina un descuento especial para este periodo."
+          onConfirm={handleSubmit(handleCreatePaquete)}
+          loading={loadingAction}
+          confirmDisabled={!isValid || loadingAction}
+          confirmLabel="Crear Paquete"
+          confirmIcon={Plus}
+          size="lg"
+        >
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="lg:col-span-2">
+                <FormField label="Nombre del Paquete" required error={errors.nombre}>
+                  <TextInput
+                    placeholder="Ej: Finde Romántico"
+                    {...register('nombre', { required: 'Requerido' })}
+                  />
+                </FormField>
+              </div>
+              <FormField label="Desde" required error={errors.fecha_inicio}>
                 <TextInput
-                  placeholder="Ej: Finde Romántico"
-                  {...register('nombre', { required: 'Requerido' })}
+                  type="date"
+                  min={new Date().toISOString().split('T')[0]}
+                  {...register('fecha_inicio', { required: 'Requerido' })}
+                />
+              </FormField>
+              <FormField label="Hasta" required error={errors.fecha_fin}>
+                <TextInput
+                  type="date"
+                  min={fechaInicio || new Date().toISOString().split('T')[0]}
+                  {...register('fecha_fin', { required: 'Requerido' })}
                 />
               </FormField>
             </div>
-            <FormField label="Desde" required error={errors.fecha_inicio}>
-              <TextInput
-                type="date"
-                min={new Date().toISOString().split('T')[0]}
-                {...register('fecha_inicio', { required: 'Requerido' })}
-              />
-            </FormField>
-            <FormField label="Hasta" required error={errors.fecha_fin}>
-              <TextInput
-                type="date"
-                min={fechaInicio || new Date().toISOString().split('T')[0]}
-                {...register('fecha_fin', { required: 'Requerido' })}
-              />
-            </FormField>
-          </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <FormField label="Descuento (%)" required error={errors.coeficiente_descuento}>
-              <NumberInput
-                step="0.01"
-                placeholder="Ej: 20.00"
-                {...register('coeficiente_descuento', { required: 'Requerido', min: 0.1, max: 100 })}
-              />
-            </FormField>
-          </div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <FormField label="Descuento (%)" required error={errors.coeficiente_descuento}>
+                <NumberInput
+                  step="0.01"
+                  placeholder="Ej: 20.00"
+                  {...register('coeficiente_descuento', { required: 'Requerido', min: 0.1, max: 100 })}
+                />
+              </FormField>
+            </div>
 
-          <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-2">
-              <BedDouble className="w-4 h-4 text-blue-500" />
-              Habitaciones a incluir
-            </label>
-            <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-              <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
-                <table className="w-full text-left text-sm">
-                  <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/90 dark:text-gray-400">
-                    <tr>
-                      <th className="px-4 py-3 w-12 text-center">Incluir</th>
-                      <th className="px-6 py-4">Piso - Número</th>
-                      <th className="px-6 py-4">Tipo</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {habitaciones.length === 0 ? (
-                      <tr key="empty-rooms">
-                        <td colSpan="3" className="px-4 py-8 text-center text-sm text-gray-500 italic">
-                          No hay habitaciones registradas en este hotel.
-                        </td>
+            <div className="space-y-3">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <BedDouble className="w-4 h-4 text-blue-500" />
+                Habitaciones a incluir
+              </label>
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
+                  <table className="w-full text-left text-sm">
+                    <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/90 dark:text-gray-400">
+                      <tr>
+                        <th className="px-4 py-3 w-12 text-center">Incluir</th>
+                        <th className="px-6 py-4">Piso - Número</th>
+                        <th className="px-6 py-4">Tipo</th>
                       </tr>
-                    ) : (
-                      habitaciones.map((hab, idx) => (
-                        <tr key={hab.id || `hab-${hab.piso}-${hab.numero}-${idx}`} className="transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-900/10 has-[:checked]:bg-blue-50/50 dark:has-[:checked]:bg-blue-900/20">
-                          <td className="px-4 py-3 text-center align-middle">
-                            <input
-                              type="checkbox"
-                              value={hab.id || `${hab.piso}-${hab.numero}`}
-                              {...register('habitaciones')}
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer dark:border-gray-600 dark:bg-gray-700 transition-all"
-                            />
-                          </td>
-                          <td className="px-6 py-3 font-bold text-gray-900 dark:text-white">
-                            Piso {hab.piso} - N° {hab.numero}
-                          </td>
-                          <td className="px-6 py-3 text-gray-600 dark:text-gray-300">
-                            {hab?.tipoHabitacion?.nombre || 'Sin tipo'}
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {habitaciones.length === 0 ? (
+                        <tr key="empty-rooms">
+                          <td colSpan="3" className="px-4 py-8 text-center text-sm text-gray-500 italic">
+                            No hay habitaciones registradas en este hotel.
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        habitaciones.map((hab, idx) => (
+                          <tr key={hab.id || `hab-${hab.piso}-${hab.numero}-${idx}`} className="transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-900/10 has-[:checked]:bg-blue-50/50 dark:has-[:checked]:bg-blue-900/20">
+                            <td className="px-4 py-3 text-center align-middle">
+                              <input
+                                type="checkbox"
+                                value={hab.id || `${hab.piso}-${hab.numero}`}
+                                {...register('habitaciones')}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer dark:border-gray-600 dark:bg-gray-700 transition-all"
+                              />
+                            </td>
+                            <td className="px-6 py-3 font-bold text-gray-900 dark:text-white">
+                              Piso {hab.piso} - N° {hab.numero}
+                            </td>
+                            <td className="px-6 py-3 text-gray-600 dark:text-gray-300">
+                              {hab?.tipoHabitacion?.nombre || 'Sin tipo'}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </ActionModal>
-
-      {/* Listado de Paquetes */}
-      <PaquetesList data={paquetes} loading={loadingInitial} />
-
+        </ActionModal>
+      
+        {/* Listado de Paquetes */}
+        <PaquetesList data={paquetes} loading={loadingInitial} />
+      </div>
     </div>
   );
 }

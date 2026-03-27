@@ -44,6 +44,7 @@ export default function AjustesGeneralesTab({
       encargadoTipoDocumento: '',
       encargadoNumeroDocumento: '',
     },
+    mode: 'onChange'
   });
 
   const {
@@ -78,6 +79,11 @@ export default function AjustesGeneralesTab({
       }
     }
   }, [initialData, reset]);
+
+  const handleNumericChange = (e) => {
+    const { value } = e.target;
+    setValue(e.target.name, value.replace(/\D/g, ''), { shouldValidate: true });
+  };
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -133,175 +139,138 @@ export default function AjustesGeneralesTab({
         </p>
       </div>
 
-      {/* Paleta de estilos activos por pestaña (strings completos para Tailwind) */}
-      {(() => {
-        const TAB_STYLES = {
-          general:   { active: 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400', icon: 'text-blue-500' },
-          ubicacion: { active: 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400', icon: 'text-indigo-500' },
-          encargado: { active: 'border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400', icon: 'text-violet-500' },
-        };
-        const inactive = 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300';
-        return (
-          <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => setActiveSubTab('general')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'general' ? TAB_STYLES.general.active : inactive}`}
-            >
-              <Building2 className={`h-4 w-4 ${activeSubTab === 'general' ? TAB_STYLES.general.icon : ''}`} />
-              Información Básica
-            </button>
-            <button
-              onClick={() => setActiveSubTab('ubicacion')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'ubicacion' ? TAB_STYLES.ubicacion.active : inactive}`}
-            >
-              <MapPin className={`h-4 w-4 ${activeSubTab === 'ubicacion' ? TAB_STYLES.ubicacion.icon : ''}`} />
-              Ubicación Geográfica
-            </button>
-            <button
-              onClick={() => setActiveSubTab('encargado')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'encargado' ? TAB_STYLES.encargado.active : inactive}`}
-            >
-              <User className={`h-4 w-4 ${activeSubTab === 'encargado' ? TAB_STYLES.encargado.icon : ''}`} />
-              Encargado Actual
-            </button>
+      {/* Paleta de estilos activos por pestaña */}
+      <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('general')}
+          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'general' ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}`}
+        >
+          <Building2 className={`h-4 w-4 ${activeSubTab === 'general' ? 'text-blue-500' : ''}`} />
+          Información Básica
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('ubicacion')}
+          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'ubicacion' ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}`}
+        >
+          <MapPin className={`h-4 w-4 ${activeSubTab === 'ubicacion' ? 'text-indigo-500' : ''}`} />
+          Ubicación Geográfica
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('encargado')}
+          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'encargado' ? 'border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}`}
+        >
+          <User className={`h-4 w-4 ${activeSubTab === 'encargado' ? 'text-violet-500' : ''}`} />
+          Encargado Actual
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="">
+        {/* Contenedor de sub-pestañas con scroll si es necesario */}
+        <div className="">
+          {/* Sección: Información Básica */}
+          <div className={activeSubTab === 'general' ? 'animate-in fade-in duration-300' : 'hidden'}>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <FormField label="Nombre del Hotel" required error={errors.nombre}>
+                <TextInput
+                  {...register('nombre', {
+                    required: 'El nombre es obligatorio',
+                  })}
+                  placeholder="Ej: Hotel Paradise Resort"
+                />
+              </FormField>
+
+              <FormField label="Categoría" required error={errors.categoriaId}>
+                <SelectInput
+                  {...register('categoriaId', {
+                    required: 'Seleccione una categoría',
+                  })}
+                >
+                  <option value="">Seleccionar...</option>
+                  {categorias?.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </SelectInput>
+              </FormField>
+
+              <FormField label="Teléfono" required error={errors.telefono}>
+                <TelInput
+                  {...register('telefono', {
+                    required: 'El teléfono es obligatorio',
+                    onChange: handleNumericChange
+                  })}
+                  placeholder="Ej: 3764556677"
+                />
+              </FormField>
+
+              <FormField label="Email" required error={errors.email}>
+                <EmailInput
+                  {...register('email', { 
+                    required: 'El email es obligatorio',
+                    pattern: { value: /^\S+@\S+$/i, message: 'Email inválido' }
+                  })}
+                  placeholder="contacto@hotel.com"
+                />
+              </FormField>
+            </div>
           </div>
-        );
-      })()}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {/* Sección: Información Básica */}
-        {activeSubTab === 'general' && (
-        <div className="animate-in fade-in duration-300">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <FormField label="Nombre del Hotel" required error={errors.nombre}>
-              <TextInput
-                {...register('nombre', {
-                  required: 'El nombre es obligatorio',
-                })}
-                placeholder="Ej: Hotel Paradise Resort"
-              />
-            </FormField>
-
-            <FormField label="Categoría" required error={errors.categoriaId}>
-              <SelectInput
-                {...register('categoriaId', {
-                  required: 'Seleccione una categoría',
-                })}
-              >
-                <option value="">Seleccionar...</option>
-                {categorias?.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </SelectInput>
-            </FormField>
-
-            <FormField label="Teléfono" required error={errors.telefono}>
-              <TelInput
-                {...register('telefono', {
-                  required: 'El teléfono es obligatorio',
-                })}
-                placeholder="+54 ..."
-              />
-            </FormField>
-
-            <FormField label="Email" required error={errors.email}>
-              <EmailInput
-                {...register('email', { required: 'El email es obligatorio' })}
-              />
-            </FormField>
-          </div>
-          <div className="mt-6 flex justify-end pt-4">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                isSubmitting
-                  ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
-                  : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700'
-              }`}
-            >
-              <Save className="h-4 w-4" />
-              {isSubmitting ? 'Guardando...' : 'Guardar Información Básica'}
-            </button>
-          </div>
-        </div>
-        )}
-
-        {/* Sección: Ubicación */}
-        {activeSubTab === 'ubicacion' && (
-        <div className="animate-in fade-in duration-300">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <FormField label="Dirección" required error={errors.direccion}>
-              <TextInput
-                {...register('direccion', {
-                  required: 'La dirección es obligatoria',
-                })}
-                placeholder="Calle, Número, Piso..."
-              />
-            </FormField>
-
+          {/* Sección: Ubicación */}
+          <div className={activeSubTab === 'ubicacion' ? 'animate-in fade-in duration-300' : 'hidden'}>
             <UbicacionSelector
               errors={errors}
               register={register}
               setValue={setValue}
               watch={watch}
+              showAddress={true}
             />
           </div>
-          <div className="mt-6 flex justify-end pt-4">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                isSubmitting
-                  ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
-                  : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700'
-              }`}
-            >
-              <Save className="h-4 w-4" />
-              {isSubmitting ? 'Guardando...' : 'Guardar Ubicación'}
-            </button>
+
+          {/* Sección: Encargado */}
+          <div className={activeSubTab === 'encargado' ? 'animate-in fade-in duration-300 flex flex-col' : 'hidden'}>
+            <EncargadosList
+              value={selectedEncargadoId}
+              onChange={setSelectedEncargadoId}
+              exclude={initialData?.encargado?.id}
+            />
+
+            <RedirectLink
+              to="/admin/encargados/nuevo"
+              text="¿El encargado que buscas no aparece o no está registrado?"
+              label="Hacé clic acá para gestionarlos."
+              newTab
+              className="mt-4"
+            />
           </div>
         </div>
-        )}
 
-        {/* Sección: Encargado */}
-        {activeSubTab === 'encargado' && (
-        <div className="animate-in fade-in duration-300 flex flex-col h-full">
-          <EncargadosList
-            value={selectedEncargadoId}
-            onChange={setSelectedEncargadoId}
-            exclude={initialData?.encargado?.id}
-          />
-          
-          <RedirectLink
-            to="/admin/encargados/nuevo"
-            text="¿El encargado que buscas no aparece o no está registrado?"
-            label="Hacé clic acá para gestionarlos."
-            newTab
-            className="mt-4"
-          />
-
-          {selectedEncargadoId !== initialData?.encargado?.id && (
-            <div className="mt-6 flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  isSubmitting
-                    ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
-                    : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700'
-                }`}
-              >
+        <div className="mt-10 flex justify-end pt-6 border-t border-gray-100 dark:border-gray-800">
+          <button
+            type="submit"
+            disabled={isSubmitting || !form.formState.isValid}
+            className={`flex items-center gap-2 rounded-lg px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              isSubmitting || !form.formState.isValid
+                ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
+                : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 shadow-blue-500/20 active:scale-[0.98]'
+            }`}
+          >
+            {isSubmitting ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Guardando Cambios...
+              </>
+            ) : (
+              <>
                 <Save className="h-4 w-4" />
-                {isSubmitting ? 'Guardando...' : 'Guardar Encargado'}
-              </button>
-            </div>
-          )}
+                Guardar Ajustes Generales
+              </>
+            )}
+          </button>
         </div>
-        )}
-
       </form>
     </div>
   );

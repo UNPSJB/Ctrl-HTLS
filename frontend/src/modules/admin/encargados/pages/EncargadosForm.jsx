@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { Save, UserCog, X } from 'lucide-react';
+import { Save, UserCog, User, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '@admin-ui';
+import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import { 
     FormField, 
     TextInput, 
+    EmailInput,
     SelectInput,
     TelInput,
     RedirectLink
@@ -23,14 +24,15 @@ const tiposDocumento = [
 const EncargadosForm = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState('personal');
 
-    // Form mode is always 'Create'
     const {
         register,
         handleSubmit,
         setValue,
         watch,
-        formState: { errors, isValid }
+        formState: { errors, isValid },
+        reset
     } = useForm({
         defaultValues: {
             nombre: '',
@@ -38,13 +40,14 @@ const EncargadosForm = () => {
             telefono: '',
             tipoDocumento: 'dni',
             numeroDocumento: '',
+            email: '',
         },
         mode: 'onChange'
     });
 
     const tipoDocumento = watch('tipoDocumento');
 
-    // Formateadores automáticos
+    // Formateadores automáticos con validación reactiva
     const handleDocumentoChange = (e) => {
         const { value } = e.target;
         let procesado = value;
@@ -53,18 +56,17 @@ const EncargadosForm = () => {
         } else {
             procesado = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
         }
-        setValue('numeroDocumento', procesado);
+        setValue('numeroDocumento', procesado, { shouldValidate: true });
     };
 
-    const handleTelefonoChange = (e) => {
+    const handleNumericChange = (e) => {
         const { value } = e.target;
-        setValue('telefono', value.replace(/\D/g, ''));
+        setValue(e.target.name, value.replace(/\D/g, ''), { shouldValidate: true });
     };
 
     const handleTipoChange = (e) => {
-        const { value } = e.target;
-        setValue('tipoDocumento', value);
-        setValue('numeroDocumento', ''); // Limpiar documento al cambiar tipo
+        setValue('tipoDocumento', e.target.value, { shouldValidate: true });
+        setValue('numeroDocumento', '', { shouldValidate: true });
     };
 
     // Envío del formulario
@@ -85,79 +87,93 @@ const EncargadosForm = () => {
 
     const handleCancel = () => navigate('/admin/encargados');
 
-
     return (
         <div className="space-y-6">
             {/* Encabezado del Encargado */}
             <PageHeader
                 title="Registrar Nuevo Encargado"
-                description="El encargado quedará disponible para ser asignado posteriormente a un hotel."
+                description="Complete los datos para dar de alta a un nuevo encargado operativo."
                 onBack={handleCancel}
                 icon={UserCog}
             />
 
-            {/* Contenedor del Formulario */}
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1 flex flex-col">
-                    <div>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            <FormField label="Nombre" required error={errors.nombre}>
-                                <TextInput
-                                    placeholder="Ej: Juan Carlos"
-                                    {...register('nombre', {
-                                        required: 'El nombre es obligatorio',
-                                        minLength: { value: 2, message: 'Mínimo 2 caracteres' }
-                                    })}
-                                />
-                            </FormField>
+            <SidebarLayout
+                sidebar={
+                    <PageSidebar
+                        tabs={[
+                            { id: 'personal', icon: User, label: 'Información Personal' },
+                            { id: 'contacto', icon: Phone, label: 'Medios de Contacto' },
+                        ]}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                    />
+                }
+            >
+                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="flex-1">
+                        {/* Información Personal */}
+                        <div className={activeTab === 'personal' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                <FormField label="Nombre" required error={errors.nombre}>
+                                    <TextInput
+                                        id="nombre"
+                                        {...register('nombre', { required: 'El nombre es obligatorio' })}
+                                        placeholder="Ej: Juan Carlos"
+                                    />
+                                </FormField>
+                                <FormField label="Apellido" required error={errors.apellido}>
+                                    <TextInput
+                                        id="apellido"
+                                        {...register('apellido', { required: 'El apellido es obligatorio' })}
+                                        placeholder="Ej: García López"
+                                    />
+                                </FormField>
+                                <FormField label="Tipo de Documento" required error={errors.tipoDocumento}>
+                                    <SelectInput
+                                        id="tipoDocumento"
+                                        {...register('tipoDocumento', { onChange: handleTipoChange })}
+                                    >
+                                        {tiposDocumento.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                                    </SelectInput>
+                                </FormField>
+                                <FormField label="Número de Documento" required error={errors.numeroDocumento}>
+                                    <TextInput
+                                        id="numeroDocumento"
+                                        {...register('numeroDocumento', {
+                                            required: 'El documento es obligatorio',
+                                            minLength: { value: 7, message: 'Mínimo 7 caracteres' },
+                                            onChange: handleDocumentoChange
+                                        })}
+                                        maxLength={15}
+                                        placeholder="Sin puntos ni guiones"
+                                    />
+                                </FormField>
+                            </div>
+                        </div>
 
-                            <FormField label="Apellido" required error={errors.apellido}>
-                                <TextInput
-                                    placeholder="Ej: García López"
-                                    {...register('apellido', {
-                                        required: 'El apellido es obligatorio',
-                                        minLength: { value: 2, message: 'Mínimo 2 caracteres' }
-                                    })}
-                                />
-                            </FormField>
-
-                            <FormField label="Tipo de Documento" required error={errors.tipoDocumento}>
-                                <SelectInput
-                                    {...register('tipoDocumento', {
-                                        required: 'Seleccione un tipo'
-                                    })}
-                                    onChange={handleTipoChange}
-                                >
-                                    {tiposDocumento.map(tipo => (
-                                        <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
-                                    ))}
-                                </SelectInput>
-                            </FormField>
-
-                            <FormField label="Número de Documento" required error={errors.numeroDocumento}>
-                                <TextInput
-                                    placeholder="Ej: 12345678"
-                                    {...register('numeroDocumento', {
-                                        required: 'El documento es obligatorio',
-                                        minLength: { value: 7, message: 'Mínimo 7 caracteres' },
-                                        maxLength: { value: 15, message: 'Documento muy largo' }
-                                    })}
-                                    onChange={handleDocumentoChange}
-                                />
-                            </FormField>
-
-                            <FormField label="Teléfono" error={errors.telefono}>
-                                <TelInput
-                                    placeholder="Ej: 3811234567"
-                                    {...register('telefono', {
-                                        pattern: {
-                                            value: /^[0-9]*$/,
-                                            message: 'Solo se permiten números'
-                                        }
-                                    })}
-                                    onChange={handleTelefonoChange}
-                                />
-                            </FormField>
+                        {/* Medios de Contacto */}
+                        <div className={activeTab === 'contacto' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Medios de Contacto</h3>
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                <FormField label="Email" required error={errors.email}>
+                                    <EmailInput
+                                        id="email"
+                                        {...register('email', {
+                                            required: 'El email es obligatorio',
+                                            pattern: { value: /^\S+@\S+$/i, message: 'Email inválido' }
+                                        })}
+                                        placeholder="encargado@empresa.com"
+                                    />
+                                </FormField>
+                                <FormField label="Teléfono" error={errors.telefono}>
+                                    <TelInput
+                                        id="telefono"
+                                        {...register('telefono', { onChange: handleNumericChange })}
+                                        placeholder="Ej: 3764556677"
+                                    />
+                                </FormField>
+                            </div>
                         </div>
                     </div>
 
@@ -166,30 +182,30 @@ const EncargadosForm = () => {
                         <RedirectLink
                             to="/admin/encargados"
                             label="Cancelar"
-                            icon={X}
                             className="px-5 py-2.5"
+                            disabled={loading}
                         />
 
                         <button
                             type="submit"
-                            disabled={loading || !isValid}
+                            disabled={!isValid || loading}
                             className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
                         >
                             {loading ? (
                                 <>
                                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                    Registrando...
+                                    Guardando...
                                 </>
                             ) : (
                                 <>
                                     <Save className="h-4 w-4" />
-                                    Registrar Encargado
+                                    Guardar Encargado
                                 </>
                             )}
                         </button>
                     </div>
-                </form>
-            </div>
+                </PageContentCard>
+            </SidebarLayout>
         </div>
     );
 };

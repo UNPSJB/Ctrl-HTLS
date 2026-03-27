@@ -1,10 +1,18 @@
 import { useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import useUbicacion from '@/hooks/useUbicacion';
-import { FormField, SelectInput, RedirectLink } from '@form';
+import { FormField, SelectInput, TextInput, RedirectLink } from '@form';
 
 // Selector cascada de ubicación: País -> Provincia -> Ciudad refactorizado con suite @form
-const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
+const UbicacionSelector = ({ 
+  errors = {}, 
+  register, 
+  setValue, 
+  watch,
+  showAddress = false,
+  addressFieldName = 'direccion',
+  required = true
+}) => {
   const {
     paises,
     provincias,
@@ -18,6 +26,9 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
     handleProvinciaChange,
     handleCiudadChange,
     setInitialUbicacion,
+    loadingPaises,
+    loadingProvincias,
+    loadingCiudades,
   } = useUbicacion();
 
   // Sincronización inicial desde el formulario (Modo Edición)
@@ -34,46 +45,49 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
   // Actualizar el formulario solo cuando el hook cambia (y sea diferente al valor actual)
   useEffect(() => {
     if (paisId && watch('paisId') !== paisId) {
-      setValue('paisId', paisId);
+      setValue('paisId', paisId, { shouldDirty: true });
     }
   }, [paisId, setValue, watch]);
 
   useEffect(() => {
     if (provinciaId && watch('provinciaId') !== provinciaId) {
-      setValue('provinciaId', provinciaId);
+      setValue('provinciaId', provinciaId, { shouldDirty: true });
     }
   }, [provinciaId, setValue, watch]);
 
   useEffect(() => {
     if (ciudadId && watch('ciudadId') !== ciudadId) {
-      setValue('ciudadId', ciudadId);
+      setValue('ciudadId', ciudadId, { shouldDirty: true });
     }
   }, [ciudadId, setValue, watch]);
 
   const handlePaisChangeInternal = (value) => {
     handlePaisChange(value);
-    setValue('paisId', value);
+    setValue('paisId', value, { shouldValidate: true, shouldDirty: true });
   };
 
   const handleProvinciaChangeInternal = (value) => {
     handleProvinciaChange(value);
-    setValue('provinciaId', value);
+    setValue('provinciaId', value, { shouldValidate: true, shouldDirty: true });
   };
 
   const handleCiudadChangeInternal = (value) => {
     handleCiudadChange(value);
-    setValue('ciudadId', value);
+    setValue('ciudadId', value, { shouldValidate: true, shouldDirty: true });
   };
 
   return (
-    <>
-      <FormField label="País" required error={errors.paisId}>
+    <div className="grid grid-cols-1 gap-x-6 gap-y-6 md:grid-cols-2">
+      <FormField label="País" required={required} error={errors.paisId}>
         <SelectInput
-          {...register('paisId', { required: 'Debe seleccionar un país' })}
+          {...register('paisId', { required: required ? 'Debe seleccionar un país' : false })}
           value={paisId}
           onChange={(e) => handlePaisChangeInternal(e.target.value)}
+          disabled={loadingPaises}
         >
-          <option value="">Seleccionar país</option>
+          <option value="">
+            {loadingPaises ? 'Cargando países...' : 'Seleccionar país'}
+          </option>
           {(paises || []).map((pais) => (
             <option key={pais.id} value={pais.id.toString()}>
               {pais.nombre}
@@ -82,17 +96,21 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
         </SelectInput>
       </FormField>
 
-      <FormField label="Provincia/Estado" required error={errors.provinciaId}>
+      <FormField label="Provincia/Estado" required={required} error={errors.provinciaId}>
         <SelectInput
           {...register('provinciaId', {
-            required: 'Debe seleccionar una provincia',
+            required: required ? 'Debe seleccionar una provincia' : false,
           })}
           value={provinciaId}
           onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
-          disabled={isProvinciasDisabled}
+          disabled={isProvinciasDisabled || loadingProvincias}
         >
           <option value="">
-            {paisId ? 'Seleccionar provincia' : 'Primero seleccione un país'}
+            {loadingProvincias
+              ? 'Cargando provincias...'
+              : paisId
+                ? 'Seleccionar provincia'
+                : 'Primero seleccione un país'}
           </option>
           {(provincias || []).map((provincia) => (
             <option key={provincia.id} value={provincia.id.toString()}>
@@ -102,19 +120,21 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
         </SelectInput>
       </FormField>
 
-      <FormField label="Ciudad" required error={errors.ciudadId}>
+      <FormField label="Ciudad" required={required} error={errors.ciudadId}>
         <SelectInput
           {...register('ciudadId', {
-            required: 'Debe seleccionar una ciudad',
+            required: required ? 'Debe seleccionar una ciudad' : false,
           })}
           value={ciudadId}
           onChange={(e) => handleCiudadChangeInternal(e.target.value)}
-          disabled={isCiudadesDisabled}
+          disabled={isCiudadesDisabled || loadingCiudades}
         >
           <option value="">
-            {provinciaId
-              ? 'Seleccionar ciudad'
-              : 'Primero seleccione una provincia'}
+            {loadingCiudades
+              ? 'Cargando ciudades...'
+              : provinciaId
+                ? 'Seleccionar ciudad'
+                : 'Primero seleccione una provincia'}
           </option>
           {(ciudades || []).map((ciudad) => (
             <option key={ciudad.id} value={ciudad.id.toString()}>
@@ -124,6 +144,18 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
         </SelectInput>
       </FormField>
 
+      {showAddress && (
+        <FormField label="Dirección" required={required} error={errors[addressFieldName]}>
+          <TextInput
+            id={addressFieldName}
+            {...register(addressFieldName, { 
+              required: required ? 'La dirección es obligatoria' : false 
+            })}
+            placeholder="Calle, Número, Depto..."
+          />
+        </FormField>
+      )}
+
       {/* Redirección a Gestión de Ubicaciones */}
       <RedirectLink
         to="/admin/ubicacion"
@@ -132,7 +164,7 @@ const UbicacionSelector = ({ errors = {}, register, setValue, watch }) => {
         newTab
         className="col-span-full mt-2"
       />
-    </>
+    </div>
   );
 };
 

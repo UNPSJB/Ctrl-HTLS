@@ -10,10 +10,11 @@ import { Link } from 'react-router-dom';
  * @param {string} label - Texto del enlace interactivo.
  * @param {string} className - Clases adicionales para el contenedor.
  * @param {boolean} newTab - Si el enlace debe abrirse en una nueva pestaña.
+ * @param {boolean} disabled - Si el enlace está deshabilitado.
  */
-const RedirectLink = ({ to, text, label, className = '', newTab = false }) => {
+const RedirectLink = ({ to, text, label, className = '', newTab = false, disabled = false }) => {
   return (
-    <div className={`inline-block text-sm text-gray-500 dark:text-gray-400 ${className}`}>
+    <div className={`inline-block text-sm text-gray-500 dark:text-gray-400 ${className} ${disabled ? 'opacity-40 pointer-events-none select-none' : ''}`}>
       {text && <span>{text} </span>}
       <Link
         to={to}
