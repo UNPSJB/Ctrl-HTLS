@@ -438,6 +438,22 @@ const obtenerAdministradores = async () => {
   return administradores.map(formatearAdministrador);
 };
 
+const obtenerAdministradorPorId = async (id) => {
+  const administrador = await Empleado.findByPk(id, {
+    include: [incluirCiudadCompleta],
+  });
+
+  if (!administrador) {
+    throw new CustomError('Administrador no encontrado', 404);
+  }
+
+  if (administrador.rol !== 'administrador') {
+    throw new CustomError('El empleado no es un administrador', 404);
+  }
+
+  return formatearAdministrador(administrador);
+};
+
 const obtenerVendedorPorId = async (id) => {
   const vendedor = await Empleado.findByPk(id, {
     include: incluirRelacionesVendedor,
@@ -601,6 +617,7 @@ module.exports = {
   obtenerVentasCliente,
   eliminarEmpleado,
   obtenerAdministradores,
+  obtenerAdministradorPorId,
   obtenerVendedores,
   obtenerVendedorPorId,
   crearCliente,

@@ -22,6 +22,7 @@ const {
 
 const {
   getAdministradores,
+  getAdministradorById,
   createEmpleado,
   updateEmpleado,
   updateAdministrador,
@@ -65,6 +66,7 @@ router.put(
 ); //Ruta para actualizar solo administradores
 router.delete('/empleado/:id', validateId, deleteEmpleado); //Ruta para eliminar un administrador/vendedor
 router.get('/administradores', getAdministradores); //Ruta para obtener todos los administradores
+router.get('/administrador/:id', validateId, getAdministradorById); //Ruta para obtener un administrador por su ID
 router.get('/vendedor/:id', validateId, getVendedor); //Ruta para obtener un vendedor por su ID
 router.get('/vendedor/:id/ventas', validateId, getVentasVendedor); //Ruta para obtener las ventas de un vendedor
 router.get('/vendedores', getVendedores); //Ruta para obtener todos los vendedores

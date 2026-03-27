@@ -223,8 +223,26 @@ const getVentasCliente = async (req, res) => {
   }
 };
 
+const getAdministradorById = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const administrador = await personaServices.obtenerAdministradorPorId(id);
+    return res.status(200).json(administrador);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAdministradores,
+  getAdministradorById,
   createEmpleado,
   updateEmpleado,
   updateAdministrador,
