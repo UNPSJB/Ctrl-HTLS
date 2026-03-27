@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { Save, X, Users } from 'lucide-react';
+import { Save, X, Users, User, Phone, Search } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
-import { PageHeader } from '@admin-ui';
+import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import { 
     FormField, 
     TextInput, 
@@ -23,7 +23,7 @@ const tiposDocumento = [
     { id: 'pasaporte', nombre: 'Pasaporte' },
 ];
 
-// Formulario para registro y edición de clientes
+// Formulario para registro y edición de clientes con Estilo Industrial
 const ClientesForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -51,6 +51,7 @@ const ClientesForm = () => {
 
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
+    const [activeTab, setActiveTab] = useState('personal');
 
     const tipoDocumento = watch('tipoDocumento');
 
@@ -139,110 +140,130 @@ const ClientesForm = () => {
         <div className="space-y-6">
             {/* Perfil del Cliente / Encabezado */}
             <PageHeader
-                title={isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Registrar Nuevo Cliente'}
-                description={isEditing ? 'Actualice la información personal y de contacto del cliente' : 'Ingrese los datos básicos para registrar un nuevo cliente'}
+                title={isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Nuevo Cliente'}
+                description={isEditing ? 'Gestión de información personal y contacto' : 'Complete el formulario para dar de alta un cliente'}
                 onBack={handleCancel}
                 icon={Users}
                 loading={loadingData}
             />
 
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col">
-                {loadingData ? (
-                    <div className="flex-1 flex items-center justify-center p-6">
+            <SidebarLayout
+                sidebar={
+                    <PageSidebar
+                        tabs={[
+                            { id: 'personal', icon: User, label: 'Información Personal' },
+                            { id: 'contacto', icon: Phone, label: 'Contacto y Otros' },
+                        ]}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                    />
+                }
+            >
+                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    {loadingData ? (
                         <InnerLoading message="Cargando perfil del cliente..." />
+                    ) : (
+                        <div className="flex-1 space-y-6">
+                            {activeTab === 'personal' && (
+                                <div className="space-y-6 animate-in fade-in duration-300">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <FormField label="Nombre" required error={errors.nombre}>
+                                            <TextInput
+                                                {...register('nombre', { required: 'El nombre es obligatorio' })}
+                                                placeholder="Ej: Juan Carlos"
+                                            />
+                                        </FormField>
+
+                                        <FormField label="Apellido" required error={errors.apellido}>
+                                            <TextInput
+                                                {...register('apellido', { required: 'El apellido es obligatorio' })}
+                                                placeholder="Ej: García López"
+                                            />
+                                        </FormField>
+
+                                        <FormField label="Tipo de Documento" required error={errors.tipoDocumento}>
+                                            <SelectInput
+                                                {...register('tipoDocumento', { onChange: handleTipoChange })}
+                                            >
+                                                {tiposDocumento.map((tipo) => (
+                                                    <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
+                                                ))}
+                                            </SelectInput>
+                                        </FormField>
+
+                                        <FormField label="Número de Documento" required error={errors.numeroDocumento}>
+                                            <TextInput
+                                                {...register('numeroDocumento', {
+                                                    required: 'El documento es obligatorio',
+                                                    minLength: { value: 7, message: 'Mínimo 7 caracteres' },
+                                                    onChange: handleDocumentoChange
+                                                })}
+                                                placeholder={tipoDocumento === 'pasaporte' ? 'Ej: A1234567' : 'Ej: 12345678'}
+                                                maxLength={15}
+                                            />
+                                        </FormField>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'contacto' && (
+                                <div className="space-y-6 animate-in fade-in duration-300">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Medios de Contacto</h3>
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <FormField label="Email" required error={errors.email}>
+                                            <EmailInput
+                                                {...register('email', {
+                                                    required: 'El email es obligatorio',
+                                                    pattern: {
+                                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                        message: 'Email inválido'
+                                                    }
+                                                })}
+                                                placeholder="hotel@ejemplo.com"
+                                            />
+                                        </FormField>
+
+                                        <FormField label="Teléfono" error={errors.telefono}>
+                                            <TelInput
+                                                {...register('telefono', { onChange: handleTelefonoChange })}
+                                                placeholder="Ej: 3811234567"
+                                            />
+                                        </FormField>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Botones de Acción */}
+                    <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+                        <RedirectLink
+                            to="/admin/clientes"
+                            label="Cancelar"
+                            className="px-5 py-2.5"
+                        />
+
+                        <button
+                            type="submit"
+                            disabled={loading || loadingData || !isValid}
+                            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    Guardando...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="h-4 w-4" />
+                                    {isEditing ? 'Actualizar Cliente' : 'Guardar Cliente'}
+                                </>
+                            )}
+                        </button>
                     </div>
-                ) : (
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1 flex flex-col">
-                        <div>
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                <FormField label="Nombre" required error={errors.nombre}>
-                                    <TextInput
-                                        {...register('nombre', { required: 'El nombre es obligatorio' })}
-                                        placeholder="Ej: Juan Carlos"
-                                    />
-                                </FormField>
-
-                                <FormField label="Apellido" required error={errors.apellido}>
-                                    <TextInput
-                                        {...register('apellido', { required: 'El apellido es obligatorio' })}
-                                        placeholder="Ej: García López"
-                                    />
-                                </FormField>
-
-                                <FormField label="Tipo de Documento" required error={errors.tipoDocumento}>
-                                    <SelectInput
-                                        {...register('tipoDocumento', { onChange: handleTipoChange })}
-                                    >
-                                        {tiposDocumento.map((tipo) => (
-                                            <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
-                                        ))}
-                                    </SelectInput>
-                                </FormField>
-
-                                <FormField label="Número de Documento" required error={errors.numeroDocumento}>
-                                    <TextInput
-                                        {...register('numeroDocumento', {
-                                            required: 'El documento es obligatorio',
-                                            minLength: { value: 7, message: 'Mínimo 7 caracteres' },
-                                            onChange: handleDocumentoChange
-                                        })}
-                                        placeholder={tipoDocumento === 'pasaporte' ? 'Ej: A1234567' : 'Ej: 12345678'}
-                                        maxLength={15}
-                                    />
-                                </FormField>
-
-                                <FormField label="Email" required error={errors.email}>
-                                    <EmailInput
-                                        {...register('email', {
-                                            required: 'El email es obligatorio',
-                                            pattern: {
-                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                                message: 'Email inválido'
-                                            }
-                                        })}
-                                        placeholder="hotel@ejemplo.com"
-                                    />
-                                </FormField>
-
-                                <FormField label="Teléfono" error={errors.telefono}>
-                                    <TelInput
-                                        {...register('telefono', { onChange: handleTelefonoChange })}
-                                        placeholder="Ej: 3811234567"
-                                    />
-                                </FormField>
-                            </div>
-                        </div>
-
-                        {/* Botones de Acción */}
-                        <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
-                            <RedirectLink
-                                to="/admin/clientes"
-                                label="Cancelar"
-                                icon={X}
-                                className="px-5 py-2.5"
-                            />
-
-                            <button
-                                type="submit"
-                                disabled={loading || !isValid}
-                                className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                        Guardando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="h-4 w-4" />
-                                        {isEditing ? 'Actualizar Cliente' : 'Guardar Cliente'}
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </form>
-                )}
-            </div>
+                </PageContentCard>
+            </SidebarLayout>
         </div>
     );
 };

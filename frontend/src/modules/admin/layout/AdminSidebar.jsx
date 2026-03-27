@@ -8,7 +8,8 @@ import {
   Moon,
   Sun,
   MapPin,
-  Contact
+  Contact,
+  Shield
 } from 'lucide-react';
 import { ThemeContext } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
@@ -27,106 +28,99 @@ function AdminSidebar({ onClose }) {
     [theme]
   );
 
-  // Elementos del menú de navegación
-  const menuItems = [
+  // Elementos del menú agrupados por lógica de negocio
+  const menuGroups = [
     {
-      title: 'Dashboard',
-      icon: Home,
-      path: '/admin',
+      label: 'PRINCIPAL',
+      items: [
+        { title: 'Dashboard', icon: Home, path: '/admin' },
+      ]
     },
     {
-      title: 'Hoteles',
-      icon: Building2,
-      path: '/admin/hoteles',
+      label: 'OPERACIONES',
+      items: [
+        { title: 'Hoteles', icon: Building2, path: '/admin/hoteles' },
+        { title: 'Encargados', icon: Contact, path: '/admin/encargados' },
+        { title: 'Clientes', icon: Users, path: '/admin/clientes' },
+        { title: 'Ubicación', icon: MapPin, path: '/admin/ubicacion' },
+      ]
     },
     {
-      title: 'Personal',
-      icon: UserCheck,
-      path: '/admin/personal',
-    },
-    {
-      title: 'Clientes',
-      icon: Users,
-      path: '/admin/clientes',
-    },
-    {
-      title: 'Encargados',
-      icon: Contact,
-      path: '/admin/encargados',
-    },
-    {
-      title: 'Ubicación',
-      icon: MapPin,
-      path: '/admin/ubicacion',
-    },
+      label: 'Gestión de Personal',
+      items: [
+        { title: 'Vendedores', icon: UserCheck, path: '/admin/vendedores' },
+        { title: 'Administradores', icon: Shield, path: '/admin/administradores' },
+      ]
+    }
   ];
 
   return (
     <div className="flex h-full flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
 
       {/* Logo y Nombre de Marca */}
-      <div className="flex h-20 items-center justify-center border-b border-gray-200 px-6 dark:border-gray-800">
-        <img src={logo} alt="Logo" className="h-8 w-auto" />
+      <div className="flex h-24 items-center justify-center border-b border-gray-200 px-6 dark:border-gray-800">
+        <img src={logo} alt="Logo" className="h-11 w-auto" />
       </div>
 
       {/* Menú de Navegación Principal */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6 custom-scrollbar">
-        <div className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-          Menu Principal
-        </div>
+      <nav className="flex-1 space-y-6 overflow-y-auto px-4 py-6 custom-scrollbar">
+        {menuGroups.map((group, groupIdx) => (
+          <div key={groupIdx} className="space-y-1">
+            <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">
+              {group.label}
+            </div>
 
-        {menuItems.map((item, idx) => (
-          <NavLink
-            key={idx}
-            to={item.path}
-            end={item.path === '/admin'}
-            onClick={onClose}
-            className={({ isActive }) =>
-              `group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/10 dark:text-blue-400'
-                : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
-              }`
-            }
-          >
-            <item.icon className="h-5 w-5 transition-colors group-hover:text-gray-900 dark:group-hover:text-white" />
-            {item.title}
-          </NavLink>
+            {group.items.map((item, idx) => (
+              <NavLink
+                key={idx}
+                to={item.path}
+                end={item.path === '/admin'}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive
+                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/10 dark:text-blue-400'
+                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`
+                }
+              >
+                <item.icon className="h-5 w-5 transition-colors group-hover:text-gray-900 dark:group-hover:text-white" />
+                {item.title}
+              </NavLink>
+            ))}
+          </div>
         ))}
       </nav>
 
       {/* Sección inferior con usuario y configuración de tema */}
-      <div className="border-t border-gray-200 p-4 dark:border-gray-800">
-        <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700/50 dark:bg-gray-800/50">
-
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <Avatar />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {user?.nombre} {user?.apellido}
-                </p>
-                <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-                  {user?.rol}
-                </p>
-              </div>
+      <div className="border-t border-gray-100 px-4 py-6 dark:border-gray-800/50">
+        <div className="flex items-center justify-between gap-3 px-1">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <Avatar className="h-11 w-11 text-base" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100 line-height-tight">
+                {user?.nombre} {user?.apellido}
+              </p>
+              <p className="truncate text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {user?.rol}
+              </p>
             </div>
+          </div>
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={toggleTheme}
-                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400"
-                title="Cambiar tema"
-              >
-                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </button>
-              <button
-                onClick={logout}
-                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-red-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-red-400"
-                title="Cerrar Sesión"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
-            </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-blue-400 transition-colors"
+              title="Cambiar tema"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+            <button
+              onClick={logout}
+              className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-red-400 transition-colors"
+              title="Cerrar Sesión"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </div>

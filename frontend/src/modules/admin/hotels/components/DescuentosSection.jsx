@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import DescuentosList from './DescuentosList';
+import { ActionModal } from '@admin-ui';
 import { 
   FormField, 
   NumberInput 
@@ -69,47 +70,47 @@ export default function DescuentosSection({ hotelId }) {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => setShowForm(true)}
           disabled={loading || submitting}
           className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50"
         >
-          <Plus className={`h-4 w-4 transition-transform ${showForm ? 'rotate-45' : ''}`} />
-          {showForm ? 'Cancelar' : 'Nuevo Descuento'}
+          <Plus className="h-4 w-4" />
+          Nuevo Descuento
         </button>
       </div>
 
-      {/* Formulario */}
-      {showForm && (
-        <div className="animate-in slide-in-from-top-4 rounded-2xl border border-indigo-100 bg-indigo-50/30 p-6 duration-300 dark:border-indigo-900/20 dark:bg-indigo-900/10">
-          <form
-            onSubmit={form.handleSubmit(handleAdd)}
-            className="grid grid-cols-1 gap-6 md:grid-cols-2 items-end"
-          >
-            <FormField label="Cantidad de Habitaciones" required error={form.formState.errors.cantidad_de_habitaciones}>
-              <NumberInput
-                min="1"
-                placeholder="Ej: 3"
-                {...form.register('cantidad_de_habitaciones', { required: true, min: 1 })}
-              />
-            </FormField>
-            <FormField label="Porcentaje de Descuento (%)" required error={form.formState.errors.porcentaje}>
-              <div className="flex items-center gap-2">
-                <NumberInput
-                  placeholder="Ej: 5"
-                  {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
-                />
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="rounded-lg bg-indigo-600 p-3 text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  <Plus className="h-5 w-5" />
-                </button>
-              </div>
-            </FormField>
-          </form>
+      {/* Modal de Descuento */}
+      <ActionModal
+        isOpen={showForm}
+        onClose={() => {
+          setShowForm(false);
+          form.reset();
+        }}
+        title="Configurar Descuento"
+        description="Premie a clientes que reservan múltiples habitaciones simultáneamente."
+        onConfirm={form.handleSubmit(handleAdd)}
+        loading={submitting}
+        confirmLabel="Registrar Descuento"
+        confirmIcon={Plus}
+        variant="indigo" // Usamos indigo para esta sección según el diseño original
+      >
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <FormField label="Cantidad de Habitaciones" required error={form.formState.errors.cantidad_de_habitaciones}>
+            <NumberInput
+              min="1"
+              placeholder="Ej: 3"
+              {...form.register('cantidad_de_habitaciones', { required: true, min: 1 })}
+            />
+          </FormField>
+          
+          <FormField label="Porcentaje de Descuento (%)" required error={form.formState.errors.porcentaje}>
+            <NumberInput
+              placeholder="Ej: 5"
+              {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
+            />
+          </FormField>
         </div>
-      )}
+      </ActionModal>
 
       {/* Tabla */}
       <DescuentosList data={descuentos} loading={loading} />

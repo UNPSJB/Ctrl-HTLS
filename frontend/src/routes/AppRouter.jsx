@@ -20,6 +20,8 @@ import VendedoresForm from '@/modules/admin/vendors/pages/VendedoresForm';
 import LiquidacionesGlobales from '@/modules/admin/vendors/pages/LiquidacionesGlobales';
 import VendedorLiquidaciones from '@/modules/admin/vendors/pages/VendedorLiquidaciones';
 import Personal from '@/modules/admin/vendors/pages/Personal';
+import Administradores from '@/modules/admin/vendors/pages/Administradores';
+import Vendedores from '@/modules/admin/vendors/pages/Vendedores';
 import AdministradoresForm from '@/modules/admin/vendors/pages/AdministradoresForm';
 import Ubicacion from '@/modules/admin/ubicacion/pages/Ubicacion';
 import Encargados from '@/modules/admin/encargados/pages/Encargados';
@@ -79,6 +81,10 @@ function AppRouter() {
 
                 {/* Rutas de Ubicación */}
                 <Route path="ubicacion" element={<Ubicacion />} />
+
+                {/* Rutas de Administradores y Vendedores (Nuevo Acceso Aislado) */}
+                <Route path="administradores" element={<Administradores />} />
+                <Route path="vendedores" element={<Vendedores />} />
 
                 {/* Rutas de Encargados */}
                 <Route path="encargados" element={<Encargados />} />

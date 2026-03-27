@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import TemporadasList from './TemporadasList';
+import { ActionModal } from '@admin-ui';
 import { 
   FormField, 
   SelectInput, 
@@ -84,60 +85,63 @@ export default function TemporadasSection({ hotelId }) {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => setShowForm(true)}
           disabled={loading || submitting}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
         >
-          <Plus className={`h-4 w-4 transition-transform ${showForm ? 'rotate-45' : ''}`} />
-          {showForm ? 'Cancelar' : 'Nueva Temporada'}
+          <Plus className="h-4 w-4" />
+          Nueva Temporada
         </button>
       </div>
 
-      {/* Formulario */}
-      {showForm && (
-        <div className="animate-in slide-in-from-top-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-6 duration-300 dark:border-blue-900/20 dark:bg-blue-900/10">
-          <form
-            onSubmit={form.handleSubmit(handleAdd)}
-            className="grid grid-cols-1 gap-6 md:grid-cols-4 items-end"
-          >
-            <FormField label="Tipo" required error={form.formState.errors.tipo}>
-              <SelectInput
-                {...form.register('tipo', { required: true })}
-              >
-                <option value="alta">Temporada Alta (+)</option>
-                <option value="baja">Temporada Baja (-)</option>
+      {/* Modal de Temporada */}
+      <ActionModal
+        isOpen={showForm}
+        onClose={() => {
+          setShowForm(false);
+          form.reset();
+        }}
+        title="Configurar Temporada"
+        description="Defina un periodo de tiempo y su ajuste porcentual sobre la tarifa base."
+        onConfirm={form.handleSubmit(handleAdd)}
+        loading={submitting}
+        confirmLabel="Registrar Temporada"
+        confirmIcon={Plus}
+      >
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <FormField label="Tipo de Ajuste" required error={form.formState.errors.tipo}>
+              <SelectInput {...form.register('tipo', { required: true })}>
+                <option value="alta">Temporada Alta (+ Aumento)</option>
+                <option value="baja">Temporada Baja (- Descuento)</option>
               </SelectInput>
             </FormField>
-            <FormField label="Inicio" required error={form.formState.errors.fechaInicio}>
-              <TextInput
-                type="date"
-                {...form.register('fechaInicio', { required: true })}
+          </div>
+          
+          <FormField label="Fecha de Inicio" required error={form.formState.errors.fechaInicio}>
+            <TextInput
+              type="date"
+              {...form.register('fechaInicio', { required: true })}
+            />
+          </FormField>
+          
+          <FormField label="Fecha de Fin" required error={form.formState.errors.fechaFin}>
+            <TextInput
+              type="date"
+              {...form.register('fechaFin', { required: true })}
+            />
+          </FormField>
+          
+          <div className="sm:col-span-2">
+            <FormField label="Porcentaje de Ajuste (%)" required error={form.formState.errors.porcentaje}>
+              <NumberInput
+                placeholder="Ej: 15"
+                {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
               />
             </FormField>
-            <FormField label="Fin" required error={form.formState.errors.fechaFin}>
-              <TextInput
-                type="date"
-                {...form.register('fechaFin', { required: true })}
-              />
-            </FormField>
-            <FormField label="Ajuste (%)" required error={form.formState.errors.porcentaje}>
-              <div className="flex items-center gap-2">
-                <NumberInput
-                  placeholder="Ej: 15"
-                  {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
-                />
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="rounded-lg bg-blue-600 p-3 text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 disabled:opacity-50"
-                >
-                  <Plus className="h-5 w-5" />
-                </button>
-              </div>
-            </FormField>
-          </form>
+          </div>
         </div>
-      )}
+      </ActionModal>
 
       {/* Tabla */}
       <TemporadasList data={temporadas} loading={loading} onDelete={handleDelete} />
