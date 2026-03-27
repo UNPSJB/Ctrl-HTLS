@@ -221,23 +221,13 @@ export default function AjustesGeneralesTab({
 
           {/* Sección: Ubicación */}
           <div className={activeSubTab === 'ubicacion' ? 'animate-in fade-in duration-300' : 'hidden'}>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField label="Dirección" required error={errors.direccion}>
-                <TextInput
-                  {...register('direccion', {
-                    required: 'La dirección es obligatoria',
-                  })}
-                  placeholder="Calle, Número, Piso..."
-                />
-              </FormField>
-
-              <UbicacionSelector
-                errors={errors}
-                register={register}
-                setValue={setValue}
-                watch={watch}
-              />
-            </div>
+            <UbicacionSelector
+              errors={errors}
+              register={register}
+              setValue={setValue}
+              watch={watch}
+              showAddress={true}
+            />
           </div>
 
           {/* Sección: Encargado */}

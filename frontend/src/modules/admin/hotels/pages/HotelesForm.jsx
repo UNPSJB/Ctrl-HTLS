@@ -248,19 +248,13 @@ export default function HotelesForm() {
                 {/* Ubicación Geográfica */}
                 <div className={activeTab === 'ubicacion' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación Geográfica</h3>
-                  <div className="space-y-6">
-                    <FormField label="Dirección" required error={errors.direccion}>
-                      <TextInput
-                        id="direccion"
-                        {...register('direccion', { required: 'La dirección es obligatoria' })}
-                        placeholder="Calle, Número, Depto"
-                      />
-                    </FormField>
+                  <div className="">
                     <UbicacionSelector
                       errors={errors}
                       register={register}
                       setValue={setValue}
                       watch={watch}
+                      showAddress={true}
                     />
                   </div>
                 </div>
