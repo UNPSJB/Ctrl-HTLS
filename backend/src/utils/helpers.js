@@ -173,8 +173,11 @@ const convertirFechas = (fecha) => {
 };
 
 const verificarPorcentaje = (porcentaje) => {
-  if (porcentaje <= 0 || porcentaje > 100) {
-    throw new CustomError('El porcentaje debe estar entre 1 y 100', 400); // Bad Request
+  if (porcentaje <= 0 || porcentaje > 1) {
+    throw new CustomError(
+      'El porcentaje debe ser un coeficiente entre 0 y 1 (ej: 0.10 = 10%)',
+      400,
+    ); // Bad Request
   }
 };
 

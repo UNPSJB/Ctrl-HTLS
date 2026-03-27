@@ -68,9 +68,16 @@ const validateTemporadaId = [
     .withMessage('El idTemporada debe ser un número entero'),
 ];
 
+const validatePaqueteId = [
+  param('idPaquete')
+    .isInt()
+    .withMessage('El idPaquete debe ser un número entero'),
+];
+
 module.exports = {
   validateHotel,
   validateId,
   validateTarifasPayload,
   validateTemporadaId,
+  validatePaqueteId,
 };

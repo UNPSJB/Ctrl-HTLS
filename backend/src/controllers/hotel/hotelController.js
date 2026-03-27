@@ -255,6 +255,44 @@ const setPaquetePromocional = async (req, res) => {
   }
 };
 
+const deletePaquetePromocional = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id, idPaquete } = req.params;
+
+  try {
+    const resultado = await hotelServices.eliminarPaqueteDeHotel(id, idPaquete);
+    res.json(resultado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const updatePaquetePromocional = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id, idPaquete } = req.params;
+
+  try {
+    const paquete = await hotelServices.actualizarPaqueteDeHotel(
+      id,
+      idPaquete,
+      req.body,
+    );
+    res.json(paquete);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const setTemporada = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -303,6 +341,27 @@ const deleteTemporada = async (req, res) => {
       idTemporada,
     );
     res.json(resultado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const updateTemporada = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id, idTemporada } = req.params;
+
+  try {
+    const temporada = await hotelServices.actualizarTemporadaDeHotel(
+      id,
+      idTemporada,
+      req.body,
+    );
+    res.json(temporada);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
@@ -432,12 +491,15 @@ module.exports = {
   setTemporada,
   getTemporadas,
   deleteTemporada,
+  updateTemporada,
   setHabitaciones,
   setDescuento,
   getDescuentos,
   updateHabitacion,
   deleteHabitacion,
   setPaquetePromocional,
+  deletePaquetePromocional,
+  updatePaquetePromocional,
   getTiposDeHabitacion,
   createEncargado,
   getEncargados,

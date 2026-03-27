@@ -14,6 +14,8 @@ const Hotel = require('../../models/hotel/Hotel');
 const HotelEmpleado = require('../../models/hotel/HotelEmpleado');
 const DetalleFactura = require('../../models/ventas/DetalleFactura');
 const Liquidacion = require('../../models/ventas/Liquidacion');
+const Alquiler = require('../../models/ventas/Alquiler');
+const Factura = require('../../models/ventas/Factura');
 
 const Ciudad = require('../../models/core/Ciudad');
 const Provincia = require('../../models/core/Provincia');
@@ -220,6 +222,170 @@ const actualizarEmpleado = async (id, empleado) => {
   });
 
   return empleadoExistente;
+};
+
+const actualizarAdministrador = async (id, datosAdministrador) => {
+  const {
+    nombre,
+    apellido,
+    email,
+    telefono,
+    tipoDocumento,
+    numeroDocumento,
+    direccion,
+    ciudadId,
+  } = datosAdministrador;
+
+  // Verificar si el empleado existe
+  const empleadoExistente = await Empleado.findByPk(id);
+  if (!empleadoExistente) {
+    throw new CustomError('Administrador no encontrado', 404);
+  }
+
+  // Verificar que sea administrador
+  if (empleadoExistente.rol !== 'administrador') {
+    throw new CustomError('El empleado no es un administrador', 403);
+  }
+
+  // Verificar datos
+  await verificarUpdate(numeroDocumento, email, telefono, id);
+  await verificarCiudad(ciudadId);
+
+  // Actualizar solo los campos permitidos (sin modificar rol ni password)
+  await empleadoExistente.update({
+    nombre,
+    apellido,
+    email,
+    telefono,
+    tipoDocumento,
+    numeroDocumento,
+    direccion,
+    ciudadId,
+  });
+
+  const administradorActualizado = await Empleado.findByPk(id, {
+    include: [incluirCiudadCompleta],
+  });
+
+  return formatearAdministrador(administradorActualizado);
+};
+
+const obtenerVentasVendedor = async (id) => {
+  const vendedor = await Empleado.findByPk(id, {
+    include: [
+      {
+        model: DetalleFactura,
+        as: 'detallesFactura',
+        attributes: [
+          'id',
+          'descripcion',
+          'subtotal',
+          'facturaId',
+          'liquidacionId',
+        ],
+      },
+    ],
+  });
+
+  if (!vendedor) {
+    throw new CustomError('Vendedor no encontrado', 404);
+  }
+
+  if (vendedor.rol !== 'vendedor') {
+    throw new CustomError('El empleado no es un vendedor', 403);
+  }
+
+  const ventas = (vendedor.detallesFactura || []).map((detalle) => ({
+    id: detalle.id,
+    descripcion: detalle.descripcion,
+    subtotal: Number(detalle.subtotal),
+    facturaId: detalle.facturaId,
+    liquidacionId: detalle.liquidacionId,
+  }));
+
+  return {
+    vendedorId: vendedor.id,
+    vendedorNombre: `${vendedor.nombre} ${vendedor.apellido}`,
+    totalVentas: ventas.length,
+    montoTotal: ventas.reduce((sum, v) => sum + v.subtotal, 0),
+    ventas,
+  };
+};
+
+const obtenerVentasCliente = async (id) => {
+  const cliente = await Cliente.findByPk(id, {
+    include: [
+      {
+        model: Alquiler,
+        as: 'alquileres',
+        include: [
+          {
+            model: DetalleFactura,
+            as: 'detalleFactura',
+            attributes: [
+              'id',
+              'descripcion',
+              'precio_unitario',
+              'subtotal',
+              'facturaId',
+            ],
+            include: [
+              {
+                model: Factura,
+                as: 'factura',
+                attributes: [
+                  'id',
+                  'numero',
+                  'fecha',
+                  'tipo_factura',
+                  'importe_total',
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!cliente) {
+    throw new CustomError('Cliente no encontrado', 404);
+  }
+
+  const ventas = (cliente.alquileres || []).map((alquiler) => ({
+    alquilerId: alquiler.id,
+    fechaInicio: alquiler.fecha_inicio,
+    fechaFin: alquiler.fecha_fin,
+    pasajeros: alquiler.pasajeros,
+    importeTotal: Number(alquiler.importe_total),
+    detalle: alquiler.detalleFactura
+      ? {
+          id: alquiler.detalleFactura.id,
+          descripcion: alquiler.detalleFactura.descripcion,
+          precioUnitario: Number(alquiler.detalleFactura.precio_unitario),
+          subtotal: Number(alquiler.detalleFactura.subtotal),
+          factura: alquiler.detalleFactura.factura
+            ? {
+                id: alquiler.detalleFactura.factura.id,
+                numero: alquiler.detalleFactura.factura.numero,
+                fecha: alquiler.detalleFactura.factura.fecha,
+                tipoFactura: alquiler.detalleFactura.factura.tipo_factura,
+                importeTotal: Number(
+                  alquiler.detalleFactura.factura.importe_total,
+                ),
+              }
+            : null,
+        }
+      : null,
+  }));
+
+  return {
+    clienteId: cliente.id,
+    clienteNombre: `${cliente.nombre} ${cliente.apellido}`,
+    totalVentas: ventas.length,
+    montoTotal: ventas.reduce((sum, v) => sum + v.importeTotal, 0),
+    ventas,
+  };
 };
 
 const eliminarEmpleado = async (id) => {
@@ -430,6 +596,9 @@ const actualizarPuntosCliente = async (clienteId, puntos, transaction) => {
 module.exports = {
   crearEmpleado,
   actualizarEmpleado,
+  actualizarAdministrador,
+  obtenerVentasVendedor,
+  obtenerVentasCliente,
   eliminarEmpleado,
   obtenerAdministradores,
   obtenerVendedores,

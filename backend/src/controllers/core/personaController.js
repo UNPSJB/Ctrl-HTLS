@@ -86,6 +86,41 @@ const getVendedor = async (req, res) => {
   }
 };
 
+const updateAdministrador = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { id } = req.params;
+
+  try {
+    const administrador = await personaServices.actualizarAdministrador(
+      id,
+      req.body,
+    );
+    return res.status(200).json(administrador);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const getVentasVendedor = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { id } = req.params;
+
+  try {
+    const ventas = await personaServices.obtenerVentasVendedor(id);
+    return res.status(200).json(ventas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const createCliente = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -172,17 +207,36 @@ const getClienteByDocumento = async (req, res) => {
   }
 };
 
+const getVentasCliente = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { id } = req.params;
+
+  try {
+    const ventas = await personaServices.obtenerVentasCliente(id);
+    return res.status(200).json(ventas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAdministradores,
   createEmpleado,
   updateEmpleado,
+  updateAdministrador,
   deleteEmpleado,
   getVendedores,
   getVendedor,
+  getVentasVendedor,
   createCliente,
   updateCliente,
   deleteCliente,
   getClientes,
   getClienteById,
   getClienteByDocumento,
+  getVentasCliente,
 };
