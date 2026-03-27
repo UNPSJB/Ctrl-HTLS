@@ -47,7 +47,7 @@ export const PageSidebar = ({ tabs, activeTab, onTabChange }) => (
 export const PageContentCard = ({ children, className = '', as: Tag = 'div', ...props }) => (
   <Tag 
     {...props}
-    className={`rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col min-h-[400px] ${className}`}
+    className={`rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col ${className}`}
   >
     {children}
   </Tag>

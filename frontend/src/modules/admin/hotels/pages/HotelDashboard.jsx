@@ -83,58 +83,58 @@ export default function HotelDashboard() {
           />
         }
       >
-        <PageContentCard className="min-h-[500px]">
+        <PageContentCard className="">
 
-            {loading ? (
-              <div className="flex-1 flex items-center justify-center">
-                <InnerLoading message="Hidratando dashboard..." />
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <InnerLoading message="Hidratando dashboard..." />
+            </div>
+          ) : !hotel ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-12">
+              <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-4 dark:bg-red-900/20 dark:text-red-400">
+                No se pudo cargar la información del hotel.
               </div>
-            ) : !hotel ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-12">
-                <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-4 dark:bg-red-900/20 dark:text-red-400">
-                  No se pudo cargar la información del hotel.
-                </div>
-                <button 
-                  onClick={fetchHotelDashboardData}
-                  className="text-blue-600 font-medium hover:underline"
-                >
-                  Reintentar carga
-                </button>
+              <button
+                onClick={fetchHotelDashboardData}
+                className="text-blue-600 font-medium hover:underline"
+              >
+                Reintentar carga
+              </button>
+            </div>
+          ) : (
+            <div className="">
+              <div className={activeTab === 'general' ? 'block' : 'hidden'}>
+                <AjustesGeneralesTab
+                  hotelId={hotel.id}
+                  initialData={hotel}
+                  onUpdate={fetchHotelDashboardData}
+                />
               </div>
-            ) : (
-              <div className="animate-in fade-in duration-500 flex-1">
-                {activeTab === 'general' && (
-                  <AjustesGeneralesTab
-                    hotelId={hotel.id}
-                    initialData={hotel}
-                    onUpdate={fetchHotelDashboardData}
-                  />
-                )}
 
-                {activeTab === 'tarifas' && (
-                  <TarifasTab hotelId={hotel.id} />
-                )}
-
-                {activeTab === 'habitaciones' && (
-                  <HabitacionesTab
-                    hotelId={hotel.id}
-                    tarifasAsignadas={hotel.tarifas || []}
-                  />
-                )}
-
-                {activeTab === 'personal' && (
-                  <PersonalAsignadoTab hotelId={hotel.id} />
-                )}
-
-                {activeTab === 'temporadas' && (
-                  <TemporadasTab hotelId={hotel.id} />
-                )}
-
-                {activeTab === 'paquetes' && (
-                  <PaquetesTab hotelId={hotel.id} />
-                )}
+              <div className={activeTab === 'tarifas' ? 'block' : 'hidden'}>
+                <TarifasTab hotelId={hotel.id} />
               </div>
-            )}
+
+              <div className={activeTab === 'habitaciones' ? 'block' : 'hidden'}>
+                <HabitacionesTab
+                  hotelId={hotel.id}
+                  tarifasAsignadas={hotel.tarifas || []}
+                />
+              </div>
+
+              <div className={activeTab === 'personal' ? 'block' : 'hidden'}>
+                <PersonalAsignadoTab hotelId={hotel.id} />
+              </div>
+
+              <div className={activeTab === 'temporadas' ? 'block' : 'hidden'}>
+                <TemporadasTab hotelId={hotel.id} />
+              </div>
+
+              <div className={activeTab === 'paquetes' ? 'block' : 'hidden'}>
+                <PaquetesTab hotelId={hotel.id} />
+              </div>
+            </div>
+          )}
         </PageContentCard>
       </SidebarLayout>
     </div>

@@ -119,7 +119,7 @@ export default function PersonalAsignadoTab({ hotelId }) {
 
 
   return (
-    <div className="animate-in fade-in space-y-8 duration-300">
+    <div className="animate-in fade-in duration-300">
       {/* Encabezado */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-1">
@@ -140,6 +140,8 @@ export default function PersonalAsignadoTab({ hotelId }) {
           <UserPlus className="h-4 w-4" /> Autorizar Nuevo Vendedor
         </button>
       </div>
+
+      <div className="mt-8">
 
       {/* Modal de Asignación */}
       <ActionModal
@@ -261,6 +263,7 @@ export default function PersonalAsignadoTab({ hotelId }) {
         loadingAction={loadingAction}
         onDesasignar={handleDesasignar}
       />
+      </div>
     </div>
   );
 }

@@ -32,8 +32,12 @@ export default function TemporadasTab({ hotelId }) {
         </button>
       </div>
 
-      {activeSubTab === 'temporadas' && <TemporadasSection hotelId={hotelId} />}
-      {activeSubTab === 'descuentos' && <DescuentosSection hotelId={hotelId} />}
+      <div className={activeSubTab === 'temporadas' ? 'block' : 'hidden'}>
+        <TemporadasSection hotelId={hotelId} />
+      </div>
+      <div className={activeSubTab === 'descuentos' ? 'block' : 'hidden'}>
+        <DescuentosSection hotelId={hotelId} />
+      </div>
     </div>
   );
 }
