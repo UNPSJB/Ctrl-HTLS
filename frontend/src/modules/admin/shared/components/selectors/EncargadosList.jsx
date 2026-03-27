@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { User, Search, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, Search, RefreshCw, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import axiosInstance from '@/api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -73,18 +73,28 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
-      {/* Barra de búsqueda */}
       <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
-        <div className="max-w-sm">
-          <SearchInput
-            placeholder="Buscar por nombre o DNI..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            onClear={() => setSearchTerm('')}
-          />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex-1 max-w-sm">
+            <SearchInput
+              placeholder="Buscar por nombre o DNI..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              onClear={() => setSearchTerm('')}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={fetchEncargados}
+            disabled={loading}
+            title="Actualizar lista de encargados"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 shadow-sm transition-all hover:bg-gray-50 hover:text-blue-600 active:scale-95 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-blue-400"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
