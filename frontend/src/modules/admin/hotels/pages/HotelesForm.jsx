@@ -7,6 +7,7 @@ import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@admin-hooks/useHotel';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
+import { capitalizeFirst } from '@/utils/stringUtils';
 
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
@@ -77,12 +78,12 @@ export default function HotelesForm() {
       const hotel = response.data;
 
       if (hotel.nombre) {
-        setCrumbLabel(id, hotel.nombre);
+        setCrumbLabel(id, capitalizeFirst(hotel.nombre));
       }
 
       reset({
-        nombre: hotel.nombre || '',
-        direccion: hotel.direccion || '',
+        nombre: capitalizeFirst(hotel.nombre) || '',
+        direccion: capitalizeFirst(hotel.direccion) || '',
         telefono: hotel.telefono || '',
         email: hotel.email || '',
         categoriaId: hotel.categoriaId || '',

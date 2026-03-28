@@ -8,6 +8,7 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import {
   FormField,
   TextInput,
@@ -80,19 +81,19 @@ const VendedoresForm = () => {
       const data = response.data;
 
       if (data.nombre) {
-        setCrumbLabel(id, `${data.nombre} ${data.apellido || ''}`.trim());
+        setCrumbLabel(id, `${capitalizeFirst(data.nombre)} ${capitalizeFirst(data.apellido || '')}`.trim());
       }
 
       const userHotels = data.hotelesPermitidos ? data.hotelesPermitidos : [];
 
       reset({
-        nombre: data.nombre || '',
-        apellido: data.apellido || '',
+        nombre: capitalizeFirst(data.nombre) || '',
+        apellido: capitalizeFirst(data.apellido) || '',
         email: data.email || '',
         telefono: data.telefono || '',
         tipoDocumento: data.tipoDocumento || 'dni',
         numeroDocumento: data.numeroDocumento || '',
-        direccion: data.direccion || '',
+        direccion: capitalizeFirst(data.direccion) || '',
         password: '',
         rol: data.rol || 'vendedor',
         paisId: data.ubicacion?.paisId || '',

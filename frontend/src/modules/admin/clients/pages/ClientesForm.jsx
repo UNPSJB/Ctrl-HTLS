@@ -8,6 +8,7 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import { 
     FormField, 
     TextInput, 
@@ -74,12 +75,12 @@ const ClientesForm = () => {
             const data = response.data;
 
             if (data.nombre) {
-                setCrumbLabel(id, `${data.nombre} ${data.apellido || ''}`.trim());
+                setCrumbLabel(id, `${capitalizeFirst(data.nombre)} ${capitalizeFirst(data.apellido || '')}`.trim());
             }
 
             reset({
-                nombre: data.nombre || '',
-                apellido: data.apellido || '',
+                nombre: capitalizeFirst(data.nombre) || '',
+                apellido: capitalizeFirst(data.apellido) || '',
                 email: data.email || '',
                 telefono: data.telefono || '',
                 tipoDocumento: data.tipoDocumento || 'dni',
@@ -87,7 +88,7 @@ const ClientesForm = () => {
                 paisId: data.paisId ? String(data.paisId) : '',
                 provinciaId: data.provinciaId ? String(data.provinciaId) : '',
                 ciudadId: data.ciudadId ? String(data.ciudadId) : '',
-                direccion: data.direccion || '',
+                direccion: capitalizeFirst(data.direccion) || '',
             });
         } catch (error) {
             console.error(error);

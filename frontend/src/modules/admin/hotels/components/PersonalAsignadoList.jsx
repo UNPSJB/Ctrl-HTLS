@@ -3,6 +3,7 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
@@ -58,7 +59,7 @@ export default function PersonalAsignadoList({
                   className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
                 >
                   <td className="whitespace-nowrap px-6 py-3 font-medium text-gray-900 dark:text-white">
-                    {v.empleadoNombre} {v.empleadoApellido}
+                    {capitalizeFirst(v.empleadoNombre)} {capitalizeFirst(v.empleadoApellido)}
                   </td>
                   <td className="whitespace-nowrap px-6 py-3 text-gray-600 dark:text-gray-300">
                     <span className="mr-1 text-xs font-bold uppercase text-gray-400">

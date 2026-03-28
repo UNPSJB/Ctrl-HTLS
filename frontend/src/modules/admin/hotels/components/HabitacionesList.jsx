@@ -5,6 +5,7 @@ import {
   DoorOpen,
   Layers,
 } from 'lucide-react';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
@@ -82,7 +83,7 @@ export default function HabitacionesList({
                     </td>
                     <td className="px-6 py-3">
                       <span className="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        {tipo?.nombre || 'Tipo no definido'}
+                        {tipo?.nombre ? capitalizeFirst(tipo.nombre) : 'Tipo no definido'}
                       </span>
                     </td>
                     <td className="px-6 py-3 text-right">

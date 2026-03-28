@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Edit, Eye, Plus, Search, MapPin, Star, Building2, X, User } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import { useHotelsData } from '@admin-hooks/useHotelsData';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -97,14 +98,14 @@ const HotelesTable = () => {
                         <Building2 className="h-5 w-5" />
                       </div>
                       <div className="ml-4">
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {hotel.nombre}
+                        <div className="font-medium text-gray-900 dark:text-white transition-all">
+                          {capitalizeFirst(hotel.nombre)}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                    {hotel.encargadoNombre || <span className="italic text-gray-400">—</span>}
+                    {hotel.encargadoNombre ? capitalizeFirst(hotel.encargadoNombre) : <span className="italic text-gray-400">—</span>}
                   </td>
                   <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
                     {hotel.ubicacion?.nombreCiudad ? (

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Tag, BedDouble, Edit, Trash2 } from 'lucide-react';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import TableButton from '@admin-ui/TableButton';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -52,8 +53,8 @@ export default function PaquetesList({ data = [], loading = false, onEdit, onDel
                 <tr key={paquete.id || `pkg-${pIdx}`} className="group transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
                   {/* Nombre */}
                   <td className="px-6 py-4">
-                    <div className="font-bold text-gray-900 dark:text-white">
-                      {paquete.nombre}
+                    <div className="font-bold text-gray-900 dark:text-white transition-all">
+                      {capitalizeFirst(paquete.nombre)}
                     </div>
                   </td>
 

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import PersonalAsignadoList from '../components/PersonalAsignadoList';
 import { PageHeader, ActionModal } from '@admin-ui';
 import { SearchInput } from '@form';
@@ -189,14 +190,14 @@ export default function PersonalAsignadoTab({ hotelId }) {
                         }}
                         className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-blue-50/50 dark:hover:bg-blue-900/10"
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-600 dark:bg-blue-900 dark:text-blue-300">
-                          {v.nombre.charAt(0)}
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600 dark:bg-gray-800 dark:text-gray-400">
+                          <User className="h-4 w-4" />
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            {v.nombre} {v.apellido}
+                        <div className="text-left">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white transition-all">
+                            {capitalizeFirst(v.nombre)} {capitalizeFirst(v.apellido)}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-[10px] text-gray-500 dark:text-gray-400">
                             DNI: {v.numeroDocumento} • {v.email}
                           </p>
                         </div>
@@ -216,8 +217,8 @@ export default function PersonalAsignadoTab({ hotelId }) {
                     <User className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white">
-                      {selectedVendedor.nombre} {selectedVendedor.apellido}
+                    <h4 className="font-bold text-gray-900 dark:text-white transition-all">
+                      {capitalizeFirst(selectedVendedor.nombre)} {capitalizeFirst(selectedVendedor.apellido)}
                     </h4>
                     <p className="text-xs text-gray-500 uppercase tracking-wider">Información del Vendedor Seleccionado</p>
                   </div>

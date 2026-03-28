@@ -6,6 +6,7 @@ import axiosInstance from '@api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { SearchInput } from '@form';
+import { capitalizeFirst } from '@/utils/stringUtils';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -118,8 +119,8 @@ const AdministradoresTable = () => {
                                                         <User className="h-5 w-5" />
                                                     </div>
                                                     <div className="ml-4 text-sm">
-                                                        <div className="font-medium text-gray-900 dark:text-white capitalize transition-all">
-                                                            {admin.nombre.toLowerCase()} {admin.apellido.toLowerCase()}
+                                                        <div className="font-medium text-gray-900 dark:text-white transition-all">
+                                                            {capitalizeFirst(admin.nombre)} {capitalizeFirst(admin.apellido)}
                                                         </div>
                                                     </div>
                                                 </div>

@@ -14,6 +14,7 @@ import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader, PageContentCard } from '@admin-ui';
+import { capitalizeFirst } from '@/utils/stringUtils';
 
 // Detalle de ventas y liquidaciones de un vendedor
 const VendedorLiquidaciones = () => {
@@ -100,8 +101,8 @@ const VendedorLiquidaciones = () => {
 
       {/* Encabezado con Datos del Vendedor */}
       <PageHeader
-        title={vendedor ? `Actividad: ${vendedor.nombre} ${vendedor.apellido}` : 'Actividad Financiera'}
-        description={vendedor ? `Gestione las ventas y liquidaciones de ${vendedor.nombre.toLowerCase()}` : 'Obteniendo información...'}
+        title={vendedor ? `Actividad: ${capitalizeFirst(vendedor.nombre)} ${capitalizeFirst(vendedor.apellido)}` : 'Actividad Financiera'}
+        description={vendedor ? `Gestione las ventas y liquidaciones de ${capitalizeFirst(vendedor.nombre)}` : 'Obteniendo información...'}
         backTo="/admin/vendedores"
         icon={TrendingUp}
         loading={loading && !vendedor}

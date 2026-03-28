@@ -7,6 +7,7 @@ import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
 import { SearchInput } from '@form';
+import { capitalizeFirst } from '@/utils/stringUtils';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -122,9 +123,9 @@ const EncargadosTable = () => {
                           <User className="h-5 w-5" />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white capitalize">
-                            {encargado.nombre?.toLowerCase()} {encargado.apellido?.toLowerCase()}
-                          </div>
+                           <div className="text-sm font-medium text-gray-900 dark:text-white transition-all">
+                             {capitalizeFirst(encargado.nombre)} {capitalizeFirst(encargado.apellido)}
+                           </div>
                         </div>
                       </div>
                     </td>
@@ -151,7 +152,7 @@ const EncargadosTable = () => {
                     <td className="px-6 py-3">
                       {encargado.hotel ? (
                         <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                          {encargado.hotel.nombre}
+                          {capitalizeFirst(encargado.hotel.nombre)}
                         </span>
                       ) : (
                         <span className="italic text-gray-400">—</span>
