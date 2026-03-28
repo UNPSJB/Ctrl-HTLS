@@ -59,7 +59,7 @@ export default function HotelDashboard() {
     { id: 'habitaciones', icon: DoorOpen, label: 'Habitaciones Físicas' },
     { id: 'personal', icon: Users, label: 'Personal Asignado' },
     { id: 'temporadas', icon: Calendar, label: 'Temporadas y Descuentos' },
-    { id: 'paquetes', icon: Tag, label: 'Paquetes Promocionales' },
+    { id: 'paquetes', icon: Tag, label: 'Paquetes Turísticos' },
   ];
 
   return (

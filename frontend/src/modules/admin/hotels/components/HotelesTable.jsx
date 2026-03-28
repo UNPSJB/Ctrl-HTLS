@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Edit, Trash2, Eye, Plus, Search, MapPin, Star, Building2, X, User } from 'lucide-react';
+import { Edit, Eye, Plus, Search, MapPin, Star, Building2, X, User } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
 import { useHotelsData } from '@admin-hooks/useHotelsData';
 import TablePagination from '@admin-ui/TablePagination';
@@ -34,10 +34,6 @@ const HotelesTable = () => {
   }, [currentPage, filteredHoteles]);
 
 
-
-  const handleDelete = () => {
-
-  };
 
   const handleView = (id) => {
     navigate(`/admin/hoteles/${id}/dashboard`);
@@ -122,18 +118,12 @@ const HotelesTable = () => {
                   </td>
                   <td className="whitespace-nowrap px-6 py-3 text-right text-sm font-medium">
                     <div className="flex justify-end gap-2">
-                      <TableButton
-                        variant="view"
-                        icon={Eye}
-                        onClick={() => handleView(hotel.hotelId)}
-                        aria-label="Ver detalles"
-                      />
-                      <TableButton
-                        variant="delete"
-                        icon={Trash2}
-                        onClick={() => handleDelete()}
-                        aria-label="Eliminar"
-                      />
+                       <TableButton
+                         variant="view"
+                         icon={Eye}
+                         onClick={() => handleView(hotel.hotelId)}
+                         aria-label="Ver detalles"
+                       />
                     </div>
                   </td>
                 </tr>
