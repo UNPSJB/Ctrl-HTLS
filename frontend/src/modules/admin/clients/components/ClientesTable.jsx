@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Trash2, Search, X, Users, User } from 'lucide-react';
+import { Edit, Trash2, Search, X, Users, User, History } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
@@ -48,6 +48,10 @@ const ClientesTable = () => {
 
   const handleEdit = (id) => {
     navigate(`/admin/clientes/editar/${id}`);
+  };
+
+  const handleHistory = (id) => {
+    navigate(`/admin/clientes/${id}/historial`);
   };
 
   const filteredClientes = useMemo(() => {
@@ -128,8 +132,14 @@ const ClientesTable = () => {
                   </td>
                   <td className="px-6 py-3 text-right">
                     <div className="flex justify-end gap-2">
-                      <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(cliente.id)} />
-                      <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(cliente.id)} />
+                       <TableButton
+                         variant="view"
+                         icon={History}
+                         onClick={() => handleHistory(cliente.id)}
+                         title="Ver historial de alquileres"
+                       />
+                       <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(cliente.id)} />
+                       <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(cliente.id)} />
                     </div>
                   </td>
                 </tr>

@@ -22,6 +22,7 @@ import AdministradoresForm from '@/modules/admin/vendors/pages/AdministradoresFo
 import Ubicacion from '@/modules/admin/ubicacion/pages/Ubicacion';
 import Encargados from '@/modules/admin/encargados/pages/Encargados';
 import EncargadosForm from '@/modules/admin/encargados/pages/EncargadosForm';
+import ClienteHistorial from '@/modules/admin/clients/pages/ClienteHistorial';
 
 function AppRouter() {
   const { user, loading } = useAuth();
@@ -71,6 +72,7 @@ function AppRouter() {
                 <Route path="clientes" element={<Clientes />} />
                 <Route path="clientes/nuevo" element={<ClientesForm />} />
                 <Route path="clientes/editar/:id" element={<ClientesForm />} />
+                <Route path="clientes/:id/historial" element={<ClienteHistorial />} />
 
                 {/* Rutas de Ubicación */}
                 <Route path="ubicacion" element={<Ubicacion />} />
