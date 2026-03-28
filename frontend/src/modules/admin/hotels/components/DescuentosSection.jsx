@@ -5,9 +5,9 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import DescuentosList from './DescuentosList';
 import { ActionModal } from '@admin-ui';
-import { 
-  FormField, 
-  NumberInput 
+import {
+  FormField,
+  NumberInput
 } from '@form';
 
 export default function DescuentosSection({ hotelId }) {
@@ -102,7 +102,7 @@ export default function DescuentosSection({ hotelId }) {
               {...form.register('cantidad_de_habitaciones', { required: true, min: 1 })}
             />
           </FormField>
-          
+
           <FormField label="Porcentaje de Descuento (%)" required error={form.formState.errors.porcentaje}>
             <NumberInput
               placeholder="Ej: 5"
@@ -114,15 +114,6 @@ export default function DescuentosSection({ hotelId }) {
 
       {/* Tabla */}
       <DescuentosList data={descuentos} loading={loading} />
-
-      {/* Nota informativa */}
-      <div className="flex items-start gap-3 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
-        <Info className="mt-0.5 h-5 w-5 shrink-0 text-gray-400" />
-        <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-          Los descuentos por volumen se aplican automáticamente en el motor de reservas cuando
-          el cliente selecciona la cantidad de habitaciones indicada o superior.
-        </p>
-      </div>
     </section>
   );
 }

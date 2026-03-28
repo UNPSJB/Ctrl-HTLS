@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, X, Lock, MapPin, Building2, Briefcase, Phone } from 'lucide-react';
+import { User, Save, X, Lock, MapPin, Building2, Briefcase, Phone, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
@@ -326,34 +326,59 @@ const VendedoresForm = () => {
               {rol === 'vendedor' && isEditing && (
                 <div className={activeTab === 'hoteles' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Acceso a Hoteles</h3>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {assignedHotels.map((hotel) => (
-                      <div
-                        key={hotel.id}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm dark:bg-blue-900 dark:text-blue-300">
-                            <Building2 className="h-4 w-4" />
-                          </div>
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{hotel.nombre}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveHotel(hotel.id)}
-                          className="rounded-full p-1 text-red-500 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30"
-                          title="Quitar acceso"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                    {assignedHotels.length === 0 && (
-                      <div className="col-span-full rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500 dark:border-gray-600">
-                        <Building2 className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                        <p>Este vendedor no tiene hoteles asignados.</p>
-                      </div>
-                    )}
+                  
+                  <div className="relative flex flex-col min-h-[300px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div className="overflow-x-auto flex-1">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                          <tr>
+                            <th scope="col" className="px-6 py-4">
+                              Hotel
+                            </th>
+                            <th scope="col" className="px-6 py-4 text-right">
+                              Acciones
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                          {assignedHotels.length > 0 ? (
+                            assignedHotels.map((hotel) => (
+                              <tr key={hotel.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
+                                <td className="whitespace-nowrap px-6 py-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                      <Building2 className="h-5 w-5" />
+                                    </div>
+                                    <span className="font-medium text-gray-900 dark:text-white">
+                                      {capitalizeFirst(hotel.nombre)}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-3 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveHotel(hotel.id)}
+                                    className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                                    title="Quitar acceso"
+                                  >
+                                    <Trash2 className="h-5 w-5" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="2" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <div className="flex flex-col items-center gap-2 italic">
+                                  <Building2 className="h-8 w-8 opacity-20" />
+                                  <p>Este vendedor no tiene hoteles asignados.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}
