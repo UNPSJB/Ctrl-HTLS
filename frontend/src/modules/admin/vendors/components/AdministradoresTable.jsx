@@ -104,7 +104,8 @@ const AdministradoresTable = () => {
                                     <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
                                         <th className="px-6 py-4 text-left">Nombre Completo</th>
                                         <th className="px-6 py-4 text-left">Documento</th>
-                                        <th className="px-6 py-4 text-left">Contacto</th>
+                                        <th className="px-6 py-4 text-left">Email</th>
+                                        <th className="px-6 py-4 text-left">Teléfono</th>
                                         <th className="px-6 py-4 text-right">Acciones</th>
                                     </tr>
                                 </thead>
@@ -128,12 +129,10 @@ const AdministradoresTable = () => {
                                                 {admin.numeroDocumento}
                                             </td>
                                             <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                                                <div className="flex flex-col">
-                                                    <span>{admin.email || <span className="italic text-gray-400">—</span>}</span>
-                                                    <span className="text-gray-500">
-                                                        {admin.telefono || <span className="italic text-gray-400">—</span>}
-                                                    </span>
-                                                </div>
+                                                {admin.email || <span className="italic text-gray-400">—</span>}
+                                            </td>
+                                            <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                                {admin.telefono || <span className="italic text-gray-400">—</span>}
                                             </td>
                                             <td className="px-6 py-3 text-right">
                                                 <div className="flex justify-end gap-2">
