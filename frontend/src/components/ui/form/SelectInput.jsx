@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 
 /**
  * Select especializado con estilos consistentes y flecha personalizada.
@@ -9,7 +9,7 @@ const SelectInput = forwardRef(({ error, className = '', children, ...props }, r
   const errorClasses = error ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 dark:border-gray-600';
   const darkClasses = 'dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400';
   const disabledClasses = 'disabled:bg-gray-50 disabled:cursor-not-allowed dark:disabled:bg-gray-800';
-  
+
   return (
     <div className="relative">
       <select

@@ -106,7 +106,8 @@ const EncargadosTable = () => {
                 <tr>
                   <th className="px-6 py-4">Nombre Completo</th>
                   <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Contacto</th>
+                  <th className="px-6 py-4">Email</th>
+                  <th className="px-6 py-4">Teléfono</th>
                   <th className="px-6 py-4">Hotel</th>
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
@@ -136,14 +137,14 @@ const EncargadosTable = () => {
                       {encargado.dni}
                     </td>
 
-                    {/* Contacto */}
+                    {/* Email */}
                     <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      <div className="flex flex-col">
-                        <span>{encargado.email || <span className="italic text-gray-400">—</span>}</span>
-                        <span className="text-gray-500">
-                          {encargado.telefono || <span className="italic text-gray-400">—</span>}
-                        </span>
-                      </div>
+                      {encargado.email || <span className="italic text-gray-400">—</span>}
+                    </td>
+
+                    {/* Teléfono */}
+                    <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                      {encargado.telefono || <span className="italic text-gray-400">—</span>}
                     </td>
 
                     {/* Estado de Asignación */}

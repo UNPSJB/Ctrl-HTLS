@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Edit, Trash2, Search, Plus, X, DollarSign, FileText, User, Users } from 'lucide-react';
+import { Edit, Trash2, BarChart3, User, Users } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
@@ -37,7 +37,7 @@ const VendedoresTable = () => {
   };
 
   const handleEdit = (id) => {
-    navigate(`/admin/personal/vendedores/editar/${id}`);
+    navigate(`/admin/vendedores/editar/${id}`);
   };
 
   const filteredVendedores = useMemo(() => {
@@ -106,8 +106,8 @@ const VendedoresTable = () => {
                   <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
                     <th className="px-6 py-4 text-left">Nombre Completo</th>
                     <th className="px-6 py-4 text-left">Documento</th>
-                    <th className="px-6 py-4 text-left">Contacto</th>
-                    <th className="px-6 py-4 text-left">Hoteles</th>
+                    <th className="px-6 py-4 text-left">Email</th>
+                    <th className="px-6 py-4 text-left">Teléfono</th>
                     <th className="px-6 py-4 text-right">Acciones</th>
                   </tr>
                 </thead>
@@ -131,29 +131,18 @@ const VendedoresTable = () => {
                         {vendedor.numeroDocumento}
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                        <div className="flex flex-col">
-                          <span>{vendedor.email || <span className="italic text-gray-400">—</span>}</span>
-                          <span className="text-gray-500">
-                            {vendedor.telefono || <span className="italic text-gray-400">—</span>}
-                          </span>
-                        </div>
+                        {vendedor.email || <span className="italic text-gray-400">—</span>}
                       </td>
-                      <td className="px-6 py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {vendedor.hotelesPermitidos?.length > 0 ? vendedor.hotelesPermitidos.map(h => (
-                            <span key={h.id} className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                              {h.nombre}
-                            </span>
-                          )) : <span className="italic text-gray-400">—</span>}
-                        </div>
+                      <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        {vendedor.telefono || <span className="italic text-gray-400">—</span>}
                       </td>
                       <td className="px-6 py-3 text-right">
                         <div className="flex justify-end gap-2">
                           <TableButton
                             variant="view"
-                            icon={FileText}
-                            onClick={() => navigate(`/admin/personal/liquidaciones/${vendedor.id}`)}
-                            title="Ver Liquidaciones"
+                            icon={BarChart3}
+                            onClick={() => navigate(`/admin/vendedores/liquidaciones/${vendedor.id}`)}
+                            title="Actividad y Liquidaciones"
                           />
                           <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />
                           <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(vendedor.id)} />

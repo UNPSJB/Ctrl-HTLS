@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,13 +13,13 @@ import { useNavigate } from 'react-router-dom';
  * @param {boolean} loading - Si es true, muestra un estado de carga (shimmer).
  * @param {string} className - Clases adicionales para el contenedor.
  */
-const PageHeader = ({ 
-  title, 
-  description, 
-  backTo, 
-  onBack, 
-  icon: Icon, 
-  extra, 
+const PageHeader = ({
+  title,
+  description,
+  backTo,
+  onBack,
+  icon: Icon,
+  extra,
   loading = false,
   className = ''
 }) => {

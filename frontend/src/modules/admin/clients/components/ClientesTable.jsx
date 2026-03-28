@@ -96,7 +96,8 @@ const ClientesTable = () => {
                 <tr>
                   <th className="px-6 py-4">Nombre Completo</th>
                   <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Contacto</th>
+                  <th className="px-6 py-4">Email</th>
+                  <th className="px-6 py-4">Teléfono</th>
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -120,12 +121,10 @@ const ClientesTable = () => {
                     {cliente.numeroDocumento}
                   </td>
                   <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                    <div className="flex flex-col">
-                      <span>{cliente.email || <span className="italic text-gray-400">—</span>}</span>
-                      <span className="text-gray-500">
-                        {cliente.telefono || <span className="italic text-gray-400">—</span>}
-                      </span>
-                    </div>
+                    {cliente.email || <span className="italic text-gray-400">—</span>}
+                  </td>
+                  <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                    {cliente.telefono || <span className="italic text-gray-400">—</span>}
                   </td>
                   <td className="px-6 py-3 text-right">
                     <div className="flex justify-end gap-2">

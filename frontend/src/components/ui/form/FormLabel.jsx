@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Componente de etiqueta estandarizado para formularios.
  * Maneja automáticamente íconos y la marca de campo obligatorio (*).

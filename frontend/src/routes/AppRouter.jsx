@@ -11,15 +11,11 @@ import HotelPage from '@/modules/vendor/pages/HotelPage';
 import HotelDashboard from '@/modules/admin/hotels/pages/HotelDashboard';
 import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
-import VendedoresTable from '@/modules/admin/vendors/components/VendedoresTable';
 import ClientesForm from '@/modules/admin/clients/pages/ClientesForm';
-// Importaremos placeholder o componentes reales según existan
 import Clientes from '@/modules/admin/clients/pages/Clientes';
-import AdministradoresTable from '@/modules/admin/vendors/components/AdministradoresTable';
 import VendedoresForm from '@/modules/admin/vendors/pages/VendedoresForm';
 import LiquidacionesGlobales from '@/modules/admin/vendors/pages/LiquidacionesGlobales';
 import VendedorLiquidaciones from '@/modules/admin/vendors/pages/VendedorLiquidaciones';
-import Personal from '@/modules/admin/vendors/pages/Personal';
 import Administradores from '@/modules/admin/vendors/pages/Administradores';
 import Vendedores from '@/modules/admin/vendors/pages/Vendedores';
 import AdministradoresForm from '@/modules/admin/vendors/pages/AdministradoresForm';
@@ -54,20 +50,17 @@ function AppRouter() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Dashboard />} />
 
-                {/* Rutas Individuales de Personal (Fuera del Tab Layout) */}
-                <Route path="personal/vendedores/nuevo" element={<VendedoresForm />} />
-                <Route path="personal/vendedores/editar/:id" element={<VendedoresForm />} />
-                <Route path="personal/administradores/nuevo" element={<AdministradoresForm />} />
-                <Route path="personal/administradores/editar/:id" element={<AdministradoresForm />} />
-                <Route path="personal/liquidaciones" element={<LiquidacionesGlobales />} />
-                <Route path="personal/liquidaciones/:id" element={<VendedorLiquidaciones />} />
+                {/* Rutas de Vendedores */}
+                <Route path="vendedores" element={<Vendedores />} />
+                <Route path="vendedores/nuevo" element={<VendedoresForm />} />
+                <Route path="vendedores/editar/:id" element={<VendedoresForm />} />
+                <Route path="vendedores/liquidaciones" element={<LiquidacionesGlobales />} />
+                <Route path="vendedores/liquidaciones/:id" element={<VendedorLiquidaciones />} />
 
-                {/* Rutas de Personal (Listados con Tabs integrados) */}
-                <Route path="personal" element={<Personal />}>
-                  <Route index element={<Navigate to="vendedores" replace />} />
-                  <Route path="vendedores" element={<VendedoresTable />} />
-                  <Route path="administradores" element={<AdministradoresTable />} />
-                </Route>
+                {/* Rutas de Administradores */}
+                <Route path="administradores" element={<Administradores />} />
+                <Route path="administradores/nuevo" element={<AdministradoresForm />} />
+                <Route path="administradores/editar/:id" element={<AdministradoresForm />} />
 
                 {/* Rutas de Hoteles */}
                 <Route path="hoteles" element={<Hoteles />} />
@@ -81,10 +74,6 @@ function AppRouter() {
 
                 {/* Rutas de Ubicación */}
                 <Route path="ubicacion" element={<Ubicacion />} />
-
-                {/* Rutas de Administradores y Vendedores (Nuevo Acceso Aislado) */}
-                <Route path="administradores" element={<Administradores />} />
-                <Route path="vendedores" element={<Vendedores />} />
 
                 {/* Rutas de Encargados */}
                 <Route path="encargados" element={<Encargados />} />

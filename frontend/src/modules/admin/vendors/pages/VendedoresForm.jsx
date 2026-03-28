@@ -2,20 +2,20 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft, Phone } from 'lucide-react';
+import { User, Save, X, Lock, MapPin, Building2, Briefcase, Phone } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
-import { 
-    FormField, 
-    TextInput, 
-    EmailInput, 
-    TelInput, 
-    SelectInput,
-    PasswordInput,
-    RedirectLink
+import {
+  FormField,
+  TextInput,
+  EmailInput,
+  TelInput,
+  SelectInput,
+  PasswordInput,
+  RedirectLink
 } from '@form';
 
 const tiposDocumento = [
@@ -95,20 +95,17 @@ const VendedoresForm = () => {
         direccion: data.direccion || '',
         password: '',
         rol: data.rol || 'vendedor',
+        paisId: data.ubicacion?.paisId || '',
+        provinciaId: data.ubicacion?.provinciaId || '',
+        ciudadId: data.ubicacion?.ciudadId || '',
       });
 
       setAssignedHotels(userHotels);
       setInitialHotels(userHotels);
-
-      if (data.ubicacion) {
-        setValue('paisId', data.ubicacion.paisId);
-        setValue('provinciaId', data.ubicacion.provinciaId);
-        setValue('ciudadId', data.ubicacion.ciudadId);
-      }
     } catch (error) {
       console.error(error);
       toast.error('Error al cargar datos del vendedor');
-      navigate('/admin/personal/vendedores');
+      navigate('/admin/vendedores');
     } finally {
       setLoadingData(false);
     }
@@ -176,7 +173,7 @@ const VendedoresForm = () => {
         }
       }
 
-      navigate('/admin/personal/vendedores');
+      navigate('/admin/vendedores');
     } catch (error) {
       console.error(error);
       const mensaje = error.response?.data?.error || 'Error al guardar los datos';
@@ -186,7 +183,7 @@ const VendedoresForm = () => {
     }
   };
 
-  const handleCancel = () => navigate('/admin/personal/vendedores');
+  const handleCancel = () => navigate('/admin/vendedores');
 
 
   return (
@@ -199,17 +196,6 @@ const VendedoresForm = () => {
         onBack={handleCancel}
         icon={Briefcase}
         loading={loadingData}
-        extra={isEditing && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase text-gray-400">Rol:</span>
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-              {rol === 'administrador' ? 'Administrador' : 'Vendedor'}
-            </span>
-            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/30 dark:text-green-400">
-              Activo
-            </span>
-          </div>
-        )}
       />
 
       <SidebarLayout
@@ -375,7 +361,7 @@ const VendedoresForm = () => {
 
           <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
             <RedirectLink
-              to="/admin/personal/vendedores"
+              to="/admin/vendedores"
               label="Cancelar"
               className="px-5 py-2.5"
               disabled={isSubmitting}

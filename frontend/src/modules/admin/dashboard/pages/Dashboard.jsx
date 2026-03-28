@@ -186,7 +186,7 @@ function Dashboard() {
                     <ArrowRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
                   </Link>
 
-                  <Link to="/admin/personal/vendedores/nuevo" className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20 hover:bg-purple-50 dark:hover:bg-purple-900/10 hover:border-purple-200 transition-all group">
+                  <Link to="/admin/vendedores/nuevo" className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20 hover:bg-purple-50 dark:hover:bg-purple-900/10 hover:border-purple-200 transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 rounded-lg group-hover:scale-110 transition-transform">
                         <UserCheck className="w-5 h-5" />

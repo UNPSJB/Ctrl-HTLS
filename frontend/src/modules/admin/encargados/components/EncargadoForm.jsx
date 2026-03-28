@@ -1,8 +1,7 @@
-import React from 'react';
-import { 
-  FormField, 
-  TextInput, 
-  SelectInput 
+import {
+  FormField,
+  TextInput,
+  SelectInput
 } from '@form';
 
 

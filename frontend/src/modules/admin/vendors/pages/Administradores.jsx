@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ListHeader } from '@admin-ui';
 import { Users } from 'lucide-react';
@@ -16,7 +15,7 @@ const Administradores = () => {
                 title="Gestión de Administradores"
                 description="Administra los perfiles con acceso total al sistema de gestión"
                 actionLabel="Nuevo Administrador"
-                onAction={() => navigate('/admin/personal/administradores/nuevo')}
+                onAction={() => navigate('/admin/administradores/nuevo')}
                 icon={Users}
             />
 
