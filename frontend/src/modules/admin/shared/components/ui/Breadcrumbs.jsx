@@ -5,9 +5,11 @@ import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 // Mapeo de rutas a nombres legibles en español
 const routeNameMap = {
     admin: 'Dashboard',
-    vendedores: 'Vendedores',
-    clientes: 'Clientes',
     hoteles: 'Hoteles',
+    clientes: 'Clientes',
+    vendedores: 'Vendedores',
+    administradores: 'Administradores',
+    liquidaciones: 'Liquidaciones',
     nuevo: 'Nuevo',
     editar: 'Editar',
     configuracion: 'Configuración',
