@@ -84,6 +84,10 @@ const ClientesForm = () => {
                 telefono: data.telefono || '',
                 tipoDocumento: data.tipoDocumento || 'dni',
                 numeroDocumento: data.numeroDocumento || '',
+                paisId: data.paisId ? String(data.paisId) : '',
+                provinciaId: data.provinciaId ? String(data.provinciaId) : '',
+                ciudadId: data.ciudadId ? String(data.ciudadId) : '',
+                direccion: data.direccion || '',
             });
         } catch (error) {
             console.error(error);
@@ -241,12 +245,13 @@ const ClientesForm = () => {
                             {/* Ubicación Geográfica */}
                             <div className={activeTab === 'ubicacion' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación Geográfica</h3>
-                                <UbicacionSelector
+                            <UbicacionSelector
                                     errors={errors}
                                     register={register}
                                     setValue={setValue}
                                     watch={watch}
                                     showAddress={true}
+                                    required={false}
                                 />
                             </div>
                         </div>
