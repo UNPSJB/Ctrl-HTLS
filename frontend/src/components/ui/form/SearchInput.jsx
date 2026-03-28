@@ -1,15 +1,15 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { Search } from 'lucide-react';
 
 /**
  * Input especializado para búsquedas dinámicas en tablas y filtros.
  * Incluye ícono de lupa y estilos de borde altamente redondeado.
  */
-const SearchInput = forwardRef(({ 
-  className = '', 
-  containerClassName = '', 
+const SearchInput = forwardRef(({
+  className = '',
+  containerClassName = '',
   onClear,
-  ...props 
+  ...props
 }, ref) => {
   return (
     <div className={`relative ${containerClassName}`}>

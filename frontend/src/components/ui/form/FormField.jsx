@@ -1,4 +1,4 @@
-import React from 'react';
+
 import FormLabel from './FormLabel';
 import FormError from './FormError';
 

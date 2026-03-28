@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Componente de mensaje de error estandarizado para formularios.
  * Compatible con strings o con el objeto de error de react-hook-form.
@@ -12,7 +10,7 @@ const FormError = ({ error, className = '' }) => {
   if (!message) return null;
 
   return (
-    <p 
+    <p
       role="alert"
       className={`mt-1 text-xs font-medium text-red-500 animate-in fade-in slide-in-from-top-1 ${className}`}
     >

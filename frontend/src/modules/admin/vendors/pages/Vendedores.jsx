@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ListHeader } from '@admin-ui';
 import { UserCheck } from 'lucide-react';

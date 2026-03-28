@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   DollarSign,
   Calendar,
-  FileText,
   CheckCircle2,
   AlertCircle,
   ShoppingBag,
   Filter,
+  TrendingUp,
+  Receipt
 } from 'lucide-react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { PageHeader } from '@admin-ui';
+import { PageHeader, PageContentCard } from '@admin-ui';
 
 // Detalle de ventas y liquidaciones de un vendedor
 const VendedorLiquidaciones = () => {
@@ -32,6 +32,7 @@ const VendedorLiquidaciones = () => {
 
   // Cálculos derivados
   const pendingSales = ventas.filter((v) => !v.liquidacionId);
+  const totalSalesAmount = ventas.reduce((acc, curr) => acc + Number(curr.subtotal), 0);
   const pendingAmount = pendingSales.reduce((acc, curr) => acc + Number(curr.subtotal), 0) * 0.02;
   const totalPaid = liquidaciones.reduce((acc, curr) => acc + Number(curr.total), 0);
 
@@ -99,10 +100,10 @@ const VendedorLiquidaciones = () => {
 
       {/* Encabezado con Datos del Vendedor */}
       <PageHeader
-        title={vendedor ? `Liquidaciones: ${vendedor.nombre} ${vendedor.apellido}` : 'Liquidaciones'}
-        description={vendedor ? `${vendedor.tipoDocumento}: ${vendedor.numeroDocumento}` : 'Obteniendo información...'}
+        title={vendedor ? `Actividad: ${vendedor.nombre} ${vendedor.apellido}` : 'Actividad Financiera'}
+        description={vendedor ? `Gestione las ventas y liquidaciones de ${vendedor.nombre.toLowerCase()}` : 'Obteniendo información...'}
         backTo="/admin/personal/vendedores"
-        icon={DollarSign}
+        icon={TrendingUp}
         loading={loading && !vendedor}
       />
 
@@ -114,11 +115,10 @@ const VendedorLiquidaciones = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               disabled={loading && !vendedor}
-              className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors disabled:opacity-50 ${
-                activeTab === tab.id
+              className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors disabled:opacity-50 ${activeTab === tab.id
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -138,10 +138,23 @@ const VendedorLiquidaciones = () => {
               <>
                 {/* Cards de resumen */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {/* Ventas pendientes (cantidad) */}
-                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                  {/* Total Facturado */}
+                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 transition-all hover:shadow-md">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                        <Receipt className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Facturado</p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${totalSalesAmount.toLocaleString()}</h3>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ventas pendientes (cantidad) */}
+                  <div className="rounded-xl border border-amber-100 bg-white p-5 shadow-sm dark:border-amber-900/20 dark:bg-gray-800 transition-all hover:shadow-md text-amber-600">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                         <ShoppingBag className="h-5 w-5" />
                       </div>
                       <div>
@@ -152,40 +165,27 @@ const VendedorLiquidaciones = () => {
                   </div>
 
                   {/* Monto pendiente */}
-                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                  <div className="rounded-xl border border-orange-100 bg-white p-5 shadow-sm dark:border-orange-900/20 dark:bg-gray-800 transition-all hover:shadow-md text-orange-600">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
-                        <AlertCircle className="h-5 w-5" />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+                        <DollarSign className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Monto Pendiente</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${pendingAmount.toFixed(2)}</h3>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Comisión Pendiente</p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${pendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                       </div>
                     </div>
                   </div>
 
                   {/* Total liquidado */}
-                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                  <div className="rounded-xl border border-emerald-100 bg-white p-5 shadow-sm dark:border-emerald-900/20 dark:bg-gray-800 transition-all hover:shadow-md text-emerald-600">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                         <CheckCircle2 className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Liquidado</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${totalPaid.toFixed(2)}</h3>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Liquidaciones generadas */}
-                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Liquidaciones</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{liquidaciones.length}</h3>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Pagado</p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                       </div>
                     </div>
                   </div>
@@ -298,12 +298,12 @@ const VendedorLiquidaciones = () => {
                             </td>
                             <td className="px-4 py-2.5 text-center">
                               {v.liquidacionId ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                  <CheckCircle2 className="h-3 w-3" /> Pagado
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30">
+                                  <CheckCircle2 className="h-3.5 w-3.5" /> Liquidado
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                                  <AlertCircle className="h-3 w-3" /> Pendiente
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/30">
+                                  <AlertCircle className="h-3.5 w-3.5" /> Pendiente
                                 </span>
                               )}
                             </td>

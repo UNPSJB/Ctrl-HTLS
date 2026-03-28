@@ -1,14 +1,13 @@
-import React from 'react';
 import { Plus } from 'lucide-react';
 
 /**
  * ListHeader - Componente genérico para cabeceras de páginas de listado (Estilo Plano).
  */
-const ListHeader = ({ 
-    title, 
-    description, 
-    onAction, 
-    actionLabel, 
+const ListHeader = ({
+    title,
+    description,
+    onAction,
+    actionLabel,
     actionIcon: ActionIcon = Plus
 }) => {
     return (

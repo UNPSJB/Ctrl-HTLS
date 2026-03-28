@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 
 /**
@@ -64,13 +64,13 @@ const ActionModal = ({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300 dark:bg-black/70"
         onClick={() => !loading && onClose()}
       />
 
       {/* Modal Container */}
-      <div 
+      <div
         className={`relative w-full ${sizeClasses[size]} animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden max-h-[90vh]`}
       >
         {/* Header */}

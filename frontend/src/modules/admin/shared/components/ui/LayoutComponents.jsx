@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * SidebarLayout - Wrapper principal para páginas con barra lateral.
  */
@@ -28,11 +26,10 @@ export const PageSidebar = ({ tabs, activeTab, onTabChange }) => (
         key={tab.id}
         type="button"
         onClick={() => onTabChange(tab.id)}
-        className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-          activeTab === tab.id
+        className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === tab.id
             ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
             : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
-        }`}
+          }`}
       >
         {tab.icon && <tab.icon className="h-5 w-5" />}
         <span>{tab.label}</span>
@@ -45,7 +42,7 @@ export const PageSidebar = ({ tabs, activeTab, onTabChange }) => (
  * PageContentCard - Tarjeta blanca para el contenido principal.
  */
 export const PageContentCard = ({ children, className = '', as: Tag = 'div', ...props }) => (
-  <Tag 
+  <Tag
     {...props}
     className={`rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col ${className}`}
   >

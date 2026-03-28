@@ -8,11 +8,11 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
-import { 
-    FormField, 
-    TextInput, 
-    EmailInput, 
-    TelInput, 
+import {
+    FormField,
+    TextInput,
+    EmailInput,
+    TelInput,
     SelectInput,
     PasswordInput,
     RedirectLink
@@ -282,7 +282,7 @@ const AdministradoresForm = () => {
                                             placeholder="••••••••"
                                         />
                                     </FormField>
-                                    {isEditing && <p className="mt-1 text-xs text-gray-500 italic flex items-center gap-1.5"><ShieldCheck className="w-3 h-3"/> Deje en blanco para mantener la contraseña actual.</p>}
+                                    {isEditing && <p className="mt-1 text-xs text-gray-500 italic flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Deje en blanco para mantener la contraseña actual.</p>}
                                 </div>
                             </div>
                         </div>

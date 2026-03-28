@@ -2,20 +2,20 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, X, Lock, MapPin, Building2, Briefcase, ArrowLeft, Phone } from 'lucide-react';
+import { User, Save, X, Lock, MapPin, Building2, Briefcase, Phone } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
-import { 
-    FormField, 
-    TextInput, 
-    EmailInput, 
-    TelInput, 
-    SelectInput,
-    PasswordInput,
-    RedirectLink
+import {
+  FormField,
+  TextInput,
+  EmailInput,
+  TelInput,
+  SelectInput,
+  PasswordInput,
+  RedirectLink
 } from '@form';
 
 const tiposDocumento = [
@@ -95,16 +95,13 @@ const VendedoresForm = () => {
         direccion: data.direccion || '',
         password: '',
         rol: data.rol || 'vendedor',
+        paisId: data.ubicacion?.paisId || '',
+        provinciaId: data.ubicacion?.provinciaId || '',
+        ciudadId: data.ubicacion?.ciudadId || '',
       });
 
       setAssignedHotels(userHotels);
       setInitialHotels(userHotels);
-
-      if (data.ubicacion) {
-        setValue('paisId', data.ubicacion.paisId);
-        setValue('provinciaId', data.ubicacion.provinciaId);
-        setValue('ciudadId', data.ubicacion.ciudadId);
-      }
     } catch (error) {
       console.error(error);
       toast.error('Error al cargar datos del vendedor');

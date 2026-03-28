@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 
 /**
  * Área de texto multi-línea con estilos consistentes.
@@ -9,7 +9,7 @@ const TextAreaInput = forwardRef(({ error, className = '', ...props }, ref) => {
   const errorClasses = error ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 dark:border-gray-600';
   const darkClasses = 'dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400';
   const disabledClasses = 'disabled:bg-gray-50 disabled:text-gray-500 dark:disabled:bg-gray-800';
-  
+
   return (
     <textarea
       ref={ref}
