@@ -23,14 +23,8 @@ const verificarDocumento = async (numeroDocumento) => {
       Cliente.findOne({ where: { numeroDocumento } }),
     ]);
 
-  if (encargadoExistente) {
-    throw new CustomError('Ya existe un encargado con el mismo documento', 409); // Conflict
-  }
-  if (empleadoExistente) {
-    throw new CustomError('Ya existe un empleado con el mismo documento', 409); // Conflict
-  }
-  if (clienteExistente) {
-    throw new CustomError('Ya existe un cliente con el mismo documento', 409); // Conflict
+  if (encargadoExistente || empleadoExistente || clienteExistente) {
+    throw new CustomError('Ya existe un registro con el mismo documento', 409); // Conflict
   }
 };
 
@@ -57,18 +51,14 @@ const verificarEmail = async (email, excludeHotelId = null) => {
       Empleado.findOne({ where: { email } }),
     ]);
 
-  if (hotelExistenteEmail) {
-    throw new CustomError('Ya existe un hotel con el mismo email', 409); // Conflict
-  }
-  if (clienteExistenteEmail) {
-    throw new CustomError('Ya existe un cliente con el mismo email', 409); // Conflict
-  }
-  if (empleadoExistenteEmail) {
-    throw new CustomError('Ya existe un empleado con el mismo email', 409); // Conflict
+  if (hotelExistenteEmail || clienteExistenteEmail || empleadoExistenteEmail) {
+    throw new CustomError('Ya existe un registro con el mismo email', 409); // Conflict
   }
 };
 
 const verificarTelefono = async (telefono, excludeHotelId = null) => {
+  if (!telefono || telefono.trim() === '') return;
+
   const [
     hotelExistenteTelefono,
     clienteExistenteTelefono,
@@ -84,14 +74,12 @@ const verificarTelefono = async (telefono, excludeHotelId = null) => {
     Empleado.findOne({ where: { telefono } }),
   ]);
 
-  if (hotelExistenteTelefono) {
-    throw new CustomError('Ya existe un hotel con el mismo telefono', 409); // Conflict
-  }
-  if (clienteExistenteTelefono) {
-    throw new CustomError('Ya existe un cliente con el mismo telefono', 409); // Conflict
-  }
-  if (empleadoExistenteTelefono) {
-    throw new CustomError('Ya existe un empleado con el mismo telefono', 409); // Conflict
+  if (
+    hotelExistenteTelefono ||
+    clienteExistenteTelefono ||
+    empleadoExistenteTelefono
+  ) {
+    throw new CustomError('Ya existe un registro con el mismo teléfono', 409); // Conflict
   }
 };
 

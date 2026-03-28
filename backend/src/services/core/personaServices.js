@@ -558,34 +558,47 @@ const obtenerClientePorDocumento = async (numeroDocumento) => {
 };
 
 const verificarUpdate = async (numeroDocumento, email, telefono, id) => {
+  const promesas = [
+    Cliente.findOne({ where: { email, id: { [Op.ne]: id } } }),
+    Empleado.findOne({ where: { email, id: { [Op.ne]: id } } }),
+    Cliente.findOne({ where: { numeroDocumento, id: { [Op.ne]: id } } }),
+    Empleado.findOne({ where: { numeroDocumento, id: { [Op.ne]: id } } }),
+    Encargado.findOne({ where: { dni: numeroDocumento, id: { [Op.ne]: id } } }),
+  ];
+
+  // Solo verificar teléfono si viene con valor
+  const verificarTel = telefono && telefono.trim() !== '';
+  if (verificarTel) {
+    promesas.push(
+      Cliente.findOne({ where: { telefono, id: { [Op.ne]: id } } }),
+      Empleado.findOne({ where: { telefono, id: { [Op.ne]: id } } }),
+    );
+  }
+
+  const resultados = await Promise.all(promesas);
+
   const [
     emailCliente,
     emailEmpleado,
     documentoCliente,
     documentoEmpleado,
     documentoEncargado,
-    telefonoCliente,
-    telefonoEmpleado,
-  ] = await Promise.all([
-    Cliente.findOne({ where: { email, id: { [Op.ne]: id } } }),
-    Empleado.findOne({ where: { email, id: { [Op.ne]: id } } }),
-    Cliente.findOne({ where: { numeroDocumento, id: { [Op.ne]: id } } }),
-    Empleado.findOne({ where: { numeroDocumento, id: { [Op.ne]: id } } }),
-    Encargado.findOne({ where: { dni: numeroDocumento, id: { [Op.ne]: id } } }),
-    Cliente.findOne({ where: { telefono, id: { [Op.ne]: id } } }),
-    Empleado.findOne({ where: { telefono, id: { [Op.ne]: id } } }),
-  ]);
+  ] = resultados;
 
   if (emailCliente || emailEmpleado) {
-    throw new CustomError('El email ya está registrado', 409); // Conflict
+    throw new CustomError('Ya existe un registro con el mismo email', 409); // Conflict
   }
 
   if (documentoCliente || documentoEmpleado || documentoEncargado) {
-    throw new CustomError('El número de documento ya está registrado', 409); // Conflict
+    throw new CustomError('Ya existe un registro con el mismo documento', 409); // Conflict
   }
 
-  if (telefonoCliente || telefonoEmpleado) {
-    throw new CustomError('El teléfono ya está registrado', 409); // Conflict
+  if (verificarTel) {
+    const telefonoCliente = resultados[5];
+    const telefonoEmpleado = resultados[6];
+    if (telefonoCliente || telefonoEmpleado) {
+      throw new CustomError('Ya existe un registro con el mismo teléfono', 409); // Conflict
+    }
   }
 };
 
