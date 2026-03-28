@@ -15,7 +15,7 @@ const Administradores = () => {
                 title="Gestión de Administradores"
                 description="Administra los perfiles con acceso total al sistema de gestión"
                 actionLabel="Nuevo Administrador"
-                onAction={() => navigate('/admin/personal/administradores/nuevo')}
+                onAction={() => navigate('/admin/administradores/nuevo')}
                 icon={Users}
             />
 

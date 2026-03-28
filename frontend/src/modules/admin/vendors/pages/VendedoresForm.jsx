@@ -105,7 +105,7 @@ const VendedoresForm = () => {
     } catch (error) {
       console.error(error);
       toast.error('Error al cargar datos del vendedor');
-      navigate('/admin/personal/vendedores');
+      navigate('/admin/vendedores');
     } finally {
       setLoadingData(false);
     }
@@ -173,7 +173,7 @@ const VendedoresForm = () => {
         }
       }
 
-      navigate('/admin/personal/vendedores');
+      navigate('/admin/vendedores');
     } catch (error) {
       console.error(error);
       const mensaje = error.response?.data?.error || 'Error al guardar los datos';
@@ -183,7 +183,7 @@ const VendedoresForm = () => {
     }
   };
 
-  const handleCancel = () => navigate('/admin/personal/vendedores');
+  const handleCancel = () => navigate('/admin/vendedores');
 
 
   return (
@@ -196,17 +196,6 @@ const VendedoresForm = () => {
         onBack={handleCancel}
         icon={Briefcase}
         loading={loadingData}
-        extra={isEditing && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase text-gray-400">Rol:</span>
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-              {rol === 'administrador' ? 'Administrador' : 'Vendedor'}
-            </span>
-            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/30 dark:text-green-400">
-              Activo
-            </span>
-          </div>
-        )}
       />
 
       <SidebarLayout
@@ -372,7 +361,7 @@ const VendedoresForm = () => {
 
           <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
             <RedirectLink
-              to="/admin/personal/vendedores"
+              to="/admin/vendedores"
               label="Cancelar"
               className="px-5 py-2.5"
               disabled={isSubmitting}

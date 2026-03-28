@@ -73,7 +73,7 @@ const LiquidacionesGlobales = () => {
       <PageHeader
         title="Liquidaciones Globales"
         description="Historial y generación masiva de pagos"
-        backTo="/admin/personal/vendedores"
+        backTo="/admin/vendedores"
         icon={DollarSign}
         extra={
           <button

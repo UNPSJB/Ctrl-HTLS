@@ -47,7 +47,7 @@ const AdministradoresTable = () => {
     };
 
     const handleEdit = (id) => {
-        navigate(`/admin/personal/administradores/editar/${id}`);
+        navigate(`/admin/administradores/editar/${id}`);
     };
 
     const filteredAdmins = useMemo(() => {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, Lock, MapPin, Briefcase, ArrowLeft, ShieldCheck, X, Phone } from 'lucide-react';
+import { User, Save, Lock, MapPin, ShieldCheck, Phone } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
@@ -48,7 +48,6 @@ const AdministradoresForm = () => {
             numeroDocumento: '',
             direccion: '',
             password: '',
-            confirmPassword: '',
             rol: 'administrador',
             paisId: '',
             provinciaId: '',
@@ -73,7 +72,8 @@ const AdministradoresForm = () => {
     const fetchAdmin = async () => {
         try {
             setLoadingData(true);
-            const response = await axiosInstance.get(`/vendedor/${id}`);
+            // Usando el endpoint correcto para administradores
+            const response = await axiosInstance.get(`/administrador/${id}`);
             const data = response.data;
 
             if (data.nombre) {
@@ -90,17 +90,14 @@ const AdministradoresForm = () => {
                 direccion: data.direccion || '',
                 password: '',
                 rol: 'administrador',
+                paisId: data.ubicacion?.paisId || '',
+                provinciaId: data.ubicacion?.provinciaId || '',
+                ciudadId: data.ubicacion?.ciudadId || '',
             });
-
-            if (data.ubicacion) {
-                setValue('paisId', data.ubicacion.paisId);
-                setValue('provinciaId', data.ubicacion.provinciaId);
-                setValue('ciudadId', data.ubicacion.ciudadId);
-            }
         } catch (error) {
             console.error(error);
             toast.error('Error al cargar datos del administrador');
-            navigate('/admin/personal/administradores');
+            navigate('/admin/administradores');
         } finally {
             setLoadingData(false);
         }
@@ -125,16 +122,19 @@ const AdministradoresForm = () => {
 
 
     const onSubmit = async (data) => {
-        // Envío del formulario
         try {
+            // Eliminar contraseña vacía en modo edición
+            if (isEditing && !data.password) delete data.password;
+
             if (isEditing) {
-                await axiosInstance.put(`/empleado/${id}`, data);
-                toast.success('Administrador actualizado');
+                // Usar endpoint exclusivo de administradores para la actualización
+                await axiosInstance.put(`/administrador/${id}`, data);
+                toast.success('Administrador actualizado correctamente');
             } else {
                 await axiosInstance.post('/empleado', data);
-                toast.success('Administrador registrado');
+                toast.success('Administrador registrado correctamente');
             }
-            navigate('/admin/personal/administradores');
+            navigate('/admin/administradores');
         } catch (error) {
             console.error(error);
             const mensaje = error.response?.data?.error || (isEditing ? 'Error al actualizar administrador' : 'Error al crear administrador');
@@ -142,7 +142,7 @@ const AdministradoresForm = () => {
         }
     };
 
-    const handleCancel = () => navigate('/admin/personal/administradores');
+    const handleCancel = () => navigate('/admin/administradores');
 
 
     return (
@@ -150,22 +150,11 @@ const AdministradoresForm = () => {
 
             {/* Perfil del Administrador / Encabezado */}
             <PageHeader
-                title={isEditing ? 'Editar Administrador' : 'Registrar Nuevo Administrador'}
+                title={isEditing ? (watch('nombre') ? `${watch('nombre')} ${watch('apellido')}` : 'Editar Administrador') : 'Registrar Nuevo Administrador'}
                 description={isEditing ? 'Gestione los permisos y datos del perfil administrativo' : 'Complete el formulario para dar de alta un administrador'}
                 onBack={handleCancel}
                 icon={ShieldCheck}
                 loading={loadingData}
-                extra={isEditing && (
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold uppercase text-gray-400">Rol:</span>
-                        <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
-                            Administrador
-                        </span>
-                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                            Activo
-                        </span>
-                    </div>
-                )}
             />
 
             <SidebarLayout
@@ -290,7 +279,7 @@ const AdministradoresForm = () => {
 
                     <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
                         <RedirectLink
-                            to="/admin/personal/administradores"
+                            to="/admin/administradores"
                             label="Cancelar"
                             className="px-5 py-2.5"
                             disabled={isSubmitting}

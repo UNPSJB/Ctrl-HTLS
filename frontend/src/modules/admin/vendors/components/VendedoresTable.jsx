@@ -37,7 +37,7 @@ const VendedoresTable = () => {
   };
 
   const handleEdit = (id) => {
-    navigate(`/admin/personal/vendedores/editar/${id}`);
+    navigate(`/admin/vendedores/editar/${id}`);
   };
 
   const filteredVendedores = useMemo(() => {
@@ -152,7 +152,7 @@ const VendedoresTable = () => {
                           <TableButton
                             variant="view"
                             icon={BarChart3}
-                            onClick={() => navigate(`/admin/personal/liquidaciones/${vendedor.id}`)}
+                            onClick={() => navigate(`/admin/vendedores/liquidaciones/${vendedor.id}`)}
                             title="Actividad y Liquidaciones"
                           />
                           <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />

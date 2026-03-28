@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 
 /**
  * Componente base de entrada (input) estandarizado.

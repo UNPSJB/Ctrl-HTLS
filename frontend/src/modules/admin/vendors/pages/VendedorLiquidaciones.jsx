@@ -102,7 +102,7 @@ const VendedorLiquidaciones = () => {
       <PageHeader
         title={vendedor ? `Actividad: ${vendedor.nombre} ${vendedor.apellido}` : 'Actividad Financiera'}
         description={vendedor ? `Gestione las ventas y liquidaciones de ${vendedor.nombre.toLowerCase()}` : 'Obteniendo información...'}
-        backTo="/admin/personal/vendedores"
+        backTo="/admin/vendedores"
         icon={TrendingUp}
         loading={loading && !vendedor}
       />
