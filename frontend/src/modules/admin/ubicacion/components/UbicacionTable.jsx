@@ -49,7 +49,7 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
           </div>
         </div>
 
-        <div className="relative flex flex-col flex-grow overflow-hidden min-h-[300px]">
+        <div className="relative flex flex-col flex-grow overflow-hidden">
           {loading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
               <InnerLoading message={`Cargando ${tipo === 'pais' ? 'países' : tipo === 'provincia' ? 'provincias' : 'ciudades'}...`} />
