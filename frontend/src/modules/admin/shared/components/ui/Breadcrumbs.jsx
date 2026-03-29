@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Mapeo de rutas a nombres legibles en español
 const routeNameMap = {
@@ -9,9 +10,16 @@ const routeNameMap = {
     clientes: 'Clientes',
     vendedores: 'Vendedores',
     administradores: 'Administradores',
+    encargados: 'Encargados',
     liquidaciones: 'Liquidaciones',
+    ubicacion: 'Ubicaciones',
+    paises: 'Países',
+    provincias: 'Provincias',
+    ciudades: 'Ciudades',
     nuevo: 'Nuevo',
     editar: 'Editar',
+    historial: 'Historial',
+    dashboard: 'Dashboard',
     configuracion: 'Configuración',
     categorias: 'Categorías',
 };
@@ -48,7 +56,11 @@ const Breadcrumbs = () => {
                     const name = dynamicName || staticName || value;
 
                     const isId = !isNaN(value) || (pathnames[index - 1] === 'editar');
-                    const displayName = isId ? (dynamicName || value) : name;
+                    const rawName = isId ? (dynamicName || value) : name;
+                    // Aplicar capitalización a todos los segmentos
+                    const displayName = (typeof rawName === 'string' && isNaN(rawName))
+                        ? capitalizeWords(rawName)
+                        : rawName;
 
                     return (
                         <li key={to}>
