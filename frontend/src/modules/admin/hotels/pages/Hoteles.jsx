@@ -11,7 +11,7 @@ const Hoteles = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
             <ListHeader
                 title="Gestión de Hoteles"
                 description="Administra los hoteles, ubicaciones y categorías del sistema"

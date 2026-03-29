@@ -74,8 +74,8 @@ const AdministradoresTable = () => {
     if (error) return <div className="p-4 text-red-500">{error}</div>;
 
     return (
-        <div className="space-y-6">
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex-grow flex flex-col h-full overflow-hidden">
+        <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
                 {/* Barra de Búsqueda Centrada */}
                 <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
@@ -91,51 +91,58 @@ const AdministradoresTable = () => {
                 </div>
 
                 {/* Tabla Administradores */}
-                <div className="relative flex flex-col min-h-[400px]">
+                <div className="relative flex flex-col flex-grow overflow-hidden min-h-[300px]">
                     {loading && (
                         <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
                             <InnerLoading message="Consultando privilegios..." />
                         </div>
                     )}
 
-                    <div className="overflow-x-auto">
+                    {/* Encabezado fijo Fuera del Scroll */}
+                    <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-700/30">
+                        <table className="w-full table-fixed text-left text-sm">
+                            <thead className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <tr>
+                                    <th className="px-6 py-4 w-[30%]">Nombre Completo</th>
+                                    <th className="px-6 py-4 w-[20%]">Documento</th>
+                                    <th className="px-6 py-4 w-[25%]">Email</th>
+                                    <th className="px-6 py-4 w-[15%]">Teléfono</th>
+                                    <th className="px-6 py-4 w-[10%] text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    {/* Cuerpo desplazable con Scroll Interno */}
+                    <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
                         {filteredAdmins.length > 0 ? (
-                            <table className="w-full border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-                                        <th className="px-6 py-4 text-left">Nombre Completo</th>
-                                        <th className="px-6 py-4 text-left">Documento</th>
-                                        <th className="px-6 py-4 text-left">Email</th>
-                                        <th className="px-6 py-4 text-left">Teléfono</th>
-                                        <th className="px-6 py-4 text-right">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <table className="w-full table-fixed border-collapse text-left text-sm">
+                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                     {currentItems.map((admin) => (
-                                        <tr key={admin.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800">
-                                            <td className="px-6 py-3">
-                                                <div className="flex items-center">
+                                        <tr key={admin.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
+                                            <td className="px-6 py-3 w-[30%]">
+                                                <div className="flex items-center truncate">
                                                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
                                                         <User className="h-5 w-5" />
                                                     </div>
-                                                    <div className="ml-4 text-sm">
-                                                        <div className="font-medium text-gray-900 dark:text-white transition-all">
+                                                    <div className="ml-4 truncate">
+                                                        <div className="font-medium text-gray-900 dark:text-white transition-all truncate">
                                                             {capitalizeFirst(admin.nombre)} {capitalizeFirst(admin.apellido)}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                                            <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[20%] truncate">
                                                 <span className="font-semibold uppercase mr-2">{admin.tipoDocumento}</span>
                                                 {admin.numeroDocumento}
                                             </td>
-                                            <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
+                                            <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[25%] truncate">
                                                 {admin.email || <span className="italic text-gray-400">—</span>}
                                             </td>
-                                            <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                            <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 w-[15%] truncate">
                                                 {admin.telefono || <span className="italic text-gray-400">—</span>}
                                             </td>
-                                            <td className="px-6 py-3 text-right">
+                                            <td className="px-6 py-3 text-right w-[10%]">
                                                 <div className="flex justify-end gap-2">
                                                     <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(admin.id)} />
                                                     <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(admin.id)} />

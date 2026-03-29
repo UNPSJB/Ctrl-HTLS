@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Search, X, Users, User } from 'lucide-react';
+import { Trash2, Users, User } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@/api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
@@ -76,117 +76,125 @@ const EncargadosTable = () => {
   );
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      {/* Barra de Búsqueda Interna */}
-      <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-        <div className="max-w-md">
-          <SearchInput
-            placeholder="Buscar por nombre o documento..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            onClear={() => setSearchTerm('')}
-            disabled={loading}
-          />
-        </div>
-      </div>
-
-      <div className="relative flex flex-col min-h-[400px]">
-        {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-            <InnerLoading message="Cargando encargados..." />
+    <div className="flex-grow flex flex-col h-full overflow-hidden">
+      <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        {/* Barra de Búsqueda Interna */}
+        <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+          <div className="max-w-md">
+            <SearchInput
+              placeholder="Buscar por nombre o documento..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              onClear={() => setSearchTerm('')}
+              disabled={loading}
+            />
           </div>
-        )}
+        </div>
 
-        <div className="overflow-x-auto">
-          {filteredEncargados.length > 0 ? (
-            <table className="w-full border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-                <tr>
-                  <th className="px-6 py-4">Nombre Completo</th>
-                  <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Email</th>
-                  <th className="px-6 py-4">Teléfono</th>
-                  <th className="px-6 py-4">Hotel</th>
-                  <th className="px-6 py-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                {currentItems.map((encargado) => (
-                  <tr key={encargado.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                    {/* Nombre y Avatar */}
-                    <td className="px-6 py-3">
-                      <div className="flex items-center">
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                          <User className="h-5 w-5" />
-                        </div>
-                        <div className="ml-4">
-                           <div className="text-sm font-medium text-gray-900 dark:text-white transition-all">
-                             {capitalizeFirst(encargado.nombre)} {capitalizeFirst(encargado.apellido)}
-                           </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Documento */}
-                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      <span className="font-semibold uppercase mr-2">
-                        {encargado.tipoDocumento}
-                      </span>
-                      {encargado.dni}
-                    </td>
-
-                    {/* Email */}
-                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                      {encargado.email || <span className="italic text-gray-400">—</span>}
-                    </td>
-
-                    {/* Teléfono */}
-                    <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
-                      {encargado.telefono || <span className="italic text-gray-400">—</span>}
-                    </td>
-
-                    {/* Estado de Asignación */}
-                    <td className="px-6 py-3">
-                      {encargado.hotel ? (
-                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                          {capitalizeFirst(encargado.hotel.nombre)}
-                        </span>
-                      ) : (
-                        <span className="italic text-gray-400">—</span>
-                      )}
-                    </td>
-
-                    {/* Acciones */}
-                    <td className="px-6 py-3 text-right">
-                      <div className="flex justify-end gap-2">
-                        {/* Se omite Edit porque Backend no tiene PUT /hotel/encargados/:id */}
-                        <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(encargado.id)} />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
-              <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
-              <p className="text-gray-500 dark:text-gray-400">No se encontraron encargados que coincidan con la búsqueda.</p>
+        <div className="relative flex flex-col flex-grow overflow-hidden min-h-[300px]">
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+              <InnerLoading message="Cargando encargados..." />
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Paginación */}
-      <TablePagination
-        currentPage={currentPage}
-        totalItems={filteredEncargados.length}
-        itemsPerPage={ITEMS_PER_PAGE}
-        onPageChange={setCurrentPage}
-        disabled={loading}
-      />
+          {/* Encabezado fijo Fuera del Scroll */}
+          <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-700/30">
+            <table className="w-full table-fixed text-left text-sm">
+              <thead className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <tr>
+                  <th className="px-6 py-4 w-[25%]">Nombre Completo</th>
+                  <th className="px-6 py-4 w-[15%]">Documento</th>
+                  <th className="px-6 py-4 w-[20%]">Email</th>
+                  <th className="px-6 py-4 w-[15%]">Teléfono</th>
+                  <th className="px-6 py-4 w-[15%]">Hotel</th>
+                  <th className="px-6 py-4 w-[10%] text-right">Acciones</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+
+          {/* Cuerpo desplazable con Scroll Interno */}
+          <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+            {filteredEncargados.length > 0 ? (
+              <table className="w-full table-fixed border-collapse text-left text-sm">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                  {currentItems.map((encargado) => (
+                    <tr key={encargado.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
+                      {/* Nombre y Avatar */}
+                      <td className="px-6 py-3 w-[25%]">
+                        <div className="flex items-center truncate">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            <User className="h-5 w-5" />
+                          </div>
+                          <div className="ml-4 truncate">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white transition-all truncate">
+                              {capitalizeFirst(encargado.nombre)} {capitalizeFirst(encargado.apellido)}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Documento */}
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[15%] truncate">
+                        <span className="font-semibold uppercase mr-2">
+                          {encargado.tipoDocumento}
+                        </span>
+                        {encargado.dni}
+                      </td>
+
+                      {/* Email */}
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[20%] truncate">
+                        {encargado.email || <span className="italic text-gray-400">—</span>}
+                      </td>
+
+                      {/* Teléfono */}
+                      <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 w-[15%] truncate">
+                        {encargado.telefono || <span className="italic text-gray-400">—</span>}
+                      </td>
+
+                      {/* Estado de Asignación */}
+                      <td className="px-6 py-3 w-[15%] truncate">
+                        {encargado.hotel ? (
+                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 truncate max-w-full">
+                            {capitalizeFirst(encargado.hotel.nombre)}
+                          </span>
+                        ) : (
+                          <span className="italic text-gray-400">—</span>
+                        )}
+                      </td>
+
+                      {/* Acciones */}
+                      <td className="px-6 py-3 text-right w-[10%]">
+                        <div className="flex justify-end gap-2">
+                          <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(encargado.id)} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
+                <p className="text-gray-500 dark:text-gray-400">No se encontraron encargados que coincidan con la búsqueda.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Paginación */}
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredEncargados.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+          disabled={loading}
+        />
+      </div>
     </div>
   );
 };

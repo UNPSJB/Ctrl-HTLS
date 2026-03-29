@@ -7,7 +7,7 @@ const Clientes = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
             <ListHeader
                 title="Gestión de Clientes"
                 description="Administra la base de datos de clientes y sus perfiles"

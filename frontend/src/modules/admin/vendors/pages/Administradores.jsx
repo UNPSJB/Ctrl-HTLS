@@ -10,7 +10,7 @@ const Administradores = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
             <ListHeader
                 title="Gestión de Administradores"
                 description="Administra los perfiles con acceso total al sistema de gestión"

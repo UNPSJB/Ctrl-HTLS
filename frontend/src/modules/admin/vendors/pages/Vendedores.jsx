@@ -10,7 +10,7 @@ const Vendedores = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center py-2">
                 {/* Título y descripción */}
                 <div className="min-w-0">
