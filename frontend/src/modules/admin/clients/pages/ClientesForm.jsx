@@ -151,15 +151,17 @@ const ClientesForm = () => {
 
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
             {/* Perfil del Cliente / Encabezado */}
-            <PageHeader
-                title={isEditing ? 'Editar Cliente' : 'Registrar Nuevo Cliente'}
-                description={isEditing ? 'Gestione la información personal y de contacto del cliente' : 'Complete el formulario para dar de alta un cliente'}
-                onBack={handleCancel}
-                icon={Users}
-                loading={loadingData}
-            />
+            <div className="flex-shrink-0">
+                <PageHeader
+                    title={isEditing ? 'Editar Cliente' : 'Registrar Nuevo Cliente'}
+                    description={isEditing ? 'Gestione la información personal y de contacto del cliente' : 'Complete el formulario para dar de alta un cliente'}
+                    onBack={handleCancel}
+                    icon={Users}
+                    loading={loadingData}
+                />
+            </div>
 
             <SidebarLayout
                 sidebar={
@@ -174,11 +176,13 @@ const ClientesForm = () => {
                     />
                 }
             >
-                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="">
                     {loadingData ? (
-                        <InnerLoading message="Cargando perfil del cliente..." />
+                        <div className="flex-1 flex items-center justify-center py-12">
+                            <InnerLoading message="Cargando perfil del cliente..." />
+                        </div>
                     ) : (
-                        <div className="flex-1">
+                        <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
                             {/* Información Personal */}
                             <div className={activeTab === 'personal' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
@@ -260,7 +264,7 @@ const ClientesForm = () => {
                     )}
 
                     {/* Botones de Acción */}
-                    <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+                    <div className="flex-shrink-0 flex items-center justify-end gap-3 border-t border-gray-100 bg-white dark:bg-gray-800 pt-6 mt-6 dark:border-gray-700">
                         <RedirectLink
                             to="/admin/clientes"
                             label="Cancelar"

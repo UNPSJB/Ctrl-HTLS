@@ -163,15 +163,17 @@ export default function HotelesForm() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col gap-6 overflow-hidden">
       {/* Encabezado del Hotel */}
-      <PageHeader
-        title={isEditing ? 'Editar Hotel' : 'Registrar Nuevo Hotel'}
-        description={isEditing ? 'Gestione la información básica y de contacto del hotel' : 'Complete la información para dar de alta un hotel'}
-        backTo="/admin/hoteles"
-        icon={Building2}
-        loading={loadingResources || loadingData}
-      />
+      <div className="flex-shrink-0">
+        <PageHeader
+          title={isEditing ? 'Editar Hotel' : 'Registrar Nuevo Hotel'}
+          description={isEditing ? 'Gestione la información básica y de contacto del hotel' : 'Complete la información para dar de alta un hotel'}
+          backTo="/admin/hoteles"
+          icon={Building2}
+          loading={loadingResources || loadingData}
+        />
+      </div>
 
       <SidebarLayout
         sidebar={
@@ -188,16 +190,15 @@ export default function HotelesForm() {
           />
         }
       >
-        <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="flex-1">
-            {loadingResources || loadingData ? (
-              <div className="flex-1 flex items-center justify-center py-12">
-                <InnerLoading message="Preparando formulario de hotel..." />
-              </div>
-            ) : (
-              <div>
-                {/* Información General */}
-                <div className={activeTab === 'general' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+        <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="">
+          {loadingResources || loadingData ? (
+            <div className="flex-1 flex items-center justify-center py-12">
+              <InnerLoading message="Preparando formulario de hotel..." />
+            </div>
+          ) : (
+            <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
+              {/* Información General */}
+              <div className={activeTab === 'general' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información General</h3>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <FormField label="Nombre" required error={errors.nombre}>
@@ -279,11 +280,10 @@ export default function HotelesForm() {
                   <p className="text-xs text-gray-500 italic mt-1 text-center">¿El encargado que buscas no aparece o no está registrado?</p>
                 </div>
               </div>
-            )}
-          </div>
+          )}
 
           {/* Footer Estático */}
-          <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+          <div className="flex-shrink-0 flex items-center justify-end gap-3 border-t border-gray-100 bg-white dark:bg-gray-800 pt-6 mt-6 dark:border-gray-700">
             <RedirectLink
               to="/admin/hoteles"
               label="Cancelar"

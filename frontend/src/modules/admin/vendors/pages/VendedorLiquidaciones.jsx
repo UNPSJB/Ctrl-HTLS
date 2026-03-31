@@ -97,19 +97,20 @@ const VendedorLiquidaciones = () => {
   ];
 
   return (
-    <div className="space-y-6">
-
+    <div className="h-full flex flex-col gap-6 overflow-hidden">
       {/* Encabezado con Datos del Vendedor */}
-      <PageHeader
-        title={vendedor ? `Actividad: ${capitalizeFirst(vendedor.nombre)} ${capitalizeFirst(vendedor.apellido)}` : 'Actividad Financiera'}
-        description={vendedor ? `Gestione las ventas y liquidaciones de ${capitalizeFirst(vendedor.nombre)}` : 'Obteniendo información...'}
-        backTo="/admin/vendedores"
-        icon={TrendingUp}
-        loading={loading && !vendedor}
-      />
+      <div className="flex-shrink-0">
+        <PageHeader
+          title={vendedor ? `Actividad: ${capitalizeFirst(vendedor.nombre)} ${capitalizeFirst(vendedor.apellido)}` : 'Actividad Financiera'}
+          description={vendedor ? `Gestione las ventas y liquidaciones de ${capitalizeFirst(vendedor.nombre)}` : 'Obteniendo información...'}
+          backTo="/admin/vendedores"
+          icon={TrendingUp}
+          loading={loading && !vendedor}
+        />
+      </div>
 
       {/* Selector de Pestañas */}
-      <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-xl px-6">
+      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-xl px-6">
         <nav className="-mb-px flex space-x-8">
           {TABS.map((tab) => (
             <button
@@ -128,15 +129,17 @@ const VendedorLiquidaciones = () => {
       </div>
 
       {/* Contenido de Pestañas */}
-      <div className="min-h-[400px]">
+      <div className="flex-grow flex flex-col overflow-hidden">
         {loading && !vendedor ? (
-          <InnerLoading message="Cargando datos de liquidación..." />
+          <div className="flex-1 flex items-center justify-center">
+            <InnerLoading message="Cargando datos de liquidación..." />
+          </div>
         ) : (
-          <div className="animate-in fade-in duration-500 space-y-6">
+          <div className="animate-in fade-in duration-500 h-full flex flex-col">
 
             {/* ─── PESTAÑA: Resumen y Liquidar ─── */}
             {activeTab === 'resumen' && (
-              <>
+              <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar space-y-6">
                 {/* Cards de resumen */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {/* Total Facturado */}
@@ -249,13 +252,13 @@ const VendedorLiquidaciones = () => {
                     )}
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
             {/* ─── PESTAÑA: Historial de Ventas ─── */}
             {activeTab === 'ventas' && (
-              <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
-                <div className="border-b border-gray-200 px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
+              <div className="h-full flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
+                <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
                   <div>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Historial de Ventas</h2>
                     <p className="text-xs text-gray-500 dark:text-gray-400">{ventas.length} ventas totales</p>
@@ -274,9 +277,9 @@ const VendedorLiquidaciones = () => {
                     </select>
                   </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                <div className="flex-grow overflow-auto custom-scrollbar">
+                  <table className="w-full text-left text-sm relative">
+                    <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
                       <tr>
                         <th className="px-4 py-3">ID</th>
                         <th className="px-4 py-3">Descripción</th>
@@ -325,14 +328,14 @@ const VendedorLiquidaciones = () => {
 
             {/* ─── PESTAÑA: Historial de Pagos ─── */}
             {activeTab === 'pagos' && (
-              <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
-                <div className="border-b border-gray-200 px-6 py-4 flex flex-col gap-1 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
+              <div className="h-full flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
+                <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex flex-col gap-1 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Historial de Pagos</h2>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{liquidaciones.length} liquidaciones totales</p>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                <div className="flex-grow overflow-auto custom-scrollbar">
+                  <table className="w-full text-left text-sm relative">
+                    <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
                       <tr>
                         <th className="px-4 py-3">Nro.</th>
                         <th className="px-4 py-3">Fecha de Liquidación</th>

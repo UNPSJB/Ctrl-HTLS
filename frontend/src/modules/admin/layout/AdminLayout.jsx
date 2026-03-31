@@ -25,9 +25,9 @@ function AdminLayout() {
           className="lg:ml-72 h-screen flex flex-col overflow-hidden transition-all duration-200"
         >
           <div className="flex-grow w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col overflow-hidden">
-            <div className="flex-shrink-0">
+            {/* <div className="flex-shrink-0">
               <Breadcrumbs />
-            </div>
+            </div> */}
             <div className="flex-grow overflow-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
               <Outlet />
             </div>

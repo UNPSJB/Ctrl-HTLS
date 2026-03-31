@@ -188,16 +188,17 @@ const VendedoresForm = () => {
 
 
   return (
-    <div className="space-y-6">
-
+    <div className="h-full flex flex-col gap-6 overflow-hidden">
       {/* Encabezado del Vendedor */}
-      <PageHeader
-        title={isEditing ? 'Editar Vendedor' : 'Registrar Nuevo Vendedor'}
-        description={isEditing ? 'Gestione la información personal y permisos del vendedor' : 'Complete el formulario para dar de alta un vendedor'}
-        backTo="/admin/vendedores"
-        icon={Briefcase}
-        loading={loadingData}
-      />
+      <div className="flex-shrink-0">
+        <PageHeader
+          title={isEditing ? 'Editar Vendedor' : 'Registrar Nuevo Vendedor'}
+          description={isEditing ? 'Gestione la información personal y permisos del vendedor' : 'Complete el formulario para dar de alta un vendedor'}
+          backTo="/admin/vendedores"
+          icon={Briefcase}
+          loading={loadingData}
+        />
+      </div>
 
       <SidebarLayout
         sidebar={
@@ -215,11 +216,13 @@ const VendedoresForm = () => {
           />
         }
       >
-        <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="">
           {loadingData ? (
-            <InnerLoading message="Cargando perfil..." />
+            <div className="flex-1 flex items-center justify-center py-12">
+              <InnerLoading message="Cargando perfil..." />
+            </div>
           ) : (
-            <div className="flex-1">
+            <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
               {/* Información Personal */}
               <div className={activeTab === 'general' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
@@ -386,7 +389,7 @@ const VendedoresForm = () => {
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+          <div className="flex-shrink-0 flex items-center justify-end gap-3 border-t border-gray-100 bg-white dark:bg-gray-800 pt-6 mt-6 dark:border-gray-700">
             <RedirectLink
               to="/admin/vendedores"
               label="Cancelar"

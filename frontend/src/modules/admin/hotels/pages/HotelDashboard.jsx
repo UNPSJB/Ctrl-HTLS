@@ -63,15 +63,17 @@ export default function HotelDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col gap-6 overflow-hidden">
       {/* Encabezado del Dashboard */}
-      <PageHeader
-        title={hotel?.nombre || 'Hotel'}
-        description={loading ? 'Sincronizando datos...' : 'Dashboard de Configuración'}
-        backTo="/admin/hoteles"
-        icon={Building2}
-        loading={loading}
-      />
+      <div className="flex-shrink-0">
+        <PageHeader
+          title={hotel?.nombre || 'Hotel'}
+          description={loading ? 'Sincronizando datos...' : 'Dashboard de Configuración'}
+          backTo="/admin/hoteles"
+          icon={Building2}
+          loading={loading}
+        />
+      </div>
 
       <SidebarLayout
         sidebar={
@@ -102,7 +104,7 @@ export default function HotelDashboard() {
               </button>
             </div>
           ) : (
-            <div className="">
+            <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar flex flex-col relative">
               <div className={activeTab === 'general' ? 'block' : 'hidden'}>
                 <AjustesGeneralesTab
                   hotelId={hotel.id}

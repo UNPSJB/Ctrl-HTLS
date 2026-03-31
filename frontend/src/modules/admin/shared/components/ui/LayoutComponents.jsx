@@ -2,11 +2,11 @@
  * SidebarLayout - Wrapper principal para páginas con barra lateral.
  */
 export const SidebarLayout = ({ sidebar, children, className = '' }) => (
-  <div className={`flex flex-col gap-6 lg:flex-row ${className}`}>
-    <aside className="w-full lg:w-80 shrink-0">
+  <div className={`flex flex-col gap-6 lg:flex-row h-full overflow-hidden ${className}`}>
+    <aside className="w-full lg:w-80 shrink-0 lg:overflow-y-auto custom-scrollbar lg:h-full lg:pr-2">
       {sidebar}
     </aside>
-    <main className="flex-1 w-full min-w-0">
+    <main className="flex-1 w-full min-w-0 flex flex-col h-full overflow-hidden">
       {children}
     </main>
   </div>
@@ -52,12 +52,12 @@ export const PageSidebar = ({ tabs, activeTab, onTabChange, loading = false }) =
 );
 
 /**
- * PageContentCard - Tarjeta blanca para el contenido principal.
+ * PageContentCard - Tarjeta blanca para el contenido principal operando en Full Viewport.
  */
 export const PageContentCard = ({ children, className = '', as: Tag = 'div', ...props }) => (
   <Tag
     {...props}
-    className={`rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col ${className}`}
+    className={`rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col h-full overflow-hidden ${className}`}
   >
     {children}
   </Tag>
