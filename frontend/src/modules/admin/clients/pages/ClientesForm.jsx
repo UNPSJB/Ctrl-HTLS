@@ -170,6 +170,7 @@ const ClientesForm = () => {
                         ]}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
+                        loading={loadingData}
                     />
                 }
             >

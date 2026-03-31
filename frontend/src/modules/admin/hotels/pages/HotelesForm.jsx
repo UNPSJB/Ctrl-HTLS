@@ -170,6 +170,7 @@ export default function HotelesForm() {
         description={isEditing ? 'Gestione la información básica y de contacto del hotel' : 'Complete la información para dar de alta un hotel'}
         backTo="/admin/hoteles"
         icon={Building2}
+        loading={loadingResources || loadingData}
       />
 
       <SidebarLayout
@@ -183,6 +184,7 @@ export default function HotelesForm() {
             ]}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            loading={loadingResources || loadingData}
           />
         }
       >

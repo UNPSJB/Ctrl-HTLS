@@ -148,12 +148,11 @@ const AdministradoresForm = () => {
 
     return (
         <div className="space-y-6">
-
-            {/* Perfil del Administrador / Encabezado */}
+            {/* Encabezado del Administrador */}
             <PageHeader
-                title={isEditing ? (watch('nombre') ? `${watch('nombre')} ${watch('apellido')}` : 'Editar Administrador') : 'Registrar Nuevo Administrador'}
-                description={isEditing ? 'Gestione los permisos y datos del perfil administrativo' : 'Complete el formulario para dar de alta un administrador'}
-                onBack={handleCancel}
+                title={isEditing ? 'Editar Administrador' : 'Registrar Nuevo Administrador'}
+                description={isEditing ? 'Gestione la información de perfil y acceso del administrador' : 'Complete el formulario para dar de alta un administrador'}
+                backTo="/admin/administradores"
                 icon={ShieldCheck}
                 loading={loadingData}
             />
@@ -169,6 +168,7 @@ const AdministradoresForm = () => {
                         ]}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
+                        loading={loadingData}
                     />
                 }
             >

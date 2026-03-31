@@ -95,6 +95,7 @@ const EncargadosForm = () => {
                 description="Complete los datos para dar de alta a un nuevo encargado operativo."
                 onBack={handleCancel}
                 icon={UserCog}
+                loading={loading}
             />
 
             <SidebarLayout
@@ -106,6 +107,7 @@ const EncargadosForm = () => {
                         ]}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
+                        loading={loading}
                     />
                 }
             >

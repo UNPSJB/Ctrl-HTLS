@@ -190,11 +190,11 @@ const VendedoresForm = () => {
   return (
     <div className="space-y-6">
 
-      {/* Perfil del Vendedor / Encabezado */}
+      {/* Encabezado del Vendedor */}
       <PageHeader
-        title={isEditing ? `${watch('nombre')} ${watch('apellido')}` : 'Nuevo Vendedor'}
-        description={isEditing ? 'Gestione el perfil y accesos del personal' : 'Complete la información para dar de alta un vendedor'}
-        onBack={handleCancel}
+        title={isEditing ? 'Editar Vendedor' : 'Registrar Nuevo Vendedor'}
+        description={isEditing ? 'Gestione la información personal y permisos del vendedor' : 'Complete el formulario para dar de alta un vendedor'}
+        backTo="/admin/vendedores"
         icon={Briefcase}
         loading={loadingData}
       />
@@ -203,14 +203,15 @@ const VendedoresForm = () => {
         sidebar={
           <PageSidebar
             tabs={[
-              { id: 'general', icon: User, label: 'Información Personal' },
+              { id: 'general', icon: User, label: 'Información General' },
               { id: 'contacto', icon: Phone, label: 'Medios de Contacto' },
-              { id: 'ubicacion', icon: MapPin, label: 'Ubicación Geográfica' },
-              (rol === 'vendedor' && isEditing) && { id: 'hoteles', icon: Building2, label: 'Acceso a Hoteles' },
-              { id: 'seguridad', icon: Lock, label: 'Seguridad de la Cuenta' },
+              { id: 'ubicacion', icon: MapPin, label: 'Ubicación' },
+              (rol === 'vendedor' && isEditing) && { id: 'hoteles', icon: Building2, label: 'Hoteles Permitidos' },
+              { id: 'seguridad', icon: Lock, label: 'Seguridad y Acceso' },
             ].filter(Boolean)}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            loading={loadingData}
           />
         }
       >
