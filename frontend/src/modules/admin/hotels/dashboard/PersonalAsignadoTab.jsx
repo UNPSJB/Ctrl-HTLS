@@ -120,9 +120,9 @@ export default function PersonalAsignadoTab({ hotelId }) {
 
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="h-full flex flex-col animate-in fade-in duration-300">
       {/* Encabezado */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div className="flex-shrink-0 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
             <Users className="h-5 w-5 text-blue-500" />
@@ -142,7 +142,7 @@ export default function PersonalAsignadoTab({ hotelId }) {
         </button>
       </div>
 
-      <div className="mt-8">
+      <div className="flex-grow mt-6 flex flex-col overflow-hidden relative">
 
       {/* Modal de Asignación */}
       <ActionModal

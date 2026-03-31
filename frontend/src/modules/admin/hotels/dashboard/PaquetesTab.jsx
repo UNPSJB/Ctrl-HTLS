@@ -144,8 +144,8 @@ export default function PaquetesTab({ hotelId }) {
   };
 
   return (
-    <div className="animate-in fade-in duration-500">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+    <div className="h-full flex flex-col animate-in fade-in duration-500">
+      <div className="flex-shrink-0 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
             <Tag className="h-5 w-5 text-blue-500" />
@@ -165,7 +165,7 @@ export default function PaquetesTab({ hotelId }) {
         </button>
       </div>
 
-      <div className="mt-8">
+      <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
         {/* Modal de Crear/Editar Paquete */}
         <ActionModal
           isOpen={showForm}

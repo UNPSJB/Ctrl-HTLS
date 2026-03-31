@@ -20,15 +20,15 @@ export default function PaquetesList({ data = [], loading = false, onEdit, onDel
   );
 
   return (
-    <div className="relative flex min-h-[400px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {loading && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
           <InnerLoading message="Sincronizando paquetes..." />
         </div>
       )}
-      <div className="flex-1 overflow-x-auto">
+      <div className="flex-grow overflow-auto custom-scrollbar">
         <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+          <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
             <tr>
               <th className="px-6 py-4">Nombre Paquete</th>
               <th className="px-6 py-4 text-center">Desde</th>
