@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Eye, Building2, X } from 'lucide-react';
+import { Eye, Building2, X, PowerOff, CheckCircle2, AlertTriangle } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import { useHotelsData } from '@admin-hooks/useHotelsData';
@@ -7,6 +7,8 @@ import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useNavigate } from 'react-router-dom';
 import { SearchInput } from '@/components/ui/form';
+import { ActionModal } from '@admin-ui';
+import { toast } from 'react-hot-toast';
 
 // Lista principal de hoteles para administración
 const HotelesTable = () => {
@@ -14,7 +16,32 @@ const HotelesTable = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [hotelToDeactivate, setHotelToDeactivate] = useState(null);
+  const [simulatedStatuses, setSimulatedStatuses] = useState({}); // Mapea ID a booleano, simulando soft delete
   const ITEMS_PER_PAGE = 100;
+
+  const getIsActive = (id) => {
+    // Si no está registrado en el estado de simulador, asumimos que viene activo del back
+    return simulatedStatuses[id] !== undefined ? simulatedStatuses[id] : true;
+  };
+
+  const handleToggleStatus = (hotel) => {
+    const active = getIsActive(hotel.hotelId);
+    if (active) {
+      setHotelToDeactivate(hotel); // Pedimos confirmación para dar de baja
+    } else {
+      // Alta directa, sin tanta gravedad
+      setSimulatedStatuses(prev => ({ ...prev, [hotel.hotelId]: true }));
+      toast.success(`Activado: El hotel ${capitalizeFirst(hotel.nombre)} vuelve a estar operativo.`);
+    }
+  };
+
+  const confirmDeactivate = () => {
+    if (!hotelToDeactivate) return;
+    setSimulatedStatuses(prev => ({ ...prev, [hotelToDeactivate.hotelId]: false }));
+    toast.success(`Dado de Baja: El hotel ${capitalizeFirst(hotelToDeactivate.nombre)} ha sido desactivado temporalmente.`);
+    setHotelToDeactivate(null);
+  };
 
   const filteredHoteles = useMemo(() => {
     if (!hoteles) return [];
@@ -75,76 +102,83 @@ const HotelesTable = () => {
             </div>
           )}
 
-          {/* Encabezado fijo Fuera del Scroll */}
-          <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-700/30">
-            <table className="w-full table-fixed text-left text-sm">
-              <thead className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          <div className="flex-grow overflow-auto custom-scrollbar">
+            <table className="w-full text-left text-sm">
+              <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4 w-[35%]">Nombre Hotel</th>
-                  <th className="px-6 py-4 w-[20%]">Encargado</th>
-                  <th className="px-6 py-4 w-[25%]">Ubicación</th>
-                  <th className="px-6 py-4 w-[10%]">Categoría</th>
-                  <th className="px-6 py-4 w-[10%] text-right">Acciones</th>
+                  <th className="px-6 py-4">Nombre Hotel</th>
+                  <th className="px-6 py-4">Encargado</th>
+                  <th className="px-6 py-4">Ubicación</th>
+                  <th className="px-6 py-4">Categoría</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
-            </table>
-          </div>
-
-          {/* Cuerpo desplazable con Scroll Interno */}
-          <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-            {filteredHoteles.length > 0 ? (
-              <table className="w-full table-fixed border-collapse text-left text-sm">
+              {filteredHoteles.length > 0 ? (
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {currentItems.map((hotel) => (
                     <tr
                       key={hotel.hotelId}
                       className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
                     >
-                      <td className="px-6 py-3 w-[35%]">
+                      <td className="px-6 py-3">
                         <div className="flex items-center">
                           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                             <Building2 className="h-5 w-5" />
                           </div>
                           <div className="ml-4 truncate">
-                            <div className="font-medium text-gray-900 dark:text-white transition-all truncate">
+                            <div className="font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
                               {capitalizeFirst(hotel.nombre)}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[20%] truncate">
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[150px] truncate">
                         {hotel.encargadoNombre ? capitalizeFirst(hotel.encargadoNombre) : <span className="italic text-gray-400">—</span>}
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[25%] truncate">
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate">
                         {hotel.ubicacion?.nombreCiudad ? (
                           <span className="truncate block">{hotel.ubicacion.nombreCiudad}, {hotel.ubicacion.nombreProvincia || <span className="italic text-gray-400">—</span>}</span>
                         ) : (
                           <span className="italic text-gray-400">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 w-[10%]">
+                      <td className="px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                         {hotel.categoria?.estrellas || <span className="italic text-gray-400">—</span>}
                       </td>
-                      <td className="px-6 py-3 text-right text-sm font-medium w-[10%]">
+                      <td className="px-6 py-3 text-right text-sm font-medium">
                         <div className="flex justify-end gap-2">
                           <TableButton
                             variant="view"
                             icon={Eye}
                             onClick={() => handleView(hotel.hotelId)}
                             aria-label="Ver detalles"
+                            title="Gestionar Hotel"
+                          />
+                          <TableButton
+                            variant={getIsActive(hotel.hotelId) ? "delete" : "view"}
+                            icon={getIsActive(hotel.hotelId) ? PowerOff : CheckCircle2}
+                            onClick={() => handleToggleStatus(hotel)}
+                            aria-label={getIsActive(hotel.hotelId) ? "Dar de baja" : "Activar"}
+                            title={getIsActive(hotel.hotelId) ? "Dar de baja temporalmente" : "Activar Hotel"}
                           />
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-12 text-center">
-                <Building2 className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
-                <p className="text-gray-500 dark:text-gray-400">No se encontraron hoteles que coincidan con la búsqueda.</p>
-              </div>
-            )}
+              ) : (
+                <tbody>
+                  <tr>
+                    <td colSpan="5" className="p-12 text-center text-gray-500 dark:text-gray-400">
+                        <div className="flex flex-col items-center justify-center">
+                          <Building2 className="mb-2 h-8 w-8 opacity-50" />
+                          <p>No se encontraron hoteles que coincidan con la búsqueda.</p>
+                        </div>
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
           </div>
         </div>
 
@@ -157,6 +191,46 @@ const HotelesTable = () => {
           disabled={loading}
         />
       </div>
+
+      {/* Modal Interactivo de Baja Lógica */}
+      <ActionModal
+        isOpen={!!hotelToDeactivate}
+        onClose={() => setHotelToDeactivate(null)}
+        title="¿Confirmar la baja del Hotel?"
+        onConfirm={confirmDeactivate}
+        loading={false}
+        confirmLabel="Confirmar y Dar de Baja"
+        confirmIcon={PowerOff}
+      >
+        <div className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+          <p>
+            Estás a punto de dar de baja el hotel{' '}
+            <strong className="text-gray-900 dark:text-white">
+              {hotelToDeactivate?.nombre ? capitalizeFirst(hotelToDeactivate.nombre) : ''}
+            </strong>.
+            Esta acción deshabilitará sus operaciones comerciales temporalmente, pero podrás activarlo en cualquier momento.
+          </p>
+
+          <div className="rounded-lg bg-red-50 p-4 border border-red-100 dark:bg-red-900/10 dark:border-red-900/30">
+            <h4 className="flex items-center gap-2 font-bold text-red-800 dark:text-red-400 mb-3">
+              <AlertTriangle className="h-5 w-5" />
+              Consecuencias Inmediatas:
+            </h4>
+            <ul className="space-y-2 list-disc pl-5 text-red-700 dark:text-red-300">
+              <li>El <strong>Encargado y los Vendedores asignados</strong> perderán acceso y quedarán desvinculados de esta sucursal.</li>
+              <li>Las <strong>Habitaciones y Paquetes Turísticos</strong> dejarán de estar disponibles para nuevos alquileres.</li>
+              <li>Las configuraciones de tarifas, temporadas y descuentos quedarán archivadas e inactivas.</li>
+            </ul>
+          </div>
+
+          <div className="rounded-lg bg-blue-50 p-4 border border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30">
+            <p className="font-semibold text-blue-800 dark:text-blue-300 leading-snug">
+               <span className="block mb-1 text-xs uppercase tracking-wider font-bold">Resguardo Comercial</span>
+               Los alquileres que ya estén activos o programados para este hotel NO se verán afectados por esta rotación de estado.
+            </p>
+          </div>
+        </div>
+      </ActionModal>
     </div>
   );
 };
