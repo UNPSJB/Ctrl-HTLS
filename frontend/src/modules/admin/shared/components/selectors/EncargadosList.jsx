@@ -72,9 +72,9 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
-      <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+      <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 max-w-sm">
             <SearchInput
@@ -100,14 +100,14 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
       </div>
 
       {/* Contenido: loading superpuesto o tabla */}
-      <div className="relative flex flex-col min-h-[200px]">
+      <div className="relative flex flex-col flex-grow overflow-hidden min-h-0">
         {loading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 backdrop-blur-[2px] dark:bg-gray-800/60">
             <InnerLoading message="Cargando encargados disponibles..." />
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="flex-grow overflow-auto custom-scrollbar">
           {!loading && encargados.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-10 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
@@ -125,7 +125,7 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
             </div>
           ) : (
             <table className="w-full border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+              <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
                   <th className="px-6 py-4">Nombre Completo</th>
                   <th className="px-6 py-4">Documento</th>
@@ -208,13 +208,15 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
       </div>
 
       {/* Paginación */}
-      <TablePagination
-        currentPage={currentPage}
-        totalItems={filtered.length}
-        itemsPerPage={ITEMS_PER_PAGE}
-        onPageChange={setCurrentPage}
-        disabled={loading}
-      />
+      <div className="border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 flex-shrink-0">
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filtered.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+          disabled={loading}
+        />
+      </div>
     </div>
   );
 }

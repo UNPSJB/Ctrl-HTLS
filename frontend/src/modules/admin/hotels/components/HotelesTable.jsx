@@ -35,15 +35,16 @@ const HotelesTable = () => {
     try {
       if (hotelToToggle.eliminado) {
         // Enviar reactivacion
-        // TODO: backend no soporta encargadoId todavia
-        // await axiosInstance.patch(`/hotel/${hotelToToggle.hotelId}/reactivar`, { encargadoId: selectedEncargadoId });
-        toast.success(`(Simulado) El Hotel ${capitalizeFirst(hotelToToggle.nombre)} ha sido reactivado y asignado al encargado ID: ${selectedEncargadoId}. PENDIENTE BACKEND.`);
+        await axiosInstance.patch(`/hotel/${hotelToToggle.hotelId}/reactivar`, {
+          encargadoId: selectedEncargadoId
+        });
+        toast.success(`Activado: El hotel ${capitalizeFirst(hotelToToggle.nombre)} vuelve a estar operativo.`);
       } else {
         // Enviar baja
         await axiosInstance.delete(`/hotel/${hotelToToggle.hotelId}`);
         toast.success(`Suspendido: El hotel ${capitalizeFirst(hotelToToggle.nombre)} ha sido desactivado temporalmente.`);
-        refetch(); // Refrescamos tabla real solo cuando hace baja
       }
+      refetch(); // Refrescamos tabla real
     } catch (err) {
       toast.error(err.response?.data?.error || 'Error al cambiar estado del hotel');
     } finally {
@@ -231,9 +232,10 @@ const HotelesTable = () => {
           {hotelToToggle?.eliminado ? (
             <div className="pt-2">
               <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Selecciona un Encargado Disponible</h4>
-              <div className="max-h-[350px] overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+              <div className="h-[350px]">
                 <EncargadosList 
                   value={selectedEncargadoId} 
+
                   onChange={setSelectedEncargadoId} 
                 />
               </div>
