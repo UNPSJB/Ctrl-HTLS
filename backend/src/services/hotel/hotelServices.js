@@ -32,6 +32,7 @@ const hotelTipoHabitacionServices = require('./hotelTipoHabitacionServices');
 const HotelEmpleado = require('../../models/hotel/HotelEmpleado');
 const personaServices = require('../core/personaServices');
 const Servicio = require('../../models/hotel/Servicio');
+const Habitacion = require('../../models/hotel/Habitacion');
 
 const crearHotel = async (
   nombre,
@@ -108,6 +109,7 @@ const obtenerEncargados = async () => {
           model: Hotel,
           as: 'hotel',
           attributes: ['id', 'nombre'],
+          where: { eliminado: false },
         },
       ],
     });
@@ -129,7 +131,10 @@ const modificarHotel = async (
   encargadoId,
   categoriaId,
 ) => {
-  const hotel = await Hotel.findByPk(id);
+  // const hotel = await Hotel.findByPk(id);
+  const hotel = await Hotel.findOne({
+    where: { id: id, eliminado: false },
+  });
   if (!hotel) {
     throw new CustomError('El hotel no existe', 404); // Not Found
   }
@@ -161,13 +166,29 @@ const modificarHotel = async (
   return hotel;
 };
 
-//IMPLEMENTAR
 const eliminarHotel = async (id) => {
-  return id;
+  const hotel = await Hotel.findByPk(id);
+  if (!hotel) {
+    throw new CustomError('El hotel no existe', 404); // Not Found
+  }
+  if (hotel.eliminado) {
+    throw new CustomError('El hotel ya fue eliminado', 400);
+  }
+
+  await hotel.update({ eliminado: true });
+
+  // Eliminar lógicamente todas las habitaciones del hotel
+  await Habitacion.update(
+    { eliminado: true },
+    { where: { hotelId: id, eliminado: false } },
+  );
+
+  return hotel;
 };
 
 const getHotelById = async (hotelId) => {
-  const hotel = await Hotel.findByPk(hotelId, {
+  const hotel = await Hotel.findOne({
+    where: { id: hotelId },
     include: [
       {
         model: Encargado,
@@ -475,7 +496,7 @@ const getCiudadCompleta = async (ciudadId) => {
 const getHotelesPorCiudad = async (ciudadId) => {
   // Obtener los hoteles de la ciudad especificada
   const hoteles = await Hotel.findAll({
-    where: { ciudadId },
+    where: { ciudadId, eliminado: false },
     include: [
       {
         model: Categoria,
@@ -505,6 +526,7 @@ const getHotelesPorCiudad = async (ciudadId) => {
 
 const obtenerTodosLosHoteles = async () => {
   const hoteles = await Hotel.findAll({
+    where: { eliminado: false },
     include: [
       {
         model: Categoria,
@@ -559,6 +581,7 @@ const verificarHotel = async (hotelData, hotelId = null) => {
     where: {
       nombre,
       ciudadId,
+      eliminado: false,
       ...(hotelId && { id: { [Op.ne]: hotelId } }),
     },
   });
@@ -579,6 +602,7 @@ const verificarHotel = async (hotelData, hotelId = null) => {
   const encargadoHotelExistente = await Hotel.findOne({
     where: {
       encargadoId,
+      eliminado: false,
       ...(hotelId && { id: { [Op.ne]: hotelId } }),
     },
   });
@@ -958,6 +982,58 @@ const deleteEncargado = async (id) => {
   }
 };
 
+const obtenerEncargadoPorId = async (id) => {
+  const encargado = await Encargado.findByPk(id, {
+    include: [
+      {
+        model: Hotel,
+        as: 'hotel',
+        attributes: ['id', 'nombre'],
+      },
+    ],
+  });
+
+  if (!encargado) {
+    throw new CustomError('Encargado no encontrado', 404);
+  }
+
+  return encargado;
+};
+
+const actualizarEncargado = async (id, datosEncargado) => {
+  const { nombre, apellido, tipoDocumento, numeroDocumento, telefono } =
+    datosEncargado;
+
+  const encargado = await Encargado.findByPk(id);
+  if (!encargado) {
+    throw new CustomError('Encargado no encontrado', 404);
+  }
+
+  // Verificar documento solo si cambió
+  if (numeroDocumento && numeroDocumento !== encargado.dni) {
+    await verificarDocumento(numeroDocumento);
+  }
+
+  if (tipoDocumento) {
+    await verificarTipoDocumento(tipoDocumento);
+  }
+
+  // Verificar teléfono solo si viene con valor y cambió
+  if (telefono && telefono.trim() !== '' && telefono !== encargado.telefono) {
+    await verificarTelefono(telefono);
+  }
+
+  await encargado.update({
+    nombre: nombre || encargado.nombre,
+    apellido: apellido || encargado.apellido,
+    tipoDocumento: tipoDocumento || encargado.tipoDocumento,
+    dni: numeroDocumento || encargado.dni,
+    telefono: telefono !== undefined ? telefono : encargado.telefono,
+  });
+
+  return encargado;
+};
+
 /**
  * Verifica si un hotel con el nombre dado existe en la ciudad especificada
  * @param {*} nombreHotel - Nombre del hotel a verificar
@@ -967,7 +1043,7 @@ const deleteEncargado = async (id) => {
 const verificarHotelUbicacion = async (nombreHotel, ciudadId) => {
   try {
     const hotel = await Hotel.findOne({
-      where: { nombre: nombreHotel, ciudadId: ciudadId },
+      where: { nombre: nombreHotel, ciudadId: ciudadId, eliminado: false },
       include: [
         {
           model: Categoria,
@@ -1057,6 +1133,7 @@ const getHotelesPorCiudadYVendedor = async (ciudadId, vendedorId) => {
     where: {
       ciudadId,
       id: hotelesIds,
+      eliminado: false,
     },
     include: [
       {
@@ -1208,6 +1285,7 @@ const desasignarEmpleadoDeHotel = async (hotelId, empleadoId) => {
 module.exports = {
   crearHotel,
   modificarHotel,
+  eliminarHotel,
   getHotelById,
   obtenerTodosLosHoteles,
   obtenerCategorias,
@@ -1224,11 +1302,12 @@ module.exports = {
   getDisponibilidadPorHotel,
   getHotelesPorCiudad,
   obtenerTiposDeHabitacion,
-  eliminarHotel,
   //getHabitacionesDisponibles,
   //getPaquetesDisponibles,
   crearEncargado,
   deleteEncargado,
+  obtenerEncargadoPorId,
+  actualizarEncargado,
   asignarEmpleadoAHotel,
   desasignarEmpleadoDeHotel,
   obtenerEncargados,

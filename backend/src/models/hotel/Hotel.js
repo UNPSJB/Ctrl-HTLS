@@ -25,6 +25,11 @@ const Hotel = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    eliminado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: 'hoteles',

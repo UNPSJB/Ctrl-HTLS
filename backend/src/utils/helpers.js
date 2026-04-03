@@ -44,6 +44,7 @@ const verificarEmail = async (email, excludeHotelId = null) => {
       Hotel.findOne({
         where: {
           email,
+          eliminado: false,
           ...(excludeHotelId && { id: { [Op.ne]: excludeHotelId } }),
         },
       }),
@@ -67,6 +68,7 @@ const verificarTelefono = async (telefono, excludeHotelId = null) => {
     Hotel.findOne({
       where: {
         telefono,
+        eliminado: false,
         ...(excludeHotelId && { id: { [Op.ne]: excludeHotelId } }),
       },
     }),
@@ -93,6 +95,7 @@ const verificarDireccion = async (
     where: {
       direccion,
       ciudadId,
+      eliminado: false,
       ...(excludeHotelId && { id: { [Op.ne]: excludeHotelId } }),
     },
   });
@@ -147,7 +150,10 @@ const verificarFechas = (fechaInicio, fechaFin) => {
 };
 
 const verificarIdHotel = async (hotelId) => {
-  const hotelExistente = await Hotel.findByPk(hotelId);
+  // const hotelExistente = await Hotel.findByPk(hotelId);
+  const hotelExistente = await Hotel.findOne({
+    where: { id: hotelId, eliminado: false },
+  });
   if (!hotelExistente) {
     throw new CustomError('El hotel no existe', 404); // Not Found
   }
