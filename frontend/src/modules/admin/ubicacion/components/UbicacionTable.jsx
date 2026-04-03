@@ -4,6 +4,7 @@ import TablePagination from '@admin-ui/TablePagination';
 import TableButton from '@admin-ui/TableButton';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { SearchInput } from '@form';
+import { capitalizeFirst } from '@/utils/stringUtils';
 
 const PAGE_SIZE = 15;
 
@@ -30,97 +31,109 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
 
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      {/* Header bar: Breadcrumbs/Title + Buscar */}
-      <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 dark:border-gray-700 md:flex-row md:items-end md:justify-between">
-        <div className="flex-1">
-          {headerContent}
+    <div className="flex-grow flex flex-col h-full overflow-hidden">
+      <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        {/* Header bar: Breadcrumbs/Title + Buscar */}
+        <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 dark:border-gray-700 md:flex-row md:items-end md:justify-between">
+          <div className="flex-1">
+            {headerContent}
+          </div>
+          <div className="w-full md:w-80">
+            <SearchInput
+              placeholder={`Buscar ${tipo === 'pais' ? 'países' : tipo === 'provincia' ? 'provincias' : 'ciudades'}...`}
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              onClear={() => handleSearch('')}
+              disabled={loading}
+            />
+          </div>
         </div>
-        <div className="w-full md:w-80">
-          <SearchInput
-            placeholder={`Buscar ${tipo === 'pais' ? 'países' : tipo === 'provincia' ? 'provincias' : 'ciudades'}...`}
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-            onClear={() => handleSearch('')}
-            disabled={loading}
-          />
-        </div>
-      </div>
 
-      <div className="relative flex min-h-[400px] flex-col overflow-hidden">
-        {/* Espacio reservado para la tabla o el loader */}
-        <div className="overflow-x-auto flex-1 flex flex-col h-full">
-          {loading ? (
-            <InnerLoading message={`Cargando ${tipo === 'pais' ? 'países' : tipo === 'provincia' ? 'provincias' : 'ciudades'}...`} />
-          ) : pageItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-16 text-gray-400">
-              <Search className="h-8 w-8 opacity-40 mb-2" />
-              <p className="text-sm">
-                {search ? 'Sin resultados para esa búsqueda' : 'No hay registros todavía'}
-              </p>
+        <div className="relative flex flex-col flex-grow overflow-hidden">
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+              <InnerLoading message={`Cargando ${tipo === 'pais' ? 'países' : tipo === 'provincia' ? 'provincias' : 'ciudades'}...`} />
             </div>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40">
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">#</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Nombre</th>
+          )}
+
+          {/* Encabezado fijo Fuera del Scroll */}
+          <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-700/30">
+            <table className="w-full table-fixed text-left text-sm">
+              <thead className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <tr>
+                  <th className="px-6 py-4 w-[8%]">#</th>
+                  <th className="px-6 py-4 w-[50%]">Nombre</th>
                   {tipo === 'ciudad' && (
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Código Postal</th>
+                    <th className="px-6 py-4 w-[15%]">Código Postal</th>
                   )}
-                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
+                  <th className={`px-6 py-4 text-right ${tipo === 'ciudad' ? 'w-[27%]' : 'w-[42%]'}`}>Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                {pageItems.map((item, idx) => (
-                  <tr
-                    key={item.id}
-                    className="group transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/20"
-                  >
-                    <td className="px-6 py-3 text-gray-400 dark:text-gray-500 text-xs w-16">
-                      {(safePage - 1) * PAGE_SIZE + idx + 1}
-                    </td>
-                    <td className="px-6 py-3 font-medium text-gray-800 dark:text-gray-200">
-                      {item.nombre}
-                    </td>
-                    {tipo === 'ciudad' && (
-                      <td className="px-6 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs">
-                        {item.codigoPostal}
-                      </td>
-                    )}
-                    <td className="px-6 py-3">
-                      <div className="flex items-center justify-end gap-1">
-                        <TableButton variant="edit" icon={Pencil} onClick={() => onEdit(item)} />
-                        <TableButton variant="delete" icon={Trash2} onClick={() => onDelete(item)} />
-
-                        {hayDrillDown && (
-                          <button
-                            onClick={() => onDrillDown(item)}
-                            className="ml-2 flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 transition-colors"
-                            title={`Ver ${drillDownLabel}`}
-                          >
-                            <span>{drillDownLabel}</span>
-                            <ArrowRight className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
             </table>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Paginación */}
-      <TablePagination
-        currentPage={page}
-        totalItems={filtered.length}
-        itemsPerPage={PAGE_SIZE}
-        onPageChange={setPage}
-        disabled={loading}
-      />
+          {/* Cuerpo desplazable con Scroll Interno */}
+          <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+            {!loading && pageItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 py-16 text-gray-400">
+                <Search className="h-8 w-8 opacity-40 mb-2" />
+                <p className="text-sm">
+                  {search ? 'Sin resultados para esa búsqueda' : 'No hay registros todavía'}
+                </p>
+              </div>
+            ) : (
+              <table className="w-full table-fixed border-collapse text-left text-sm">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
+                  {pageItems.map((item, idx) => (
+                    <tr
+                      key={item.id}
+                      className="group transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/20"
+                    >
+                      <td className="px-6 py-3 text-gray-400 dark:text-gray-500 text-xs w-[8%] truncate">
+                        {(safePage - 1) * PAGE_SIZE + idx + 1}
+                      </td>
+                      <td className="px-6 py-3 font-medium text-gray-800 dark:text-gray-200 w-[50%] truncate">
+                        {capitalizeFirst(item.nombre)}
+                      </td>
+                      {tipo === 'ciudad' && (
+                        <td className="px-6 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs w-[15%] truncate">
+                          {item.codigoPostal || <span className="italic opacity-50">—</span>}
+                        </td>
+                      )}
+                      <td className={`px-6 py-3 ${tipo === 'ciudad' ? 'w-[27%]' : 'w-[42%]'}`}>
+                        <div className="flex items-center justify-end gap-1">
+                          <TableButton variant="edit" icon={Pencil} onClick={() => onEdit(item)} />
+                          <TableButton variant="delete" icon={Trash2} onClick={() => onDelete(item)} />
+
+                          {hayDrillDown && (
+                            <button
+                              onClick={() => onDrillDown(item)}
+                              className="ml-2 flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 transition-colors"
+                              title={`Ver ${drillDownLabel}`}
+                            >
+                              <span>{drillDownLabel}</span>
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        {/* Paginación */}
+        <TablePagination
+          currentPage={page}
+          totalItems={filtered.length}
+          itemsPerPage={PAGE_SIZE}
+          onPageChange={setPage}
+          disabled={loading}
+        />
+      </div>
     </div>
   );
 }

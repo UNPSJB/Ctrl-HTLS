@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Tag, Plus, Info, Calendar as CalendarIcon, Users, BedDouble } from 'lucide-react';
+import { Tag, Plus, BedDouble } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import PaquetesList from '../components/PaquetesList';
 import { ActionModal } from '@admin-ui';
-import { 
-  FormField, 
-  TextInput, 
-  NumberInput 
+import {
+  FormField,
+  TextInput,
+  NumberInput
 } from '@form';
 
 export default function PaquetesTab({ hotelId }) {
@@ -17,11 +17,13 @@ export default function PaquetesTab({ hotelId }) {
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingAction, setLoadingAction] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  // Guarda el paquete que se está editando (null = modo crear)
+  const [editingPaquete, setEditingPaquete] = useState(null);
 
-  const { register, handleSubmit, reset, watch, formState: { errors, isValid } } = useForm({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isValid } } = useForm({
     mode: 'onChange'
   });
-  
+
   // Observar fecha inicio para limitar fecha fin
   const fechaInicio = watch('fecha_inicio');
 
@@ -46,9 +48,42 @@ export default function PaquetesTab({ hotelId }) {
     }
   };
 
-  const handleCreatePaquete = async (data) => {
-    // Verificar que haya al menos una habitación seleccionada
-    const habitacionesSeleccionadas = data.habitaciones || [];
+  // Abre el modal en modo creación
+  const handleOpenCreate = () => {
+    setEditingPaquete(null);
+    reset({
+      nombre: '',
+      fecha_inicio: '',
+      fecha_fin: '',
+      coeficiente_descuento: '',
+      habitaciones: [],
+    });
+    setShowForm(true);
+  };
+
+  // Abre el modal en modo edición y pre-rellena el formulario
+  const handleOpenEdit = (paquete) => {
+    setEditingPaquete(paquete);
+
+    // Formatear fechas a yyyy-MM-dd para el input type=date
+    const formatDate = (iso) => iso ? iso.split('T')[0] : '';
+
+    // Los IDs de las habitaciones del paquete (como strings para los checkboxes)
+    const habitacionIds = (paquete.habitaciones || []).map(h => String(h.id));
+
+    reset({
+      nombre: paquete.nombre || '',
+      fecha_inicio: formatDate(paquete.fecha_inicio),
+      fecha_fin: formatDate(paquete.fecha_fin),
+      coeficiente_descuento: Math.abs(Math.round(paquete.coeficiente_descuento * 100)),
+      habitaciones: habitacionIds,
+    });
+    setShowForm(true);
+  };
+
+  // Handler unificado: crea o actualiza según el estado de editingPaquete
+  const handleSavePaquete = async (data) => {
+    const habitacionesSeleccionadas = Array.isArray(data.habitaciones) ? data.habitaciones : [];
     if (habitacionesSeleccionadas.length === 0) {
       toast.error('Debes seleccionar al menos una habitación para el paquete');
       return;
@@ -56,44 +91,72 @@ export default function PaquetesTab({ hotelId }) {
 
     try {
       setLoadingAction(true);
-      
+
       const payload = {
         nombre: data.nombre,
         fecha_inicio: data.fecha_inicio,
         fecha_fin: data.fecha_fin,
-        coeficiente_descuento: parseFloat(data.coeficiente_descuento),
-        habitaciones: habitacionesSeleccionadas.map(id => parseInt(id, 10))
+        coeficiente_descuento: parseFloat(data.coeficiente_descuento) / 100,
+        habitaciones: habitacionesSeleccionadas.map(id => parseInt(id, 10)),
       };
 
-      await axiosInstance.post(`/hotel/${hotelId}/paquete-promocional`, payload);
-      toast.success('Paquete creado exitosamente');
+      if (editingPaquete) {
+        // Modo edición
+        await axiosInstance.put(`/hotel/${hotelId}/paquete-promocional/${editingPaquete.id}`, payload);
+        toast.success('Paquete actualizado exitosamente');
+      } else {
+        // Modo creación
+        await axiosInstance.post(`/hotel/${hotelId}/paquete-promocional`, payload);
+        toast.success('Paquete creado exitosamente');
+      }
+
       setShowForm(false);
+      setEditingPaquete(null);
       reset();
-      fetchData(); // Recargar la lista
+      fetchData();
     } catch (error) {
       console.error(error);
-      const errorMsg = error.response?.data?.error || 'Error al crear el paquete promocional';
+      const errorMsg = error.response?.data?.error || (editingPaquete ? 'Error al actualizar el paquete' : 'Error al crear el paquete promocional');
       toast.error(errorMsg);
     } finally {
       setLoadingAction(false);
     }
   };
 
+  // Elimina un paquete con confirmación
+  const handleDeletePaquete = async (idPaquete) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este paquete promocional?')) return;
+
+    try {
+      await axiosInstance.delete(`/hotel/${hotelId}/paquete-promocional/${idPaquete}`);
+      toast.success('Paquete eliminado');
+      fetchData();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.error || 'Error al eliminar el paquete');
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowForm(false);
+    setEditingPaquete(null);
+    reset();
+  };
 
   return (
-    <div className="animate-in fade-in duration-500">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+    <div className="h-full flex flex-col animate-in fade-in duration-500">
+      <div className="flex-shrink-0 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
             <Tag className="h-5 w-5 text-blue-500" />
-            Paquetes Promocionales
+            Paquetes Turísticos
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Cree ofertas combinando múltiples habitaciones por un precio especial.
           </p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={handleOpenCreate}
           disabled={loadingInitial}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
         >
@@ -102,20 +165,17 @@ export default function PaquetesTab({ hotelId }) {
         </button>
       </div>
 
-      <div className="mt-8">
-        {/* Modal de Paquete */}
+      <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
+        {/* Modal de Crear/Editar Paquete */}
         <ActionModal
           isOpen={showForm}
-          onClose={() => {
-            setShowForm(false);
-            reset();
-          }}
-          title="Crear Paquete Promocional"
-          description="Agrupe habitaciones y defina un descuento especial para este periodo."
-          onConfirm={handleSubmit(handleCreatePaquete)}
+          onClose={handleCloseModal}
+          title={editingPaquete ? `Editar: ${editingPaquete.nombre}` : 'Crear Paquete Promocional'}
+          description={editingPaquete ? 'Modifique los datos del paquete promocional.' : 'Agrupe habitaciones y defina un descuento especial para este periodo.'}
+          onConfirm={handleSubmit(handleSavePaquete)}
           loading={loadingAction}
           confirmDisabled={!isValid || loadingAction}
-          confirmLabel="Crear Paquete"
+          confirmLabel={editingPaquete ? 'Guardar Cambios' : 'Crear Paquete'}
           confirmIcon={Plus}
           size="lg"
         >
@@ -132,14 +192,13 @@ export default function PaquetesTab({ hotelId }) {
               <FormField label="Desde" required error={errors.fecha_inicio}>
                 <TextInput
                   type="date"
-                  min={new Date().toISOString().split('T')[0]}
                   {...register('fecha_inicio', { required: 'Requerido' })}
                 />
               </FormField>
               <FormField label="Hasta" required error={errors.fecha_fin}>
                 <TextInput
                   type="date"
-                  min={fechaInicio || new Date().toISOString().split('T')[0]}
+                  min={fechaInicio || ''}
                   {...register('fecha_fin', { required: 'Requerido' })}
                 />
               </FormField>
@@ -148,13 +207,14 @@ export default function PaquetesTab({ hotelId }) {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <FormField label="Descuento (%)" required error={errors.coeficiente_descuento}>
                 <NumberInput
-                  step="0.01"
-                  placeholder="Ej: 20.00"
-                  {...register('coeficiente_descuento', { required: 'Requerido', min: 0.1, max: 100 })}
+                  step="1"
+                  placeholder="Ej: 20"
+                  {...register('coeficiente_descuento', { required: 'Requerido', min: 1, max: 100 })}
                 />
               </FormField>
             </div>
 
+            {/* Selector de habitaciones */}
             <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-2">
                 <BedDouble className="w-4 h-4 text-blue-500" />
@@ -179,11 +239,14 @@ export default function PaquetesTab({ hotelId }) {
                         </tr>
                       ) : (
                         habitaciones.map((hab, idx) => (
-                          <tr key={hab.id || `hab-${hab.piso}-${hab.numero}-${idx}`} className="transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-900/10 has-[:checked]:bg-blue-50/50 dark:has-[:checked]:bg-blue-900/20">
+                          <tr
+                            key={hab.id || `hab-${hab.piso}-${hab.numero}-${idx}`}
+                            className="transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-900/10 has-[:checked]:bg-blue-50/50 dark:has-[:checked]:bg-blue-900/20"
+                          >
                             <td className="px-4 py-3 text-center align-middle">
                               <input
                                 type="checkbox"
-                                value={hab.id || `${hab.piso}-${hab.numero}`}
+                                value={String(hab.id)}
                                 {...register('habitaciones')}
                                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer dark:border-gray-600 dark:bg-gray-700 transition-all"
                               />
@@ -204,9 +267,14 @@ export default function PaquetesTab({ hotelId }) {
             </div>
           </div>
         </ActionModal>
-      
+
         {/* Listado de Paquetes */}
-        <PaquetesList data={paquetes} loading={loadingInitial} />
+        <PaquetesList
+          data={paquetes}
+          loading={loadingInitial}
+          onEdit={handleOpenEdit}
+          onDelete={handleDeletePaquete}
+        />
       </div>
     </div>
   );

@@ -22,15 +22,15 @@ function AdminLayout() {
 
         {/* Área de contenido principal */}
         <main
-          className="pt-0 lg:ml-72"
-          style={{
-            height: '100vh',
-            overflowY: 'auto',
-          }}
+          className="lg:ml-72 h-screen flex flex-col overflow-hidden transition-all duration-200"
         >
-          <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-            <Breadcrumbs />
-            <Outlet />
+          <div className="flex-grow w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col overflow-hidden">
+            {/* <div className="flex-shrink-0">
+              <Breadcrumbs />
+            </div> */}
+            <div className="flex-grow overflow-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+              <Outlet />
+            </div>
           </div>
         </main>
 

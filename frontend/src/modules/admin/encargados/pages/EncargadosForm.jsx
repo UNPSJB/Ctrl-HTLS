@@ -88,14 +88,17 @@ const EncargadosForm = () => {
     const handleCancel = () => navigate('/admin/encargados');
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
             {/* Encabezado del Encargado */}
-            <PageHeader
-                title="Registrar Nuevo Encargado"
-                description="Complete los datos para dar de alta a un nuevo encargado operativo."
-                onBack={handleCancel}
-                icon={UserCog}
-            />
+            <div className="flex-shrink-0">
+                <PageHeader
+                    title="Registrar Nuevo Encargado"
+                    description="Complete los datos para dar de alta a un nuevo encargado operativo."
+                    onBack={handleCancel}
+                    icon={UserCog}
+                    loading={loading}
+                />
+            </div>
 
             <SidebarLayout
                 sidebar={
@@ -106,11 +109,12 @@ const EncargadosForm = () => {
                         ]}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
+                        loading={loading}
                     />
                 }
             >
-                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="flex-1">
+                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="">
+                    <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
                         {/* Información Personal */}
                         <div className={activeTab === 'personal' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
@@ -178,7 +182,7 @@ const EncargadosForm = () => {
                     </div>
 
                     {/* Botones de Acción */}
-                    <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+                    <div className="flex-shrink-0 flex items-center justify-end gap-3 border-t border-gray-100 bg-white dark:bg-gray-800 pt-6 mt-6 dark:border-gray-700">
                         <RedirectLink
                             to="/admin/encargados"
                             label="Cancelar"

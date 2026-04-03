@@ -3,6 +3,7 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
@@ -24,16 +25,16 @@ export default function PersonalAsignadoList({
   );
 
   return (
-    <div className="relative flex min-h-[400px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {(loading || loadingAction) && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
           <InnerLoading message="Actualizando personal..." />
         </div>
       )}
 
-      <div className="flex-1 overflow-x-auto">
+      <div className="flex-grow overflow-auto custom-scrollbar">
         <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+          <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
             <tr>
               <th className="px-6 py-4">Nombre</th>
               <th className="px-6 py-4">Documento</th>
@@ -58,7 +59,7 @@ export default function PersonalAsignadoList({
                   className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
                 >
                   <td className="whitespace-nowrap px-6 py-3 font-medium text-gray-900 dark:text-white">
-                    {v.empleadoNombre} {v.empleadoApellido}
+                    {capitalizeFirst(v.empleadoNombre)} {capitalizeFirst(v.empleadoApellido)}
                   </td>
                   <td className="whitespace-nowrap px-6 py-3 text-gray-600 dark:text-gray-300">
                     <span className="mr-1 text-xs font-bold uppercase text-gray-400">

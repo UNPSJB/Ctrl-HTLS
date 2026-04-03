@@ -8,6 +8,7 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import { 
     FormField, 
     TextInput, 
@@ -74,12 +75,12 @@ const ClientesForm = () => {
             const data = response.data;
 
             if (data.nombre) {
-                setCrumbLabel(id, `${data.nombre} ${data.apellido || ''}`.trim());
+                setCrumbLabel(id, `${capitalizeFirst(data.nombre)} ${capitalizeFirst(data.apellido || '')}`.trim());
             }
 
             reset({
-                nombre: data.nombre || '',
-                apellido: data.apellido || '',
+                nombre: capitalizeFirst(data.nombre) || '',
+                apellido: capitalizeFirst(data.apellido) || '',
                 email: data.email || '',
                 telefono: data.telefono || '',
                 tipoDocumento: data.tipoDocumento || 'dni',
@@ -87,7 +88,7 @@ const ClientesForm = () => {
                 paisId: data.paisId ? String(data.paisId) : '',
                 provinciaId: data.provinciaId ? String(data.provinciaId) : '',
                 ciudadId: data.ciudadId ? String(data.ciudadId) : '',
-                direccion: data.direccion || '',
+                direccion: capitalizeFirst(data.direccion) || '',
             });
         } catch (error) {
             console.error(error);
@@ -150,15 +151,17 @@ const ClientesForm = () => {
 
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
             {/* Perfil del Cliente / Encabezado */}
-            <PageHeader
-                title={isEditing ? 'Editar Cliente' : 'Registrar Nuevo Cliente'}
-                description={isEditing ? 'Gestione la información personal y de contacto del cliente' : 'Complete el formulario para dar de alta un cliente'}
-                onBack={handleCancel}
-                icon={Users}
-                loading={loadingData}
-            />
+            <div className="flex-shrink-0">
+                <PageHeader
+                    title={isEditing ? 'Editar Cliente' : 'Registrar Nuevo Cliente'}
+                    description={isEditing ? 'Gestione la información personal y de contacto del cliente' : 'Complete el formulario para dar de alta un cliente'}
+                    onBack={handleCancel}
+                    icon={Users}
+                    loading={loadingData}
+                />
+            </div>
 
             <SidebarLayout
                 sidebar={
@@ -169,14 +172,17 @@ const ClientesForm = () => {
                         ]}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
+                        loading={loadingData}
                     />
                 }
             >
-                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="">
                     {loadingData ? (
-                        <InnerLoading message="Cargando perfil del cliente..." />
+                        <div className="flex-1 flex items-center justify-center py-12">
+                            <InnerLoading message="Cargando perfil del cliente..." />
+                        </div>
                     ) : (
-                        <div className="flex-1">
+                        <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
                             {/* Información Personal */}
                             <div className={activeTab === 'personal' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
@@ -258,7 +264,7 @@ const ClientesForm = () => {
                     )}
 
                     {/* Botones de Acción */}
-                    <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+                    <div className="flex-shrink-0 flex items-center justify-end gap-3 border-t border-gray-100 bg-white dark:bg-gray-800 pt-6 mt-6 dark:border-gray-700">
                         <RedirectLink
                             to="/admin/clientes"
                             label="Cancelar"

@@ -7,7 +7,7 @@ const Encargados = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
             <ListHeader
                 title="Gestión de Encargados"
                 description="Administra la base de datos de encargados disponibles o asignados"

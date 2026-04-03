@@ -5,6 +5,7 @@ import {
   DoorOpen,
   Layers,
 } from 'lucide-react';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
@@ -28,15 +29,15 @@ export default function HabitacionesList({
   );
 
   return (
-    <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {loading && !isCreating && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
           <InnerLoading message="Cargando inventario..." />
         </div>
       )}
-      <div className="overflow-x-auto flex-1">
+      <div className="flex-grow overflow-auto custom-scrollbar">
         <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+          <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
             <tr>
               <th className="px-6 py-4">Habitación</th>
               <th className="px-6 py-4">Ubicación</th>
@@ -82,7 +83,7 @@ export default function HabitacionesList({
                     </td>
                     <td className="px-6 py-3">
                       <span className="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        {tipo?.nombre || 'Tipo no definido'}
+                        {tipo?.nombre ? capitalizeFirst(tipo.nombre) : 'Tipo no definido'}
                       </span>
                     </td>
                     <td className="px-6 py-3 text-right">

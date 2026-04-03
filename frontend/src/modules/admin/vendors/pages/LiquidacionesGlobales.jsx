@@ -67,28 +67,30 @@ const LiquidacionesGlobales = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col gap-6 overflow-hidden">
 
       {/* Encabezado Global */}
-      <PageHeader
-        title="Liquidaciones Globales"
-        description="Historial y generación masiva de pagos"
-        backTo="/admin/vendedores"
-        icon={DollarSign}
-        extra={
-          <button
-            onClick={handleLiquidarMasivo}
-            disabled={loading}
-            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 h-10 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 shadow-sm transition-colors"
-          >
-            <DollarSign className="h-4 w-4" />
-            Liquidar Periodo
-          </button>
-        }
-      />
+      <div className="flex-shrink-0">
+        <PageHeader
+          title="Liquidaciones Globales"
+          description="Historial y generación masiva de pagos"
+          backTo="/admin/vendedores"
+          icon={DollarSign}
+          extra={
+            <button
+              onClick={handleLiquidarMasivo}
+              disabled={loading}
+              className="flex items-center gap-2 rounded-lg bg-green-600 px-4 h-10 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 shadow-sm transition-colors"
+            >
+              <DollarSign className="h-4 w-4" />
+              Liquidar Periodo
+            </button>
+          }
+        />
+      </div>
 
       {/* Panel de filtros y tabla */}
-      <div className="relative flex flex-col min-h-[400px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="relative flex-grow flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 
         {/* Overlay de carga */}
         {loading && (
@@ -98,7 +100,7 @@ const LiquidacionesGlobales = () => {
         )}
 
         {/* Cabecera con filtros */}
-        <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/20">
+        <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/20">
           <div className="flex flex-wrap items-end gap-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Desde</label>
@@ -130,22 +132,22 @@ const LiquidacionesGlobales = () => {
         </div>
 
         {/* Contenido de la tabla */}
-        <div className="overflow-x-auto">
+        <div className="flex-grow overflow-auto custom-scrollbar">
           {!hasBuscado ? (
             // Estado inicial: todavía no se realizó ninguna búsqueda
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <div className="flex flex-col h-full items-center justify-center py-16 text-gray-400">
               <Search className="mb-3 h-10 w-10 opacity-20" />
               <p className="text-sm font-medium">Seleccione un rango de fechas y presione <strong>Buscar</strong></p>
             </div>
           ) : liquidaciones.length === 0 ? (
             // Se buscó pero no hay resultados
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <div className="flex flex-col h-full items-center justify-center py-16 text-gray-400">
               <FileText className="mb-3 h-10 w-10 opacity-20" />
               <p className="text-sm italic">No hay liquidaciones en el rango seleccionado.</p>
             </div>
           ) : (
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+            <table className="w-full text-left text-sm relative">
+              <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
                 <tr>
                   <th className="px-4 py-3">Número</th>
                   <th className="px-4 py-3">Fecha de Liquidación</th>

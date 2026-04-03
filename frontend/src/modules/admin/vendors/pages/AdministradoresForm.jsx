@@ -8,6 +8,7 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import {
     FormField,
     TextInput,
@@ -77,17 +78,17 @@ const AdministradoresForm = () => {
             const data = response.data;
 
             if (data.nombre) {
-                setCrumbLabel(id, `${data.nombre} ${data.apellido || ''}`.trim());
+                setCrumbLabel(id, `${capitalizeFirst(data.nombre)} ${capitalizeFirst(data.apellido || '')}`.trim());
             }
 
             reset({
-                nombre: data.nombre || '',
-                apellido: data.apellido || '',
+                nombre: capitalizeFirst(data.nombre) || '',
+                apellido: capitalizeFirst(data.apellido) || '',
                 email: data.email || '',
                 telefono: data.telefono || '',
                 tipoDocumento: data.tipoDocumento || 'dni',
                 numeroDocumento: data.numeroDocumento || '',
-                direccion: data.direccion || '',
+                direccion: capitalizeFirst(data.direccion) || '',
                 password: '',
                 rol: 'administrador',
                 paisId: data.ubicacion?.paisId || '',
@@ -146,16 +147,17 @@ const AdministradoresForm = () => {
 
 
     return (
-        <div className="space-y-6">
-
-            {/* Perfil del Administrador / Encabezado */}
-            <PageHeader
-                title={isEditing ? (watch('nombre') ? `${watch('nombre')} ${watch('apellido')}` : 'Editar Administrador') : 'Registrar Nuevo Administrador'}
-                description={isEditing ? 'Gestione los permisos y datos del perfil administrativo' : 'Complete el formulario para dar de alta un administrador'}
-                onBack={handleCancel}
-                icon={ShieldCheck}
-                loading={loadingData}
-            />
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
+            {/* Encabezado del Administrador */}
+            <div className="flex-shrink-0">
+                <PageHeader
+                    title={isEditing ? 'Editar Administrador' : 'Registrar Nuevo Administrador'}
+                    description={isEditing ? 'Gestione la información de perfil y acceso del administrador' : 'Complete el formulario para dar de alta un administrador'}
+                    backTo="/admin/administradores"
+                    icon={ShieldCheck}
+                    loading={loadingData}
+                />
+            </div>
 
             <SidebarLayout
                 sidebar={
@@ -168,14 +170,17 @@ const AdministradoresForm = () => {
                         ]}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
+                        loading={loadingData}
                     />
                 }
             >
-                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <PageContentCard as="form" onSubmit={handleSubmit(onSubmit)} className="">
                     {loadingData ? (
-                        <InnerLoading message="Consultando privilegios..." />
+                        <div className="flex-1 flex items-center justify-center py-12">
+                            <InnerLoading message="Consultando privilegios..." />
+                        </div>
                     ) : (
-                        <div className="flex-1">
+                        <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
                             {/* Información Personal */}
                             <div className={activeTab === 'personal' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Personal</h3>
@@ -277,7 +282,7 @@ const AdministradoresForm = () => {
                         </div>
                     )}
 
-                    <div className="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+                    <div className="flex-shrink-0 flex items-center justify-end gap-3 border-t border-gray-100 bg-white dark:bg-gray-800 pt-6 mt-6 dark:border-gray-700">
                         <RedirectLink
                             to="/admin/administradores"
                             label="Cancelar"

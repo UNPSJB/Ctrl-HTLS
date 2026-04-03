@@ -72,9 +72,9 @@ export default function TarifasTab({ hotelId }) {
   };
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="h-full flex flex-col animate-in fade-in duration-300">
       {/* Encabezado */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-8">
+      <div className="flex-shrink-0 flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-6">
         <div className="max-w-2xl space-y-1">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             Tarifas y Tipos de Habitación
@@ -92,8 +92,8 @@ export default function TarifasTab({ hotelId }) {
       </div>
 
       {/* Formulario con tabla */}
-      <form onSubmit={handleSubmit(onSubmit)} className="">
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col overflow-hidden">
+        <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
           {/* Overlay de carga */}
           {loading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
@@ -101,8 +101,9 @@ export default function TarifasTab({ hotelId }) {
             </div>
           )}
 
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700/50 dark:text-gray-300">
+          <div className="flex-grow overflow-auto custom-scrollbar">
+            <table className="w-full text-left text-sm">
+              <thead className="sticky top-0 z-10 bg-gray-50 text-xs uppercase text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-300">
               <tr>
                 <th className="px-6 py-4 font-semibold">Tipo de Habitación</th>
                 <th className="px-6 py-4 font-semibold">Capacidad</th>
@@ -173,9 +174,10 @@ export default function TarifasTab({ hotelId }) {
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
-        <div className="mt-10 flex items-center justify-end gap-3 border-t border-gray-100 pt-6 dark:border-gray-700">
+        <div className="flex-shrink-0 mt-6 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 pt-4 pb-2">
           <button
             type="submit"
             disabled={isSubmitting || !isValid || loading}

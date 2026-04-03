@@ -129,18 +129,21 @@ export default function AjustesGeneralesTab({
   }
 
   return (
-    <div className="animate-in fade-in duration-300">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Ajustes Generales
-        </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Modifique la información base, contacto y ubicación física del hotel.
-        </p>
+    <div className="h-full flex flex-col animate-in fade-in duration-300">
+      <div className="flex-shrink-0 mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div className="space-y-1">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
+            <Building2 className="h-5 w-5 text-blue-500" />
+            Ajustes Generales
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Modifique la información base, contacto y ubicación física del hotel.
+          </p>
+        </div>
       </div>
 
       {/* Paleta de estilos activos por pestaña */}
-      <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex-shrink-0 mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
         <button
           type="button"
           onClick={() => setActiveSubTab('general')}
@@ -167,9 +170,9 @@ export default function AjustesGeneralesTab({
         </button>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col overflow-hidden">
         {/* Contenedor de sub-pestañas con scroll si es necesario */}
-        <div className="">
+        <div className="flex-grow overflow-y-auto custom-scrollbar pr-2 pb-6">
           {/* Sección: Información Básica */}
           <div className={activeSubTab === 'general' ? 'animate-in fade-in duration-300' : 'hidden'}>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -248,7 +251,7 @@ export default function AjustesGeneralesTab({
           </div>
         </div>
 
-        <div className="mt-10 flex justify-end pt-6 border-t border-gray-100 dark:border-gray-800">
+        <div className="flex-shrink-0 mt-4 pt-4 flex justify-end border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-transparent pb-1">
           <button
             type="submit"
             disabled={isSubmitting || !form.formState.isValid}

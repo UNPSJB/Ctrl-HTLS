@@ -19,9 +19,13 @@ import VendedorLiquidaciones from '@/modules/admin/vendors/pages/VendedorLiquida
 import Administradores from '@/modules/admin/vendors/pages/Administradores';
 import Vendedores from '@/modules/admin/vendors/pages/Vendedores';
 import AdministradoresForm from '@/modules/admin/vendors/pages/AdministradoresForm';
-import Ubicacion from '@/modules/admin/ubicacion/pages/Ubicacion';
+import Paises from '@/modules/admin/ubicacion/pages/Paises';
+import Provincias from '@/modules/admin/ubicacion/pages/Provincias';
+import Ciudades from '@/modules/admin/ubicacion/pages/Ciudades';
+
 import Encargados from '@/modules/admin/encargados/pages/Encargados';
 import EncargadosForm from '@/modules/admin/encargados/pages/EncargadosForm';
+import ClienteHistorial from '@/modules/admin/clients/pages/ClienteHistorial';
 
 function AppRouter() {
   const { user, loading } = useAuth();
@@ -71,9 +75,13 @@ function AppRouter() {
                 <Route path="clientes" element={<Clientes />} />
                 <Route path="clientes/nuevo" element={<ClientesForm />} />
                 <Route path="clientes/editar/:id" element={<ClientesForm />} />
+                <Route path="clientes/:id/historial" element={<ClienteHistorial />} />
 
                 {/* Rutas de Ubicación */}
-                <Route path="ubicacion" element={<Ubicacion />} />
+                <Route path="ubicacion" element={<Navigate to="/admin/ubicacion/paises" replace />} />
+                <Route path="ubicacion/paises" element={<Paises />} />
+                <Route path="ubicacion/paises/:paisId/provincias" element={<Provincias />} />
+                <Route path="ubicacion/paises/:paisId/provincias/:provinciaId/ciudades" element={<Ciudades />} />
 
                 {/* Rutas de Encargados */}
                 <Route path="encargados" element={<Encargados />} />

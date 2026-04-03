@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { User, Search, RefreshCw, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import axiosInstance from '@/api/axiosInstance';
+import { capitalizeFirst } from '@/utils/stringUtils';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
@@ -157,10 +158,10 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
                             <User className="h-5 w-5" />
                           </div>
                           <div className="ml-4">
-                            <div className={`text-sm font-medium capitalize transition-all ${
+                            <div className={`text-sm font-medium transition-all ${
                               isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'
                             }`}>
-                              {e.nombre?.toLowerCase()} {e.apellido?.toLowerCase()}
+                              {capitalizeFirst(e.nombre)} {capitalizeFirst(e.apellido)}
                             </div>
                           </div>
                         </div>

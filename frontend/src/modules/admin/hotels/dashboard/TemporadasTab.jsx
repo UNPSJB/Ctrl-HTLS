@@ -1,42 +1,151 @@
-import { useState } from 'react';
-import { Calendar, Tag } from 'lucide-react';
-import TemporadasSection from '../components/TemporadasSection';
-import DescuentosSection from '../components/DescuentosSection';
-
-const TAB_STYLES = {
-  temporadas: { active: 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400', icon: 'text-blue-500' },
-  descuentos: { active: 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400', icon: 'text-indigo-500' },
-};
-const TAB_INACTIVE = 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300';
+import { useState, useEffect } from 'react';
+import { Plus, Calendar } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import axiosInstance from '@/api/axiosInstance';
+import TemporadasList from '../components/TemporadasList';
+import { ActionModal } from '@admin-ui';
+import {
+  FormField,
+  SelectInput,
+  TextInput,
+  NumberInput
+} from '@form';
 
 export default function TemporadasTab({ hotelId }) {
-  const [activeSubTab, setActiveSubTab] = useState('temporadas');
+  const [temporadas, setTemporadas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  const form = useForm();
+
+  useEffect(() => {
+    fetchTemporadas();
+  }, [hotelId]);
+
+  const fetchTemporadas = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axiosInstance.get(`/hotel/${hotelId}/temporadas`);
+      setTemporadas(data);
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al cargar temporadas del hotel');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdd = async (data) => {
+    try {
+      setSubmitting(true);
+      const payload = {
+        ...data,
+        porcentaje: parseFloat(data.porcentaje) / 100
+      };
+      await axiosInstance.post(`/hotel/${hotelId}/temporada`, payload);
+      toast.success('Temporada agregada correctamente');
+      setShowForm(false);
+      form.reset();
+      await fetchTemporadas();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.error || 'Error al agregar temporada');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿Confirma eliminar esta temporada?')) return;
+    try {
+      setLoading(true);
+      await axiosInstance.delete(`/hotel/${hotelId}/temporada/${id}`);
+      toast.success('Temporada eliminada');
+      await fetchTemporadas();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al eliminar');
+      setLoading(false);
+    }
+  };
+
 
   return (
-    <div className="animate-in fade-in duration-300">
-      {/* Barra de pestañas */}
-      <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
+    <div className="h-full flex flex-col animate-in fade-in duration-300">
+      <div className="flex-shrink-0 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div className="space-y-1">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
+            <Calendar className="h-5 w-5 text-blue-500" />
+            Temporadas del Hotel
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Gestione periodos de alta y baja demanda con ajustes porcentuales automáticos.
+          </p>
+        </div>
         <button
-          onClick={() => setActiveSubTab('temporadas')}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'temporadas' ? TAB_STYLES.temporadas.active : TAB_INACTIVE}`}
+          onClick={() => setShowForm(true)}
+          disabled={loading || submitting}
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
         >
-          <Calendar className={`h-4 w-4 ${activeSubTab === 'temporadas' ? TAB_STYLES.temporadas.icon : ''}`} />
-          Temporadas del Hotel
-        </button>
-        <button
-          onClick={() => setActiveSubTab('descuentos')}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeSubTab === 'descuentos' ? TAB_STYLES.descuentos.active : TAB_INACTIVE}`}
-        >
-          <Tag className={`h-4 w-4 ${activeSubTab === 'descuentos' ? TAB_STYLES.descuentos.icon : ''}`} />
-          Descuentos por Cantidad
+          <Plus className="h-4 w-4" />
+          Nueva Temporada
         </button>
       </div>
 
-      <div className={activeSubTab === 'temporadas' ? 'block' : 'hidden'}>
-        <TemporadasSection hotelId={hotelId} />
-      </div>
-      <div className={activeSubTab === 'descuentos' ? 'block' : 'hidden'}>
-        <DescuentosSection hotelId={hotelId} />
+      <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
+
+      {/* Modal de Temporada */}
+        <ActionModal
+          isOpen={showForm}
+          onClose={() => {
+            setShowForm(false);
+            form.reset();
+          }}
+          title="Configurar Temporada"
+          description="Defina un periodo de tiempo y su ajuste porcentual sobre la tarifa base."
+          onConfirm={form.handleSubmit(handleAdd)}
+          loading={submitting}
+          confirmLabel="Registrar Temporada"
+          confirmIcon={Plus}
+        >
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <FormField label="Tipo de Ajuste" required error={form.formState.errors.tipo}>
+                <SelectInput {...form.register('tipo', { required: true })}>
+                  <option value="alta">Temporada Alta (+ Aumento)</option>
+                  <option value="baja">Temporada Baja (- Descuento)</option>
+                </SelectInput>
+              </FormField>
+            </div>
+
+            <FormField label="Fecha de Inicio" required error={form.formState.errors.fechaInicio}>
+              <TextInput
+                type="date"
+                {...form.register('fechaInicio', { required: true })}
+              />
+            </FormField>
+
+            <FormField label="Fecha de Fin" required error={form.formState.errors.fechaFin}>
+              <TextInput
+                type="date"
+                {...form.register('fechaFin', { required: true })}
+              />
+            </FormField>
+
+            <div className="sm:col-span-2">
+              <FormField label="Porcentaje de Ajuste (%)" required error={form.formState.errors.porcentaje}>
+                <NumberInput
+                  placeholder="Ej: 15"
+                  {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
+                />
+              </FormField>
+            </div>
+          </div>
+        </ActionModal>
+
+        {/* Tabla */}
+        <TemporadasList data={temporadas} loading={loading} onDelete={handleDelete} />
       </div>
     </div>
   );

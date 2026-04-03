@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Globe, Map, Building, Plus, ChevronRight, Trash2, AlertTriangle } from 'lucide-react';
+import { Globe, Map, Building, ChevronRight, AlertTriangle } from 'lucide-react';
+import { ListHeader } from '@admin-ui';
 import useLocalidad from '../hooks/useLocalidad';
 import UbicacionTable from '../components/UbicacionTable';
 import UbicacionModal from '../components/UbicacionModal';
@@ -13,9 +14,9 @@ const NIVELES = {
 
 // Clases estáticas por nivel (Tailwind necesita strings completos, no interpolados)
 const NIVEL_STYLES = {
-  paises:    { btn: 'bg-blue-600 hover:bg-blue-700',   icon: 'bg-blue-50 dark:bg-blue-900/20',   iconText: 'text-blue-600 dark:text-blue-400' },
-  provincias:{ btn: 'bg-indigo-600 hover:bg-indigo-700', icon: 'bg-indigo-50 dark:bg-indigo-900/20', iconText: 'text-indigo-600 dark:text-indigo-400' },
-  ciudades:  { btn: 'bg-violet-600 hover:bg-violet-700', icon: 'bg-violet-50 dark:bg-violet-900/20', iconText: 'text-violet-600 dark:text-violet-400' },
+  paises:    { icon: 'bg-blue-50 dark:bg-blue-900/20',   iconText: 'text-blue-600 dark:text-blue-400' },
+  provincias:{ icon: 'bg-indigo-50 dark:bg-indigo-900/20', iconText: 'text-indigo-600 dark:text-indigo-400' },
+  ciudades:  { icon: 'bg-violet-50 dark:bg-violet-900/20', iconText: 'text-violet-600 dark:text-violet-400' },
 };
 
 // ─── Modal de confirmación de borrado ────────────────────────────────────────
@@ -140,23 +141,15 @@ function Ubicacion() {
   const Icon = nivelCfg.icon;
 
   return (
-    <div className="space-y-6">
-      {/* Header principal */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Ubicaciones</h1>
-          <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-            Administra los países, provincias y ciudades del sistema
-          </p>
-        </div>
-        <button
-          onClick={handleOpenCreate}
-          className={`flex items-center gap-2 rounded-lg px-4 h-10 text-sm font-semibold text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${NIVEL_STYLES[nivel].btn}`}
-        >
-          <Plus className="h-4 w-4" />
-          Nuevo/a {nivelCfg.tipo === 'pais' ? 'País' : nivelCfg.tipo === 'provincia' ? 'Provincia' : 'Ciudad'}
-        </button>
-      </div>
+    <div className="h-full flex flex-col gap-6 overflow-hidden">
+      {/* Header principal estandarizado */}
+      <ListHeader
+        title="Gestión de Ubicaciones"
+        description="Administra los países, provincias y ciudades del sistema"
+        actionLabel={`Nueva ${nivelCfg.tipo === 'pais' ? 'País' : nivelCfg.tipo === 'provincia' ? 'Provincia' : 'Ciudad'}`}
+        onAction={handleOpenCreate}
+        icon={Globe}
+      />
 
       {/* Área de contenido principal (Tabla y subheader) */}
       <UbicacionTable

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Building2,
-  ArrowLeft,
   Bed,
+  Box,
   DoorOpen,
   Users,
   Calendar,
@@ -15,13 +15,13 @@ import axiosInstance from '@/api/axiosInstance';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
-import { RedirectLink } from '@form';
 import HabitacionesTab from '@/modules/admin/hotels/dashboard/HabitacionesTab';
 import PersonalAsignadoTab from '@/modules/admin/hotels/dashboard/PersonalAsignadoTab';
 import AjustesGeneralesTab from '@/modules/admin/hotels/dashboard/AjustesGeneralesTab';
 import TarifasTab from '@/modules/admin/hotels/dashboard/TarifasTab';
-import TemporadasTab from '@/modules/admin/hotels/dashboard/TemporadasTab';
 import PaquetesTab from '@/modules/admin/hotels/dashboard/PaquetesTab';
+import TemporadasTab from '@/modules/admin/hotels/dashboard/TemporadasTab';
+import DescuentosTab from '@/modules/admin/hotels/dashboard/DescuentosTab';
 
 export default function HotelDashboard() {
   const { id } = useParams();
@@ -58,20 +58,23 @@ export default function HotelDashboard() {
     { id: 'tarifas', icon: Bed, label: 'Tarifas y Tipos' },
     { id: 'habitaciones', icon: DoorOpen, label: 'Habitaciones Físicas' },
     { id: 'personal', icon: Users, label: 'Personal Asignado' },
-    { id: 'temporadas', icon: Calendar, label: 'Temporadas y Descuentos' },
-    { id: 'paquetes', icon: Tag, label: 'Paquetes Promocionales' },
+    { id: 'temporadas', icon: Calendar, label: 'Temporadas' },
+    { id: 'descuentos', icon: Tag, label: 'Descuentos por Cantidad' },
+    { id: 'paquetes', icon: Box, label: 'Paquetes Turísticos' },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col gap-6 overflow-hidden">
       {/* Encabezado del Dashboard */}
-      <PageHeader
-        title={hotel?.nombre || 'Hotel'}
-        description={loading ? 'Sincronizando datos...' : 'Dashboard de Configuración'}
-        backTo="/admin/hoteles"
-        icon={Building2}
-        loading={loading}
-      />
+      <div className="flex-shrink-0">
+        <PageHeader
+          title={hotel?.nombre || 'Hotel'}
+          description={loading ? 'Sincronizando datos...' : 'Dashboard de Configuración'}
+          backTo="/admin/hoteles"
+          icon={Building2}
+          loading={loading}
+        />
+      </div>
 
       <SidebarLayout
         sidebar={
@@ -102,8 +105,8 @@ export default function HotelDashboard() {
               </button>
             </div>
           ) : (
-            <div className="">
-              <div className={activeTab === 'general' ? 'block' : 'hidden'}>
+            <div className="flex-grow flex flex-col relative overflow-hidden">
+              <div className={activeTab === 'general' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
                 <AjustesGeneralesTab
                   hotelId={hotel.id}
                   initialData={hotel}
@@ -111,28 +114,33 @@ export default function HotelDashboard() {
                 />
               </div>
 
-              <div className={activeTab === 'tarifas' ? 'block' : 'hidden'}>
+              <div className={activeTab === 'tarifas' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
                 <TarifasTab hotelId={hotel.id} />
               </div>
 
-              <div className={activeTab === 'habitaciones' ? 'block' : 'hidden'}>
+              <div className={activeTab === 'habitaciones' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
                 <HabitacionesTab
                   hotelId={hotel.id}
                   tarifasAsignadas={hotel.tarifas || []}
                 />
               </div>
 
-              <div className={activeTab === 'personal' ? 'block' : 'hidden'}>
+              <div className={activeTab === 'personal' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
                 <PersonalAsignadoTab hotelId={hotel.id} />
               </div>
 
-              <div className={activeTab === 'temporadas' ? 'block' : 'hidden'}>
+              <div className={activeTab === 'temporadas' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
                 <TemporadasTab hotelId={hotel.id} />
               </div>
 
-              <div className={activeTab === 'paquetes' ? 'block' : 'hidden'}>
+              <div className={activeTab === 'descuentos' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
+                <DescuentosTab hotelId={hotel.id} />
+              </div>
+
+              <div className={activeTab === 'paquetes' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
                 <PaquetesTab hotelId={hotel.id} />
               </div>
+
             </div>
           )}
         </PageContentCard>
