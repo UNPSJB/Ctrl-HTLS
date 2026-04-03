@@ -185,13 +185,26 @@ const eliminarHotel = async (id) => {
   return hotel;
 };
 
-const reactivarHotel = async (id) => {
+const reactivarHotel = async (id, encargadoId) => {
   const hotel = await Hotel.findByPk(id);
   if (!hotel) {
     throw new CustomError('El hotel no existe', 404);
   }
   if (!hotel.eliminado) {
     throw new CustomError('El hotel no está eliminado', 400);
+  }
+
+  if (!encargadoId) {
+    throw new CustomError(
+      'Se requiere un encargado para reactivar el hotel',
+      400,
+    );
+  }
+
+  // Verificar que el encargado exista
+  const encargado = await Encargado.findByPk(encargadoId);
+  if (!encargado) {
+    throw new CustomError('El encargado no existe', 404);
   }
 
   // Verificar que no exista otro hotel activo con el mismo nombre en la misma ciudad
@@ -220,23 +233,21 @@ const reactivarHotel = async (id) => {
   await verificarDireccion(hotel.direccion, hotel.ciudadId, id);
 
   // Verificar que el encargado no esté asignado a otro hotel activo
-  if (hotel.encargadoId) {
-    const encargadoHotelExistente = await Hotel.findOne({
-      where: {
-        encargadoId: hotel.encargadoId,
-        eliminado: false,
-        id: { [Op.ne]: id },
-      },
-    });
-    if (encargadoHotelExistente) {
-      throw new CustomError(
-        'El encargado ya tiene un hotel activo asignado',
-        409,
-      );
-    }
+  const encargadoHotelExistente = await Hotel.findOne({
+    where: {
+      encargadoId,
+      eliminado: false,
+      id: { [Op.ne]: id },
+    },
+  });
+  if (encargadoHotelExistente) {
+    throw new CustomError(
+      'El encargado ya tiene un hotel activo asignado',
+      409,
+    );
   }
 
-  await hotel.update({ eliminado: false });
+  await hotel.update({ eliminado: false, encargadoId });
 
   // Reactivar todas las habitaciones del hotel
   await Habitacion.update(

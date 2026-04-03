@@ -85,8 +85,9 @@ const deleteHotel = async (req, res) => {
 
 const reactivateHotel = async (req, res) => {
   const { id } = req.params;
+  const { encargadoId } = req.body;
   try {
-    const hotel = await hotelServices.reactivarHotel(id);
+    const hotel = await hotelServices.reactivarHotel(id, encargadoId);
     res.json(hotel);
   } catch (error) {
     const statusCode = error.statusCode || 500;
