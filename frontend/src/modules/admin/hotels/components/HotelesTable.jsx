@@ -9,38 +9,47 @@ import { useNavigate } from 'react-router-dom';
 import { SearchInput } from '@/components/ui/form';
 import { ActionModal } from '@admin-ui';
 import { toast } from 'react-hot-toast';
+import axiosInstance from '@/api/axiosInstance';
+import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
 
 // Lista principal de hoteles para administración
 const HotelesTable = () => {
-  const { hoteles, loading, error } = useHotelsData();
+  const { hoteles, loading, error, refetch } = useHotelsData();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [hotelToDeactivate, setHotelToDeactivate] = useState(null);
-  const [simulatedStatuses, setSimulatedStatuses] = useState({}); // Mapea ID a booleano, simulando soft delete
+  const [hotelToToggle, setHotelToToggle] = useState(null);
+  const [isToggling, setIsToggling] = useState(false);
+  const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
   const ITEMS_PER_PAGE = 100;
 
-  const getIsActive = (id) => {
-    // Si no está registrado en el estado de simulador, asumimos que viene activo del back
-    return simulatedStatuses[id] !== undefined ? simulatedStatuses[id] : true;
-  };
-
   const handleToggleStatus = (hotel) => {
-    const active = getIsActive(hotel.hotelId);
-    if (active) {
-      setHotelToDeactivate(hotel); // Pedimos confirmación para dar de baja
-    } else {
-      // Alta directa, sin tanta gravedad
-      setSimulatedStatuses(prev => ({ ...prev, [hotel.hotelId]: true }));
-      toast.success(`Activado: El hotel ${capitalizeFirst(hotel.nombre)} vuelve a estar operativo.`);
-    }
+    setHotelToToggle(hotel); // Invocamos el modal sea para activar o desactivar
+    setSelectedEncargadoId(null); // Reset del selector al abrir
   };
 
-  const confirmDeactivate = () => {
-    if (!hotelToDeactivate) return;
-    setSimulatedStatuses(prev => ({ ...prev, [hotelToDeactivate.hotelId]: false }));
-    toast.success(`Dado de Baja: El hotel ${capitalizeFirst(hotelToDeactivate.nombre)} ha sido desactivado temporalmente.`);
-    setHotelToDeactivate(null);
+  const confirmToggle = async () => {
+    if (!hotelToToggle) return;
+    setIsToggling(true);
+
+    try {
+      if (hotelToToggle.eliminado) {
+        // Enviar reactivacion
+        // TODO: backend no soporta encargadoId todavia
+        // await axiosInstance.patch(`/hotel/${hotelToToggle.hotelId}/reactivar`, { encargadoId: selectedEncargadoId });
+        toast.success(`(Simulado) El Hotel ${capitalizeFirst(hotelToToggle.nombre)} ha sido reactivado y asignado al encargado ID: ${selectedEncargadoId}. PENDIENTE BACKEND.`);
+      } else {
+        // Enviar baja
+        await axiosInstance.delete(`/hotel/${hotelToToggle.hotelId}`);
+        toast.success(`Suspendido: El hotel ${capitalizeFirst(hotelToToggle.nombre)} ha sido desactivado temporalmente.`);
+        refetch(); // Refrescamos tabla real solo cuando hace baja
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Error al cambiar estado del hotel');
+    } finally {
+      setIsToggling(false);
+      setHotelToToggle(null);
+    }
   };
 
   const filteredHoteles = useMemo(() => {
@@ -118,16 +127,16 @@ const HotelesTable = () => {
                   {currentItems.map((hotel) => (
                     <tr
                       key={hotel.hotelId}
-                      className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
+                      className={`transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30 ${hotel.eliminado ? 'opacity-50 grayscale' : ''}`}
                     >
                       <td className="px-6 py-3">
                         <div className="flex items-center">
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                          <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${hotel.eliminado ? 'bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'}`}>
                             <Building2 className="h-5 w-5" />
                           </div>
                           <div className="ml-4 truncate">
-                            <div className="font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
-                              {capitalizeFirst(hotel.nombre)}
+                            <div className={`font-medium transition-all max-w-[200px] truncate md:max-w-[300px] ${hotel.eliminado ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+                              {hotel.eliminado ? <del>{capitalizeFirst(hotel.nombre)}</del> : capitalizeFirst(hotel.nombre)}
                             </div>
                           </div>
                         </div>
@@ -153,13 +162,14 @@ const HotelesTable = () => {
                             onClick={() => handleView(hotel.hotelId)}
                             aria-label="Ver detalles"
                             title="Gestionar Hotel"
+                            disabled={hotel.eliminado}
                           />
                           <TableButton
-                            variant={getIsActive(hotel.hotelId) ? "delete" : "view"}
-                            icon={getIsActive(hotel.hotelId) ? PowerOff : CheckCircle2}
+                            variant={!hotel.eliminado ? "delete" : "view"}
+                            icon={!hotel.eliminado ? PowerOff : CheckCircle2}
                             onClick={() => handleToggleStatus(hotel)}
-                            aria-label={getIsActive(hotel.hotelId) ? "Dar de baja" : "Activar"}
-                            title={getIsActive(hotel.hotelId) ? "Dar de baja temporalmente" : "Activar Hotel"}
+                            aria-label={!hotel.eliminado ? "Dar de baja" : "Activar"}
+                            title={!hotel.eliminado ? "Dar de baja temporalmente" : "Activar Hotel"}
                           />
                         </div>
                       </td>
@@ -170,10 +180,10 @@ const HotelesTable = () => {
                 <tbody>
                   <tr>
                     <td colSpan="5" className="p-12 text-center text-gray-500 dark:text-gray-400">
-                        <div className="flex flex-col items-center justify-center">
-                          <Building2 className="mb-2 h-8 w-8 opacity-50" />
-                          <p>No se encontraron hoteles que coincidan con la búsqueda.</p>
-                        </div>
+                      <div className="flex flex-col items-center justify-center">
+                        <Building2 className="mb-2 h-8 w-8 opacity-50" />
+                        <p>No se encontraron hoteles que coincidan con la búsqueda.</p>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -192,41 +202,58 @@ const HotelesTable = () => {
         />
       </div>
 
-      {/* Modal Interactivo de Baja Lógica */}
+      {/* Modal Interactivo de Alternancia */}
       <ActionModal
-        isOpen={!!hotelToDeactivate}
-        onClose={() => setHotelToDeactivate(null)}
-        title="¿Confirmar la baja del Hotel?"
-        onConfirm={confirmDeactivate}
-        loading={false}
-        confirmLabel="Confirmar y Dar de Baja"
-        confirmIcon={PowerOff}
+        isOpen={!!hotelToToggle}
+        onClose={() => {
+          setHotelToToggle(null);
+          setSelectedEncargadoId(null);
+        }}
+        title={hotelToToggle?.eliminado ? "¿Reactivar Hotel?" : "¿Confirmar la baja del Hotel?"}
+        onConfirm={confirmToggle}
+        loading={isToggling}
+        confirmDisabled={hotelToToggle?.eliminado && !selectedEncargadoId}
+        confirmLabel={hotelToToggle?.eliminado ? "Asignar y Reactivar" : "Confirmar y Dar de Baja"}
+        confirmIcon={hotelToToggle?.eliminado ? CheckCircle2 : PowerOff}
+        size={hotelToToggle?.eliminado ? "lg" : "md"}
       >
-        <div className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+        <div className="space-y-4 text-sm text-gray-600 dark:text-gray-300">
           <p>
-            Estás a punto de dar de baja el hotel{' '}
-            <strong className="text-gray-900 dark:text-white">
-              {hotelToDeactivate?.nombre ? capitalizeFirst(hotelToDeactivate.nombre) : ''}
+            {hotelToToggle?.eliminado ? 'Estás a punto de volver a poner operativo el hotel ' : 'Estás a punto de dar de baja el hotel '}
+            <strong className="text-gray-900 dark:text-white font-medium">
+              {hotelToToggle?.nombre ? capitalizeFirst(hotelToToggle.nombre) : ''}
             </strong>.
-            Esta acción deshabilitará sus operaciones comerciales temporalmente, pero podrás activarlo en cualquier momento.
+            {hotelToToggle?.eliminado
+              ? ' Para reanudar sus operaciones comerciales, debes asignarle un encargado obligatoriamente.'
+              : ' Esta acción deshabilitará sus operaciones comerciales temporalmente. Podrás reactivarlo luego.'}
           </p>
 
-          <div className="rounded-lg bg-red-50 p-4 border border-red-100 dark:bg-red-900/10 dark:border-red-900/30">
-            <h4 className="flex items-center gap-2 font-bold text-red-800 dark:text-red-400 mb-3">
-              <AlertTriangle className="h-5 w-5" />
-              Consecuencias Inmediatas:
-            </h4>
-            <ul className="space-y-2 list-disc pl-5 text-red-700 dark:text-red-300">
-              <li>El <strong>Encargado y los Vendedores asignados</strong> perderán acceso y quedarán desvinculados de esta sucursal.</li>
-              <li>Las <strong>Habitaciones y Paquetes Turísticos</strong> dejarán de estar disponibles para nuevos alquileres.</li>
-              <li>Las configuraciones de tarifas, temporadas y descuentos quedarán archivadas e inactivas.</li>
-            </ul>
-          </div>
+          {hotelToToggle?.eliminado ? (
+            <div className="pt-2">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Selecciona un Encargado Disponible</h4>
+              <div className="max-h-[350px] overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+                <EncargadosList 
+                  value={selectedEncargadoId} 
+                  onChange={setSelectedEncargadoId} 
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="pt-2">
+              <p className="font-medium text-gray-900 dark:text-white mb-2">
+                Consecuencias:
+              </p>
+              <ul className="space-y-1 list-disc pl-5 text-gray-500 dark:text-gray-400">
+                <li>El personal asignado quedará desvinculado de la sucursal.</li>
+                <li>Habitaciones y paquetes no estarán disponibles para alquilar.</li>
+                <li>Tarifas y descuentos quedarán inactivos.</li>
+              </ul>
+            </div>
+          )}
 
-          <div className="rounded-lg bg-blue-50 p-4 border border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30">
-            <p className="font-semibold text-blue-800 dark:text-blue-300 leading-snug">
-               <span className="block mb-1 text-xs uppercase tracking-wider font-bold">Resguardo Comercial</span>
-               Los alquileres que ya estén activos o programados para este hotel NO se verán afectados por esta rotación de estado.
+          <div className="pt-2 mt-2 border-t border-gray-100 dark:border-gray-800">
+            <p className="text-gray-500 dark:text-gray-400 italic">
+              Nota: Los alquileres ya activos no se verán afectados por el cambio de estado.
             </p>
           </div>
         </div>

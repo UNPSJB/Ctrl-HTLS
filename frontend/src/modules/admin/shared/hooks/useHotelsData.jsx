@@ -14,23 +14,24 @@ export function useHotelsData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchHoteles = async () => {
-      try {
-        setLoading(true);
-        const response = await axiosInstance.get('/hoteles');
-        setData(response.data);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching hoteles:', err);
+  const fetchHoteles = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get('/hoteles');
+      setData(response.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching hoteles:', err);
+
         const errorMsg = err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
         setError(errorMsg);
         toast.error(errorMsg, { id: 'fetch-error-hotels' });
       } finally {
-        setLoading(false);
-      }
-    };
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchHoteles();
   }, []);
 
@@ -47,5 +48,6 @@ export function useHotelsData() {
     hoteles: hotelesNormalizados,
     loading,
     error,
+    refetch: fetchHoteles,
   };
 }
