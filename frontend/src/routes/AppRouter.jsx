@@ -86,6 +86,7 @@ function AppRouter() {
                 {/* Rutas de Encargados */}
                 <Route path="encargados" element={<Encargados />} />
                 <Route path="encargados/nuevo" element={<EncargadosForm />} />
+                <Route path="encargados/editar/:id" element={<EncargadosForm />} />
 
                 {/* Fallback admin */}
                 <Route path="*" element={<Navigate to="/admin" replace />} />

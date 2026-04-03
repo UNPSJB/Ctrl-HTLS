@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Users, User } from 'lucide-react';
+import { Trash2, Users, User, Edit } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@/api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
@@ -164,6 +164,11 @@ const EncargadosTable = () => {
                       {/* Acciones */}
                       <td className="px-6 py-3 text-right">
                         <div className="flex justify-end gap-2">
+                          <TableButton
+                            variant="edit"
+                            icon={Edit}
+                            onClick={() => navigate(`/admin/encargados/editar/${encargado.id}`)}
+                          />
                           <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(encargado.id)} />
                         </div>
                       </td>

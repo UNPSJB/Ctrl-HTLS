@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { Save, UserCog, User, Phone } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
-import { 
-    FormField, 
-    TextInput, 
+import {
+    FormField,
+    TextInput,
     EmailInput,
     SelectInput,
     TelInput,
@@ -22,7 +22,9 @@ const tiposDocumento = [
 ];
 
 const EncargadosForm = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
+    const isEditing = Boolean(id);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('personal');
 
@@ -44,6 +46,34 @@ const EncargadosForm = () => {
         },
         mode: 'onChange'
     });
+
+    // Cargar datos si es edición
+    useEffect(() => {
+        if (isEditing) {
+            fetchEncargadoData();
+        }
+    }, [id]);
+
+    const fetchEncargadoData = async () => {
+        setLoading(true);
+        try {
+            const { data } = await axiosInstance.get(`/hotel/encargados/${id}`);
+            reset({
+                nombre: data.nombre || '',
+                apellido: data.apellido || '',
+                telefono: data.telefono || '',
+                tipoDocumento: data.tipoDocumento || 'dni',
+                numeroDocumento: data.dni || '', // El backend devuelve 'dni' para el número
+                email: data.email || '',
+            });
+        } catch (error) {
+            console.error(error);
+            toast.error('No se pudieron cargar los datos del encargado');
+            navigate('/admin/encargados');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const tipoDocumento = watch('tipoDocumento');
 
@@ -73,12 +103,18 @@ const EncargadosForm = () => {
     const onSubmit = async (data) => {
         setLoading(true);
         try {
-            await axiosInstance.post('/hotel/encargados', data);
-            toast.success('Encargado registrado exitosamente');
+            if (isEditing) {
+                await axiosInstance.put(`/hotel/encargados/${id}`, data);
+                toast.success('Encargado actualizado exitosamente');
+            } else {
+                await axiosInstance.post('/hotel/encargados', data);
+                toast.success('Encargado registrado exitosamente');
+            }
             navigate('/admin/encargados');
         } catch (error) {
             console.error(error);
-            const mensaje = error.response?.data?.error || 'Error al crear encargado. Verifique si el documento ya existe.';
+            const action = isEditing ? 'actualizar' : 'crear';
+            const mensaje = error.response?.data?.error || `Error al ${action} encargado.`;
             toast.error(mensaje);
         } finally {
             setLoading(false);
@@ -92,8 +128,11 @@ const EncargadosForm = () => {
             {/* Encabezado del Encargado */}
             <div className="flex-shrink-0">
                 <PageHeader
-                    title="Registrar Nuevo Encargado"
-                    description="Complete los datos para dar de alta a un nuevo encargado operativo."
+                    title={isEditing ? 'Editar Encargado' : 'Registrar Nuevo Encargado'}
+                    description={isEditing
+                        ? `Modificando el perfil de ${watch('nombre')} ${watch('apellido')}.`
+                        : 'Complete los datos para dar de alta a un nuevo encargado operativo.'
+                    }
                     onBack={handleCancel}
                     icon={UserCog}
                     loading={loading}
@@ -198,12 +237,12 @@ const EncargadosForm = () => {
                             {loading ? (
                                 <>
                                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                    Guardando...
+                                    {isEditing ? 'Actualizando...' : 'Guardando...'}
                                 </>
                             ) : (
                                 <>
                                     <Save className="h-4 w-4" />
-                                    Guardar Encargado
+                                    {isEditing ? 'Actualizar Cambios' : 'Guardar Encargado'}
                                 </>
                             )}
                         </button>
