@@ -72,6 +72,28 @@ const updateHotel = async (req, res) => {
   }
 };
 
+const deleteHotel = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const hotel = await hotelServices.eliminarHotel(id);
+    res.json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const reactivateHotel = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const hotel = await hotelServices.reactivarHotel(id);
+    res.json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getAllHoteles = async (req, res) => {
   try {
     const hoteles = await hotelServices.obtenerTodosLosHoteles();
@@ -451,6 +473,40 @@ const deleteEncargado = async (req, res) => {
   }
 };
 
+const getEncargadoById = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const encargado = await hotelServices.obtenerEncargadoPorId(id);
+    res.json(encargado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const updateEncargado = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const encargado = await hotelServices.actualizarEncargado(id, req.body);
+    res.json(encargado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const asignarEmpleado = async (req, res) => {
   const { hotelId, vendedorId } = req.body;
   try {
@@ -482,6 +538,8 @@ const desasignarEmpleado = async (req, res) => {
 module.exports = {
   createHotel,
   updateHotel,
+  deleteHotel,
+  reactivateHotel,
   getAllHoteles,
   getHotelById,
   getCategorias,
@@ -503,6 +561,8 @@ module.exports = {
   getTiposDeHabitacion,
   createEncargado,
   getEncargados,
+  getEncargadoById,
+  updateEncargado,
   deleteEncargado,
   asignarEmpleado,
   desasignarEmpleado,

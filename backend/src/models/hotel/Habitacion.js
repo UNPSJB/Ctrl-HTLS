@@ -12,6 +12,11 @@ const Habitacion = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    eliminado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: 'habitaciones',

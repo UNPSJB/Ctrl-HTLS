@@ -17,7 +17,10 @@ const crearHabitaciones = async (idHotel, habitaciones) => {
 
   try {
     // Verificar si el hotel existe
-    const hotel = await Hotel.findByPk(idHotel, { transaction });
+    const hotel = await Hotel.findOne({
+      where: { id: idHotel, eliminado: false },
+      transaction,
+    });
     if (!hotel) {
       throw new CustomError('El hotel no existe', 404); // Not Found
     }
@@ -54,6 +57,7 @@ const crearHabitaciones = async (idHotel, habitaciones) => {
     const habitacionesExistentes = await Habitacion.findAll({
       where: {
         hotelId: idHotel,
+        eliminado: false,
         numero: { [Op.in]: numerosHabitacion },
       },
       transaction,
@@ -100,20 +104,28 @@ const crearHabitaciones = async (idHotel, habitaciones) => {
 
 const obtenerHabitaciones = async (idHotel) => {
   // Verificar si el hotel existe
-  const hotel = await Hotel.findByPk(idHotel);
+  const hotel = await Hotel.findOne({
+    where: { id: idHotel, eliminado: false },
+  });
   if (!hotel) {
     throw new CustomError('El hotel no existe', 404); // Not Found
   }
 
   // Obtener las habitaciones del hotel
   const habitaciones = await Habitacion.findAll({
-    where: { hotelId: idHotel },
-    attributes: ['id', 'numero', 'piso', 'tipoHabitacionId'],
+    where: { hotelId: idHotel, eliminado: false },
+    attributes: ['id', 'numero', 'piso', 'tipoHabitacionId', 'eliminado'],
     include: [
       {
         model: TipoHabitacion,
         as: 'tipoHabitacion',
         attributes: ['nombre'],
+      },
+      {
+        model: Hotel,
+        as: 'hotel',
+        attributes: ['nombre'],
+        where: { eliminado: false },
       },
     ],
   });
@@ -141,7 +153,9 @@ const obtenerHabitaciones = async (idHotel) => {
 
 const modificarHabitacion = async (idHotel, idHabitacion, habitacion) => {
   // Verificar si el hotel existe
-  const hotel = await Hotel.findByPk(idHotel);
+  const hotel = await Hotel.findOne({
+    where: { id: idHotel, eliminado: false },
+  });
   if (!hotel) {
     throw new CustomError('El hotel no existe', 404); // Not Found
   }
@@ -216,7 +230,9 @@ const modificarHabitacion = async (idHotel, idHabitacion, habitacion) => {
 // Eliminar una habitación
 const eliminarHabitacion = async (idHotel, idHabitacion) => {
   // Verificar si el hotel existe
-  const hotel = await Hotel.findByPk(idHotel);
+  const hotel = await Hotel.findOne({
+    where: { id: idHotel, eliminado: false },
+  });
   if (!hotel) {
     throw new CustomError('El hotel no existe', 404); // Not Found
   }
@@ -228,40 +244,7 @@ const eliminarHabitacion = async (idHotel, idHabitacion) => {
     throw new CustomError('La habitación no existe', 404); // Not Found
   }
 
-  const fechaActual = new Date(); // Fecha actual
-  const fechaFin = new Date('9999-12-31'); // Fecha futura amplia
-
-  // Verificar si la habitación está alquilada actualmente o en el futuro
-  const habitacionesAlquiladas = await verificarDisponibilidadHabitaciones(
-    [idHabitacion], // Pasar el ID como un arreglo
-    fechaActual,
-    fechaFin,
-  );
-
-  if (habitacionesAlquiladas.length > 0) {
-    throw new CustomError(
-      'La habitación está alquilada actualmente o en el futuro y no puede ser eliminada.',
-      400,
-    ); // Bad Request
-  }
-
-  // Verificar si la habitación está asociada a uno o más paquetes promocionales
-  const habitacionesEnPaquete = await verificarHabitacionesPaquetePromocional(
-    [idHabitacion], // Pasar el ID como un arreglo
-    fechaActual,
-    fechaFin,
-  );
-
-  if (habitacionesEnPaquete.length > 0) {
-    throw new CustomError(
-      'La habitación está asignada a un paquete promocional actualmente o en el futuro y no puede ser eliminada.',
-      400,
-    ); // Bad Request
-  }
-
-  //Verificar que no exista una habitación con el mismo número en el mismo hotel
-
-  await habitacion.destroy();
+  await habitacion.update({ eliminado: true });
 };
 
 //Verificar que existe el tipo de habitación
@@ -294,7 +277,10 @@ const verificarTipoHabitacion = async (idTipoHabitacion, idHotel) => {
 const verificarLimitesHabitaciones = async (idHotel, habitaciones) => {
   // Verificar el número de habitaciones en el hotel
   const totalHabitaciones = await Habitacion.count({
-    where: { hotelId: idHotel },
+    where: {
+      hotelId: idHotel,
+      eliminado: false,
+    },
   });
   if (totalHabitaciones + habitaciones.length > 1000) {
     throw new CustomError(
@@ -369,6 +355,7 @@ const verificarHabitacionesHotel = async (idHotel, habitaciones) => {
   const habitacionesEncontradas = await Habitacion.findAll({
     where: {
       hotelId: idHotel,
+      eliminado: false,
       id: { [Op.in]: habitaciones },
     },
     attributes: ['id'],
@@ -435,12 +422,18 @@ const obtenerHabitacionesPorCapacidad = async (idHotel, pasajeros) => {
   // Obtener las habitaciones del hotel con su tipo de habitación
   //let habitacionesFiltradas = [];
   const habitaciones = await Habitacion.findAll({
-    where: { hotelId: idHotel },
+    where: { hotelId: idHotel, eliminado: false },
     include: [
       {
         model: TipoHabitacion,
         as: 'tipoHabitacion',
         attributes: ['nombre', 'capacidad'],
+      },
+      {
+        model: Hotel,
+        as: 'hotel',
+        attributes: ['nombre'],
+        where: { eliminado: false },
       },
     ],
   });
@@ -475,7 +468,7 @@ const obtenerHabitacionesDisponiblesPorTipo = async (
 ) => {
   // Obtener todas las habitaciones del hotel con su tipo de habitación
   const habitaciones = await Habitacion.findAll({
-    where: { hotelId: idHotel },
+    where: { hotelId: idHotel, eliminado: false },
     include: [
       {
         model: TipoHabitacion,
@@ -489,6 +482,12 @@ const obtenerHabitacionesDisponiblesPorTipo = async (
             attributes: ['precio'],
           },
         ],
+      },
+      {
+        model: Hotel,
+        as: 'hotel',
+        attributes: ['nombre'],
+        where: { eliminado: false },
       },
     ],
   });
@@ -566,7 +565,7 @@ const guardarHabitaciones = async (
 
 const getHabitacion = (idHabitacion) => {
   return Habitacion.findOne({
-    where: { id: idHabitacion },
+    where: { id: idHabitacion, eliminado: false },
     include: [
       {
         model: TipoHabitacion,
@@ -582,6 +581,7 @@ const getHabitacionPorNumeroYHotel = (idHotel, numero) => {
     where: {
       hotelId: idHotel,
       numero: numero,
+      eliminado: false,
     },
   });
 };
