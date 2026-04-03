@@ -54,11 +54,11 @@ const ActionModal = ({
   };
 
   const variantClasses = {
-    blue: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 shadow-blue-500/20',
-    indigo: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 shadow-indigo-500/20',
-    green: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 shadow-emerald-500/20',
-    red: 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500 shadow-rose-500/20',
-    amber: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500 shadow-amber-500/20',
+    blue: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
+    indigo: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+    green: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500',
+    red: 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500',
+    amber: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500',
   };
 
   return (
@@ -119,7 +119,7 @@ const ActionModal = ({
                 type="button"
                 onClick={onConfirm}
                 disabled={loading || confirmDisabled}
-                className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:grayscale-[0.5] focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${variantClasses[variant]}`}
+                className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:grayscale-[0.5] focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${variantClasses[variant]}`}
               >
                 {loading ? (
                   <>
