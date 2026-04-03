@@ -7,6 +7,7 @@ import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
+import { toast } from 'react-hot-toast';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -30,7 +31,9 @@ const AdministradoresTable = () => {
             setAdmins(response.data);
             setError(null);
         } catch (err) {
-            setError(err.response?.data?.error || 'Error al cargar los administradores');
+            const errorMsg = err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
+            setError(errorMsg);
+            toast.error(errorMsg, { id: 'fetch-error' });
         } finally {
             setLoading(false);
         }
@@ -71,8 +74,6 @@ const AdministradoresTable = () => {
         setCurrentPage(1);
     }, [searchTerm]);
 
-    if (error) return <div className="p-4 text-red-500">{error}</div>;
-
     return (
     <div className="flex-grow flex flex-col h-full overflow-hidden">
         <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -90,59 +91,52 @@ const AdministradoresTable = () => {
                     </div>
                 </div>
 
-                {/* Tabla Administradores */}
-                <div className="relative flex flex-col flex-grow overflow-hidden">
-                    {loading && (
-                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-                            <InnerLoading message="Consultando privilegios..." />
+        {/* Tabla Administradores */}
+        <div className="relative flex flex-col flex-grow overflow-hidden">
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+              <InnerLoading message="Consultando privilegios..." />
+            </div>
+          )}
+
+          <div className="flex-grow overflow-auto custom-scrollbar">
+            <table className="w-full text-left text-sm">
+              <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
+                <tr>
+                  <th className="px-6 py-4">Nombre Completo</th>
+                  <th className="px-6 py-4">Documento</th>
+                  <th className="px-6 py-4">Email</th>
+                  <th className="px-6 py-4">Teléfono</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              {filteredAdmins.length > 0 ? (
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                  {currentItems.map((admin) => (
+                    <tr key={admin.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
+                      <td className="px-6 py-3">
+                        <div className="flex items-center truncate">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                            <User className="h-5 w-5" />
+                          </div>
+                          <div className="ml-4 truncate">
+                            <div className="font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
+                              {capitalizeFirst(admin.nombre)} {capitalizeFirst(admin.apellido)}
+                            </div>
+                          </div>
                         </div>
-                    )}
-
-                    {/* Encabezado fijo Fuera del Scroll */}
-                    <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-700/30">
-                        <table className="w-full table-fixed text-left text-sm">
-                            <thead className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                                <tr>
-                                    <th className="px-6 py-4 w-[30%]">Nombre Completo</th>
-                                    <th className="px-6 py-4 w-[20%]">Documento</th>
-                                    <th className="px-6 py-4 w-[25%]">Email</th>
-                                    <th className="px-6 py-4 w-[15%]">Teléfono</th>
-                                    <th className="px-6 py-4 w-[10%] text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-
-                    {/* Cuerpo desplazable con Scroll Interno */}
-                    <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-                        {filteredAdmins.length > 0 ? (
-                            <table className="w-full table-fixed border-collapse text-left text-sm">
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                    {currentItems.map((admin) => (
-                                        <tr key={admin.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                                            <td className="px-6 py-3 w-[30%]">
-                                                <div className="flex items-center truncate">
-                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                                                        <User className="h-5 w-5" />
-                                                    </div>
-                                                    <div className="ml-4 truncate">
-                                                        <div className="font-medium text-gray-900 dark:text-white transition-all truncate">
-                                                            {capitalizeFirst(admin.nombre)} {capitalizeFirst(admin.apellido)}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[20%] truncate">
-                                                <span className="font-semibold uppercase mr-2">{admin.tipoDocumento}</span>
-                                                {admin.numeroDocumento}
-                                            </td>
-                                            <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[25%] truncate">
-                                                {admin.email || <span className="italic text-gray-400">—</span>}
-                                            </td>
-                                            <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 w-[15%] truncate">
-                                                {admin.telefono || <span className="italic text-gray-400">—</span>}
-                                            </td>
-                                            <td className="px-6 py-3 text-right w-[10%]">
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[150px] truncate">
+                        <span className="font-semibold uppercase mr-2">{admin.tipoDocumento}</span>
+                        {admin.numeroDocumento}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate">
+                        {admin.email || <span className="italic text-gray-400">—</span>}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[150px] truncate">
+                        {admin.telefono || <span className="italic text-gray-400">—</span>}
+                      </td>
+                      <td className="px-6 py-3 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(admin.id)} />
                                                     <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(admin.id)} />
@@ -150,16 +144,22 @@ const AdministradoresTable = () => {
                                             </td>
                                         </tr>
                                     ))}
-                                </tbody>
-                            </table>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center p-12 text-center">
-                                <User className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
-                                <p className="text-gray-500 dark:text-gray-400">No se encontraron administradores que coincidan con la búsqueda.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                </tbody>
+              ) : (
+                <tbody>
+                  <tr>
+                    <td colSpan="5" className="p-12 text-center text-gray-500 dark:text-gray-400">
+                      <div className="flex flex-col items-center justify-center">
+                        <User className="mb-2 h-8 w-8 opacity-50" />
+                        <p>No se encontraron administradores que coincidan con la búsqueda.</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
+          </div>
+        </div>
 
                 {/* Paginación */}
                 <TablePagination

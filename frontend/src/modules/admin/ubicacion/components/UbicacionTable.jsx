@@ -56,51 +56,50 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
             </div>
           )}
 
-          {/* Encabezado fijo Fuera del Scroll */}
-          <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-700/30">
-            <table className="w-full table-fixed text-left text-sm">
-              <thead className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          <div className="flex-grow overflow-auto custom-scrollbar">
+            <table className="w-full text-left text-sm">
+              <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4 w-[8%]">#</th>
-                  <th className="px-6 py-4 w-[50%]">Nombre</th>
+                  <th className="px-6 py-4">#</th>
+                  <th className="px-6 py-4">Nombre</th>
                   {tipo === 'ciudad' && (
-                    <th className="px-6 py-4 w-[15%]">Código Postal</th>
+                    <th className="px-6 py-4">Código Postal</th>
                   )}
-                  <th className={`px-6 py-4 text-right ${tipo === 'ciudad' ? 'w-[27%]' : 'w-[42%]'}`}>Acciones</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
-            </table>
-          </div>
-
-          {/* Cuerpo desplazable con Scroll Interno */}
-          <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-            {!loading && pageItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-16 text-gray-400">
-                <Search className="h-8 w-8 opacity-40 mb-2" />
-                <p className="text-sm">
-                  {search ? 'Sin resultados para esa búsqueda' : 'No hay registros todavía'}
-                </p>
-              </div>
-            ) : (
-              <table className="w-full table-fixed border-collapse text-left text-sm">
+              {!loading && pageItems.length === 0 ? (
+                <tbody>
+                  <tr>
+                    <td colSpan={tipo === 'ciudad' ? 4 : 3}>
+                      <div className="flex flex-col items-center justify-center gap-2 py-16 text-gray-400">
+                        <Search className="h-8 w-8 opacity-40 mb-2" />
+                        <p className="text-sm">
+                          {search ? 'Sin resultados para esa búsqueda' : 'No hay registros todavía'}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              ) : (
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
                   {pageItems.map((item, idx) => (
                     <tr
                       key={item.id}
                       className="group transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/20"
                     >
-                      <td className="px-6 py-3 text-gray-400 dark:text-gray-500 text-xs w-[8%] truncate">
+                      <td className="px-6 py-3 text-gray-400 dark:text-gray-500 text-xs truncate">
                         {(safePage - 1) * PAGE_SIZE + idx + 1}
                       </td>
-                      <td className="px-6 py-3 font-medium text-gray-800 dark:text-gray-200 w-[50%] truncate">
+                      <td className="px-6 py-3 font-medium text-gray-800 dark:text-gray-200">
                         {capitalizeFirst(item.nombre)}
                       </td>
                       {tipo === 'ciudad' && (
-                        <td className="px-6 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs w-[15%] truncate">
+                        <td className="px-6 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs truncate">
                           {item.codigoPostal || <span className="italic opacity-50">—</span>}
                         </td>
                       )}
-                      <td className={`px-6 py-3 ${tipo === 'ciudad' ? 'w-[27%]' : 'w-[42%]'}`}>
+                      <td className="px-6 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <TableButton variant="edit" icon={Pencil} onClick={() => onEdit(item)} />
                           <TableButton variant="delete" icon={Trash2} onClick={() => onDelete(item)} />
@@ -120,8 +119,8 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            )}
+              )}
+            </table>
           </div>
         </div>
 

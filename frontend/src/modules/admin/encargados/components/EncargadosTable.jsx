@@ -29,7 +29,8 @@ const EncargadosTable = () => {
       setEncargados(response.data);
     } catch (error) {
       console.error(error);
-      toast.error('Error al cargar encargados');
+      const errorMsg = error.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
+      toast.error(errorMsg, { id: 'fetch-error-enc' });
     } finally {
       setLoading(false);
     }
@@ -101,37 +102,30 @@ const EncargadosTable = () => {
             </div>
           )}
 
-          {/* Encabezado fijo Fuera del Scroll */}
-          <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-700/30">
-            <table className="w-full table-fixed text-left text-sm">
-              <thead className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          <div className="flex-grow overflow-auto custom-scrollbar">
+            <table className="w-full text-left text-sm">
+              <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4 w-[25%]">Nombre Completo</th>
-                  <th className="px-6 py-4 w-[15%]">Documento</th>
-                  <th className="px-6 py-4 w-[20%]">Email</th>
-                  <th className="px-6 py-4 w-[15%]">Teléfono</th>
-                  <th className="px-6 py-4 w-[15%]">Hotel</th>
-                  <th className="px-6 py-4 w-[10%] text-right">Acciones</th>
+                  <th className="px-6 py-4">Nombre Completo</th>
+                  <th className="px-6 py-4">Documento</th>
+                  <th className="px-6 py-4">Email</th>
+                  <th className="px-6 py-4">Teléfono</th>
+                  <th className="px-6 py-4">Hotel</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
-            </table>
-          </div>
-
-          {/* Cuerpo desplazable con Scroll Interno */}
-          <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-            {filteredEncargados.length > 0 ? (
-              <table className="w-full table-fixed border-collapse text-left text-sm">
+              {filteredEncargados.length > 0 ? (
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {currentItems.map((encargado) => (
                     <tr key={encargado.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
                       {/* Nombre y Avatar */}
-                      <td className="px-6 py-3 w-[25%]">
+                      <td className="px-6 py-3">
                         <div className="flex items-center truncate">
                           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                             <User className="h-5 w-5" />
                           </div>
                           <div className="ml-4 truncate">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white transition-all truncate">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
                               {capitalizeFirst(encargado.nombre)} {capitalizeFirst(encargado.apellido)}
                             </div>
                           </div>
@@ -139,7 +133,7 @@ const EncargadosTable = () => {
                       </td>
 
                       {/* Documento */}
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[15%] truncate">
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[150px] truncate">
                         <span className="font-semibold uppercase mr-2">
                           {encargado.tipoDocumento}
                         </span>
@@ -147,17 +141,17 @@ const EncargadosTable = () => {
                       </td>
 
                       {/* Email */}
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 w-[20%] truncate">
+                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate">
                         {encargado.email || <span className="italic text-gray-400">—</span>}
                       </td>
 
                       {/* Teléfono */}
-                      <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 w-[15%] truncate">
+                      <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[150px] truncate">
                         {encargado.telefono || <span className="italic text-gray-400">—</span>}
                       </td>
 
                       {/* Estado de Asignación */}
-                      <td className="px-6 py-3 w-[15%] truncate">
+                      <td className="px-6 py-3 truncate max-w-[200px] md:max-w-[250px]">
                         {encargado.hotel ? (
                           <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 truncate max-w-full">
                             {capitalizeFirst(encargado.hotel.nombre)}
@@ -168,7 +162,7 @@ const EncargadosTable = () => {
                       </td>
 
                       {/* Acciones */}
-                      <td className="px-6 py-3 text-right w-[10%]">
+                      <td className="px-6 py-3 text-right">
                         <div className="flex justify-end gap-2">
                           <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(encargado.id)} />
                         </div>
@@ -176,13 +170,19 @@ const EncargadosTable = () => {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-12 text-center">
-                <Users className="mx-auto mb-2 h-8 w-8 text-gray-400 opacity-50" />
-                <p className="text-gray-500 dark:text-gray-400">No se encontraron encargados que coincidan con la búsqueda.</p>
-              </div>
-            )}
+              ) : (
+                <tbody>
+                  <tr>
+                    <td colSpan="6" className="p-12 text-center text-gray-500 dark:text-gray-400">
+                      <div className="flex flex-col items-center justify-center">
+                        <Users className="mb-2 h-8 w-8 opacity-50" />
+                        <p>No se encontraron encargados que coincidan con la búsqueda.</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import axiosInstance from '@/api/axiosInstance';
 import { transformHoteles } from './hotelTransformer';
+import { toast } from 'react-hot-toast';
 
 /**
  * Hook centralizado para obtener y transformar los datos de los hoteles.
@@ -22,7 +23,9 @@ export function useHotelsData() {
         setError(null);
       } catch (err) {
         console.error('Error fetching hoteles:', err);
-        setError(err);
+        const errorMsg = err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
+        setError(errorMsg);
+        toast.error(errorMsg, { id: 'fetch-error-hotels' });
       } finally {
         setLoading(false);
       }

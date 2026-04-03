@@ -26,7 +26,7 @@ const useLocalidad = () => {
       setPaises(capitalizeList(Array.isArray(data) ? data : []));
     } catch (err) {
       if (err.response?.status !== 404) {
-        toast.error('Error al cargar países');
+        toast.error(err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor', { id: 'fetch-paises-err' });
       }
       setPaises([]);
     } finally {
@@ -41,7 +41,7 @@ const useLocalidad = () => {
       setProvincias(capitalizeList(Array.isArray(data) ? data : []));
     } catch (err) {
       if (err.response?.status !== 404) {
-        toast.error('Error al cargar provincias');
+        toast.error(err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor', { id: 'fetch-prov-err' });
       }
       setProvincias([]);
     } finally {
@@ -56,7 +56,7 @@ const useLocalidad = () => {
       setCiudades(capitalizeList(Array.isArray(data) ? data : []));
     } catch (err) {
       if (err.response?.status !== 404) {
-        toast.error('Error al cargar ciudades');
+        toast.error(err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor', { id: 'fetch-ciu-err' });
       }
       setCiudades([]);
     } finally {
