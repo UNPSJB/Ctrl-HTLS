@@ -44,6 +44,8 @@ const incluirRelacionesVendedor = [
     as: 'hoteles',
     attributes: ['id', 'nombre'],
     through: { attributes: [] },
+    where: { eliminado: false },
+    required: false,
   },
   {
     model: DetalleFactura,

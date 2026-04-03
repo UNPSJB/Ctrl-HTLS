@@ -39,6 +39,7 @@ const {
   desasignarEmpleado,
   updateTarifas,
   deleteHotel,
+  reactivateHotel,
 } = require('../../controllers/hotel/hotelController');
 
 const router = express.Router();
@@ -51,6 +52,7 @@ router.get('/hotel/:id/paquetes', validateId, getPaquetes); //Ruta para listar p
 router.get('/hotel/:id/tarifas', validateId, getTarifas); //Ruta para obtener tarifas por tipo de habitación
 router.post('/hotel', validateHotel, createHotel); //Ruta para crear un hotel
 router.delete('/hotel/:id', validateId, deleteHotel); //Ruta para eliminar un hotel
+router.patch('/hotel/:id/reactivar', validateId, reactivateHotel); //Ruta para reactivar un hotel eliminado
 router.put('/hotel/:id', validateId, validateHotel, updateHotel); //Ruta para modificar un hotel
 router.put(
   '/hotel/:id/tarifas',

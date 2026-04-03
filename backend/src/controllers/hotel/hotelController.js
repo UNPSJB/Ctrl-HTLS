@@ -83,6 +83,17 @@ const deleteHotel = async (req, res) => {
   }
 };
 
+const reactivateHotel = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const hotel = await hotelServices.reactivarHotel(id);
+    res.json(hotel);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getAllHoteles = async (req, res) => {
   try {
     const hoteles = await hotelServices.obtenerTodosLosHoteles();
@@ -528,6 +539,7 @@ module.exports = {
   createHotel,
   updateHotel,
   deleteHotel,
+  reactivateHotel,
   getAllHoteles,
   getHotelById,
   getCategorias,

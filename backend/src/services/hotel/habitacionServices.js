@@ -114,7 +114,7 @@ const obtenerHabitaciones = async (idHotel) => {
   // Obtener las habitaciones del hotel
   const habitaciones = await Habitacion.findAll({
     where: { hotelId: idHotel, eliminado: false },
-    attributes: ['id', 'numero', 'piso', 'tipoHabitacionId'],
+    attributes: ['id', 'numero', 'piso', 'tipoHabitacionId', 'eliminado'],
     include: [
       {
         model: TipoHabitacion,

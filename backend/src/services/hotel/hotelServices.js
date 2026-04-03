@@ -175,12 +175,74 @@ const eliminarHotel = async (id) => {
     throw new CustomError('El hotel ya fue eliminado', 400);
   }
 
-  await hotel.update({ eliminado: true });
+  await hotel.update({ eliminado: true, encargadoId: null });
 
   // Eliminar lógicamente todas las habitaciones del hotel
   await Habitacion.update(
     { eliminado: true },
     { where: { hotelId: id, eliminado: false } },
+  );
+
+  return hotel;
+};
+
+const reactivarHotel = async (id) => {
+  const hotel = await Hotel.findByPk(id);
+  if (!hotel) {
+    throw new CustomError('El hotel no existe', 404);
+  }
+  if (!hotel.eliminado) {
+    throw new CustomError('El hotel no está eliminado', 400);
+  }
+
+  // Verificar que no exista otro hotel activo con el mismo nombre en la misma ciudad
+  const hotelExistenteNombre = await Hotel.findOne({
+    where: {
+      nombre: hotel.nombre,
+      ciudadId: hotel.ciudadId,
+      eliminado: false,
+      id: { [Op.ne]: id },
+    },
+  });
+  if (hotelExistenteNombre) {
+    throw new CustomError(
+      'Ya existe un hotel activo con el mismo nombre en esta ciudad',
+      409,
+    );
+  }
+
+  // Verificar que el email no esté en uso por otro registro activo
+  await verificarEmail(hotel.email, id);
+
+  // Verificar que el teléfono no esté en uso por otro registro activo
+  await verificarTelefono(hotel.telefono, id);
+
+  // Verificar que la dirección no esté en uso por otro registro activo
+  await verificarDireccion(hotel.direccion, hotel.ciudadId, id);
+
+  // Verificar que el encargado no esté asignado a otro hotel activo
+  if (hotel.encargadoId) {
+    const encargadoHotelExistente = await Hotel.findOne({
+      where: {
+        encargadoId: hotel.encargadoId,
+        eliminado: false,
+        id: { [Op.ne]: id },
+      },
+    });
+    if (encargadoHotelExistente) {
+      throw new CustomError(
+        'El encargado ya tiene un hotel activo asignado',
+        409,
+      );
+    }
+  }
+
+  await hotel.update({ eliminado: false });
+
+  // Reactivar todas las habitaciones del hotel
+  await Habitacion.update(
+    { eliminado: false },
+    { where: { hotelId: id, eliminado: true } },
   );
 
   return hotel;
@@ -526,7 +588,6 @@ const getHotelesPorCiudad = async (ciudadId) => {
 
 const obtenerTodosLosHoteles = async () => {
   const hoteles = await Hotel.findAll({
-    where: { eliminado: false },
     include: [
       {
         model: Categoria,
@@ -1286,6 +1347,7 @@ module.exports = {
   crearHotel,
   modificarHotel,
   eliminarHotel,
+  reactivarHotel,
   getHotelById,
   obtenerTodosLosHoteles,
   obtenerCategorias,
