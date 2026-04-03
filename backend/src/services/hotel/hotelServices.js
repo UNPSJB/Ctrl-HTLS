@@ -109,7 +109,6 @@ const obtenerEncargados = async () => {
           model: Hotel,
           as: 'hotel',
           attributes: ['id', 'nombre'],
-          where: { eliminado: false },
         },
       ],
     });
