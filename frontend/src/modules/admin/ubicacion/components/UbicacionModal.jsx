@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Globe, Building, Map } from 'lucide-react';
-import ActionModal from '@admin-ui/ActionModal';
+import Modal from '@ui/Modal';
 import { FormField, TextInput } from '@form';
 
 const TIPO_META = {
@@ -60,7 +60,7 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
   };
 
   return (
-    <ActionModal
+    <Modal
       isOpen
       onClose={onClose}
       title={isEditing ? `Editar ${meta.label}` : `Nuevo/a ${meta.label}`}
@@ -100,7 +100,7 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
           </FormField>
         )}
       </div>
-    </ActionModal>
+    </Modal>
   );
 }
 

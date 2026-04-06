@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Eye, Building2, X, PowerOff, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Eye, Building2, X, PowerOff, CheckCircle2 } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import { useHotelsData } from '@admin-hooks/useHotelsData';
@@ -7,7 +7,7 @@ import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useNavigate } from 'react-router-dom';
 import { SearchInput } from '@/components/ui/form';
-import { ActionModal } from '@admin-ui';
+import { Modal } from '@admin-ui';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
@@ -204,7 +204,7 @@ const HotelesTable = () => {
       </div>
 
       {/* Modal Interactivo de Alternancia */}
-      <ActionModal
+      <Modal
         isOpen={!!hotelToToggle}
         onClose={() => {
           setHotelToToggle(null);
@@ -233,10 +233,10 @@ const HotelesTable = () => {
             <div className="pt-2">
               <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Selecciona un Encargado Disponible</h4>
               <div className="h-[350px]">
-                <EncargadosList 
-                  value={selectedEncargadoId} 
+                <EncargadosList
+                  value={selectedEncargadoId}
 
-                  onChange={setSelectedEncargadoId} 
+                  onChange={setSelectedEncargadoId}
                 />
               </div>
             </div>
@@ -259,7 +259,7 @@ const HotelesTable = () => {
             </p>
           </div>
         </div>
-      </ActionModal>
+      </Modal>
     </div>
   );
 };

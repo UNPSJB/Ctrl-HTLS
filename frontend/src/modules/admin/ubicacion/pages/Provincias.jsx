@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Map, Pencil, Trash2, ChevronRight } from 'lucide-react';
-import { ListHeader, ActionModal } from '@admin-ui';
+import { ListHeader, Modal } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -189,7 +189,7 @@ function Provincias() {
       )}
 
       {/* Modal confirmación borrado */}
-      <ActionModal
+      <Modal
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         title="¿Eliminar Provincia?"

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Globe, Pencil, Trash2, ChevronRight } from 'lucide-react';
-import { ListHeader, ActionModal } from '@admin-ui';
+import { ListHeader, Modal } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -174,7 +174,7 @@ function Paises() {
       )}
 
       {/* Modal confirmación borrado */}
-      <ActionModal
+      <Modal
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         title="¿Eliminar País?"

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import PaquetesList from '../components/PaquetesList';
-import { ActionModal } from '@admin-ui';
+import { Modal } from '@admin-ui';
 import {
   FormField,
   TextInput,
@@ -167,7 +167,7 @@ export default function PaquetesTab({ hotelId }) {
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
         {/* Modal de Crear/Editar Paquete */}
-        <ActionModal
+        <Modal
           isOpen={showForm}
           onClose={handleCloseModal}
           title={editingPaquete ? `Editar: ${editingPaquete.nombre}` : 'Crear Paquete Promocional'}
@@ -266,7 +266,7 @@ export default function PaquetesTab({ hotelId }) {
               </div>
             </div>
           </div>
-        </ActionModal>
+        </Modal>
 
         {/* Listado de Paquetes */}
         <PaquetesList

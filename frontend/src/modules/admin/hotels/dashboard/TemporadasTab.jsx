@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import TemporadasList from '../components/TemporadasList';
-import { ActionModal } from '@admin-ui';
+import { Modal } from '@admin-ui';
 import {
   FormField,
   SelectInput,
@@ -96,7 +96,7 @@ export default function TemporadasTab({ hotelId }) {
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
 
       {/* Modal de Temporada */}
-        <ActionModal
+        <Modal
           isOpen={showForm}
           onClose={() => {
             setShowForm(false);
@@ -142,7 +142,7 @@ export default function TemporadasTab({ hotelId }) {
               </FormField>
             </div>
           </div>
-        </ActionModal>
+        </Modal>
 
         {/* Tabla */}
         <TemporadasList data={temporadas} loading={loading} onDelete={handleDelete} />

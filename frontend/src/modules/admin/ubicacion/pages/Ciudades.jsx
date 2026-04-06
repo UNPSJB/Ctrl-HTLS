@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Building, Pencil, Trash2 } from 'lucide-react';
-import { ListHeader, ActionModal } from '@admin-ui';
+import { ListHeader, Modal } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -194,7 +194,7 @@ function Ciudades() {
       )}
 
       {/* Modal confirmación borrado */}
-      <ActionModal
+      <Modal
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         title="¿Eliminar Ciudad?"

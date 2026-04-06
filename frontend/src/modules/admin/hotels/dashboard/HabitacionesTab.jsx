@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import HabitacionesList from '../components/HabitacionesList';
-import { ActionModal } from '@admin-ui';
+import { Modal } from '@admin-ui';
 import {
   FormField,
   SelectInput,
@@ -233,7 +233,7 @@ export default function HabitacionesTab({
       <div className="flex-grow mt-6 flex flex-col overflow-hidden relative">
 
       {/* Formulario de Alta/Edición en Modal */}
-      <ActionModal
+      <Modal
         isOpen={isCreating}
         onClose={cancelForm}
         title={editingId ? 'Editar Habitación' : 'Nueva Habitación'}
@@ -291,7 +291,7 @@ export default function HabitacionesTab({
             </FormField>
           </div>
         </div>
-      </ActionModal>
+      </Modal>
 
       {/* Listado de Habitaciones */}
       <HabitacionesList

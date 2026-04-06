@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import DescuentosList from '../components/DescuentosList';
-import { ActionModal } from '@admin-ui';
+import { Modal } from '@admin-ui';
 import {
   FormField,
   NumberInput
@@ -81,7 +81,7 @@ export default function DescuentosTab({ hotelId }) {
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
 
       {/* Modal de Descuento */}
-        <ActionModal
+        <Modal
           isOpen={showForm}
           onClose={() => {
             setShowForm(false);
@@ -111,7 +111,7 @@ export default function DescuentosTab({ hotelId }) {
               />
             </FormField>
           </div>
-        </ActionModal>
+        </Modal>
 
         {/* Tabla */}
         <DescuentosList data={descuentos} loading={loading} />
