@@ -4,14 +4,58 @@ import HotelFilter from './HotelFilter';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
 const HotelList = ({ hoteles, isLoading, error }) => {
-  const [estrellasSeleccionadas, setEstrellasSeleccionadas] = useState([]);
+  const [filters, setFilters] = useState({
+    hospedajes: ['A', 'B', 'C'],
+    estrellas: 5,
+    soloPaquetes: false,
+    soloDescuentos: false,
+  });
 
-  const filteredHotels =
-    estrellasSeleccionadas.length === 0
-      ? hoteles
-      : hoteles.filter((hotel) =>
-          estrellasSeleccionadas.includes(Number(hotel.categoria.estrellas))
-        );
+  const parseCategoria = (catStr) => {
+    if (!catStr) return { type: 'unknown', value: 0 };
+    if (catStr.toLowerCase().includes('hospedaje')) {
+      const letter = catStr.split(' ').pop(); // ej "Hospedaje A" -> "A"
+      return { type: 'letter', value: letter };
+    }
+    // Asume formato "3.5 Estrellas" o directamente el string "5"
+    const numberStr = String(catStr).split(' ')[0];
+    return { type: 'number', value: Number(numberStr) || 0 };
+  };
+
+  const filteredHotels = hoteles.filter((hotel) => {
+    if (filters.soloPaquetes && (!hotel.paquetes || hotel.paquetes.length === 0)) return false;
+    if (filters.soloDescuentos && (!hotel.descuentos || hotel.descuentos.length === 0)) return false;
+
+    const cat = parseCategoria(hotel.categoria?.estrellas || hotel.estrellas || '');
+
+    if (cat.type === 'letter') {
+      return filters.hospedajes.includes(cat.value);
+    }
+
+    if (cat.type === 'number') {
+      return cat.value <= filters.estrellas; // Filtra para mostrar desde ese numero HASTA abajo.
+    }
+
+    return true; 
+  });
+
+  // Algoritmo de puntuación para ordenamiento (Mejor a Peor)
+  const categoryScore = (catStr) => {
+    const cat = parseCategoria(catStr);
+    if (cat.type === 'number') return cat.value; // Puntuacion 1 a 5
+    if (cat.type === 'letter') {
+      if (cat.value === 'C') return 0.3; // Mejores hospedajes
+      if (cat.value === 'B') return 0.2;
+      if (cat.value === 'A') return 0.1; // Peores hospedajes
+    }
+    return 0; // Desconocidos
+  };
+
+  const sortedHotels = [...filteredHotels].sort((a, b) => {
+    const scoreA = categoryScore(a.categoria?.estrellas || a.estrellas || '');
+    const scoreB = categoryScore(b.categoria?.estrellas || b.estrellas || '');
+    return scoreB - scoreA; // Orden Descendente
+  });
 
   if (error) {
     return <p className="text-center text-red-500 bg-red-50 p-4 rounded-xl">{error}</p>;
@@ -36,8 +80,8 @@ const HotelList = ({ hoteles, isLoading, error }) => {
       ) : (
          <>
           <HotelFilter
-            estrellasSeleccionadas={estrellasSeleccionadas}
-            setEstrellasSeleccionadas={setEstrellasSeleccionadas}
+            filters={filters}
+            setFilters={setFilters}
           />
 
           {hoteles.length === 0 ? (
@@ -48,7 +92,7 @@ const HotelList = ({ hoteles, isLoading, error }) => {
                 Seleccione fechas y destinos para buscar disponibilidad
               </p>
             </section>
-          ) : filteredHotels.length === 0 ? (
+          ) : sortedHotels.length === 0 ? (
             <section
               className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-800 dark:bg-gray-800/50"
             >
@@ -58,7 +102,7 @@ const HotelList = ({ hoteles, isLoading, error }) => {
             </section>
           ) : (
             <ul className="flex flex-col gap-4">
-              {filteredHotels.map((hotel) => (
+              {sortedHotels.map((hotel) => (
                 <li key={hotel.hotelId}>
                   <HotelCard hotel={hotel} />
                 </li>
