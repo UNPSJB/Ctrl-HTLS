@@ -12,26 +12,24 @@ const HomePage = () => {
   const estaBloqueado = !!reservaConfirmada;
 
   return (
-    <div className="bg-background min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <HotelSearch
-          onSearch={buscarDisponibilidad}
-          isLoading={isLoading}
-          isDisabled={estaBloqueado}
-        />
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
-          <div className="lg:col-span-3">
-            {!estaBloqueado && (
-              <HotelList
-                hoteles={hoteles}
-                isLoading={isLoading}
-                error={error}
-              />
-            )}
-          </div>
-          <div className="lg:col-span-2">
-            <CartSummary />
-          </div>
+    <div className="flex flex-col gap-6">
+      <HotelSearch
+        onSearch={buscarDisponibilidad}
+        isLoading={isLoading}
+        isDisabled={estaBloqueado}
+      />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+          {!estaBloqueado && (
+            <HotelList
+              hoteles={hoteles}
+              isLoading={isLoading}
+              error={error}
+            />
+          )}
+        </div>
+        <div className="lg:col-span-2">
+          <CartSummary />
         </div>
       </div>
     </div>

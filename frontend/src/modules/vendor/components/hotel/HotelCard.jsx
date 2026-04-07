@@ -19,7 +19,7 @@ function HotelCard({ hotel: rawHotel }) {
   if (!hotel) return null;
 
   return (
-    <article className="cursor-pointer overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-gray-800">
+    <article className="overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200 dark:border-gray-700 dark:bg-gray-800">
       <HotelHeader
         hotel={hotel}
         isExpanded={isExpanded}

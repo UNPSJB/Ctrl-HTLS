@@ -48,7 +48,7 @@ function CartSummary() {
 
   return (
     <aside
-      className="sticky top-28 overflow-hidden rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800"
+      className="sticky top-28 overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
       aria-labelledby="cart-summary-title"
       role="complementary"
     >

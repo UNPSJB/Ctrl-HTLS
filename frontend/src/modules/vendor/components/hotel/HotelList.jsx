@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import HotelCard from './HotelCard';
 import HotelFilter from './HotelFilter';
+import { InnerLoading } from '@/components/ui/InnerLoading';
 
 const HotelList = ({ hoteles, isLoading, error }) => {
   const [estrellasSeleccionadas, setEstrellasSeleccionadas] = useState([]);
@@ -12,61 +13,59 @@ const HotelList = ({ hoteles, isLoading, error }) => {
           estrellasSeleccionadas.includes(Number(hotel.categoria.estrellas))
         );
 
-  if (isLoading) {
-    return (
-      <p className="text-center text-gray-500 dark:text-gray-400">
-        Buscando hoteles...
-      </p>
-    );
-  }
-
   if (error) {
-    return <p className="text-center text-red-500">{error}</p>;
+    return <p className="text-center text-red-500 bg-red-50 p-4 rounded-xl">{error}</p>;
   }
 
-  if (hoteles.length === 0) {
-    return (
-      <section
-        role="alert"
-        aria-live="polite"
-        className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-lg dark:border-gray-700 dark:bg-gray-800"
-      >
-        <p className="text-gray-500">
-          No se encontraron hoteles con los criterios seleccionados.
-        </p>
-      </section>
-    );
-  }
+  const isInitialLoad = isLoading && hoteles.length === 0;
 
   return (
-    <section aria-labelledby="hotel-list-title" className="flex flex-col">
+    <section aria-labelledby="hotel-list-title" className="flex flex-col relative min-h-[300px] gap-4">
       <h2 id="hotel-list-title" className="sr-only">
         Hoteles disponibles
       </h2>
 
-      <HotelFilter
-        estrellasSeleccionadas={estrellasSeleccionadas}
-        setEstrellasSeleccionadas={setEstrellasSeleccionadas}
-      />
+      {isLoading && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/40 backdrop-blur-[2px] transition-all duration-300 dark:bg-gray-900/40 rounded-xl">
+          <InnerLoading message="Buscando disponibilidad..." />
+        </div>
+      )}
 
-      {filteredHotels.length === 0 ? (
-        <section
-          role="alert"
-          aria-live="polite"
-          className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-lg dark:border-gray-700 dark:bg-gray-800"
-        >
-          <p className="text-gray-500">
-            No se encontraron hoteles con las estrellas seleccionadas.
-          </p>
-        </section>
+      {isInitialLoad ? (
+         <div className="flex-1" />
       ) : (
-        <ul className="flex flex-col gap-6">
-          {filteredHotels.map((hotel) => (
-            <li key={hotel.hotelId}>
-              <HotelCard hotel={hotel} />
-            </li>
-          ))}
-        </ul>
+         <>
+          <HotelFilter
+            estrellasSeleccionadas={estrellasSeleccionadas}
+            setEstrellasSeleccionadas={setEstrellasSeleccionadas}
+          />
+
+          {hoteles.length === 0 ? (
+            <section
+              className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-800 dark:bg-gray-800/50"
+            >
+              <p className="text-gray-500 font-medium">
+                Seleccione fechas y destinos para buscar disponibilidad
+              </p>
+            </section>
+          ) : filteredHotels.length === 0 ? (
+            <section
+              className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-800 dark:bg-gray-800/50"
+            >
+              <p className="text-gray-500 font-medium">
+                No se encontraron hoteles con los filtros aplicados.
+              </p>
+            </section>
+          ) : (
+            <ul className="flex flex-col gap-4">
+              {filteredHotels.map((hotel) => (
+                <li key={hotel.hotelId}>
+                  <HotelCard hotel={hotel} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </section>
   );

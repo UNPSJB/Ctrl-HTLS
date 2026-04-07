@@ -30,7 +30,7 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
 
   return (
     <>
-      <article className="grid grid-cols-4 items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
+      <article className="grid grid-cols-4 items-center rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 shadow-sm hover:shadow-md dark:border-gray-800/60 dark:bg-gray-900/40">
         <div className="col-span-2 flex items-center gap-4">
           <div className="flex items-center gap-4">
             <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">

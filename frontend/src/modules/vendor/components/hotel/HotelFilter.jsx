@@ -12,7 +12,7 @@ function HotelFilter({ estrellasSeleccionadas, setEstrellasSeleccionadas }) {
   };
 
   return (
-    <div className="mb-6 rounded-lg bg-white p-4 shadow-md dark:bg-gray-800">
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex flex-wrap gap-3">
         {estrellas.map((e) => (
           <button

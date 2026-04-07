@@ -80,7 +80,7 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
 
   return (
     <>
-      <article className="flex flex-col rounded-lg border border-gray-200 bg-gray-50 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
+      <article className="flex flex-col rounded-lg border border-gray-100 bg-gray-50 shadow-sm transition-shadow hover:shadow-md dark:border-gray-800/60 dark:bg-gray-900/40">
         <div className="grid grid-cols-4 items-center px-4 py-3">
           <div className="col-span-2 flex flex-col gap-2">
             <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">

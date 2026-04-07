@@ -71,7 +71,7 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
   const fieldDisabled = isLoading || isDisabled;
 
   return (
-    <div className="shadow-search mb-8 rounded-lg bg-white p-6 dark:bg-gray-800">
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <fieldset
         disabled={fieldDisabled}
         className={fieldDisabled ? 'opacity-60' : ''}
