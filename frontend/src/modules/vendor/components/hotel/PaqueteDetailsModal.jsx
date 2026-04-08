@@ -2,6 +2,7 @@ import { Bed, Calendar, Percent, Tag } from 'lucide-react';
 import Modal from '@ui/Modal';
 import ImageLoader from '@ui/ImageLoader';
 import { normalizeDiscount, roundTwo, toNumber, calcSeasonalPrice } from '@utils/pricingUtils';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
   if (!paquete) return null;
@@ -47,7 +48,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
       {}
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-6">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          {paquete.nombre}
+          {capitalizeWords(paquete.nombre)}
         </h2>
 
         {}
@@ -78,7 +79,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
               >
                 <Bed className="h-5 w-5" />
                 <span>
-                  {hab.nombre} - {hab.capacidad} personas
+                  {capitalizeWords(hab.nombre)} - {hab.capacidad} personas
                 </span>
               </div>
             ))}
@@ -117,7 +118,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
                   className="flex justify-between text-gray-600 dark:text-gray-400"
                 >
                   <span>
-                    {hab.nombre} ({hab.capacidad} personas)
+                    {capitalizeWords(hab.nombre)} ({hab.capacidad} personas)
                   </span>
                   <span>
                     ${toNumber(hab.precio).toFixed(2)} × {noches} =

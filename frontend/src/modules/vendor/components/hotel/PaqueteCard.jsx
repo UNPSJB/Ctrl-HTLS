@@ -3,6 +3,7 @@ import { Users, Calendar, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { calcPackageTotal } from '@utils/pricingUtils';
 import DateDisplay from '@ui/DateDisplay';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Tarjeta detallada para un paquete turístico en el carrito
 function PaqueteCard({ paquete, hotel, onRemove }) {
@@ -29,7 +30,7 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
 
       <div className="flex items-start justify-between pr-10">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-          {paquete.nombre}
+          {capitalizeWords(paquete.nombre)}
         </h3>
         <PriceTag
           precio={priceInfo.final}

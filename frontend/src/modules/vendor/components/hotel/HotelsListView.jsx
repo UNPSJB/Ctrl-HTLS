@@ -5,6 +5,7 @@ import PaqueteCard from './PaqueteCard';
 import Temporada from '@hotel/Temporada';
 import { useCarrito } from '@vendor-context/CarritoContext';
 import { calcRoomInstanceTotal, calcPackageTotal, calcDescuentoPorCantidad } from '@utils/pricingUtils';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Componente interno para manejar los cálculos memoizados por cada hotel
 function HotelItem({ hotel }) {
@@ -55,7 +56,7 @@ function HotelItem({ hotel }) {
                 id={`hotel-${hotelId}-title`}
                 className="text-xl font-bold text-gray-800 dark:text-gray-100"
               >
-                {nombre ?? 'Hotel'}
+                {capitalizeWords(nombre ?? 'Hotel')}
               </h2>
               {temporada && (
                 <Temporada porcentaje={temporada.porcentaje} tipo={temporada.tipo} />

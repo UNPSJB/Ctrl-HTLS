@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Star, MapPin, AlignLeft, Info, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import Modal from '@ui/Modal';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 function HotelDetailsModal({ hotel, onClose }) {
   const [showAllServices, setShowAllServices] = useState(false);
@@ -16,7 +17,7 @@ function HotelDetailsModal({ hotel, onClose }) {
     <Modal
       isOpen={true}
       onClose={onClose}
-      title={hotel.nombre}
+      title={capitalizeWords(hotel.nombre)}
       description="Ficha Técnica y Operativa Comercial"
       onConfirm={onClose}
       confirmLabel="Cerrar Ficha"
@@ -65,7 +66,7 @@ function HotelDetailsModal({ hotel, onClose }) {
                 servicios.map((srv, index) => (
                   <span key={index} className="flex h-8 items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-medium text-green-700 dark:border-green-900/30 dark:bg-green-900/20 dark:text-green-400">
                     <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="whitespace-nowrap">{typeof srv === 'string' ? srv : srv.nombre}</span>
+                    <span className="whitespace-nowrap">{capitalizeWords(typeof srv === 'string' ? srv : srv.nombre)}</span>
                   </span>
                 ))
               ) : (

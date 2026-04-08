@@ -4,6 +4,7 @@ import PriceTag from '@ui/PriceTag';
 import { calcRoomInstanceTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@vendor-context/CarritoContext';
 import DateDisplay from '@ui/DateDisplay';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Elemento individual de una habitación dentro de la sección de hotel del carrito
 function RoomCartItem({ room, hotel, onRemove = null, isLocked = false }) {
@@ -46,7 +47,7 @@ function RoomCartItem({ room, hotel, onRemove = null, isLocked = false }) {
           <div className="flex items-center gap-4">
             <h4 className="flex items-center gap-2 truncate font-semibold text-gray-900 dark:text-gray-100">
               <House className="h-5 w-5 flex-shrink-0 text-current" />
-              <span className="truncate">{nombre ?? 'Habitación'}</span>
+              <span className="truncate">{capitalizeWords(nombre ?? 'Habitación')}</span>
             </h4>
             <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
               <div className="flex items-center gap-1.5">

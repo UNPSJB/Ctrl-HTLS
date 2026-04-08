@@ -4,6 +4,7 @@ import Temporada from '@hotel/Temporada';
 import RoomCartItem from './RoomCartItem';
 import PackageCartItem from './PackageCartItem';
 import { calcRoomInstanceTotal, calcDescuentoPorCantidad } from '@utils/pricingUtils';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Sección agrupada por hotel dentro del carrito de compras
 function HotelCartSection({ hotel = {}, isLocked = false }) {
@@ -38,7 +39,7 @@ function HotelCartSection({ hotel = {}, isLocked = false }) {
     <section className="mb-6">
       <div className="mb-4">
         <h3 className="flex items-center gap-3 text-lg font-bold text-gray-900 dark:text-gray-100">
-          {hotel.nombre}
+          {capitalizeWords(hotel?.nombre)}
           {temporadaTipo && <Temporada porcentaje={temporadaPorcentaje} tipo={temporadaTipo} />}
         </h3>
 

@@ -5,6 +5,7 @@ import PriceTag from '@ui/PriceTag';
 import Counter from '@ui/Counter';
 import RoomDetailsModal from './RoomDetailsModal';
 import { useHabitacionSelection } from '@vendor-hooks/useHabitacionSelection';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Elemento de lista para una habitación dentro del detalle del hotel
 function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
@@ -34,7 +35,7 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
         <div className="col-span-2 flex items-center gap-4">
           <div className="flex items-center gap-4">
             <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {tipo}
+              {capitalizeWords(tipo)}
             </div>
             <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
               <Users className="h-4 w-4" />

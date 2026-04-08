@@ -7,6 +7,7 @@ import Counter from '@ui/Counter';
 import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@vendor-context/CarritoContext';
 import useBookingDates from '@vendor-hooks/useBookingDates';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Elemento de lista para un paquete turístico dentro del detalle del hotel
 function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
@@ -84,7 +85,7 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
         <div className="grid grid-cols-4 items-center px-4 py-3">
           <div className="col-span-2 flex flex-col gap-2">
             <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {nombre}
+              {capitalizeWords(nombre)}
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">

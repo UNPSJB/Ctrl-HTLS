@@ -4,6 +4,7 @@ import PriceTag from '@ui/PriceTag';
 import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@vendor-context/CarritoContext';
 import DateDisplay from '@ui/DateDisplay';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Elemento individual de un paquete dentro de la sección de hotel del carrito
 function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
@@ -38,7 +39,7 @@ function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
           <div className="flex items-center gap-4">
             <h4 className="flex items-center gap-2 truncate font-semibold text-gray-900 dark:text-gray-100">
               <PackageIcon className="h-5 w-5 flex-shrink-0 text-current" />
-              <span className="truncate">{nombre ?? 'Paquete'}</span>
+              <span className="truncate">{capitalizeWords(nombre ?? 'Paquete')}</span>
             </h4>
           </div>
           <PriceTag precio={finalTotal} />

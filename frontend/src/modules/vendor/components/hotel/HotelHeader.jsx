@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MapPin, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { capitalizeWords } from '@/utils/stringUtils';
 import Temporada from './Temporada';
 import Calificacion from './Calificacion';
 import HotelDetailsModal from './HotelDetailsModal';
@@ -25,7 +26,7 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
           {/* Lado Izquierdo: Titulo y Estrellas */}
           <div className="flex items-center gap-3 flex-1">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              {hotel.nombre}
+              {capitalizeWords(hotel?.nombre)}
             </h2>
             <button
               onClick={handleShowDetails}

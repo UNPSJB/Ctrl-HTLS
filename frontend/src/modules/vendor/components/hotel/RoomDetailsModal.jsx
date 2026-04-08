@@ -1,6 +1,7 @@
 import { Users, Bath, Tag, MapPin, CheckCircle } from 'lucide-react';
 import Modal from '@ui/Modal';
 import { calcSeasonalPrice, toNumber } from '@utils/pricingUtils';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
   const precioBase = habitacion?.precio ?? 100;
@@ -21,7 +22,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
     <Modal 
       isOpen={true}
       onClose={onClose}
-      title={habitacion?.nombre ?? "Detalles de Habitación"}
+      title={capitalizeWords(habitacion?.nombre ?? "Detalles de Habitación")}
       description="Consulta las capacidades y desglose de precio de la habitación."
       onConfirm={onReserve}
       confirmLabel="Seleccionar Habitación"

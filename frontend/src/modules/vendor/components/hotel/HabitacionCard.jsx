@@ -3,6 +3,7 @@ import { Users, Hash, Layers3, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { calcRoomInstanceTotal } from '@utils/pricingUtils';
 import DateDisplay from '@ui/DateDisplay';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Tarjeta detallada para una instancia de habitación en el carrito
 function HabitacionCard({ habitacion, hotel, onRemove }) {
@@ -33,7 +34,7 @@ function HabitacionCard({ habitacion, hotel, onRemove }) {
 
       <div className="flex items-start justify-between pr-10">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-          {habitacion.nombre}
+          {capitalizeWords(habitacion.nombre)}
         </h3>
         <PriceTag
           precio={priceInfo.final}
