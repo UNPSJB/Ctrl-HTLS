@@ -25,6 +25,7 @@ import Ciudades from '@/modules/admin/ubicacion/pages/Ciudades';
 import Encargados from '@/modules/admin/encargados/pages/Encargados';
 import EncargadosForm from '@/modules/admin/encargados/pages/EncargadosForm';
 import ClienteHistorial from '@/modules/admin/clients/pages/ClienteHistorial';
+import PerfilPage from '@/pages/PerfilPage';
 
 function AppRouter() {
   const { user, loading } = useAuth();
@@ -95,6 +96,9 @@ function AppRouter() {
             {user.rol === 'administrador' && (
               <Route path="/" element={<Navigate to="/admin" replace />} />
             )}
+
+            {/* Página de perfil compartida */}
+            <Route path="/perfil" element={<PerfilPage />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
