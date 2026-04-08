@@ -44,6 +44,7 @@ function AppRouter() {
               <Route element={<MainLayout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="pago" element={<PagoPage />} />
+                <Route path="perfil" element={<PerfilPage />} />
                 <Route path="crear-hotel" element={<HotelesForm />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
@@ -96,9 +97,6 @@ function AppRouter() {
             {user.rol === 'administrador' && (
               <Route path="/" element={<Navigate to="/admin" replace />} />
             )}
-
-            {/* Página de perfil compartida */}
-            <Route path="/perfil" element={<PerfilPage />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </>

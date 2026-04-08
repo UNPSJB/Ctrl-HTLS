@@ -4,13 +4,9 @@ import PaymentSummary from '@checkout/PaymentSummary';
 import ClienteData from '@client/ClienteData';
 
 function PagoPage() {
-  // Ahora extraemos también reservaConfirmada
   const { carrito, reservaConfirmada } = useCarrito();
 
-  // Verifica si el carrito está vacío
   if (!carrito.hoteles || carrito.hoteles.length === 0) {
-    // Si hay una reserva confirmada pero el carrito está vacío,
-    // significa que el contexto está procesando la cancelación automática.
     if (reservaConfirmada) {
       return (
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-gray-600 dark:text-gray-300">
@@ -28,29 +24,16 @@ function PagoPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Confirmar y Pagar
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Revisá los detalles antes de procesar el pago.
-          </p>
-        </div>
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-start animate-in fade-in duration-500">
+      {/* Contenido principal - columna izquierda */}
+      <div className="flex-1 space-y-6">
+        <ClienteData />
+        <HotelsListView />
       </div>
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        {/* Contenido principal - columna izquierda */}
-        <div className="flex-1 space-y-6">
-          <ClienteData />
-          <HotelsListView />
-        </div>
-
-        {/* Columna derecha sticky */}
-        <div className="w-full shrink-0 lg:sticky lg:top-6 lg:w-96">
-          <PaymentSummary />
-        </div>
+      {/* Columna derecha sticky */}
+      <div className="w-full shrink-0 lg:sticky lg:top-6 lg:w-96">
+        <PaymentSummary />
       </div>
     </div>
   );
