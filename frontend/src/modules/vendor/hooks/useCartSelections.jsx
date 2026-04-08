@@ -8,25 +8,16 @@ const { nightsBetween } = dateUtils;
  * a partir de una lista simple de habitaciones y paquetes.
  * @param {Array<object>} habitaciones - Lista de habitaciones.
  * @param {Array<object>} paquetes - Lista de paquetes.
- * @param {number} porcentaje - Porcentaje de descuento/recargo de la temporada.
- * @param {boolean} isHighSeason - Indicador manual de temporada alta.
+ * @param {object|null} temporada - Objeto de temporada { tipo, porcentaje, fechaInicio, fechaFin }.
  * @returns {Array<object>} Array con la estructura de selecciones para el cálculo.
  */
 export const useCartSelections = (
   habitaciones = [],
   paquetes = [],
-  porcentaje = 0,
-  isHighSeason
+  temporada = null
 ) => {
-  // Memoizamos el resultado para evitar recálculos innecesarios.
   return useMemo(() => {
-    // 1. Derivamos si es temporada alta a partir del porcentaje (por compatibilidad)
-    const effectiveHighSeason =
-      typeof isHighSeason === 'boolean'
-        ? isHighSeason
-        : Boolean(Number(porcentaje) > 0);
-
-    // 2. Mapeo de habitaciones
+    // Mapeo de habitaciones
     const selectedInstanceIds = habitaciones
       .map((h) => (h && h.id != null ? h.id : null))
       .filter((id) => id != null);
@@ -36,13 +27,12 @@ export const useCartSelections = (
 
     habitaciones.forEach((h) => {
       if (!h || h.id == null) return;
-      // USAMOS EL MÉTODO CORRECTO: nightsBetween
       nightsByInstance[h.id] = nightsBetween(h.fechaInicio, h.fechaFin);
       qtyByInstance[h.id] =
         Number.isFinite(Number(h.qty)) && Number(h.qty) > 0 ? Number(h.qty) : 1;
     });
 
-    // 3. Mapeo de paquetes
+    // Mapeo de paquetes
     const selectedPackageIds = paquetes
       .map((p) => (p && p.id != null ? p.id : null))
       .filter((id) => id != null);
@@ -54,14 +44,11 @@ export const useCartSelections = (
         Number.isFinite(Number(p.qty)) && Number(p.qty) > 0 ? Number(p.qty) : 1;
     });
 
-    // 4. Construcción de la estructura final (asumimos un solo "hotel" para este resumen)
+    // Estructura final con el objeto temporada completo
     return [
       {
         hotel: {
-          temporada: {
-            // Aplicamos el porcentaje de la temporada si es efectiva
-            porcentaje: effectiveHighSeason ? Number(porcentaje) || 0 : 0,
-          },
+          temporada: temporada ?? null,
         },
         selectedInstanceIds,
         selectedPackageIds,
@@ -72,5 +59,5 @@ export const useCartSelections = (
         },
       },
     ];
-  }, [habitaciones, paquetes, porcentaje, isHighSeason]);
+  }, [habitaciones, paquetes, temporada]);
 };

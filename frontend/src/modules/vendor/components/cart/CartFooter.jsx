@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClienteModal from '@client/ClienteModal';
-import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
+import { calcRoomInstanceTotal, calcPackageTotal, calcDescuentoPorCantidad } from '@utils/pricingUtils';
 import { useCarrito } from '@vendor-context/CarritoContext';
 import { useBusqueda } from '@vendor-context/BusquedaContext';
 import { usePago } from '@vendor-context/PagoContext';
@@ -21,28 +21,43 @@ function CartFooter({ hotels = [], onClose }) {
   const totals = useMemo(() => {
     let finalSum = 0;
     let originalSum = 0;
+    let descuentoHotelTotal = 0;
 
     (hotels || []).forEach((hotel) => {
-      const porcentajeTemporada = hotel?.temporada?.porcentaje ?? 0;
+      const temporada = hotel?.temporada ?? null;
+      let hotelRoomFinal = 0;
 
+      // Sumar habitaciones con temporada
       (hotel.habitaciones || []).forEach((room) => {
         const calc = calcRoomInstanceTotal({
           precio: room.precio,
-          porcentaje: porcentajeTemporada,
+          temporada,
           alquiler: {
             fechaInicio: room.fechaInicio,
             fechaFin: room.fechaFin,
           },
-          limite: hotel.temporada,
         });
         originalSum += calc.original;
-        finalSum += calc.final;
+        hotelRoomFinal += calc.final;
       });
 
+      // Aplicar descuento por cantidad exacta de habitaciones
+      const cantidadHabs = (hotel.habitaciones || []).length;
+      const descInfo = calcDescuentoPorCantidad(
+        cantidadHabs,
+        hotel.descuentos,
+        hotelRoomFinal
+      );
+      hotelRoomFinal -= descInfo.montoDescuento;
+      descuentoHotelTotal += descInfo.montoDescuento;
+
+      finalSum += hotelRoomFinal;
+
+      // Sumar paquetes (sin descuento por cantidad)
       (hotel.paquetes || []).forEach((pack) => {
         const calc = calcPackageTotal({
           paquete: pack,
-          porcentaje: porcentajeTemporada,
+          temporada,
         });
         originalSum += calc.original;
         finalSum += calc.final;
@@ -53,6 +68,7 @@ function CartFooter({ hotels = [], onClose }) {
       final: finalSum,
       original: originalSum,
       descuento: originalSum - finalSum,
+      descuentoHotel: descuentoHotelTotal,
     };
   }, [hotels]);
 
@@ -114,28 +130,39 @@ function CartFooter({ hotels = [], onClose }) {
         });
 
         const alquiler = Array.from(grupos.values()).map((grupo) => {
-          let montoCalculado = 0;
+          let montoHabitaciones = 0;
+          let montoPaquetes = 0;
 
           grupo.habitaciones.forEach((hab) => {
             const calc = calcRoomInstanceTotal({
               precio: hab.precio,
-              porcentaje: hotel?.temporada?.porcentaje,
+              temporada: hotel?.temporada,
               alquiler: {
                 fechaInicio: hab.fechaInicio,
                 fechaFin: hab.fechaFin,
               },
-              limite: hotel.temporada,
             });
-            montoCalculado += calc.final;
+            montoHabitaciones += calc.final;
           });
+
+          // Aplicar descuento por cantidad exacta
+          const cantHabs = grupo.habitaciones.length;
+          const descInfo = calcDescuentoPorCantidad(
+            cantHabs,
+            hotel.descuentos,
+            montoHabitaciones
+          );
+          montoHabitaciones -= descInfo.montoDescuento;
 
           grupo.paquetes.forEach((pkg) => {
             const calc = calcPackageTotal({
               paquete: pkg,
-              porcentaje: hotel?.temporada?.porcentaje,
+              temporada: hotel?.temporada,
             });
-            montoCalculado += calc.final;
+            montoPaquetes += calc.final;
           });
+
+          const montoCalculado = montoHabitaciones + montoPaquetes;
 
           return {
             fechaInicio: grupo.fechaInicio,

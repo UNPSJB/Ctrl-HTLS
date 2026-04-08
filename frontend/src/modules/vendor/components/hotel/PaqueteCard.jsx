@@ -11,7 +11,7 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
   const priceInfo = useMemo(() => {
     return calcPackageTotal({
       paquete,
-      porcentaje: hotel?.temporada?.porcentaje,
+      temporada: hotel?.temporada,
     });
   }, [paquete, hotel]);
 

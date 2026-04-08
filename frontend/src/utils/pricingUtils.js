@@ -24,14 +24,19 @@ export function normalizeDiscount(v) {
 }
 
 /**
- * Función simple: Aplica un ajuste porcentual a un precio base.
+ * Aplica el ajuste de temporada a un precio base.
+ * Si la temporada es 'baja', resta el porcentaje (descuento).
+ * Si la temporada es 'alta' o cualquier otro caso, suma el porcentaje (recargo).
  * @param {number} precioBase - El precio original.
- * @param {number} porcentaje - El porcentaje de ajuste (ej: 0.15 para +15%, -0.10 para -10%).
+ * @param {object|null} temporada - Objeto { tipo, porcentaje, fechaInicio, fechaFin }.
  * @returns {number} El precio final con el ajuste aplicado.
  */
-export function calcSeasonalPrice(precioBase, porcentaje) {
+export function calcSeasonalPrice(precioBase, temporada) {
   const base = toNumber(precioBase);
-  const percent = toNumber(porcentaje);
+  const percent = toNumber(temporada?.porcentaje);
+  if (temporada?.tipo === 'baja') {
+    return roundToInteger(base * (1 - percent));
+  }
   return roundToInteger(base * (1 + percent));
 }
 
@@ -39,43 +44,54 @@ export function calcSeasonalPrice(precioBase, porcentaje) {
  * Función principal: Calcula el precio total de una estancia, incluyendo noches y temporada.
  * Utiliza internamente a calcSeasonalPrice.
  */
+/**
+ * Calcula el precio total de una estancia, incluyendo noches y temporada.
+ * @param {object} params
+ * @param {number} params.precio - Precio por noche.
+ * @param {object|null} params.temporada - Objeto de temporada { tipo, porcentaje, fechaInicio, fechaFin }.
+ * @param {object} params.alquiler - Rango de fechas del alquiler { fechaInicio, fechaFin }.
+ */
 export function calcRoomInstanceTotal({
   precio,
-  porcentaje = 0,
+  temporada = null,
   alquiler,
-  limite,
 }) {
   const pricePerNight = toNumber(precio);
 
   const totalNights = nightsBetween(alquiler?.fechaInicio, alquiler?.fechaFin, {
     useUTC: true,
   });
-  const seasonalNights = limite ? calculateOverlapNights(alquiler, limite) : 0;
+  const seasonalNights = temporada ? calculateOverlapNights(alquiler, temporada) : 0;
   const normalNights = totalNights - seasonalNights;
 
   const normalPriceTotal = pricePerNight * normalNights;
 
-  // Calculamos el precio por noche con el ajuste de temporada
-  const seasonalPricePerNight = calcSeasonalPrice(pricePerNight, porcentaje);
+  // Calculamos el precio por noche con el ajuste de temporada (alta sube, baja baja)
+  const seasonalPricePerNight = calcSeasonalPrice(pricePerNight, temporada);
   const seasonalPriceTotal = seasonalPricePerNight * seasonalNights;
 
   const final = roundToInteger(normalPriceTotal + seasonalPriceTotal);
   const original = roundToInteger(pricePerNight * totalNights);
   const descuento = roundToInteger(original - final);
 
-  // Devolvemos el objeto enriquecido
   return {
     original,
     final,
     descuento,
     nights: totalNights,
-    pricePerNight: pricePerNight, // Precio base por noche
-    seasonalPricePerNight: seasonalPricePerNight, // Precio por noche con temporada
-    hasSeasonalAdjustment: seasonalNights > 0 && porcentaje !== 0,
+    pricePerNight,
+    seasonalPricePerNight,
+    hasSeasonalAdjustment: seasonalNights > 0 && toNumber(temporada?.porcentaje) !== 0,
   };
 }
 
-export function calcPackageTotal({ paquete, porcentaje = 0 }) {
+/**
+ * Calcula el total de un paquete turístico con descuento propio + ajuste de temporada.
+ * @param {object} params
+ * @param {object} params.paquete - Datos del paquete.
+ * @param {object|null} params.temporada - Objeto de temporada { tipo, porcentaje, ... }.
+ */
+export function calcPackageTotal({ paquete, temporada = null }) {
   const habitaciones = Array.isArray(paquete.habitaciones)
     ? paquete.habitaciones
     : [];
@@ -93,17 +109,17 @@ export function calcPackageTotal({ paquete, porcentaje = 0 }) {
   );
   const totalConDescuentoPaquete = totalOriginal - descuentoPaqueteMonto;
 
-  const final = calcSeasonalPrice(totalConDescuentoPaquete, porcentaje);
+  const final = calcSeasonalPrice(totalConDescuentoPaquete, temporada);
   const ajusteTemporadaMonto = final - totalConDescuentoPaquete;
 
   return {
-    original: totalOriginal, // Precio total sin ningún descuento
-    final, // Precio final con todos los ajustes
+    original: totalOriginal,
+    final,
     sumPerNight: roundToInteger(sumPerNight),
     noches,
     descuentoPaqueteMonto,
     ajusteTemporadaMonto,
-    descuentoPaquetePorcentaje: paquete.descuento, // El porcentaje crudo
+    descuentoPaquetePorcentaje: paquete.descuento,
   };
 }
 
@@ -156,8 +172,7 @@ export function calcHotelTotalFromSelection(
     packageQtyMap = {},
   } = options;
 
-  const hotelSeasonDiscount =
-    hotel && hotel.temporada ? toNumber(hotel.temporada.porcentaje) : 0;
+  const temporada = hotel?.temporada ?? null;
 
   const allInstances = flattenRoomInstances(hotel);
 
@@ -170,9 +185,8 @@ export function calcHotelTotalFromSelection(
       const qty = qtyByInstance[id] !== undefined ? qtyByInstance[id] : 1;
       const calc = calcRoomInstanceTotal({
         precio: inst.price,
-        nights,
-        qty,
-        porcentaje: hotelSeasonDiscount,
+        temporada,
+        alquiler: { fechaInicio: null, fechaFin: null },
       });
       acc.original += calc.original;
       acc.final += calc.final;
@@ -190,8 +204,7 @@ export function calcHotelTotalFromSelection(
       const qty = packageQtyMap[pid] !== undefined ? packageQtyMap[pid] : 1;
       const { original, final } = calcPackageTotal({
         paquete: p,
-        porcentaje: hotelSeasonDiscount,
-        qty,
+        temporada,
       });
       acc.original += original;
       acc.final += final;
@@ -229,14 +242,14 @@ export function calcCartTotal(hotelsSelections = []) {
   let finalSum = 0;
 
   hotelsSelections.forEach((entry) => {
-    const hotelSeasonDiscount = entry.hotel?.temporada?.porcentaje ?? 0;
+    const temporada = entry.hotel?.temporada ?? null;
 
     (entry.hotel.habitaciones || []).forEach((room) => {
       const nights = nightsBetween(room.fechaInicio, room.fechaFin);
       const calc = calcRoomInstanceTotal({
         precio: room.precio,
-        nights: nights,
-        porcentaje: hotelSeasonDiscount,
+        temporada,
+        alquiler: { fechaInicio: room.fechaInicio, fechaFin: room.fechaFin },
       });
       originalSum += calc.original;
       finalSum += calc.final;
@@ -245,7 +258,7 @@ export function calcCartTotal(hotelsSelections = []) {
     (entry.hotel.paquetes || []).forEach((pack) => {
       const calc = calcPackageTotal({
         paquete: pack,
-        porcentaje: hotelSeasonDiscount,
+        temporada,
       });
       originalSum += calc.original;
       finalSum += calc.final;
@@ -264,9 +277,7 @@ export function normalizeHotelForBooking(hotelOriginal) {
 
   const hotelId = hotelOriginal.hotelId;
   const nombre = hotelOriginal.nombre || '';
-  const temporadaPercent = hotelOriginal.temporada
-    ? toNumber(hotelOriginal.temporada.porcentaje)
-    : 0;
+  const temporada = hotelOriginal.temporada ?? null;
 
   const roomTypes = getRoomTypesFromHotel(hotelOriginal);
   const instances = flattenRoomInstances(hotelOriginal);
@@ -286,12 +297,44 @@ export function normalizeHotelForBooking(hotelOriginal) {
   return {
     hotelId,
     nombre,
-    temporadaPercent,
+    temporada,
     roomTypes,
     instances,
     paquetes,
     descuentos,
     raw: hotelOriginal,
+  };
+}
+
+/**
+ * Calcula el descuento aplicable por cantidad EXACTA de habitaciones.
+ * El descuento solo aplica si la cantidad de habitaciones coincide exactamente
+ * con algún descuento configurado para el hotel.
+ * @param {number} cantidadHabitaciones - Cantidad total de habitaciones en el carrito.
+ * @param {Array} descuentos - Array de descuentos del hotel [{porcentaje, cantidad_de_habitaciones}].
+ * @param {number} totalConTemporada - Monto total de las habitaciones después de aplicar temporada.
+ * @returns {{ montoDescuento: number, porcentajeAplicado: number }}
+ */
+export function calcDescuentoPorCantidad(cantidadHabitaciones, descuentos, totalConTemporada) {
+  if (!Array.isArray(descuentos) || descuentos.length === 0 || cantidadHabitaciones <= 0) {
+    return { montoDescuento: 0, porcentajeAplicado: 0 };
+  }
+
+  // Buscar coincidencia exacta de cantidad
+  const descuentoAplicable = descuentos.find(
+    (d) => d.cantidad_de_habitaciones === cantidadHabitaciones
+  );
+
+  if (!descuentoAplicable) {
+    return { montoDescuento: 0, porcentajeAplicado: 0 };
+  }
+
+  const porcentaje = toNumber(descuentoAplicable.porcentaje);
+  const montoDescuento = roundToInteger(totalConTemporada * porcentaje);
+
+  return {
+    montoDescuento,
+    porcentajeAplicado: porcentaje,
   };
 }
 
@@ -309,6 +352,7 @@ const DEFAULT = {
   normalizeHotelForBooking,
   calcPackageBasePricePerNight,
   calcSeasonalPrice,
+  calcDescuentoPorCantidad,
 };
 
 export default Object.freeze(DEFAULT);

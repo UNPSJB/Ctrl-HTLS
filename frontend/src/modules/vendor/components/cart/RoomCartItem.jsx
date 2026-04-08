@@ -19,9 +19,8 @@ function RoomCartItem({ room, hotel, onRemove = null, isLocked = false }) {
   const { final: finalTotal } = useMemo(() => {
     return calcRoomInstanceTotal({
       precio: precio,
-      porcentaje: hotel?.temporada?.porcentaje,
+      temporada: hotel?.temporada,
       alquiler: { fechaInicio, fechaFin },
-      limite: hotel?.temporada,
     });
   }, [precio, hotel?.temporada, fechaInicio, fechaFin]);
 

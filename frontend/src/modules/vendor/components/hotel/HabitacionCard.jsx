@@ -11,12 +11,11 @@ function HabitacionCard({ habitacion, hotel, onRemove }) {
   const priceInfo = useMemo(() => {
     return calcRoomInstanceTotal({
       precio: habitacion.precio,
-      porcentaje: hotel?.temporada?.porcentaje,
+      temporada: hotel?.temporada,
       alquiler: {
         fechaInicio: habitacion.fechaInicio,
         fechaFin: habitacion.fechaFin,
       },
-      limite: hotel?.temporada,
     });
   }, [habitacion, hotel]);
 

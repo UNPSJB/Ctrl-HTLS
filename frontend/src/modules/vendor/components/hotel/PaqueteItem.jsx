@@ -30,7 +30,7 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
   const { original: precioBase, final: precioDescuento } = useMemo(() => {
     return calcPackageTotal({
       paquete: instancias[0],
-      porcentaje: hotelData?.temporada?.porcentaje,
+      temporada: hotelData?.temporada,
     });
   }, [instancias, hotelData?.temporada]);
 

@@ -47,6 +47,7 @@ function carritoReducer(estado, accion) {
               hotelId: payload.hotelId,
               nombre: payload.nombre ?? null,
               temporada: payload.temporada ?? null,
+              descuentos: payload.descuentos ?? [],
               habitaciones: [],
               paquetes: [],
             },
@@ -63,6 +64,8 @@ function carritoReducer(estado, accion) {
                 nombre: hotel.nombre ?? payload.nombre ?? hotel.nombre,
                 temporada:
                   hotel.temporada ?? payload.temporada ?? hotel.temporada,
+                descuentos:
+                  hotel.descuentos?.length ? hotel.descuentos : (payload.descuentos ?? hotel.descuentos ?? []),
               }
             : hotel
         ),
@@ -171,10 +174,10 @@ function carritoReducer(estado, accion) {
 
 const CarritoContext = createContext(undefined);
 
-function asegurarHotel(dispatch, { hotelId, nombre, temporada }) {
+function asegurarHotel(dispatch, { hotelId, nombre, temporada, descuentos }) {
   dispatch({
     type: TIPOS.AGREGAR_HOTEL,
-    payload: { hotelId, nombre, temporada },
+    payload: { hotelId, nombre, temporada, descuentos },
   });
 }
 

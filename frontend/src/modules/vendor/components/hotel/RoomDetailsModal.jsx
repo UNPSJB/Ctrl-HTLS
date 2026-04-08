@@ -1,16 +1,21 @@
 import { Users, Bath, Tag, MapPin, CheckCircle } from 'lucide-react';
 import Modal from '@ui/Modal';
-import { normalizeDiscount } from '@utils/pricingUtils';
+import { calcSeasonalPrice, toNumber } from '@utils/pricingUtils';
 
 function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
   const precioBase = habitacion?.precio ?? 100;
 
-  const descuentoTemporada = normalizeDiscount(temporada?.porcentaje) || 0;
-  const precioFinal =
-    Math.round(precioBase * (1 - descuentoTemporada) * 100) / 100;
+  // Calcular precio ajustado según temporada (alta sube, baja baja)
+  const precioFinal = temporada
+    ? calcSeasonalPrice(precioBase, temporada)
+    : precioBase;
+
+  const esBaja = temporada?.tipo === 'baja';
+  const porcentajeVisual = Math.round(toNumber(temporada?.porcentaje) * 100);
   const montoDescuento = Math.round((precioBase - precioFinal) * 100) / 100;
 
-  const tieneDescuento = descuentoTemporada > 0;
+  // Solo mostramos visualmente el descuento si es temporada baja
+  const tieneDescuentoVisible = esBaja && montoDescuento > 0;
 
   return (
     <Modal 
@@ -22,12 +27,11 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
       confirmLabel="Seleccionar Habitación"
     >
       <div className="flex flex-col gap-6">
-        {tieneDescuento && (
+        {tieneDescuentoVisible && (
           <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
             <Tag className="h-5 w-5 text-green-500" />
             <span className="font-medium text-green-600 dark:text-green-400">
-              {(descuentoTemporada * 100).toFixed(0)}% de descuento de
-              temporada asegurado
+              {porcentajeVisual}% de descuento por temporada baja
             </span>
           </div>
         )}
@@ -88,7 +92,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
               <span>${precioBase.toFixed(2)}</span>
             </div>
 
-            {tieneDescuento && (
+            {tieneDescuentoVisible && (
               <div className="flex justify-between text-green-600 dark:text-green-400 font-semibold">
                 <span>Aplicación Temporada Baja</span>
                 <span>-${montoDescuento.toFixed(2)}</span>
@@ -102,7 +106,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
               </span>
               <span
                 className={`text-2xl font-bold ${
-                  tieneDescuento ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
+                  tieneDescuentoVisible ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
                 }`}
               >
                 ${precioFinal.toFixed(2)}

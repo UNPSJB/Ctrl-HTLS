@@ -12,7 +12,7 @@ function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
   const { final: finalTotal } = useMemo(() => {
     return calcPackageTotal({
       paquete: pack,
-      porcentaje: hotel?.temporada?.porcentaje,
+      temporada: hotel?.temporada,
     });
   }, [pack, hotel]);
 

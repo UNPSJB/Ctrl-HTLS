@@ -46,7 +46,9 @@ function useHotelSelection(hotel) {
 
   const discountCoefficient = useMemo(() => {
     if (!hotel?.temporada) return 0;
-    return normalizeDiscount(hotel.temporada.porcentaje);
+    const pct = normalizeDiscount(hotel.temporada.porcentaje);
+    // Solo devolvemos un coeficiente de descuento si la temporada es baja
+    return hotel.temporada.tipo === 'baja' ? pct : 0;
   }, [hotel?.temporada]);
 
   const addRoom = useCallback(
@@ -56,6 +58,7 @@ function useHotelSelection(hotel) {
           hotelId: hotelId,
           nombre: hotel?.nombre ?? null,
           temporada: hotel?.temporada ?? null,
+          descuentos: hotel?.descuentos ?? [],
         };
         return agregarHabitacion(hotelInfo, roomObj, fechas);
       }
@@ -85,6 +88,7 @@ function useHotelSelection(hotel) {
           hotelId: hotelId,
           nombre: hotel?.nombre ?? null,
           temporada: hotel?.temporada ?? null,
+          descuentos: hotel?.descuentos ?? [],
         };
         return agregarPaquete(hotelInfo, pkgObj, fechas);
       }

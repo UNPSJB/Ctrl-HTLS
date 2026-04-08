@@ -29,23 +29,26 @@ function PagoPage() {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <div className="mb-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Confirmar y Pagar
-        </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Revisá los detalles antes de procesar el pago.
-        </p>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Confirmar y Pagar
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Revisá los detalles antes de procesar el pago.
+          </p>
+        </div>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         {/* Contenido principal - columna izquierda */}
         <div className="flex-1 space-y-6">
           <ClienteData />
           <HotelsListView />
         </div>
 
-        <div className="w-96 shrink-0">
+        {/* Columna derecha sticky */}
+        <div className="w-full shrink-0 lg:sticky lg:top-6 lg:w-96">
           <PaymentSummary />
         </div>
       </div>

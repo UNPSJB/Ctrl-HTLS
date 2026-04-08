@@ -1,7 +1,7 @@
 // Etiqueta informativa sobre descuentos por cantidad
 function Descuento({ descuento }) {
   const porcentaje = Math.round(descuento.porcentaje * 100);
-  const textoDescuento = `${-porcentaje}% en ${descuento.cantidad_de_habitaciones}+ habitaciones`;
+  const textoDescuento = `${porcentaje}% OFF en ${descuento.cantidad_de_habitaciones} habitaciones`;
 
   return (
     <span

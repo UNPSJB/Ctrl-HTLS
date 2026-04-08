@@ -1,7 +1,7 @@
 import { Bed, Calendar, Percent, Tag } from 'lucide-react';
 import Modal from '@ui/Modal';
 import ImageLoader from '@ui/ImageLoader';
-import { normalizeDiscount, roundTwo, toNumber } from '@utils/pricingUtils';
+import { normalizeDiscount, roundTwo, toNumber, calcSeasonalPrice } from '@utils/pricingUtils';
 
 function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
   if (!paquete) return null;
@@ -19,10 +19,14 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
   const descuentoAplicado = roundTwo(precioTotal * packageDisc);
   const precioConDescuentoPaquete = roundTwo(precioTotal * (1 - packageDisc));
 
-  const hotelDisc = normalizeDiscount(temporada?.porcentaje);
-  const finalPrice = roundTwo(precioConDescuentoPaquete * (1 - hotelDisc));
+  // Aplicamos ajuste de temporada (alta sube, baja baja)
+  const finalPrice = temporada
+    ? calcSeasonalPrice(precioConDescuentoPaquete, temporada)
+    : precioConDescuentoPaquete;
 
-  const hasHotelDiscount = hotelDisc > 0;
+  const esBaja = temporada?.tipo === 'baja';
+  const porcentajeTemporada = Math.round(toNumber(temporada?.porcentaje) * 100);
+  const hasHotelDiscount = esBaja && toNumber(temporada?.porcentaje) > 0;
   const hasPackageDiscount = packageDisc > 0;
 
   return (
@@ -51,7 +55,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
           <div className="flex items-center gap-2">
             <Tag className="h-4 w-4 text-green-500" />
             <span className="text-sm font-medium text-green-500">
-              {(hotelDisc * 100).toFixed(0)}% de descuento por temporada
+              {porcentajeTemporada}% de descuento por temporada baja
             </span>
           </div>
         )}

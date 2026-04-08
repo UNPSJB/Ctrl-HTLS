@@ -5,7 +5,7 @@ import { useCarrito } from '@vendor-context/CarritoContext';
 import { useCliente } from '@vendor-context/ClienteContext';
 import { usePago } from '@vendor-context/PagoContext';
 import axiosInstance from '@api/axiosInstance';
-import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
+import { calcRoomInstanceTotal, calcPackageTotal, calcDescuentoPorCantidad } from '@utils/pricingUtils';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
 
@@ -28,40 +28,70 @@ function PaymentSummary() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { totalOriginal, totalFinal, descuentoTotal } = useMemo(() => {
-    let originalSum = 0;
-    let finalSum = 0;
+  // Cálculo desglosado de totales
+  const breakdown = useMemo(() => {
+    let subtotalHabitaciones = 0;
+    let ajusteTemporadaHabs = 0;
+    let descuentoCantidad = 0;
+    let subtotalPaquetes = 0;
+    let descuentoPaquetes = 0;
+    let ajusteTemporadaPaquetes = 0;
 
     (carrito.hoteles || []).forEach((hotel) => {
-      const porcentajeTemporada = hotel?.temporada?.porcentaje ?? 0;
+      const temporada = hotel?.temporada ?? null;
+      let hotelRoomOriginal = 0;
+      let hotelRoomFinal = 0;
 
+      // Habitaciones
       (hotel.habitaciones || []).forEach((room) => {
         const calc = calcRoomInstanceTotal({
           precio: room.precio,
-          porcentaje: porcentajeTemporada,
+          temporada,
           alquiler: { fechaInicio: room.fechaInicio, fechaFin: room.fechaFin },
-          limite: hotel.temporada,
         });
-        originalSum += calc.original;
-        finalSum += calc.final;
+        hotelRoomOriginal += calc.original;
+        hotelRoomFinal += calc.final;
       });
 
+      subtotalHabitaciones += hotelRoomOriginal;
+      ajusteTemporadaHabs += (hotelRoomFinal - hotelRoomOriginal);
+
+      // Descuento por cantidad exacta
+      const cantidadHabs = (hotel.habitaciones || []).length;
+      const descInfo = calcDescuentoPorCantidad(
+        cantidadHabs,
+        hotel.descuentos,
+        hotelRoomFinal
+      );
+      descuentoCantidad += descInfo.montoDescuento;
+
+      // Paquetes
       (hotel.paquetes || []).forEach((pack) => {
         const calc = calcPackageTotal({
           paquete: pack,
-          porcentaje: porcentajeTemporada,
+          temporada,
         });
-        originalSum += calc.original;
-        finalSum += calc.final;
+        subtotalPaquetes += calc.original;
+        descuentoPaquetes += calc.descuentoPaqueteMonto;
+        ajusteTemporadaPaquetes += calc.ajusteTemporadaMonto;
       });
     });
 
+    const totalFinal = (subtotalHabitaciones + ajusteTemporadaHabs - descuentoCantidad)
+                      + (subtotalPaquetes - descuentoPaquetes + ajusteTemporadaPaquetes);
+
     return {
-      totalOriginal: originalSum,
-      totalFinal: finalSum,
-      descuentoTotal: originalSum - finalSum,
+      subtotalHabitaciones: Math.round(subtotalHabitaciones),
+      ajusteTemporadaHabs: Math.round(ajusteTemporadaHabs),
+      descuentoCantidad: Math.round(descuentoCantidad),
+      subtotalPaquetes: Math.round(subtotalPaquetes),
+      descuentoPaquetes: Math.round(descuentoPaquetes),
+      ajusteTemporadaPaquetes: Math.round(ajusteTemporadaPaquetes),
+      totalFinal: Math.round(totalFinal),
     };
   }, [carrito.hoteles]);
+
+  const totalFinal = breakdown.totalFinal;
 
   useEffect(() => {
     setMontoTotal(totalFinal);
@@ -82,7 +112,6 @@ function PaymentSummary() {
     setIsProcessing(true);
 
     try {
-
       const itemsRaw = reservaConfirmada.flatMap((grupo) =>
         Array.isArray(grupo.alquiler) ? grupo.alquiler : [grupo]
       );
@@ -131,7 +160,6 @@ function PaymentSummary() {
         pagoEfectivoFinal = 0;
         pagoTarjetaFinal = totalAEnviar;
       } else if (metodoPago === 'Mixto') {
-
         pagoEfectivoFinal = Number(montoEfectivo || 0);
         pagoTarjetaFinal = Number(montoTarjeta || 0);
 
@@ -146,18 +174,13 @@ function PaymentSummary() {
         alquileres: alquileresPayload,
         tipoFact: tipoFactura || 'B',
         medioPago: metodoPago,
-
         montoTarjeta: pagoTarjetaFinal,
-
         montoEfectivo: pagoEfectivoFinal,
         montonEfectivo: pagoEfectivoFinal,
-
         montoTotal: Number(totalAEnviar.toFixed(2)),
         vendedorId: vendedorId || 2,
         clienteId: finalClienteId,
       };
-
-      console.log('Enviando pago:', payload);
 
       const response = await axiosInstance.post('/confirmar-pago', payload);
 
@@ -179,40 +202,107 @@ function PaymentSummary() {
 
   const canConfirm = totalFinal > 0 && !isProcessing;
 
+  const tieneHabitaciones = breakdown.subtotalHabitaciones > 0;
+  const tienePaquetes = breakdown.subtotalPaquetes > 0;
+
   return (
-    <div className="rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-      { }
-      <h3 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+    <div className="rounded-lg bg-white p-5 shadow-xl dark:bg-gray-800">
+      <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-gray-100">
         Resumen del Pago
       </h3>
 
-      <div className="space-y-2 border-b border-gray-200 pb-4 dark:border-gray-700">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
-          <span className="font-medium text-gray-800 dark:text-gray-200">
-            ${totalOriginal.toFixed(2)}
-          </span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Descuentos:</span>
-          <span
-            className={`font-medium ${descuentoTotal > 0 ? 'text-green-600' : 'text-gray-500'}`}
-          >
-            -${descuentoTotal.toFixed(2)}
-          </span>
-        </div>
-        <div className="flex items-baseline justify-between pt-3">
-          <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-            Total a Cubrir:
-          </span>
-          <span className="text-xl font-extrabold text-gray-900 dark:text-white">
-            ${totalFinal.toFixed(2)}
-          </span>
+      <div className="space-y-1 text-sm">
+        {/* Sección Habitaciones */}
+        {tieneHabitaciones && (
+          <>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>Habitaciones</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">
+                ${breakdown.subtotalHabitaciones}
+              </span>
+            </div>
+
+            {breakdown.ajusteTemporadaHabs !== 0 && (
+              <div className={`flex justify-between pl-3 text-xs ${
+                breakdown.ajusteTemporadaHabs < 0
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-orange-600 dark:text-orange-400'
+              }`}>
+                <span>
+                  {breakdown.ajusteTemporadaHabs < 0 ? 'Temporada baja' : 'Temporada alta'}
+                </span>
+                <span className="font-medium">
+                  {breakdown.ajusteTemporadaHabs < 0
+                    ? `-$${Math.abs(breakdown.ajusteTemporadaHabs)}`
+                    : `+$${breakdown.ajusteTemporadaHabs}`}
+                </span>
+              </div>
+            )}
+
+            {breakdown.descuentoCantidad > 0 && (
+              <div className="flex justify-between pl-3 text-xs text-blue-600 dark:text-blue-400">
+                <span>Desc. por cantidad</span>
+                <span className="font-medium">-${breakdown.descuentoCantidad}</span>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Sección Paquetes */}
+        {tienePaquetes && (
+          <>
+            {tieneHabitaciones && (
+              <div className="my-2 border-t border-dashed border-gray-200 dark:border-gray-700" />
+            )}
+
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>Paquetes</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">
+                ${breakdown.subtotalPaquetes}
+              </span>
+            </div>
+
+            {breakdown.descuentoPaquetes > 0 && (
+              <div className="flex justify-between pl-3 text-xs text-green-600 dark:text-green-400">
+                <span>Desc. paquete</span>
+                <span className="font-medium">-${breakdown.descuentoPaquetes}</span>
+              </div>
+            )}
+
+            {breakdown.ajusteTemporadaPaquetes !== 0 && (
+              <div className={`flex justify-between pl-3 text-xs ${
+                breakdown.ajusteTemporadaPaquetes < 0
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-orange-600 dark:text-orange-400'
+              }`}>
+                <span>
+                  {breakdown.ajusteTemporadaPaquetes < 0 ? 'Temporada baja' : 'Temporada alta'}
+                </span>
+                <span className="font-medium">
+                  {breakdown.ajusteTemporadaPaquetes < 0
+                    ? `-$${Math.abs(breakdown.ajusteTemporadaPaquetes)}`
+                    : `+$${breakdown.ajusteTemporadaPaquetes}`}
+                </span>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Total */}
+        <div className="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
+          <div className="flex items-baseline justify-between">
+            <span className="text-base font-bold text-gray-900 dark:text-gray-100">
+              Total a cobrar
+            </span>
+            <span className="text-xl font-extrabold text-gray-900 dark:text-white">
+              ${totalFinal}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="mt-4">
-        { }
+      {/* Método de pago y factura */}
+      <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
         <MetodoPago
           baseTotal={totalFinal}
           clientPoints={Number(client?.puntos ?? 0)}
@@ -220,7 +310,8 @@ function PaymentSummary() {
         <FacturaSelector />
       </div>
 
-      <div className="mt-6">
+      {/* Botón de confirmar */}
+      <div className="mt-5">
         <button
           type="button"
           onClick={handlePayment}
@@ -230,7 +321,14 @@ function PaymentSummary() {
               : 'cursor-not-allowed bg-gray-400'
             }`}
         >
-          {isProcessing ? 'Procesando...' : 'Finalizar Reserva y Pagar'}
+          {isProcessing ? (
+            <span className="flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Procesando...
+            </span>
+          ) : (
+            'Finalizar Reserva y Pagar'
+          )}
         </button>
       </div>
     </div>

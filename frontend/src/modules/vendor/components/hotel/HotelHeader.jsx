@@ -51,9 +51,9 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
 
           {/* Lado Derecho: Indicadores y Expansion */}
           <div className="flex items-center gap-4 flex-none">
-            {hotel.temporada?.tipo === 'alta' && (
+            {hotel.temporada && (
               <div className="transform scale-90">
-                 <Temporada porcentaje={hotel.temporada.porcentaje} />
+                <Temporada porcentaje={hotel.temporada.porcentaje} tipo={hotel.temporada.tipo} />
               </div>
             )}
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
@@ -64,11 +64,11 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
       </header>
 
       {showModal && createPortal(
-          <HotelDetailsModal
-            hotel={hotel}
-            onClose={() => setShowModal(false)}
-          />,
-          document.body
+        <HotelDetailsModal
+          hotel={hotel}
+          onClose={() => setShowModal(false)}
+        />,
+        document.body
       )}
     </>
   );

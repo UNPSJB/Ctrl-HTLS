@@ -66,7 +66,7 @@ export const useHabitacionSelection = (
 
   const { precioFinal, precioOriginal } = useMemo(() => {
     const final = hotelData?.temporada
-      ? calcSeasonalPrice(precioBase, hotelData.temporada.porcentaje)
+      ? calcSeasonalPrice(precioBase, hotelData.temporada)
       : precioBase;
     return { precioFinal: final, precioOriginal: precioBase };
   }, [precioBase, hotelData]);
