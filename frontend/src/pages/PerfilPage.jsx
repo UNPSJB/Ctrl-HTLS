@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import axiosInstance from '@/api/axiosInstance';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { capitalizeWords } from '@/utils/stringUtils';
+import { formatCurrency } from '@/utils/pricingUtils';
 import { toast } from 'react-hot-toast';
 import { 
   Building2, Mail, Phone, Hash, 
@@ -126,7 +127,7 @@ function PerfilPage() {
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Facturado p / Empresa</p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${totalSalesAmount.toLocaleString()}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(totalSalesAmount)}</h3>
                 </div>
               </div>
             </div>
@@ -148,7 +149,7 @@ function PerfilPage() {
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Comisión a mi Favor</p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${pendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(pendingAmount)}</h3>
                 </div>
               </div>
             </div>
@@ -159,7 +160,7 @@ function PerfilPage() {
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Histórico Cobrado</p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(totalPaid)}</h3>
                 </div>
               </div>
             </div>
@@ -219,8 +220,8 @@ function PerfilPage() {
                             <tr key={v.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
                               <td className="px-6 py-3.5 text-xs font-mono text-gray-500">#{String(v.id).padStart(5, '0')}</td>
                               <td className="px-6 py-3.5 font-medium text-gray-900 dark:text-white capitalize">{v.descripcion}</td>
-                              <td className="px-6 py-3.5 text-right text-gray-600 dark:text-gray-300">${Number(v.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                              <td className="px-6 py-3.5 text-right font-medium text-gray-900 dark:text-gray-200">${(Number(v.subtotal) * 0.02).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                              <td className="px-6 py-3.5 text-right text-gray-600 dark:text-gray-300">{formatCurrency(v.subtotal)}</td>
+                              <td className="px-6 py-3.5 text-right font-medium text-gray-900 dark:text-gray-200">{formatCurrency(Number(v.subtotal) * 0.02)}</td>
                               <td className="px-6 py-3.5 text-center">
                                 {v.liquidacionId ? (
                                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30">
@@ -265,7 +266,7 @@ function PerfilPage() {
                             <tr key={l.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
                               <td className="px-6 py-3.5 text-xs font-mono font-medium text-gray-600 dark:text-gray-400">#{l.numero}</td>
                               <td className="px-6 py-3.5 text-gray-900 dark:text-white">{new Date(l.fechaEmision).toLocaleDateString('es-AR')}</td>
-                              <td className="px-6 py-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400">${Number(l.total).toLocaleString()}</td>
+                              <td className="px-6 py-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(l.total)}</td>
                               <td className="px-6 py-3.5 text-center">
                                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30">
                                   <CheckCircle2 className="h-3.5 w-3.5" /> Pagado
