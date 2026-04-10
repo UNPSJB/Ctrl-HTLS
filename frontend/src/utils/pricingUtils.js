@@ -241,6 +241,20 @@ export function calcDescuentoPorCantidad(cantidadHabitaciones, descuentos, total
   };
 }
 
+/**
+ * Formatea un número como moneda ARS ($).
+ * @param {number} value - El valor a formatear.
+ * @returns {string} El valor formateado.
+ */
+export function formatCurrency(value) {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(toNumber(value));
+}
+
 const DEFAULT = {
   toNumber,
   roundToInteger,
@@ -254,6 +268,7 @@ const DEFAULT = {
   calcPackageBasePricePerNight,
   calcSeasonalPrice,
   calcDescuentoPorCantidad,
+  formatCurrency,
 };
 
 export default Object.freeze(DEFAULT);

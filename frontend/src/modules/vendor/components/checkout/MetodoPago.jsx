@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { formatCurrency } from '@utils/pricingUtils';
 import TarjetaForm from './TarjetaForm';
 
 // Selector de métodos de pago (Efectivo, Puntos, Tarjeta, Mixto)
@@ -103,7 +104,7 @@ function MetodoPago({
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-700 dark:text-gray-300">Monto restante a Tarjeta:</span>
               <span className={`font-semibold ${montoTarjeta < 0 ? 'text-red-500' : 'text-gray-900 dark:text-gray-100'}`}>
-                ${Math.max(0, montoTarjeta).toFixed(2)}
+                {formatCurrency(Math.max(0, montoTarjeta))}
               </span>
             </div>
             {montoTarjeta < 0 && (

@@ -16,7 +16,9 @@ const STORAGE_KEY = 'busquedaFilters';
 // Estado inicial (usar null para fechas por claridad)
 const initialFilters = {
   nombre: '',
-  ubicacion: '',
+  ubicacion: '', // ciudadId
+  paisId: '',
+  provinciaId: '',
   fechaInicio: null,
   fechaFin: null,
   capacidad: 1,

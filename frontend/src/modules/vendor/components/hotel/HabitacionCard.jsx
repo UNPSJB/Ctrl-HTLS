@@ -94,12 +94,12 @@ function HabitacionCard({ habitacion, hotel, onRemove }) {
         <div className="flex flex-col gap-0.5 text-xs text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-2">
             <span>Precio base p/noche:</span>
-            <span className="font-semibold text-gray-700 dark:text-gray-200">${priceInfo.pricePerNight}</span>
+            <span className="font-semibold text-gray-700 dark:text-gray-200">{formatCurrency(priceInfo.pricePerNight)}</span>
           </div>
           {priceInfo.hasSeasonalAdjustment && (
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
               <span>Incluye ajuste de temporada ({hotel?.temporada?.porcentaje * 100}%):</span>
-              <span className="font-bold">${priceInfo.seasonalPricePerNight}</span>
+              <span className="font-bold">{formatCurrency(priceInfo.seasonalPricePerNight)}</span>
             </div>
           )}
         </div>

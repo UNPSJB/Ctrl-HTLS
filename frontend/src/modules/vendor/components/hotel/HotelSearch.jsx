@@ -1,14 +1,22 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useBusqueda } from '@vendor-context/BusquedaContext';
 import { useAuth } from '@/context/AuthContext';
 import dateUtils from '@utils/dateUtils';
-import { Search, MapPin, Calendar, Users, Globe, Building } from 'lucide-react';
+import { Search, MapPin, Calendar, Users, Globe, Building, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import useUbicacion from '@hooks/useUbicacion';
-import { toast } from 'react-hot-toast'; 
+import { toast } from 'react-hot-toast';
+import { FormField, Input, SelectInput, SearchInput } from '@ui/form';
+import CounterInput from '@ui/form/CounterInput';
 
 const { toISODate } = dateUtils;
 
-function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
+function HotelSearch({
+  onSearch,
+  isLoading,
+  isDisabled = false,
+  isCompact = false,
+  onExpand
+}) {
   const { user } = useAuth();
   const { filtros, actualizarFiltros } = useBusqueda();
   const {
@@ -23,17 +31,41 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
     handleCiudadChange,
     isProvinciasDisabled,
     isCiudadesDisabled,
-    loadingPaises, 
+    loadingPaises,
     loadingProvincias,
     loadingCiudades,
+    setInitialUbicacion,
   } = useUbicacion();
 
   const [localFilters, setLocalFilters] = useState({
-    nombre: '', // Siempre iniciar limpio
-    fechaInicio: toISODate(new Date()), // Default hoy
-    fechaFin: toISODate(new Date(Date.now() + 86400000)), // Default mañana
+    nombre: '',
+    fechaInicio: isCompact ? (filtros?.fechaInicio ? toISODate(filtros.fechaInicio) : toISODate(new Date())) : '',
+    fechaFin: isCompact ? (filtros?.fechaFin ? toISODate(filtros.fechaFin) : toISODate(new Date(Date.now() + 86400000))) : '',
     capacidad: 2,
   });
+
+  // Hidratar desde contexto al montar y cuando cambie el modo
+  useEffect(() => {
+    if (isCompact && filtros) {
+      setLocalFilters({
+        nombre: filtros.nombre || '',
+        fechaInicio: filtros.fechaInicio ? toISODate(new Date(filtros.fechaInicio)) : toISODate(new Date()),
+        fechaFin: filtros.fechaFin ? toISODate(new Date(filtros.fechaFin)) : toISODate(new Date(Date.now() + 86400000)),
+        capacidad: filtros.capacidad || 2,
+      });
+
+      if (filtros.ubicacion || filtros.paisId) {
+        setInitialUbicacion(filtros.paisId, filtros.provinciaId, filtros.ubicacion);
+      }
+    } else if (!isCompact) {
+      // En modo expandido, forzamos limpieza de fechas según requerimiento
+      setLocalFilters(prev => ({
+        ...prev,
+        fechaInicio: '',
+        fechaFin: ''
+      }));
+    }
+  }, [isCompact, filtros]);
 
   const getToday = useCallback(() => toISODate(new Date()), []);
 
@@ -53,7 +85,16 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
       return;
     }
 
-    actualizarFiltros({ ...localFilters, paisId, provinciaId, ciudadId });
+    // Sincronizar con contexto global
+    actualizarFiltros({
+      nombre: localFilters.nombre,
+      ubicacion: ciudadId,
+      paisId,
+      provinciaId,
+      fechaInicio: toISODate(localFilters.fechaInicio),
+      fechaFin: toISODate(localFilters.fechaFin),
+      capacidad: localFilters.capacidad,
+    });
 
     const params = {
       ubicacion: ciudadId,
@@ -70,202 +111,211 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
   };
 
   const handleChange = (field, value) => {
-    setLocalFilters((prev) => {
-      const next = { ...prev, [field]: value };
-
-      // Si cambia la fecha de inicio y la de fin queda antes o igual, mover fin a inicio + 1
-      if (field === 'fechaInicio' && next.fechaFin <= value) {
-        next.fechaFin = getTomorrow(value);
-      }
-
-      return next;
-    });
+    setLocalFilters((prev) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
+  const isDateRangeValid = localFilters.fechaInicio && localFilters.fechaFin && new Date(localFilters.fechaFin) > new Date(localFilters.fechaInicio);
+  const canSubmit = ciudadId && isDateRangeValid && !isLoading && !isDisabled;
   const fieldDisabled = isLoading || isDisabled;
 
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      <fieldset
-        disabled={fieldDisabled}
-        className={fieldDisabled ? 'opacity-60' : ''}
+  // Renderizado Compacto (VISTA PROFESIONAL REFINADA)
+  const renderCompact = () => (
+    <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap">
+      <button
+        type="button"
+        onClick={onExpand}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 shadow-sm transition-all hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-900"
+        title="Editar parámetros"
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Nombre del Hotel
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={localFilters.nombre}
-                  onChange={(e) => handleChange('nombre', e.target.value)}
-                  placeholder="Buscar hotel..."
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                />
-              </div>
-            </div>
+        <SlidersHorizontal className="h-5 w-5" />
+      </button>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                País
-              </label>
-              <div className="relative">
-                <Globe className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <select
-                  value={paisId}
-                  onChange={(e) => handlePaisChange(e.target.value)}
-                  disabled={loadingPaises}
-                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                >
-                  <option value="">
-                    {loadingPaises ? 'Cargando países...' : 'Seleccionar país'}
-                  </option>
-                  {paises.map((pais) => (
-                    <option key={pais.id} value={pais.id}>
-                      {pais.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+      <div className="flex-1 min-w-[200px]">
+        <SearchInput
+          value={localFilters.nombre}
+          onChange={(e) => handleChange('nombre', e.target.value)}
+          placeholder="Hotel..."
+          className="h-10 !py-0 border-gray-200 dark:border-gray-700"
+        />
+      </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Provincia
-              </label>
-              <div className="relative">
-                <Building className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <select
-                  value={provinciaId}
-                  onChange={(e) => handleProvinciaChange(e.target.value)}
-                  disabled={isProvinciasDisabled || loadingProvincias}
-                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                >
-                  <option value="">
-                    {loadingProvincias
-                      ? 'Cargando provincias...'
-                      : paisId
-                        ? 'Seleccionar provincia'
-                        : 'Primero seleccione un país'}
-                  </option>
-                  {provincias.map((prov) => (
-                    <option key={prov.id} value={prov.id}>
-                      {prov.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+      <div className="w-44">
+        <SelectInput
+          icon={MapPin}
+          value={ciudadId}
+          onChange={(e) => handleCiudadChange(e.target.value)}
+          disabled={isCiudadesDisabled || loadingCiudades}
+          className="h-10 !py-0 text-sm border-gray-200 dark:border-gray-700 shadow-none"
+        >
+          <option value="">Ciudad...</option>
+          {ciudades.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+        </SelectInput>
+      </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Ciudad
-              </label>
-              <div className="relative">
-                <MapPin className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <select
-                  value={ciudadId}
-                  onChange={(e) => handleCiudadChange(e.target.value)}
-                  disabled={isCiudadesDisabled || loadingCiudades}
-                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                >
-                  <option value="">
-                    {loadingCiudades
-                      ? 'Cargando ciudades...'
-                      : provinciaId
-                        ? 'Seleccionar ciudad'
-                        : 'Primero seleccione una provincia'}
-                  </option>
-                  {ciudades.map((ciudad) => (
-                    <option key={ciudad.id} value={ciudad.id}>
-                      {ciudad.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+      <div className="flex items-center gap-2">
+        <div className="w-32">
+          <Input
+            type="date"
+            value={localFilters.fechaInicio}
+            onChange={(e) => handleChange('fechaInicio', e.target.value)}
+            className="h-10 px-2 text-xs border-gray-200 dark:border-gray-700 shadow-none"
+          />
+        </div>
+        <ChevronRight className="h-4 w-4 shrink-0 text-gray-300" />
+        <div className="w-32">
+          <Input
+            type="date"
+            value={localFilters.fechaFin}
+            onChange={(e) => handleChange('fechaFin', e.target.value)}
+            className="h-10 px-2 text-xs border-gray-200 dark:border-gray-700 shadow-none"
+          />
+        </div>
+      </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Fecha de Inicio
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="date"
-                  value={localFilters.fechaInicio}
-                  min={getToday()}
-                  onChange={(e) => handleChange('fechaInicio', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                />
-              </div>
-            </div>
+      <div className="w-24">
+        <CounterInput
+          icon={Users}
+          value={localFilters.capacidad}
+          min={1}
+          onChange={(val) => handleChange('capacidad', val)}
+        />
+      </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Fecha de Fin
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="date"
-                  value={localFilters.fechaFin}
-                  min={localFilters.fechaInicio || getToday()}
-                  onChange={(e) => handleChange('fechaFin', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                />
-              </div>
-            </div>
+      <button
+        type="submit"
+        disabled={!canSubmit}
+        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 text-sm font-bold text-white transition-all hover:bg-blue-700 active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm"
+      >
+        {isLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" /> : <Search className="h-4 w-4" />}
+        <span>Actualizar</span>
+      </button>
+    </div>
+  );
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Huéspedes
-              </label>
-              <div className="relative">
-                <Users className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="number"
-                  value={localFilters.capacidad}
-                  min="1"
-                  max="100"
-                  onChange={(e) =>
-                    handleChange('capacidad', Number(e.target.value))
-                  }
-                  placeholder="Huéspedes"
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                />
-              </div>
-            </div>
+  // Renderizado Expandido (HERRAMIENTA PROFESIONAL)
+  const renderHero = () => (
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+      {/* Bloque 1: Ubicación Geográfica */}
+      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-700 dark:bg-gray-800/30">
+        <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400">
+          <Building className="h-4 w-4" />
+          <span>Configuración del Destino</span>
+        </div>
 
-            <div className="flex items-end py-1">
-              <button
-                type="submit"
-                disabled={fieldDisabled}
-                className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium text-white transition-colors duration-200 ${
-                  fieldDisabled
-                    ? 'cursor-not-allowed bg-gray-400'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+        <div className="space-y-4">
+          <FormField label="Hotel o Alojamiento" icon={Search}>
+            <SearchInput
+              value={localFilters.nombre}
+              onChange={(e) => handleChange('nombre', e.target.value)}
+              placeholder="Nombre del hotel (opcional)"
+            />
+          </FormField>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <FormField label="País" icon={Globe}>
+              <SelectInput
+                value={paisId}
+                onChange={(e) => handlePaisChange(e.target.value)}
+                disabled={loadingPaises}
               >
-                {isLoading ? (
-                  <>
-                    <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
-                    Buscando...
-                  </>
-                ) : (
-                  <>
-                    <Search className="h-5 w-5" />
-                    Buscar
-                  </>
-                )}
-              </button>
-            </div>
+                <option value="">{loadingPaises ? 'Cargando...' : 'Seleccionar país'}</option>
+                {paises.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+              </SelectInput>
+            </FormField>
+
+            <FormField label="Provincia" icon={Building}>
+              <SelectInput
+                value={provinciaId}
+                onChange={(e) => handleProvinciaChange(e.target.value)}
+                disabled={isProvinciasDisabled || loadingProvincias}
+              >
+                <option value="">{loadingProvincias ? 'Cargando...' : 'Elegir provincia'}</option>
+                {provincias.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+              </SelectInput>
+            </FormField>
+
+            <FormField label="Ciudad de Destino" icon={MapPin} required>
+              <SelectInput
+                value={ciudadId}
+                onChange={(e) => handleCiudadChange(e.target.value)}
+                disabled={isCiudadesDisabled || loadingCiudades}
+              >
+                <option value="">{loadingCiudades ? 'Cargando...' : 'Seleccionar ciudad'}</option>
+                {ciudades.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+              </SelectInput>
+            </FormField>
           </div>
+        </div>
+      </div>
+
+      {/* Bloque 2: Estancia y Ejecución */}
+      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-700 dark:bg-gray-800/30">
+        <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400">
+          <Calendar className="h-4 w-4" />
+          <span>Detalles de Estancia y Acción</span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 items-end md:grid-cols-4">
+          <FormField label="Check-in" icon={Calendar} required>
+            <Input
+              type="date"
+              value={localFilters.fechaInicio}
+              min={getToday()}
+              onChange={(e) => handleChange('fechaInicio', e.target.value)}
+            />
+          </FormField>
+
+          <FormField label="Check-out" icon={Calendar} required>
+            <Input
+              type="date"
+              value={localFilters.fechaFin}
+              min={localFilters.fechaInicio || getToday()}
+              onChange={(e) => handleChange('fechaFin', e.target.value)}
+            />
+          </FormField>
+
+          <FormField label="Pasajeros" icon={Users}>
+            <CounterInput
+              icon={Users}
+              value={localFilters.capacidad}
+              min={1}
+              onChange={(val) => handleChange('capacidad', val)}
+            />
+          </FormField>
+
+          <div className="pb-[1px]"> {/* Pequeño ajuste para alinear con el borde de los inputs */}
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="flex h-[42px] w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-blue-500/10 transition-all hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <Search className="h-4 w-4" />}
+              <span>Buscar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`transition-all duration-700 ease-in-out ${isCompact
+      ? 'mb-6 rounded-xl border border-gray-200 bg-white p-3 shadow-md dark:border-gray-700 dark:bg-gray-800'
+      : 'mx-auto max-w-6xl rounded-2xl border border-gray-200 bg-white p-10 shadow-xl dark:border-gray-700 dark:bg-gray-800'}`}>
+
+      {!isCompact && (
+        <div className="mb-10 text-left md:text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">Sistema de Búsqueda de Disponibilidad</h1>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">Gestione las reservas de sus clientes con datos actualizados en tiempo real.</p>
+        </div>
+      )}
+
+      <fieldset disabled={fieldDisabled} className={fieldDisabled ? 'opacity-60 grayscale-[50%]' : ''}>
+        <form onSubmit={handleSubmit}>
+          {isCompact ? renderCompact() : renderHero()}
         </form>
       </fieldset>
     </div>

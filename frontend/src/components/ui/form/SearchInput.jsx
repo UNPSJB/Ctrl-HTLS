@@ -9,6 +9,7 @@ const SearchInput = forwardRef(({
   className = '',
   containerClassName = '',
   onClear,
+  error,
   ...props
 }, ref) => {
   return (

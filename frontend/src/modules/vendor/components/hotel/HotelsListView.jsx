@@ -7,6 +7,7 @@ import Descuento from '@ui/Descuento';
 import { useCarrito } from '@vendor-context/CarritoContext';
 import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 import { capitalizeWords } from '@/utils/stringUtils';
+import { formatCurrency } from '@utils/pricingUtils';
 
 // Componente interno para mostrar un hotel con sus ítems en la vista de pago
 function HotelItem({ hotel }) {
@@ -60,7 +61,7 @@ function HotelItem({ hotel }) {
               Monto Total
             </span>
             <span className="text-lg font-bold text-gray-900 dark:text-white">
-              ${subtotalHotel}
+              {formatCurrency(subtotalHotel)}
             </span>
           </div>
         </div>

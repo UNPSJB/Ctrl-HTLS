@@ -3,7 +3,7 @@ import { forwardRef } from 'react';
 /**
  * Select especializado con estilos consistentes y flecha personalizada.
  */
-const SelectInput = forwardRef(({ error, className = '', children, ...props }, ref) => {
+const SelectInput = forwardRef(({ error, icon: Icon, className = '', children, ...props }, ref) => {
   const baseClasses = 'w-full rounded-lg border bg-white px-4 py-2.5 text-gray-700 transition-all shadow-sm appearance-none cursor-pointer';
   const focusClasses = 'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20';
   const errorClasses = error ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 dark:border-gray-600';
@@ -11,10 +11,15 @@ const SelectInput = forwardRef(({ error, className = '', children, ...props }, r
   const disabledClasses = 'disabled:bg-gray-50 disabled:cursor-not-allowed dark:disabled:bg-gray-800';
 
   return (
-    <div className="relative">
+    <div className="relative group/select">
+      {Icon && (
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
+          <Icon className="h-4 w-4" />
+        </div>
+      )}
       <select
         ref={ref}
-        className={`${baseClasses} ${focusClasses} ${errorClasses} ${darkClasses} ${disabledClasses} ${className}`}
+        className={`${baseClasses} ${focusClasses} ${errorClasses} ${darkClasses} ${disabledClasses} ${Icon ? 'pl-10' : ''} ${className}`}
         {...props}
       >
         {children}

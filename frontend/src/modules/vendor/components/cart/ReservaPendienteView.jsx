@@ -9,20 +9,20 @@ function ReservaPendienteView() {
   if (!reservaConfirmada) return null;
 
   return (
-    <div className="flex w-full flex-col animate-in fade-in duration-500">
-      <div className="w-full rounded-xl border border-gray-200 bg-white p-6 md:p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        
-        <div className="mb-6 flex items-center gap-4 border-b border-gray-200 pb-4 dark:border-gray-700">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-            <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+    <div className="flex w-full flex-col animate-in fade-in zoom-in-95 duration-500">
+      <div className="w-full rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+
+        <div className="mb-6 flex items-center gap-4 border-b border-gray-100 pb-4 dark:border-gray-700">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg">
+            <Clock className="h-6 w-6 text-red-400 dark:text-red-400" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               Estado de Alquiler en Curso
             </h2>
-            <p className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+            <p className="flex items-center gap-1.5 text-sm font-medium text-red-500/80 dark:text-red-400/80">
               <Lock className="h-3.5 w-3.5" />
-              El carrito actual se encuentra bloqueado y no puede ser modificado.
+              Sistema bloqueado por reserva activa
             </p>
           </div>
         </div>
@@ -41,16 +41,16 @@ function ReservaPendienteView() {
             <CreditCard className="h-4 w-4" />
             Continuar al Pago
           </button>
-          
+
           <button
             onClick={cancelarReserva}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 hover:text-red-700 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20"
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
           >
             <Ban className="h-4 w-4" />
             Cancelar este Alquiler
           </button>
         </div>
-        
+
       </div>
     </div>
   );

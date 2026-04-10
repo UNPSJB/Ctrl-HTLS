@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 import { usePagar } from '@vendor-hooks/usePagar';
 import { useCliente } from '@vendor-context/ClienteContext';
+import { formatCurrency } from '@utils/pricingUtils';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
 
@@ -73,7 +74,7 @@ function PaymentSummary() {
             <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Habitaciones</span>
               <span className="font-medium text-gray-800 dark:text-gray-200">
-                ${breakdown.subtotalHabitaciones}
+                {formatCurrency(breakdown.subtotalHabitaciones)}
               </span>
             </div>
 
@@ -88,8 +89,8 @@ function PaymentSummary() {
                 </span>
                 <span className="font-medium">
                   {breakdown.ajusteTemporadaHabs < 0
-                    ? `-$${Math.abs(breakdown.ajusteTemporadaHabs)}`
-                    : `+$${breakdown.ajusteTemporadaHabs}`}
+                    ? `-${formatCurrency(Math.abs(breakdown.ajusteTemporadaHabs))}`
+                    : `+${formatCurrency(breakdown.ajusteTemporadaHabs)}`}
                 </span>
               </div>
             )}
@@ -97,7 +98,7 @@ function PaymentSummary() {
             {breakdown.descuentoCantidad > 0 && (
               <div className="flex justify-between pl-3 text-xs text-blue-600 dark:text-blue-400">
                 <span>Desc. por cantidad</span>
-                <span className="font-medium">-${breakdown.descuentoCantidad}</span>
+                <span className="font-medium">-{formatCurrency(breakdown.descuentoCantidad)}</span>
               </div>
             )}
           </>
@@ -113,14 +114,14 @@ function PaymentSummary() {
             <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Paquetes</span>
               <span className="font-medium text-gray-800 dark:text-gray-200">
-                ${breakdown.subtotalPaquetes}
+                {formatCurrency(breakdown.subtotalPaquetes)}
               </span>
             </div>
 
             {breakdown.descuentoPaquetes > 0 && (
               <div className="flex justify-between pl-3 text-xs text-green-600 dark:text-green-400">
                 <span>Desc. paquete</span>
-                <span className="font-medium">-${breakdown.descuentoPaquetes}</span>
+                <span className="font-medium">-{formatCurrency(breakdown.descuentoPaquetes)}</span>
               </div>
             )}
 
@@ -135,8 +136,8 @@ function PaymentSummary() {
                 </span>
                 <span className="font-medium">
                   {breakdown.ajusteTemporadaPaquetes < 0
-                    ? `-$${Math.abs(breakdown.ajusteTemporadaPaquetes)}`
-                    : `+$${breakdown.ajusteTemporadaPaquetes}`}
+                    ? `-${formatCurrency(Math.abs(breakdown.ajusteTemporadaPaquetes))}`
+                    : `+${formatCurrency(breakdown.ajusteTemporadaPaquetes)}`}
                 </span>
               </div>
             )}
@@ -150,7 +151,7 @@ function PaymentSummary() {
               Total a cobrar
             </span>
             <span className="text-xl font-extrabold text-gray-900 dark:text-white">
-              ${totalFinal}
+              {formatCurrency(totalFinal)}
             </span>
           </div>
         </div>

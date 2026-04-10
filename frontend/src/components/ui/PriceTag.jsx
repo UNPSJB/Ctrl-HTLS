@@ -1,13 +1,7 @@
+import { formatCurrency } from '@utils/pricingUtils';
+
 // Componente para mostrar precios con formato de moneda ARS
 function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
-
-  const formatCurrency = (value) =>
-    new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
 
   const mostrarOriginal = typeof original === 'number' && original > precio;
   const isColumn = seasonLayout === 'column';

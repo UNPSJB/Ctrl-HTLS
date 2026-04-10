@@ -1,7 +1,6 @@
-import { Bed, Calendar, Percent, Tag } from 'lucide-react';
+import { Bed, Calendar, Tag, CheckCircle, Package } from 'lucide-react';
 import Modal from '@ui/Modal';
-import ImageLoader from '@ui/ImageLoader';
-import { normalizeDiscount, roundTwo, toNumber, calcSeasonalPrice } from '@utils/pricingUtils';
+import { normalizeDiscount, roundTwo, toNumber, calcSeasonalPrice, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
 
 function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
@@ -31,151 +30,115 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
   const hasPackageDiscount = packageDisc > 0;
 
   return (
-    <Modal onClose={onClose}>
-      {}
-      <div className="flex h-[19rem] gap-4 overflow-x-auto scroll-smooth p-4">
-        {habitaciones.map((hab, index) => (
-          <div key={index} className="w-full flex-shrink-0">
-            <ImageLoader
-              name={hab.nombre}
-              folder="habitaciones"
-              cuadrado={false}
-            />
-          </div>
-        ))}
-      </div>
-
-      {}
-      <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-6">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          {capitalizeWords(paquete.nombre)}
-        </h2>
-
-        {}
-        {hasHotelDiscount && (
-          <div className="flex items-center gap-2">
-            <Tag className="h-4 w-4 text-green-500" />
-            <span className="text-sm font-medium text-green-500">
-              {porcentajeTemporada}% de descuento por temporada baja
-            </span>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={capitalizeWords(paquete.nombre)}
+      description="Consulte la configuración de habitaciones y el desglose de precios del paquete turístico."
+      onConfirm={() => {
+        if (typeof onReserve === 'function') onReserve();
+      }}
+      confirmLabel="Seleccionar Paquete"
+    >
+      <div className="flex flex-col gap-6">
+        {/* Banner de descuentos combinados */}
+        {(hasHotelDiscount || hasPackageDiscount) && (
+          <div className="flex flex-col gap-2">
+            {hasPackageDiscount && (
+              <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                <Package className="h-5 w-5 text-blue-500" />
+                <span className="font-medium text-blue-600 dark:text-blue-400">
+                  Bonificación de paquete del {(packageDisc * 100).toFixed(0)}% incluida
+                </span>
+              </div>
+            )}
+            {hasHotelDiscount && (
+              <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
+                <Tag className="h-5 w-5 text-green-500" />
+                <span className="font-medium text-green-600 dark:text-green-400">
+                  {porcentajeTemporada}% de descuento adicional por temporada baja
+                </span>
+              </div>
+            )}
           </div>
         )}
 
-        {}
-        <p className="mb-6 text-gray-600 dark:text-gray-300">
-          {paquete.descripcion}
-        </p>
-
-        {}
-        <div className="mb-6">
-          <h3 className="mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-            Habitaciones incluidas
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            {habitaciones.map((hab, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-400"
-              >
-                <Bed className="h-5 w-5" />
-                <span>
-                  {capitalizeWords(hab.nombre)} - {hab.capacidad} personas
-                </span>
+        {/* Bloque 1: Configuración Operativa (Grilla) */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900/50 shadow-sm">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 p-2 rounded-md">
+                <Calendar className="h-4 w-4" />
               </div>
-            ))}
-          </div>
-        </div>
-
-        {}
-        <div className="mb-6 grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <Calendar className="h-5 w-5" />
-            <span>{noches} noches</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <Percent className="h-5 w-5" />
-            <span>
-              {(packageDisc * 100).toFixed(0)}% de descuento del paquete
-            </span>
-          </div>
-        </div>
-
-        {}
-        <div className="mb-6">
-          <h3 className="mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-            Precios del paquete
-          </h3>
-          <div className="rounded-md border border-gray-300 p-4 dark:border-gray-700">
-            <div className="mb-2 flex justify-between border-b pb-2 text-gray-600 dark:text-gray-400">
-              <span className="font-semibold">Habitación</span>
-              <span className="font-semibold">Precio</span>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Duración</span>
+                <span className="text-gray-800 dark:text-gray-200 font-medium">{noches} noches de estancia</span>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              {habitaciones.map((hab, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between text-gray-600 dark:text-gray-400"
-                >
-                  <span>
-                    {capitalizeWords(hab.nombre)} ({hab.capacidad} personas)
-                  </span>
-                  <span>
-                    ${toNumber(hab.precio).toFixed(2)} × {noches} =
-                    <strong className="ml-2 text-gray-800 dark:text-gray-100">
-                      ${(toNumber(hab.precio) * noches).toFixed(2)}
-                    </strong>
-                  </span>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 p-2 rounded-md">
+                <Bed className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Habitaciones</span>
+                <span className="text-gray-800 dark:text-gray-200 font-medium">{habitaciones.length} unidades incluidas</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-2 sm:pt-0 sm:border-l border-gray-100 sm:pl-4 dark:border-gray-800">
+            <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold block mb-1">Detalle del Grupo</span>
+            <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-2 font-medium">
+              {habitaciones.map((hab, idx) => (
+                <li key={idx} className="flex items-center gap-2">
+                  <CheckCircle className="h-3.5 w-3.5 text-indigo-500" />
+                  Habitacion {capitalizeWords(hab.nombre)} ({hab.capacidad} personas)
+                </li>
               ))}
-            </div>
+            </ul>
+          </div>
+        </div>
 
-            <div className="mt-2 flex justify-between border-t pt-2 text-gray-600 dark:text-gray-400">
-              <span>Subtotal</span>
-              <span>${precioTotal.toFixed(2)}</span>
+        {/* Bloque 2: Liquidación Económica */}
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800 shadow-sm">
+          <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-800 dark:text-gray-200">
+            Liquidación Total del Paquete
+          </h3>
+
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between text-gray-600 dark:text-gray-400 font-medium">
+              <span>Tarifa Base (Habitaciones × {noches} noches)</span>
+              <span>{formatCurrency(precioTotal)}</span>
             </div>
 
             {hasPackageDiscount && (
-              <div className="flex justify-between text-red-600 dark:text-red-400">
-                <span>
-                  Descuento Paquete ({(packageDisc * 100).toFixed(0)}%)
-                </span>
-                <span>- ${descuentoAplicado.toFixed(2)}</span>
+              <div className="flex justify-between text-blue-600 dark:text-blue-400 font-semibold">
+                <span>Bonificación Especial de Paquete ({(packageDisc * 100).toFixed(0)}%)</span>
+                <span>-{formatCurrency(descuentoAplicado)}</span>
               </div>
             )}
 
-            <div className="mt-2 flex justify-between border-t pt-2 text-lg font-bold text-gray-800 dark:text-gray-100">
-              <span>Total Final</span>
-              {hasHotelDiscount ? (
-                <div className="flex items-center gap-2">
-                  <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                    ${finalPrice.toFixed(2)}
-                  </p>
-                  <p className="text-md text-gray-500 line-through dark:text-gray-400">
-                    ${precioConDescuentoPaquete.toFixed(2)}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                  ${precioConDescuentoPaquete.toFixed(2)}
-                </p>
-              )}
+            {hasHotelDiscount && (
+              <div className="flex justify-between text-green-600 dark:text-green-400 font-semibold">
+                <span>Bonificación Temporal Temporada Baja</span>
+                <span>-{formatCurrency(precioConDescuentoPaquete - finalPrice)}</span>
+              </div>
+            )}
+
+            <div className="border-t border-gray-200 dark:border-gray-600 pt-3 flex justify-between items-end">
+              <span className="text-gray-900 dark:text-white font-semibold flex flex-col">
+                Valor Neto Final
+              </span>
+              <span
+                className={`text-2xl font-bold ${hasHotelDiscount || hasPackageDiscount ? 'text-green-600 dark:text-green-400' : 'text-indigo-600 dark:text-indigo-400'
+                  }`}
+              >
+                {formatCurrency(finalPrice)}
+              </span>
             </div>
           </div>
         </div>
-      </div>
-
-      {}
-      <div className="sticky bottom-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <button
-          onClick={() => {
-            if (typeof onReserve === 'function') onReserve();
-          }}
-          className="w-full rounded-md bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
-          type="button"
-        >
-          Reservar paquete
-        </button>
       </div>
     </Modal>
   );
