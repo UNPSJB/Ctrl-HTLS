@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@api/axiosInstance';
 import { useCarrito } from '@vendor-context/CarritoContext';
 import { useCliente } from '@vendor-context/ClienteContext';
+import { useBusqueda } from '@vendor-context/BusquedaContext';
 import { useAuth } from '@/context/AuthContext';
 import { useCarritoPrecios } from './useCarritoPrecios';
 
@@ -16,7 +17,8 @@ export function usePagar() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { reservaConfirmada, limpiarCarritoYReserva } = useCarrito();
-  const { client } = useCliente();
+  const { client, clearClient } = useCliente();
+  const { limpiarFiltros } = useBusqueda();
   const { user } = useAuth();
   const { totalFinal } = useCarritoPrecios();
 
@@ -117,8 +119,46 @@ export function usePagar() {
         const response = await axiosInstance.post('/confirmar-pago', payload);
 
         if (response.status === 201 || response.status === 200) {
+          // Descargar automáticamente la factura PDF devuelta por el backend
+          const pdfBase64 = response.data?.pdfBase64;
+          if (pdfBase64) {
+            try {
+              const byteCharacters = atob(pdfBase64);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+              // Generar nombre descriptivo con el número de factura si está disponible
+              const nroFactura = response.data?.nroFactura || response.data?.id || Date.now();
+              const nombreArchivo = `Factura_${nroFactura}.pdf`;
+
+              // Crear enlace temporal para desencadenar la descarga
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = nombreArchivo;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+
+              toast.success('Factura descargada correctamente.');
+            } catch (pdfError) {
+              console.error('Error al procesar el PDF de la factura:', pdfError);
+              toast.error('El pago se realizó pero no se pudo descargar la factura.');
+            }
+          }
+
           toast.success('¡Pago registrado con éxito!');
+
+          // Limpiar todos los contextos de la sesión de venta
           limpiarCarritoYReserva();
+          clearClient();
+          limpiarFiltros();
+
           navigate('/');
         }
       } catch (error) {
@@ -136,6 +176,8 @@ export function usePagar() {
       totalFinal,
       user?.id,
       limpiarCarritoYReserva,
+      clearClient,
+      limpiarFiltros,
       navigate,
     ]
   );
