@@ -4,6 +4,15 @@ import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext();
 
+// Claves del localStorage que deben eliminarse al cerrar sesión
+const SESSION_KEYS = [
+  'token',
+  'user',
+  'busquedaFilters',
+  'carritoState',
+  'clienteState',
+];
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,8 +45,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Limpiar todas las claves de sesión persistentes
+    SESSION_KEYS.forEach((key) => localStorage.removeItem(key));
+
     setUser(null);
     toast.success('Sesión cerrada');
   };

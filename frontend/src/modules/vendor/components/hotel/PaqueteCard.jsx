@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import PriceTag from '@ui/PriceTag';
 import { Users, Trash2, CalendarDays, Package, ChevronDown, ChevronUp, BedDouble, Hash, ArrowRight, Moon } from 'lucide-react';
-import { calcPackageTotal } from '@utils/pricingUtils';
+import { calcPackageTotal, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
 import dateUtils from '@utils/dateUtils';
 

@@ -1,7 +1,7 @@
 import PriceTag from '@ui/PriceTag';
 import { Users, Hash, Layers3, Trash2, CalendarDays, ArrowRight, Moon } from 'lucide-react';
 import { useMemo } from 'react';
-import { calcRoomInstanceTotal } from '@utils/pricingUtils';
+import { calcRoomInstanceTotal, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
 import dateUtils from '@utils/dateUtils';
 
