@@ -16,9 +16,10 @@ import {
   FormField, 
   TextInput, 
   EmailInput, 
-  TelInput, 
+  TelInput,
   SelectInput,
-  RedirectLink
+  RedirectLink,
+  TextAreaInput
 } from '@form';
 
 // Formulario para creación y edición básica de hoteles
@@ -41,6 +42,7 @@ export default function HotelesForm() {
       direccion: '',
       telefono: '',
       email: '',
+      descripcion: '',
       categoriaId: '',
       paisId: '',
       provinciaId: '',
@@ -86,6 +88,7 @@ export default function HotelesForm() {
         direccion: capitalizeFirst(hotel.direccion) || '',
         telefono: hotel.telefono || '',
         email: hotel.email || '',
+        descripcion: hotel.descripcion || '',
         categoriaId: hotel.categoriaId || '',
         paisId: hotel.ubicacion?.paisId || '',
         provinciaId: hotel.ubicacion?.provinciaId || '',
@@ -117,6 +120,12 @@ export default function HotelesForm() {
 
   // Procesa el envío del formulario
   const onSubmit = async (data) => {
+    if (!selectedEncargadoId) {
+      toast.error('Debe seleccionar un responsable para el hotel desde la pestaña de Encargado', { duration: 4000 });
+      setActiveTab('encargado');
+      return;
+    }
+
     try {
       const encargadoIdParaHotel = selectedEncargadoId;
 
@@ -125,6 +134,7 @@ export default function HotelesForm() {
         direccion: data.direccion,
         telefono: data.telefono,
         email: data.email,
+        descripcion: data.descripcion,
         paisId: data.paisId,
         provinciaId: data.provinciaId,
         ciudadId: data.ciudadId,
@@ -223,6 +233,17 @@ export default function HotelesForm() {
                       </SelectInput>
                     </FormField>
                   </div>
+
+                  <div className="mt-6">
+                    <FormField label="Descripción del Hotel" error={errors.descripcion}>
+                      <TextAreaInput
+                        id="descripcion"
+                        {...register('descripcion')}
+                        placeholder="Escriba una descripción comercial que los clientes verán..."
+                        rows={4}
+                      />
+                    </FormField>
+                  </div>
                 </div>
 
                 {/* Medios de Contacto */}
@@ -292,7 +313,7 @@ export default function HotelesForm() {
             />
             <button
               type="submit"
-              disabled={!isValid || isSubmitting || loadingResources || loadingData}
+              disabled={!isValid || isSubmitting || loadingResources || loadingData || !selectedEncargadoId}
               className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
             >
               {isSubmitting ? (

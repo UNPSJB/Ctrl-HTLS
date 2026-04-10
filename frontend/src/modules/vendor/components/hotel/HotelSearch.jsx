@@ -195,121 +195,122 @@ function HotelSearch({
     </div>
   );
 
-  // Renderizado Expandido (HERRAMIENTA PROFESIONAL)
+  // Renderizado Expandido (HERRAMIENTA PROFESIONAL CORP)
   const renderHero = () => (
-    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-      {/* Bloque 1: Ubicación Geográfica */}
-      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-700 dark:bg-gray-800/30">
-        <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400">
-          <Building className="h-4 w-4" />
-          <span>Configuración del Destino</span>
-        </div>
-
-        <div className="space-y-4">
-          <FormField label="Hotel o Alojamiento" icon={Search}>
-            <SearchInput
-              value={localFilters.nombre}
-              onChange={(e) => handleChange('nombre', e.target.value)}
-              placeholder="Nombre del hotel (opcional)"
-            />
-          </FormField>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <FormField label="País" icon={Globe}>
-              <SelectInput
-                value={paisId}
-                onChange={(e) => handlePaisChange(e.target.value)}
-                disabled={loadingPaises}
-              >
-                <option value="">{loadingPaises ? 'Cargando...' : 'Seleccionar país'}</option>
-                {paises.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-              </SelectInput>
-            </FormField>
-
-            <FormField label="Provincia" icon={Building}>
-              <SelectInput
-                value={provinciaId}
-                onChange={(e) => handleProvinciaChange(e.target.value)}
-                disabled={isProvinciasDisabled || loadingProvincias}
-              >
-                <option value="">{loadingProvincias ? 'Cargando...' : 'Elegir provincia'}</option>
-                {provincias.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-              </SelectInput>
-            </FormField>
-
-            <FormField label="Ciudad de Destino" icon={MapPin} required>
-              <SelectInput
-                value={ciudadId}
-                onChange={(e) => handleCiudadChange(e.target.value)}
-                disabled={isCiudadesDisabled || loadingCiudades}
-              >
-                <option value="">{loadingCiudades ? 'Cargando...' : 'Seleccionar ciudad'}</option>
-                {ciudades.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-              </SelectInput>
-            </FormField>
-          </div>
-        </div>
+    <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+      {/* Fila 1: Identificación del Alojamiento */}
+      <div className="border-b border-gray-100 pb-4 dark:border-gray-700">
+        <FormField label="Hotel o Alojamiento" icon={Search} containerClassName="max-w-3xl">
+          <SearchInput
+            value={localFilters.nombre}
+            onChange={(e) => handleChange('nombre', e.target.value)}
+            placeholder="Nombre del hotel (opcional)"
+            className="rounded-md"
+          />
+        </FormField>
       </div>
 
-      {/* Bloque 2: Estancia y Ejecución */}
-      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-700 dark:bg-gray-800/30">
-        <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400">
-          <Calendar className="h-4 w-4" />
-          <span>Detalles de Estancia y Acción</span>
-        </div>
+      {/* Fila 2: Ubicación Geográfica (Horizontal) */}
+      <div className="grid grid-cols-1 gap-4 py-2 md:grid-cols-3">
+        <FormField label="País" icon={Globe}>
+          <SelectInput
+            value={paisId}
+            onChange={(e) => handlePaisChange(e.target.value)}
+            disabled={loadingPaises}
+            className="rounded-md border-gray-200 dark:border-gray-700"
+          >
+            <option value="">{loadingPaises ? 'Cargando...' : 'Seleccionar país'}</option>
+            {paises.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+          </SelectInput>
+        </FormField>
 
-        <div className="grid grid-cols-1 gap-4 items-end md:grid-cols-4">
+        <FormField label="Provincia" icon={Building}>
+          <SelectInput
+            value={provinciaId}
+            onChange={(e) => handleProvinciaChange(e.target.value)}
+            disabled={isProvinciasDisabled || loadingProvincias}
+            className="rounded-md border-gray-200 dark:border-gray-700"
+          >
+            <option value="">{loadingProvincias ? 'Cargando...' : 'Elegir provincia'}</option>
+            {provincias.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+          </SelectInput>
+        </FormField>
+
+        <FormField label="Ciudad de Destino" icon={MapPin} required>
+          <SelectInput
+            value={ciudadId}
+            onChange={(e) => handleCiudadChange(e.target.value)}
+            disabled={isCiudadesDisabled || loadingCiudades}
+            className="rounded-md border-gray-200 dark:border-gray-700"
+          >
+            <option value="">{loadingCiudades ? 'Cargando...' : 'Seleccionar ciudad'}</option>
+            {ciudades.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+          </SelectInput>
+        </FormField>
+      </div>
+
+      {/* Fila 3: Estancia y Ejecución (Fila Unificada) */}
+      <div className="grid grid-cols-1 gap-4 border-t border-gray-100 pt-6 items-end md:grid-cols-12 dark:border-gray-700">
+        <div className="md:col-span-3">
           <FormField label="Check-in" icon={Calendar} required>
             <Input
               type="date"
               value={localFilters.fechaInicio}
               min={getToday()}
               onChange={(e) => handleChange('fechaInicio', e.target.value)}
+              className="rounded-md"
             />
           </FormField>
+        </div>
 
+        <div className="md:col-span-3">
           <FormField label="Check-out" icon={Calendar} required>
             <Input
               type="date"
               value={localFilters.fechaFin}
               min={localFilters.fechaInicio || getToday()}
               onChange={(e) => handleChange('fechaFin', e.target.value)}
+              className="rounded-md"
             />
           </FormField>
+        </div>
 
+        <div className="md:col-span-3">
           <FormField label="Pasajeros" icon={Users}>
             <CounterInput
               icon={Users}
               value={localFilters.capacidad}
               min={1}
               onChange={(val) => handleChange('capacidad', val)}
+              className="rounded-md h-[50px]"
             />
           </FormField>
+        </div>
 
-          <div className="pb-[1px]"> {/* Pequeño ajuste para alinear con el borde de los inputs */}
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="flex h-[42px] w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-blue-500/10 transition-all hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <Search className="h-4 w-4" />}
-              <span>Buscar</span>
-            </button>
-          </div>
+        <div className="md:col-span-3">
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="flex h-[50px] w-full px-2 items-center justify-center gap-2 rounded-md bg-blue-700 text-sm font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-800 active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+          >
+            {isLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <Search className="h-4 w-4" />}
+            <span>Consultar Disponibilidad</span>
+          </button>
         </div>
       </div>
     </div>
   );
 
+
   return (
     <div className={`transition-all duration-700 ease-in-out ${isCompact
-      ? 'mb-6 rounded-xl border border-gray-200 bg-white p-3 shadow-md dark:border-gray-700 dark:bg-gray-800'
-      : 'mx-auto max-w-6xl rounded-2xl border border-gray-200 bg-white p-10 shadow-xl dark:border-gray-700 dark:bg-gray-800'}`}>
+      ? 'mb-6 rounded-lg border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800'
+      : 'mx-auto max-w-6xl rounded-lg border border-gray-200 bg-white p-8 shadow-lg dark:border-gray-700 dark:bg-gray-800'}`}>
 
       {!isCompact && (
-        <div className="mb-10 text-left md:text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">Sistema de Búsqueda de Disponibilidad</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Gestione las reservas de sus clientes con datos actualizados en tiempo real.</p>
+        <div className="mb-8 text-left">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white md:text-3xl">Buscador de Disponibilidad</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Terminal de reservas corporativas.</p>
         </div>
       )}
 

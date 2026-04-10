@@ -10,7 +10,7 @@ import {
   NumberInput
 } from '@form';
 
-export default function DescuentosTab({ hotelId }) {
+export default function DescuentosTab({ hotelId, isActive = false }) {
   const [descuentos, setDescuentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -19,8 +19,10 @@ export default function DescuentosTab({ hotelId }) {
   const form = useForm();
 
   useEffect(() => {
-    fetchDescuentos();
-  }, [hotelId]);
+    if (isActive) {
+      fetchDescuentos();
+    }
+  }, [hotelId, isActive]);
 
   const fetchDescuentos = async () => {
     try {

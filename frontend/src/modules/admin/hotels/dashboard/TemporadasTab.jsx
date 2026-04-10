@@ -12,7 +12,7 @@ import {
   NumberInput
 } from '@form';
 
-export default function TemporadasTab({ hotelId }) {
+export default function TemporadasTab({ hotelId, isActive = false }) {
   const [temporadas, setTemporadas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -21,8 +21,10 @@ export default function TemporadasTab({ hotelId }) {
   const form = useForm();
 
   useEffect(() => {
-    fetchTemporadas();
-  }, [hotelId]);
+    if (isActive) {
+      fetchTemporadas();
+    }
+  }, [hotelId, isActive]);
 
   const fetchTemporadas = async () => {
     try {

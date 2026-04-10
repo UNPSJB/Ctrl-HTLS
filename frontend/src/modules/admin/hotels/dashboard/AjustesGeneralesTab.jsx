@@ -4,23 +4,26 @@ import { Building2, MapPin, User, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@admin-hooks/useHotel';
+import { capitalizeFirst } from '@/utils/stringUtils';
 
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { 
-  FormField, 
-  TextInput, 
-  EmailInput, 
-  TelInput, 
+import {
+  FormField,
+  TextInput,
+  EmailInput,
+  TelInput,
   SelectInput,
-  RedirectLink
+  RedirectLink,
+  TextAreaInput
 } from '@form';
 
 export default function AjustesGeneralesTab({
   hotelId,
   initialData,
   onUpdate,
+  isActive = false,
 }) {
   const { categorias, loading: loadingResources } = useHotel();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,6 +38,7 @@ export default function AjustesGeneralesTab({
       direccion: '',
       telefono: '',
       email: '',
+      descripcion: '',
       categoriaId: '',
       paisId: '',
       provinciaId: '',
@@ -59,16 +63,17 @@ export default function AjustesGeneralesTab({
   useEffect(() => {
     if (initialData) {
       reset({
-        nombre: initialData.nombre || '',
-        direccion: initialData.direccion || '',
+        nombre: capitalizeFirst(initialData.nombre) || '',
+        direccion: capitalizeFirst(initialData.direccion) || '',
         telefono: initialData.telefono || '',
         email: initialData.email || '',
+        descripcion: initialData.descripcion || '',
         categoriaId: initialData.categoriaId || '',
         paisId: initialData.ubicacion?.paisId || '',
         provinciaId: initialData.ubicacion?.provinciaId || '',
         ciudadId: initialData.ubicacion?.ciudadId || '',
-        encargadoNombre: initialData.encargado?.nombre || '',
-        encargadoApellido: initialData.encargado?.apellido || '',
+        encargadoNombre: capitalizeFirst(initialData.encargado?.nombre) || '',
+        encargadoApellido: capitalizeFirst(initialData.encargado?.apellido) || '',
         encargadoTipoDocumento: initialData.encargado?.tipoDocumento || '',
         encargadoNumeroDocumento: initialData.encargado?.numeroDocumento || '',
       });
@@ -93,6 +98,7 @@ export default function AjustesGeneralesTab({
         direccion: data.direccion,
         telefono: data.telefono,
         email: data.email,
+        descripcion: data.descripcion,
         paisId: data.paisId,
         provinciaId: data.provinciaId,
         ciudadId: data.ciudadId,
@@ -104,15 +110,10 @@ export default function AjustesGeneralesTab({
       await axiosInstance.put(`/hotel/${hotelId}`, hotelPayload);
       toast.success('Ajustes generales actualizados exitosamente');
 
-      // Note: we are currently omitting the 'encargado update' logic
-      // since the backend only supports inserting it on creation or requires a specific endpoint.
-      // For now, the PUT /hotel/:id updates only the core hotel fields (name, phone, loc, etc).
-
       if (onUpdate) {
         onUpdate();
       }
 
-      // Reset isDirty state by resetting with current form values
       reset({}, { keepValues: true });
     } catch (error) {
       console.error(error);
@@ -212,13 +213,23 @@ export default function AjustesGeneralesTab({
 
               <FormField label="Email" required error={errors.email}>
                 <EmailInput
-                  {...register('email', { 
+                  {...register('email', {
                     required: 'El email es obligatorio',
                     pattern: { value: /^\S+@\S+$/i, message: 'Email inválido' }
                   })}
                   placeholder="contacto@hotel.com"
                 />
               </FormField>
+            </div>
+            
+            <div className="mt-6">
+               <FormField label="Descripción Básica" error={errors.descripcion}>
+                 <TextAreaInput
+                   {...register('descripcion')}
+                   placeholder="Escriba una descripción o información general del hotel..."
+                   rows={4}
+                 />
+               </FormField>
             </div>
           </div>
 
@@ -255,11 +266,10 @@ export default function AjustesGeneralesTab({
           <button
             type="submit"
             disabled={isSubmitting || !form.formState.isValid}
-            className={`flex items-center gap-2 rounded-lg px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              isSubmitting || !form.formState.isValid
+            className={`flex items-center gap-2 rounded-lg px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSubmitting || !form.formState.isValid
                 ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
                 : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 shadow-blue-500/20 active:scale-[0.98]'
-            }`}
+              }`}
           >
             {isSubmitting ? (
               <>

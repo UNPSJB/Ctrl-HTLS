@@ -28,6 +28,7 @@ export default function HabitacionesTab({
   localRooms = EMPTY_ARRAY,
   tarifasAsignadas = EMPTY_ARRAY,
   onLocalChange,
+  isActive = false,
 }) {
   const [habitaciones, setHabitaciones] = useState([]);
   const [tiposGlobales, setTiposGlobales] = useState([]);
@@ -57,13 +58,15 @@ export default function HabitacionesTab({
   // Carga de habitaciones según el modo
   useEffect(() => {
     if (!isLocalMode) {
-      fetchHabitaciones();
+      if (isActive) {
+        fetchHabitaciones(); // Re-carga al activar: asegura tarifas y habitaciones actualizadas
+      }
     } else {
       setHabitaciones(localRooms);
     }
     // No incluimos localRooms aquí si esLocalMode es falso,
     // y usamos EMPTY_ARRAY como default para evitar loops de referencia.
-  }, [hotelId, isLocalMode, localRooms]);
+  }, [hotelId, isLocalMode, localRooms, isActive]);
 
   // Carga todos los tipos de habitación disponibles en el sistema
   const fetchGlobalTypes = async () => {
@@ -144,7 +147,7 @@ export default function HabitacionesTab({
   };
 
   const handleDelete = async (habitacionId, tempId) => {
-    if (!window.confirm('¿Está seguro de eliminar esta habitación física?'))
+    if (!window.confirm('¿Está seguro de desactivar esta habitación física? Quedará invalidada para futuros alquileres.'))
       return;
 
     if (isLocalMode) {
@@ -156,11 +159,11 @@ export default function HabitacionesTab({
         await axiosInstance.delete(
           `/hotel/${hotelId}/habitacion/${habitacionId}`
         );
-        toast.success('Habitación eliminada');
+        toast.success('Habitación desactivada');
         fetchHabitaciones();
       } catch (error) {
         console.error(error);
-        toast.error('Error al eliminar la habitación');
+        toast.error('Error al desactivar la habitación');
       }
     }
   };

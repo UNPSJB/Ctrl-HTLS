@@ -108,7 +108,6 @@ const EncargadosTable = () => {
                 <tr>
                   <th className="px-6 py-4">Nombre Completo</th>
                   <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Email</th>
                   <th className="px-6 py-4">Teléfono</th>
                   <th className="px-6 py-4">Hotel</th>
                   <th className="px-6 py-4 text-right">Acciones</th>
@@ -138,11 +137,6 @@ const EncargadosTable = () => {
                           {encargado.tipoDocumento}
                         </span>
                         {encargado.dni}
-                      </td>
-
-                      {/* Email */}
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate">
-                        {encargado.email || <span className="italic text-gray-400">—</span>}
                       </td>
 
                       {/* Teléfono */}

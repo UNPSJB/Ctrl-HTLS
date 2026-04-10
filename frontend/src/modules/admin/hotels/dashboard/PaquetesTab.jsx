@@ -11,7 +11,7 @@ import {
   NumberInput
 } from '@form';
 
-export default function PaquetesTab({ hotelId }) {
+export default function PaquetesTab({ hotelId, isActive = false }) {
   const [paquetes, setPaquetes] = useState([]);
   const [habitaciones, setHabitaciones] = useState([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
@@ -28,8 +28,10 @@ export default function PaquetesTab({ hotelId }) {
   const fechaInicio = watch('fecha_inicio');
 
   useEffect(() => {
-    fetchData();
-  }, [hotelId]);
+    if (isActive) {
+      fetchData();
+    }
+  }, [hotelId, isActive]);
 
   const fetchData = async () => {
     try {

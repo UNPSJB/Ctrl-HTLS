@@ -18,7 +18,7 @@ import { SearchInput } from '@form';
  * Gestión de personal (vendedores) asignados a un hotel específico.
  * Componente autónomo: carga su propia lista de asignados desde getHotelById.
  */
-export default function PersonalAsignadoTab({ hotelId }) {
+export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
   const [asignados, setAsignados] = useState([]);
   const [todosVendedores, setTodosVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,10 +27,12 @@ export default function PersonalAsignadoTab({ hotelId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVendedor, setSelectedVendedor] = useState(null);
 
-  // Carga inicial de asignados al montar o cambiar hotelId
+  // Carga inicial de asignados al montar o cambiar hotelId / activar pestaña
   useEffect(() => {
-    fetchAsignados();
-  }, [hotelId]);
+    if (isActive) {
+      fetchAsignados();
+    }
+  }, [hotelId, isActive]);
 
   // Cargar lista de todos los vendedores solo cuando se abre el modo asignación
   useEffect(() => {
@@ -176,15 +178,15 @@ export default function PersonalAsignadoTab({ hotelId }) {
               {filteredSearch.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500 italic space-y-3 animate-in fade-in">
                   {searchTerm.length < 2 ? (
-                     <>
-                        <Search className="h-8 w-8 opacity-20" />
-                        <p className="text-sm">Escriba al menos 2 caracteres para buscar</p>
-                     </>
+                    <>
+                      <Search className="h-8 w-8 opacity-20" />
+                      <p className="text-sm">Escriba al menos 2 caracteres para buscar</p>
+                    </>
                   ) : (
-                     <>
-                        <Users className="h-8 w-8 opacity-20" />
-                        <p className="text-sm">No se encontraron vendedores disponibles</p>
-                     </>
+                    <>
+                      <Users className="h-8 w-8 opacity-20" />
+                      <p className="text-sm">No se encontraron vendedores disponibles</p>
+                    </>
                   )}
                 </div>
               ) : (
@@ -195,22 +197,19 @@ export default function PersonalAsignadoTab({ hotelId }) {
                       <button
                         key={v.id}
                         onClick={() => setSelectedVendedor(v)}
-                        className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                          isSelected 
-                            ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500 shadow-sm dark:bg-blue-500/10 dark:border-blue-500' 
+                        className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${isSelected
+                            ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500 shadow-sm dark:bg-blue-500/10 dark:border-blue-500'
                             : 'border-gray-200 hover:border-blue-300 bg-white hover:shadow-sm dark:bg-gray-900 dark:border-gray-800 dark:hover:border-gray-700'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors ${
-                            isSelected ? 'bg-blue-600 text-white dark:bg-blue-500' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
-                          }`}>
+                          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors ${isSelected ? 'bg-blue-600 text-white dark:bg-blue-500' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                            }`}>
                             <User className="h-6 w-6" />
                           </div>
                           <div className="overflow-hidden">
-                            <p className={`text-sm font-bold truncate transition-colors ${
-                              isSelected ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
-                            }`}>
+                            <p className={`text-sm font-bold truncate transition-colors ${isSelected ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
+                              }`}>
                               {capitalizeFirst(v.nombre)} {capitalizeFirst(v.apellido)}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
@@ -224,11 +223,10 @@ export default function PersonalAsignadoTab({ hotelId }) {
                           </div>
                         </div>
                         <div className="shrink-0 pl-3">
-                           <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                             isSelected ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300 dark:border-gray-600'
-                           }`}>
-                             {isSelected && <CheckCircle2 className="h-4 w-4" />}
-                           </div>
+                          <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300 dark:border-gray-600'
+                            }`}>
+                            {isSelected && <CheckCircle2 className="h-4 w-4" />}
+                          </div>
                         </div>
                       </button>
                     );

@@ -8,7 +8,6 @@ import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-
 import {
     FormField,
     TextInput,
-    EmailInput,
     SelectInput,
     TelInput,
     RedirectLink
@@ -42,7 +41,6 @@ const EncargadosForm = () => {
             telefono: '',
             tipoDocumento: 'dni',
             numeroDocumento: '',
-            email: '',
         },
         mode: 'onChange'
     });
@@ -64,7 +62,6 @@ const EncargadosForm = () => {
                 telefono: data.telefono || '',
                 tipoDocumento: data.tipoDocumento || 'dni',
                 numeroDocumento: data.dni || '', // El backend devuelve 'dni' para el número
-                email: data.email || '',
             });
         } catch (error) {
             console.error(error);
@@ -199,16 +196,6 @@ const EncargadosForm = () => {
                         <div className={activeTab === 'contacto' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Medios de Contacto</h3>
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                <FormField label="Email" required error={errors.email}>
-                                    <EmailInput
-                                        id="email"
-                                        {...register('email', {
-                                            required: 'El email es obligatorio',
-                                            pattern: { value: /^\S+@\S+$/i, message: 'Email inválido' }
-                                        })}
-                                        placeholder="encargado@empresa.com"
-                                    />
-                                </FormField>
                                 <FormField label="Teléfono" error={errors.telefono}>
                                     <TelInput
                                         id="telefono"

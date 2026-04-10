@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Trash2,
+  PowerOff,
   Edit2,
   DoorOpen,
   Layers,
@@ -96,9 +96,10 @@ export default function HabitacionesList({
                         />
                         <TableButton
                           variant="delete"
-                          icon={Trash2}
+                          icon={PowerOff}
                           onClick={() => onDelete(habitacion.id, habitacion.tempId)}
                           disabled={loading}
+                          title="Desactivar Habitación"
                         />
                       </div>
                     </td>

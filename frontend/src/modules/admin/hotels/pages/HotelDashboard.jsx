@@ -10,6 +10,7 @@ import {
   Tag,
   Settings,
 } from 'lucide-react';
+import { capitalizeWords } from '@/utils/stringUtils';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
@@ -68,7 +69,7 @@ export default function HotelDashboard() {
       {/* Encabezado del Dashboard */}
       <div className="flex-shrink-0">
         <PageHeader
-          title={hotel?.nombre || 'Hotel'}
+          title={hotel?.nombre ? capitalizeWords(hotel.nombre) : 'Hotel'}
           description={loading ? 'Sincronizando datos...' : 'Dashboard de Configuración'}
           backTo="/admin/hoteles"
           icon={Building2}
@@ -111,34 +112,36 @@ export default function HotelDashboard() {
                   hotelId={hotel.id}
                   initialData={hotel}
                   onUpdate={fetchHotelDashboardData}
+                  isActive={activeTab === 'general'}
                 />
               </div>
 
               <div className={activeTab === 'tarifas' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <TarifasTab hotelId={hotel.id} />
+                <TarifasTab hotelId={hotel.id} isActive={activeTab === 'tarifas'} />
               </div>
 
               <div className={activeTab === 'habitaciones' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
                 <HabitacionesTab
                   hotelId={hotel.id}
                   tarifasAsignadas={hotel.tarifas || []}
+                  isActive={activeTab === 'habitaciones'}
                 />
               </div>
 
               <div className={activeTab === 'personal' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <PersonalAsignadoTab hotelId={hotel.id} />
+                <PersonalAsignadoTab hotelId={hotel.id} isActive={activeTab === 'personal'} />
               </div>
 
               <div className={activeTab === 'temporadas' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <TemporadasTab hotelId={hotel.id} />
+                <TemporadasTab hotelId={hotel.id} isActive={activeTab === 'temporadas'} />
               </div>
 
               <div className={activeTab === 'descuentos' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <DescuentosTab hotelId={hotel.id} />
+                <DescuentosTab hotelId={hotel.id} isActive={activeTab === 'descuentos'} />
               </div>
 
               <div className={activeTab === 'paquetes' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <PaquetesTab hotelId={hotel.id} />
+                <PaquetesTab hotelId={hotel.id} isActive={activeTab === 'paquetes'} />
               </div>
 
             </div>
