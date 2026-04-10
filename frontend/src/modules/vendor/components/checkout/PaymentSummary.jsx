@@ -1,35 +1,26 @@
-import { useMemo, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { useCarrito } from '@vendor-context/CarritoContext';
+import { useState } from 'react';
+import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
+import { usePagar } from '@vendor-hooks/usePagar';
 import { useCliente } from '@vendor-context/ClienteContext';
-import { usePago } from '@vendor-context/PagoContext';
-import axiosInstance from '@api/axiosInstance';
-import { calcRoomInstanceTotal, calcPackageTotal, calcDescuentoPorCantidad } from '@utils/pricingUtils';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
 
 // Resumen final de la transacción y procesamiento del pago
 function PaymentSummary() {
-  const navigate = useNavigate();
-  const { carrito, reservaConfirmada, limpiarCarritoYReserva } = useCarrito();
   const { client } = useCliente();
+  const { porHotel, totalFinal } = useCarritoPrecios();
+  const { pagar, isProcessing, canConfirm } = usePagar();
 
-  const {
-    setMontoTotal,
-    metodoPago,
-    tipoFactura,
-    montoEfectivo,
-    montoTarjeta,
-    clienteId,
-    vendedorId,
-    resetPago,
-  } = usePago();
+  // Estados locales que antes estaban en PagoContext
+  const [metodoPago, setMetodoPago] = useState('Efectivo');
+  const [tipoFactura, setTipoFactura] = useState('B');
+  const [montoEfectivo, setMontoEfectivo] = useState(0);
+  const [cardData, setCardData] = useState(null);
 
-  const [isProcessing, setIsProcessing] = useState(false);
+  const montoTarjetaCálculo = totalFinal - (Number(montoEfectivo) || 0);
 
-  // Cálculo desglosado de totales
-  const breakdown = useMemo(() => {
+  // Calcular desglose agregado desde porHotel
+  const breakdown = (() => {
     let subtotalHabitaciones = 0;
     let ajusteTemporadaHabs = 0;
     let descuentoCantidad = 0;
@@ -37,173 +28,37 @@ function PaymentSummary() {
     let descuentoPaquetes = 0;
     let ajusteTemporadaPaquetes = 0;
 
-    (carrito.hoteles || []).forEach((hotel) => {
-      const temporada = hotel?.temporada ?? null;
-      let hotelRoomOriginal = 0;
-      let hotelRoomFinal = 0;
-
-      // Habitaciones
-      (hotel.habitaciones || []).forEach((room) => {
-        const calc = calcRoomInstanceTotal({
-          precio: room.precio,
-          temporada,
-          alquiler: { fechaInicio: room.fechaInicio, fechaFin: room.fechaFin },
-        });
-        hotelRoomOriginal += calc.original;
-        hotelRoomFinal += calc.final;
-      });
-
-      subtotalHabitaciones += hotelRoomOriginal;
-      ajusteTemporadaHabs += (hotelRoomFinal - hotelRoomOriginal);
-
-      // Descuento por cantidad exacta
-      const cantidadHabs = (hotel.habitaciones || []).length;
-      const descInfo = calcDescuentoPorCantidad(
-        cantidadHabs,
-        hotel.descuentos,
-        hotelRoomFinal
-      );
-      descuentoCantidad += descInfo.montoDescuento;
-
-      // Paquetes
-      (hotel.paquetes || []).forEach((pack) => {
-        const calc = calcPackageTotal({
-          paquete: pack,
-          temporada,
-        });
-        subtotalPaquetes += calc.original;
-        descuentoPaquetes += calc.descuentoPaqueteMonto;
-        ajusteTemporadaPaquetes += calc.ajusteTemporadaMonto;
-      });
+    Object.values(porHotel).forEach((h) => {
+      subtotalHabitaciones += h.subtotalHabsOriginal;
+      ajusteTemporadaHabs += h.ajusteTemporadaHabs;
+      descuentoCantidad += h.descuentoCantidad;
+      subtotalPaquetes += h.subtotalPaquetesOriginal;
+      descuentoPaquetes += h.descuentoPaquetes;
+      ajusteTemporadaPaquetes += h.ajusteTemporadaPaquetes;
     });
 
-    const totalFinal = (subtotalHabitaciones + ajusteTemporadaHabs - descuentoCantidad)
-                      + (subtotalPaquetes - descuentoPaquetes + ajusteTemporadaPaquetes);
-
     return {
-      subtotalHabitaciones: Math.round(subtotalHabitaciones),
-      ajusteTemporadaHabs: Math.round(ajusteTemporadaHabs),
-      descuentoCantidad: Math.round(descuentoCantidad),
-      subtotalPaquetes: Math.round(subtotalPaquetes),
-      descuentoPaquetes: Math.round(descuentoPaquetes),
-      ajusteTemporadaPaquetes: Math.round(ajusteTemporadaPaquetes),
-      totalFinal: Math.round(totalFinal),
+      subtotalHabitaciones,
+      ajusteTemporadaHabs,
+      descuentoCantidad,
+      subtotalPaquetes,
+      descuentoPaquetes,
+      ajusteTemporadaPaquetes,
     };
-  }, [carrito.hoteles]);
-
-  const totalFinal = breakdown.totalFinal;
-
-  useEffect(() => {
-    setMontoTotal(totalFinal);
-  }, [totalFinal, setMontoTotal]);
-
-  const handlePayment = async () => {
-    if (!reservaConfirmada || reservaConfirmada.length === 0) {
-      toast.error('No se encontró una reserva confirmada para pagar.');
-      return;
-    }
-
-    const finalClienteId = client?.id || clienteId;
-    if (!finalClienteId) {
-      toast.error('Faltan datos del cliente.');
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const itemsRaw = reservaConfirmada.flatMap((grupo) =>
-        Array.isArray(grupo.alquiler) ? grupo.alquiler : [grupo]
-      );
-
-      let alquileresPayload = itemsRaw
-        .map((item) => ({
-          alquilerId: item.id || item.alquilerId,
-          subTotal: Number(
-            item.subTotal || item.montoTotal || item.importe || 0
-          ),
-        }))
-        .filter((i) => i.alquilerId);
-
-      const sumaBackend = alquileresPayload.reduce(
-        (acc, curr) => acc + curr.subTotal,
-        0
-      );
-
-      if (Math.abs(sumaBackend - totalFinal) > 1.0 && totalFinal > 0) {
-        const count = alquileresPayload.length;
-        const base = Math.floor((totalFinal / count) * 100) / 100;
-        let acum = 0;
-        alquileresPayload.forEach((item, i) => {
-          const val = i === count - 1 ? totalFinal - acum : base;
-          item.subTotal = Number(val.toFixed(2));
-          acum += base;
-        });
-      }
-
-      const totalAEnviar = alquileresPayload.reduce(
-        (acc, curr) => acc + curr.subTotal,
-        0
-      );
-
-      let pagoEfectivoFinal = 0;
-      let pagoTarjetaFinal = 0;
-
-      if (metodoPago === 'Efectivo') {
-        pagoEfectivoFinal = totalAEnviar;
-        pagoTarjetaFinal = 0;
-      } else if (
-        metodoPago === 'Tarjeta' ||
-        metodoPago === 'Debito' ||
-        metodoPago === 'Crédito'
-      ) {
-        pagoEfectivoFinal = 0;
-        pagoTarjetaFinal = totalAEnviar;
-      } else if (metodoPago === 'Mixto') {
-        pagoEfectivoFinal = Number(montoEfectivo || 0);
-        pagoTarjetaFinal = Number(montoTarjeta || 0);
-
-        if (Math.abs(pagoEfectivoFinal + pagoTarjetaFinal - totalAEnviar) > 1) {
-          throw new Error(
-            `Los montos (Efec: $${pagoEfectivoFinal} + Tarj: $${pagoTarjetaFinal}) no suman el total ($${totalAEnviar}).`
-          );
-        }
-      }
-
-      const payload = {
-        alquileres: alquileresPayload,
-        tipoFact: tipoFactura || 'B',
-        medioPago: metodoPago,
-        montoTarjeta: pagoTarjetaFinal,
-        montoEfectivo: pagoEfectivoFinal,
-        montonEfectivo: pagoEfectivoFinal,
-        montoTotal: Number(totalAEnviar.toFixed(2)),
-        vendedorId: vendedorId || 2,
-        clienteId: finalClienteId,
-      };
-
-      const response = await axiosInstance.post('/confirmar-pago', payload);
-
-      if (response.status === 201 || response.status === 200) {
-        toast.success('¡Pago registrado con éxito!');
-        limpiarCarritoYReserva();
-        resetPago();
-        navigate('/');
-      }
-    } catch (error) {
-      console.error('Error al procesar el pago:', error);
-      const msg =
-        error.response?.data?.error || error.message || 'Error desconocido';
-      toast.error(`Error al pagar: ${msg}`);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const canConfirm = totalFinal > 0 && !isProcessing;
+  })();
 
   const tieneHabitaciones = breakdown.subtotalHabitaciones > 0;
   const tienePaquetes = breakdown.subtotalPaquetes > 0;
+
+  const handlePagar = () => {
+    pagar({
+      metodoPago,
+      tipoFactura,
+      montoEfectivo: Number(montoEfectivo),
+      montoTarjeta: montoTarjetaCálculo,
+      cardData,
+    });
+  };
 
   return (
     <div className="rounded-lg bg-white p-5 shadow-xl dark:bg-gray-800">
@@ -306,15 +161,21 @@ function PaymentSummary() {
         <MetodoPago
           baseTotal={totalFinal}
           clientPoints={Number(client?.puntos ?? 0)}
+          metodoPago={metodoPago}
+          onChangeMetodo={setMetodoPago}
+          montoEfectivo={montoEfectivo}
+          onChangeMontoEfectivo={setMontoEfectivo}
+          montoTarjeta={montoTarjetaCálculo}
+          onChangeCardData={setCardData}
         />
-        <FacturaSelector />
+        <FacturaSelector value={tipoFactura} onChange={setTipoFactura} />
       </div>
 
       {/* Botón de confirmar */}
       <div className="mt-5">
         <button
           type="button"
-          onClick={handlePayment}
+          onClick={handlePagar}
           disabled={!canConfirm}
           className={`flex w-full items-center justify-center rounded-lg px-4 py-3 font-semibold text-white transition-colors ${canConfirm
               ? 'bg-blue-600 hover:bg-blue-700'

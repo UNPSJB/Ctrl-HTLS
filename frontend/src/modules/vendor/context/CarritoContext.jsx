@@ -13,7 +13,6 @@ import { toast } from 'react-hot-toast';
 
 const { normalizeDateValue } = dateUtils;
 const STORAGE_KEY = 'carritoState';
-const SEARCH_FILTERS_KEY = 'busquedaFilters';
 
 const estadoInicial = {
   hoteles: [],
@@ -181,41 +180,14 @@ function asegurarHotel(dispatch, { hotelId, nombre, temporada, descuentos }) {
   });
 }
 
-function resolveDates(fechas = {}, elemento = {}) {
-  let fechaInicio = fechas.fechaInicio ?? elemento.fechaInicio ?? null;
-  let fechaFin = fechas.fechaFin ?? elemento.fechaFin ?? null;
-
-  if (
-    (fechaInicio == null || fechaInicio === '') &&
-    (fechaFin == null || fechaFin === '')
-  ) {
-    try {
-      const raw =
-        typeof window !== 'undefined'
-          ? window.localStorage.getItem(SEARCH_FILTERS_KEY)
-          : null;
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed) {
-          fechaInicio = fechaInicio ?? parsed.fechaInicio ?? null;
-          fechaFin = fechaFin ?? parsed.fechaFin ?? null;
-        }
-      }
-    } catch (err) {
-      // No hacemos nada si falla la lectura
-    }
-  }
-
-  fechaInicio = normalizeDateValue(fechaInicio);
-  fechaFin = normalizeDateValue(fechaFin);
-
-  return { fechaInicio, fechaFin };
-}
-
 function agregarElemento(dispatch, tipo, hotelInfo, elemento, fechas = {}) {
   asegurarHotel(dispatch, hotelInfo);
 
-  const { fechaInicio, fechaFin } = resolveDates(fechas, elemento);
+  let fechaInicio = fechas?.fechaInicio ?? elemento?.fechaInicio ?? null;
+  let fechaFin = fechas?.fechaFin ?? elemento?.fechaFin ?? null;
+
+  fechaInicio = normalizeDateValue(fechaInicio);
+  fechaFin = normalizeDateValue(fechaFin);
 
   const item = {
     ...elemento,
@@ -268,10 +240,6 @@ export function CarritoProvider({ children }) {
       dispatch({ type: TIPOS.REEMPLAZAR_ESTADO, payload: normalized });
     }
   }, []);
-
-  useEffect(() => {
-    setPersistedState(estado);
-  }, [estado, setPersistedState]);
 
   const agregarHabitacion = useCallback(
     (hotelInfo, habitacion, fechas) => {

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useBusqueda } from '@vendor-context/BusquedaContext';
+import { useAuth } from '@/context/AuthContext';
 import dateUtils from '@utils/dateUtils';
 import { Search, MapPin, Calendar, Users, Globe, Building } from 'lucide-react';
 import useUbicacion from '@hooks/useUbicacion';
@@ -8,6 +9,7 @@ import { toast } from 'react-hot-toast';
 const { toISODate } = dateUtils;
 
 function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
+  const { user } = useAuth();
   const { filtros, actualizarFiltros } = useBusqueda();
   const {
     paises,
@@ -27,16 +29,19 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
   } = useUbicacion();
 
   const [localFilters, setLocalFilters] = useState({
-    nombre: filtros?.nombre || '',
-    fechaInicio: toISODate(filtros?.fechaInicio) ?? '',
-    fechaFin: toISODate(filtros?.fechaFin) ?? '',
-    capacidad: filtros?.capacidad || 2,
+    nombre: '', // Siempre iniciar limpio
+    fechaInicio: toISODate(new Date()), // Default hoy
+    fechaFin: toISODate(new Date(Date.now() + 86400000)), // Default mañana
+    capacidad: 2,
   });
 
-  const getToday = useCallback(
-    () => new Date().toISOString().split('T')[0],
-    []
-  );
+  const getToday = useCallback(() => toISODate(new Date()), []);
+
+  const getTomorrow = (dateStr) => {
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + 1);
+    return toISODate(d);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,7 +61,7 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
       fechaFin: new Date(localFilters.fechaFin).toISOString(),
       pasajeros: localFilters.capacidad,
       nombreHotel: localFilters.nombre || 'null',
-      vendedorId: 2,
+      vendedorId: user?.id,
     };
 
     if (typeof onSearch === 'function') {
@@ -65,7 +70,16 @@ function HotelSearch({ onSearch, isLoading, isDisabled = false }) {
   };
 
   const handleChange = (field, value) => {
-    setLocalFilters((prev) => ({ ...prev, [field]: value }));
+    setLocalFilters((prev) => {
+      const next = { ...prev, [field]: value };
+
+      // Si cambia la fecha de inicio y la de fin queda antes o igual, mover fin a inicio + 1
+      if (field === 'fechaInicio' && next.fechaFin <= value) {
+        next.fechaFin = getTomorrow(value);
+      }
+
+      return next;
+    });
   };
 
   const fieldDisabled = isLoading || isDisabled;

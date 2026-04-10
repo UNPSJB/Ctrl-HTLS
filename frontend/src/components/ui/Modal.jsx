@@ -140,24 +140,26 @@ const Modal = ({
                     {cancelLabel}
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={onConfirm}
-                  disabled={loading || confirmDisabled}
-                  className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:grayscale-[0.5] focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${variantClasses[variant]}`}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Procesando...
-                    </>
-                  ) : (
-                    <>
-                      {ConfirmIcon && <ConfirmIcon className="w-4 h-4" />}
-                      {confirmLabel}
-                    </>
-                  )}
-                </button>
+                {onConfirm && (
+                  <button
+                    type="button"
+                    onClick={onConfirm}
+                    disabled={loading || confirmDisabled}
+                    className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:grayscale-[0.5] focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${variantClasses[variant]}`}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Procesando...
+                      </>
+                    ) : (
+                      <>
+                        {ConfirmIcon && <ConfirmIcon className="w-4 h-4" />}
+                        {confirmLabel}
+                      </>
+                    )}
+                  </button>
+                )}
               </>
             )}
           </div>

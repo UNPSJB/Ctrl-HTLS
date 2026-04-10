@@ -17,7 +17,7 @@ function RoomCartItem({ room, hotel, onRemove = null, isLocked = false }) {
     numero,
   } = room || {};
 
-  const { final: finalTotal } = useMemo(() => {
+  const { original: originalTotal } = useMemo(() => {
     return calcRoomInstanceTotal({
       precio: precio,
       temporada: hotel?.temporada,
@@ -60,7 +60,7 @@ function RoomCartItem({ room, hotel, onRemove = null, isLocked = false }) {
               </div>
             </div>
           </div>
-          <PriceTag precio={finalTotal} />
+          <PriceTag precio={originalTotal} />
         </div>
 
         <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-600">

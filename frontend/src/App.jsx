@@ -1,9 +1,6 @@
 import { useContext } from 'react';
 import { ThemeProvider, ThemeContext } from './context/ThemeContext';
-import { CarritoProvider } from '@vendor-context/CarritoContext';
-import { BusquedaProvider } from '@vendor-context/BusquedaContext';
-import { ClienteProvider } from '@vendor-context/ClienteContext';
-import { PagoProvider } from '@vendor-context/PagoContext';
+
 import AppRouter from './routes/AppRouter';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
@@ -38,15 +35,7 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <BusquedaProvider>
-          <CarritoProvider>
-            <ClienteProvider>
-              <PagoProvider>
-                <AppContent />
-              </PagoProvider>
-            </ClienteProvider>
-          </CarritoProvider>
-        </BusquedaProvider>
+        <AppContent />
       </ThemeProvider>
     </AuthProvider>
   );

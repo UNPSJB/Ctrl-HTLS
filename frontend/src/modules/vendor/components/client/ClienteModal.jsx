@@ -5,12 +5,10 @@ import ClienteDetailsModal from './ClienteDetailsModal';
 import { useClienteSearch } from '@vendor-hooks/useClienteSearch';
 import ClienteForm from './ClienteForm';
 import { useCliente } from '@vendor-context/ClienteContext';
-import { usePago } from '@vendor-context/PagoContext';
 
 // Modal de búsqueda y selección de clientes
 function ClienteModal({ onClose, onClienteSelected }) {
   const { client, selectClient, clearClient } = useCliente();
-  const { setClienteId } = usePago();
 
   const {
     documentNumber,
@@ -30,20 +28,17 @@ function ClienteModal({ onClose, onClienteSelected }) {
       if (!client || client.id !== searchResult.id) {
         selectClient(searchResult);
       }
-      setClienteId(searchResult.id);
     }
-  }, [searchResult, client, selectClient, setClienteId]);
+  }, [searchResult, client, selectClient]);
 
   const handleSearchClick = async () => {
     clearClient();
-    setClienteId(null);
     await performSearch();
   };
 
   const handleSelectClient = () => {
     if (searchResult) {
       selectClient(searchResult);
-      setClienteId(searchResult.id);
       onClienteSelected?.(searchResult);
       onClose();
     }
@@ -57,7 +52,6 @@ function ClienteModal({ onClose, onClienteSelected }) {
     };
     setSearchResult(formattedClient);
     selectClient(formattedClient);
-    setClienteId(nuevoCliente.id);
     setView('search');
   };
 

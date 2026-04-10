@@ -24,15 +24,15 @@ function PagoPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start animate-in fade-in duration-500">
-      {/* Contenido principal - columna izquierda */}
-      <div className="flex-1 space-y-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-start animate-in fade-in duration-500">
+      {/* Contenido principal - columna izquierda (60%) */}
+      <div className="space-y-6 lg:col-span-3">
         <ClienteData />
         <HotelsListView />
       </div>
 
-      {/* Columna derecha sticky */}
-      <div className="w-full shrink-0 lg:sticky lg:top-6 lg:w-96">
+      {/* Columna derecha sticky (40%) */}
+      <div className="lg:sticky lg:top-6 lg:col-span-2">
         <PaymentSummary />
       </div>
     </div>

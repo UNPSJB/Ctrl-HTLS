@@ -33,7 +33,7 @@ function HotelCard({ hotel: rawHotel }) {
             aria-labelledby={`rooms-${hotel.hotelId}-title`}
             className="border-t border-gray-200 p-4 dark:border-gray-700"
           >
-            <div className="mb-4 flex flex-wrap items-center gap-3">
+            <div className="mb-4 flex items-center gap-3">
               <h3
                 id={`rooms-${hotel.hotelId}-title`}
                 className="flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-100"
@@ -41,9 +41,6 @@ function HotelCard({ hotel: rawHotel }) {
                 <Bed className="h-5 w-5" />
                 Habitaciones Disponibles
               </h3>
-              {(hotel.descuentos || []).map((descuento) => (
-                <Descuento key={descuento.id} descuento={descuento} />
-              ))}
             </div>
             <ul className="space-y-3">
               {hotel.habitaciones.map((habitacionTipo) => (

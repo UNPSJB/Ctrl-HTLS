@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { MapPin, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { capitalizeWords } from '@/utils/stringUtils';
 import Temporada from './Temporada';
+import Descuento from '@ui/Descuento';
 import Calificacion from './Calificacion';
 import HotelDetailsModal from './HotelDetailsModal';
 
@@ -50,18 +51,25 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
             </span>
           </div>
 
-          {/* Lado Derecho: Indicadores y Expansion */}
+          {/* Lado Derecho: Expansion */}
           <div className="flex items-center gap-4 flex-none">
-            {hotel.temporada && (
-              <div className="transform scale-90">
-                <Temporada porcentaje={hotel.temporada.porcentaje} tipo={hotel.temporada.tipo} />
-              </div>
-            )}
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
               {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </div>
         </div>
+
+        {/* Fila 2: Etiquetas de descuento y temporada */}
+        {(hotel.temporada || (hotel.descuentos && hotel.descuentos.length > 0)) && (
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+            {hotel.temporada && (
+              <Temporada porcentaje={hotel.temporada.porcentaje} tipo={hotel.temporada.tipo} />
+            )}
+            {(hotel.descuentos || []).map((desc) => (
+              <Descuento key={desc.id} descuento={desc} />
+            ))}
+          </div>
+        )}
       </header>
 
       {showModal && createPortal(

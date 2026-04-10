@@ -1,5 +1,4 @@
 import { FileText } from 'lucide-react';
-import { usePago } from '@vendor-context/PagoContext';
 
 const tiposFactura = [
   { id: 'A', label: 'Factura A', description: 'Responsable Inscripto' },
@@ -8,12 +7,10 @@ const tiposFactura = [
 ];
 
 // Selector para elegir el tipo de factura (A, B o C)
-function FacturaSelector({ disabled = false }) {
-  const { tipoFactura, setTipoFactura } = usePago();
-
+function FacturaSelector({ value, onChange, disabled = false }) {
   const handleSelect = (id) => {
-    if (!disabled) {
-      setTipoFactura(id);
+    if (!disabled && typeof onChange === 'function') {
+      onChange(id);
     }
   };
 
@@ -30,7 +27,7 @@ function FacturaSelector({ disabled = false }) {
       <div className="relative">
         <select
           id="factura-select"
-          value={tipoFactura}
+          value={value}
           onChange={(e) => handleSelect(e.target.value)}
           disabled={disabled}
           className={`${selectClasses} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}

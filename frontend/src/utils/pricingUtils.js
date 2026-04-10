@@ -160,71 +160,7 @@ export function flattenRoomInstances(hotel) {
   return out;
 }
 
-export function calcHotelTotalFromSelection(
-  hotel,
-  selectedInstanceIds = [],
-  selectedPackageIds = [],
-  options = {}
-) {
-  const {
-    nightsByInstance = {},
-    qtyByInstance = {},
-    packageQtyMap = {},
-  } = options;
 
-  const temporada = hotel?.temporada ?? null;
-
-  const allInstances = flattenRoomInstances(hotel);
-
-  const roomsTotal = selectedInstanceIds.reduce(
-    (acc, id) => {
-      const inst = allInstances.find((x) => x.id === id);
-      if (!inst) return acc;
-      const nights =
-        nightsByInstance[id] !== undefined ? nightsByInstance[id] : 1;
-      const qty = qtyByInstance[id] !== undefined ? qtyByInstance[id] : 1;
-      const calc = calcRoomInstanceTotal({
-        precio: inst.price,
-        temporada,
-        alquiler: { fechaInicio: null, fechaFin: null },
-      });
-      acc.original += calc.original;
-      acc.final += calc.final;
-      acc.descuento += calc.descuento;
-      return acc;
-    },
-    { original: 0, final: 0, descuento: 0 }
-  );
-
-  const packages = Array.isArray(hotel.paquetes) ? hotel.paquetes : [];
-  const packagesTotal = selectedPackageIds.reduce(
-    (acc, pid) => {
-      const p = packages.find((x) => x.id === pid);
-      if (!p) return acc;
-      const qty = packageQtyMap[pid] !== undefined ? packageQtyMap[pid] : 1;
-      const { original, final } = calcPackageTotal({
-        paquete: p,
-        temporada,
-      });
-      acc.original += original;
-      acc.final += final;
-      acc.descuento += original - final;
-      return acc;
-    },
-    { original: 0, final: 0, descuento: 0 }
-  );
-
-  const original = roundToInteger(roomsTotal.original + packagesTotal.original);
-  const final = roundToInteger(roomsTotal.final + packagesTotal.final);
-  const descuento = roundToInteger(original - final);
-
-  return {
-    original,
-    final,
-    descuento,
-    hotelId: hotel && hotel.hotelId !== undefined ? hotel.hotelId : null,
-  };
-}
 
 export function calcPackageBasePricePerNight(paquete) {
   const sum = Array.isArray(paquete?.habitaciones)
@@ -237,40 +173,7 @@ export function calcPackageBasePricePerNight(paquete) {
   return roundToInteger(sum);
 }
 
-export function calcCartTotal(hotelsSelections = []) {
-  let originalSum = 0;
-  let finalSum = 0;
 
-  hotelsSelections.forEach((entry) => {
-    const temporada = entry.hotel?.temporada ?? null;
-
-    (entry.hotel.habitaciones || []).forEach((room) => {
-      const nights = nightsBetween(room.fechaInicio, room.fechaFin);
-      const calc = calcRoomInstanceTotal({
-        precio: room.precio,
-        temporada,
-        alquiler: { fechaInicio: room.fechaInicio, fechaFin: room.fechaFin },
-      });
-      originalSum += calc.original;
-      finalSum += calc.final;
-    });
-
-    (entry.hotel.paquetes || []).forEach((pack) => {
-      const calc = calcPackageTotal({
-        paquete: pack,
-        temporada,
-      });
-      originalSum += calc.original;
-      finalSum += calc.final;
-    });
-  });
-
-  const original = roundToInteger(originalSum);
-  const final = roundToInteger(finalSum);
-  const descuento = roundToInteger(original - final);
-
-  return { original, final, descuento };
-}
 
 export function normalizeHotelForBooking(hotelOriginal) {
   if (!hotelOriginal) return null;
@@ -347,8 +250,6 @@ const DEFAULT = {
   flattenRoomInstances,
   calcRoomInstanceTotal,
   calcPackageTotal,
-  calcHotelTotalFromSelection,
-  calcCartTotal,
   normalizeHotelForBooking,
   calcPackageBasePricePerNight,
   calcSeasonalPrice,

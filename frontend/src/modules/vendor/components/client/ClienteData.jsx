@@ -1,4 +1,5 @@
 import { useCliente } from '@vendor-context/ClienteContext';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Muestra datos del cliente seleccionado para la vista de pago
 function ClienteData() {
@@ -21,7 +22,7 @@ function ClienteData() {
           {/* Nombre y documento */}
           <div>
             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
-              {client.nombre}
+              {capitalizeWords(client.nombre)}
             </h3>
             <span className="text-xs text-gray-500 dark:text-gray-400">
               DNI: {client.documento}

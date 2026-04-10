@@ -36,7 +36,7 @@ const HotelList = ({ hoteles, isLoading, error }) => {
       return cat.value <= filters.estrellas; // Filtra para mostrar desde ese numero HASTA abajo.
     }
 
-    return true; 
+    return true;
   });
 
   // Algoritmo de puntuación para ordenamiento (Mejor a Peor)
@@ -76,9 +76,9 @@ const HotelList = ({ hoteles, isLoading, error }) => {
       )}
 
       {isInitialLoad ? (
-         <div className="flex-1" />
+        <div className="flex-1" />
       ) : (
-         <>
+        <>
           <HotelFilter
             filters={filters}
             setFilters={setFilters}

@@ -1,6 +1,7 @@
 import HotelSearch from '@hotel/HotelSearch';
 import HotelList from '@hotel/HotelList';
 import CartSummary from '@cart/CartSummary';
+import ReservaPendienteView from '@cart/ReservaPendienteView';
 import { useDisponibilidadSearch } from '@vendor-hooks/useDisponibilidadSearch';
 import { useCarrito } from '@vendor-context/CarritoContext';
 
@@ -20,7 +21,9 @@ const HomePage = () => {
       />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3">
-          {!estaBloqueado && (
+          {estaBloqueado ? (
+            <ReservaPendienteView />
+          ) : (
             <HotelList
               hoteles={hoteles}
               isLoading={isLoading}

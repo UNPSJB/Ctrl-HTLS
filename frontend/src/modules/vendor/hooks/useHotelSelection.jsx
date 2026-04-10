@@ -1,9 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { useCarrito } from '@vendor-context/CarritoContext';
-import {
-  calcHotelTotalFromSelection,
-  normalizeDiscount,
-} from '@utils/pricingUtils';
+
 
 function useHotelSelection(hotel) {
   const {
@@ -33,23 +30,7 @@ function useHotelSelection(hotel) {
     [getSelectedPackageIdsForHotel, hotelId]
   );
 
-  const totalPrice = useMemo(() => {
-    if (!hotel) return 0;
-    const res = calcHotelTotalFromSelection(
-      hotel,
-      selectedRoomIds,
-      selectedPackages,
-      {}
-    );
-    return res?.final ?? 0;
-  }, [hotel, selectedRoomIds, selectedPackages]);
 
-  const discountCoefficient = useMemo(() => {
-    if (!hotel?.temporada) return 0;
-    const pct = normalizeDiscount(hotel.temporada.porcentaje);
-    // Solo devolvemos un coeficiente de descuento si la temporada es baja
-    return hotel.temporada.tipo === 'baja' ? pct : 0;
-  }, [hotel?.temporada]);
 
   const addRoom = useCallback(
     (roomObj, fechas) => {
@@ -118,8 +99,6 @@ function useHotelSelection(hotel) {
     removeRoom,
     addPackage,
     removePackage,
-    totalPrice,
-    discountCoefficient,
     hotelEnCarrito,
   };
 }

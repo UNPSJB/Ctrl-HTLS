@@ -1,19 +1,21 @@
-import { Tag } from 'lucide-react';
-
-// Etiqueta visual de temporada baja (descuento). Si es alta, no se renderiza.
+// Etiqueta visual de temporada, mostrando tanto el descuento como el aumento
 const Temporada = ({ porcentaje, tipo }) => {
-  // Temporada alta no se muestra visualmente, solo se aplica al precio
-  if (tipo !== 'baja') return null;
+  if (tipo !== 'baja' && tipo !== 'alta') return null;
 
   const porcentajeVisual = Math.round(Math.abs(porcentaje) * 100);
 
-  return (
-    <div className="flex items-center gap-2">
-      <Tag className="h-4 w-4 text-green-500" />
-      <span className="text-sm font-medium text-green-500">
-        {porcentajeVisual}% descuento por temporada
+  if (tipo === 'baja') {
+    return (
+      <span className="text-sm font-medium text-green-600 dark:text-green-400">
+        {porcentajeVisual}% OFF (Temporada baja)
       </span>
-    </div>
+    );
+  }
+
+  return (
+    <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
+      +{porcentajeVisual}% (Temporada alta)
+    </span>
   );
 };
 

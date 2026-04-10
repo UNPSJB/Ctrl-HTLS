@@ -1,9 +1,8 @@
-import { useMemo } from 'react';
-import { Percent } from 'lucide-react';
 import Temporada from '@hotel/Temporada';
+import Descuento from '@ui/Descuento';
 import RoomCartItem from './RoomCartItem';
 import PackageCartItem from './PackageCartItem';
-import { calcRoomInstanceTotal, calcDescuentoPorCantidad } from '@utils/pricingUtils';
+import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 import { capitalizeWords } from '@/utils/stringUtils';
 
 // Sección agrupada por hotel dentro del carrito de compras
@@ -11,45 +10,32 @@ function HotelCartSection({ hotel = {}, isLocked = false }) {
   const temporadaTipo = hotel?.temporada?.tipo;
   const temporadaPorcentaje = hotel?.temporada?.porcentaje ?? 0;
 
-  // Calcular si aplica descuento por cantidad exacta
-  const descuentoInfo = useMemo(() => {
-    const cantidadHabs = (hotel.habitaciones || []).length;
-    if (cantidadHabs === 0) return null;
-
-    let totalHabsConTemporada = 0;
-    (hotel.habitaciones || []).forEach((room) => {
-      const calc = calcRoomInstanceTotal({
-        precio: room.precio,
-        temporada: hotel?.temporada,
-        alquiler: { fechaInicio: room.fechaInicio, fechaFin: room.fechaFin },
-      });
-      totalHabsConTemporada += calc.final;
-    });
-
-    const result = calcDescuentoPorCantidad(
-      cantidadHabs,
-      hotel.descuentos,
-      totalHabsConTemporada
-    );
-
-    return result.montoDescuento > 0 ? result : null;
-  }, [hotel]);
+  // Obtener info de descuento del hook centralizado
+  const { porHotel } = useCarritoPrecios();
+  const hotelBreakdown = porHotel[hotel.hotelId];
+  const tieneDescuento = hotelBreakdown && hotelBreakdown.descuentoCantidad > 0;
 
   return (
     <section className="mb-6">
       <div className="mb-4">
-        <h3 className="flex items-center gap-3 text-lg font-bold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
           {capitalizeWords(hotel?.nombre)}
-          {temporadaTipo && <Temporada porcentaje={temporadaPorcentaje} tipo={temporadaTipo} />}
         </h3>
 
-        {/* Indicador de descuento por cantidad */}
-        {descuentoInfo && (
-          <div className="mt-2 flex items-center gap-2">
-            <Percent className="h-4 w-4 text-blue-500" />
-            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-              {Math.round(descuentoInfo.porcentajeAplicado * 100)}% descuento por {(hotel.habitaciones || []).length} habitaciones (-${descuentoInfo.montoDescuento})
-            </span>
+        {/* Descuentos agrupados */}
+        {(tieneDescuento || temporadaTipo) && (
+          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+            {temporadaTipo && (
+              <Temporada porcentaje={temporadaPorcentaje} tipo={temporadaTipo} />
+            )}
+            {tieneDescuento && (
+              <Descuento
+                descuento={{
+                  porcentaje: hotelBreakdown.porcentajeDescCantidad,
+                  cantidad_de_habitaciones: hotelBreakdown.cantidadHabs
+                }}
+              />
+            )}
           </div>
         )}
       </div>

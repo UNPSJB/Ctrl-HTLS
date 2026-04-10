@@ -10,7 +10,7 @@ import { capitalizeWords } from '@/utils/stringUtils';
 function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
   const { fechaInicio, fechaFin, nombre, _cartId } = pack || {};
 
-  const { final: finalTotal } = useMemo(() => {
+  const { original: originalTotal } = useMemo(() => {
     return calcPackageTotal({
       paquete: pack,
       temporada: hotel?.temporada,
@@ -42,7 +42,7 @@ function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
               <span className="truncate">{capitalizeWords(nombre ?? 'Paquete')}</span>
             </h4>
           </div>
-          <PriceTag precio={finalTotal} />
+          <PriceTag precio={originalTotal} />
         </div>
 
         <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-600">
