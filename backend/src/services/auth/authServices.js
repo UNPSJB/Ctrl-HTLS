@@ -41,4 +41,35 @@ const login = async (email, password) => {
   };
 };
 
-module.exports = { login };
+const changePassword = async (
+  empleadoId,
+  contrasenaActual,
+  contrasenaNueva,
+  confirmarContrasena,
+) => {
+  // Validar que las nuevas contraseñas coincidan
+  if (contrasenaNueva !== confirmarContrasena) {
+    throw new CustomError('Las contraseñas nuevas no coinciden', 400);
+  }
+
+  // Buscar el empleado por ID
+  const empleado = await Empleado.findByPk(empleadoId);
+  if (!empleado) {
+    throw new CustomError('Empleado no encontrado', 404);
+  }
+
+  // Validar la contraseña actual
+  const isMatch = await bcrypt.compare(contrasenaActual, empleado.password);
+  if (!isMatch) {
+    throw new CustomError('La contraseña actual es incorrecta', 401);
+  }
+
+  // Hashear y guardar la nueva contraseña
+  const hashedPassword = await bcrypt.hash(contrasenaNueva, 10);
+  empleado.password = hashedPassword;
+  await empleado.save();
+
+  return { message: 'Contraseña actualizada exitosamente' };
+};
+
+module.exports = { login, changePassword };

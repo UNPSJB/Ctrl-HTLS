@@ -24,7 +24,39 @@ const logoutController = (req, res) => {
   return res.status(200).json({ message: 'Logout exitoso' });
 };
 
+const changePasswordController = async (req, res) => {
+  const { empleadoId, contrasenaActual, contrasenaNueva, confirmarContrasena } =
+    req.body;
+
+  if (
+    !empleadoId ||
+    !contrasenaActual ||
+    !contrasenaNueva ||
+    !confirmarContrasena
+  ) {
+    return res.status(400).json({
+      message:
+        'Por favor ingresa empleadoId, contrasenaActual, contrasenaNueva y confirmarContrasena.',
+    });
+  }
+
+  try {
+    const result = await authService.changePassword(
+      empleadoId,
+      contrasenaActual,
+      contrasenaNueva,
+      confirmarContrasena,
+    );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ message: error.message });
+  }
+};
+
 module.exports = {
   loginController,
   logoutController,
+  changePasswordController,
 };
