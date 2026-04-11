@@ -39,6 +39,7 @@ const crearHotel = async (
   direccion,
   telefono,
   email,
+  descripcion,
   tipoHabitaciones,
   ciudadId,
   encargadoId,
@@ -67,6 +68,7 @@ const crearHotel = async (
       direccion,
       telefono,
       email,
+      descripcion,
       ciudadId,
       encargadoId,
       categoriaId,
@@ -126,6 +128,7 @@ const modificarHotel = async (
   direccion,
   telefono,
   email,
+  descripcion,
   ciudadId,
   encargadoId,
   categoriaId,
@@ -157,6 +160,7 @@ const modificarHotel = async (
   hotel.direccion = direccion;
   hotel.telefono = telefono;
   hotel.email = email;
+  hotel.descripcion = descripcion;
   hotel.ciudadId = ciudadId;
   hotel.encargadoId = encargadoId;
   hotel.categoriaId = categoriaId;
