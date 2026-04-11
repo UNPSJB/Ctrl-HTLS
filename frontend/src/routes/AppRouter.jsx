@@ -13,7 +13,6 @@ import LoginPage from '@/pages/LoginPage';
 import ClientesForm from '@/modules/admin/clients/pages/ClientesForm';
 import Clientes from '@/modules/admin/clients/pages/Clientes';
 import VendedoresForm from '@/modules/admin/vendors/pages/VendedoresForm';
-import LiquidacionesGlobales from '@/modules/admin/vendors/pages/LiquidacionesGlobales';
 import VendedorLiquidaciones from '@/modules/admin/vendors/pages/VendedorLiquidaciones';
 import Administradores from '@/modules/admin/vendors/pages/Administradores';
 import Vendedores from '@/modules/admin/vendors/pages/Vendedores';
@@ -58,7 +57,6 @@ function AppRouter() {
                 <Route path="vendedores" element={<Vendedores />} />
                 <Route path="vendedores/nuevo" element={<VendedoresForm />} />
                 <Route path="vendedores/editar/:id" element={<VendedoresForm />} />
-                <Route path="vendedores/liquidaciones" element={<LiquidacionesGlobales />} />
                 <Route path="vendedores/liquidaciones/:id" element={<VendedorLiquidaciones />} />
 
                 {/* Rutas de Administradores */}

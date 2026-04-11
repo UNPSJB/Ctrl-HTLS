@@ -17,9 +17,6 @@ const Vendedores = () => {
                 actionLabel="Nuevo Vendedor"
                 onAction={() => navigate('/admin/vendedores/nuevo')}
                 actionIcon={UserCheck}
-                secondaryLabel="Liquidaciones"
-                secondaryAction={() => navigate('/admin/vendedores/liquidaciones')}
-                secondaryIcon={DollarSign}
             />
 
             {/* Componente de Tabla */}

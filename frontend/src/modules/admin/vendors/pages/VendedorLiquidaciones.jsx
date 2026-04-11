@@ -2,18 +2,17 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   DollarSign,
-  Calendar,
-  CheckCircle2,
-  AlertCircle,
   ShoppingBag,
-  Filter,
   TrendingUp,
-  Receipt
+  Receipt,
+  History,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { PageHeader, PageContentCard } from '@admin-ui';
+import { PageHeader } from '@admin-ui';
 import { capitalizeFirst } from '@/utils/stringUtils';
 
 // Detalle de ventas y liquidaciones de un vendedor
@@ -26,23 +25,16 @@ const VendedorLiquidaciones = () => {
   const [ventas, setVentas] = useState([]);
   const [liquidaciones, setLiquidaciones] = useState([]);
 
-  const [activeTab, setActiveTab] = useState('resumen');
-
-  // Filtro de estado para historial de ventas y pagos
-  const [filtroVentas, setFiltroVentas] = useState('todos');
+  const [activeTab, setActiveTab] = useState('liquidacion');
+  const [selectedVentas, setSelectedVentas] = useState([]);
 
   // Cálculos derivados
   const pendingSales = ventas.filter((v) => !v.liquidacionId);
+  const liquidatedSales = ventas.filter((v) => !!v.liquidacionId);
+  
   const totalSalesAmount = ventas.reduce((acc, curr) => acc + Number(curr.subtotal), 0);
   const pendingAmount = pendingSales.reduce((acc, curr) => acc + Number(curr.subtotal), 0) * 0.02;
   const totalPaid = liquidaciones.reduce((acc, curr) => acc + Number(curr.total), 0);
-
-  // Ventas filtradas
-  const ventasFiltradas = ventas.filter((v) => {
-    if (filtroVentas === 'pendiente') return !v.liquidacionId;
-    if (filtroVentas === 'pagado') return !!v.liquidacionId;
-    return true;
-  });
 
   useEffect(() => {
     fetchData();
@@ -55,6 +47,7 @@ const VendedorLiquidaciones = () => {
       setVendedor(response.data);
       setVentas(response.data.ventas || []);
       setLiquidaciones(response.data.liquidaciones || []);
+      setSelectedVentas([]); // Limpiar selección al recargar
     } catch (error) {
       console.error(error);
       toast.error('Error al cargar datos del vendedor');
@@ -64,36 +57,49 @@ const VendedorLiquidaciones = () => {
     }
   };
 
-  const handleLiquidar = async () => {
-    const start = document.getElementById('liq-start').value;
-    const end = document.getElementById('liq-end').value;
+  const handleToggleSeleccion = (ventaId) => {
+    setSelectedVentas((prev) =>
+      prev.includes(ventaId)
+        ? prev.filter((id) => id !== ventaId)
+        : [...prev, ventaId]
+    );
+  };
 
-    if (!start || !end) {
-      toast.error('Por favor seleccione un rango de fechas');
+  const handleSelectAll = () => {
+    if (selectedVentas.length === pendingSales.length) {
+      setSelectedVentas([]);
+    } else {
+      setSelectedVentas(pendingSales.map((v) => v.id));
+    }
+  };
+
+  const handleLiquidarSeleccionadas = async () => {
+    if (selectedVentas.length === 0) return;
+    
+    const montoComision = (selectedVentas.reduce((acc, vId) => {
+        const v = ventas.find(vent => vent.id === vId);
+        return acc + (v ? Number(v.subtotal) : 0);
+    }, 0) * 0.02).toFixed(2);
+
+    if (!window.confirm(`¿Desea liquidar las ${selectedVentas.length} ventas seleccionadas?\nTotal Comisión: $${montoComision}`)) {
       return;
     }
-    if (!window.confirm('¿Está seguro de generar la liquidación para este periodo?')) return;
 
     try {
       setLoadingAction(true);
-      await axiosInstance.post(`/liquidaciones/liquidar/${id}`, {
-        fechaInicio: start,
-        fechaFin: end,
-      });
-      toast.success('Liquidación generada correctamente');
-      fetchData();
+      // PREPARADO PARA FUTURO ENDPOINT (POST /liquidaciones/liquidar-seleccion)
+      toast.success('Petición preparada (Esperando backend)');
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.error || 'Error al generar liquidación');
+      toast.error(error.response?.data?.error || 'Error al procesar la liquidación');
     } finally {
       setLoadingAction(false);
     }
   };
 
   const TABS = [
-    { id: 'resumen', label: 'Resumen y Liquidar' },
-    { id: 'ventas', label: 'Historial de Ventas' },
-    { id: 'pagos', label: 'Historial de Pagos' },
+    { id: 'liquidacion', label: 'Resumen y Liquidación', icon: DollarSign },
+    { id: 'historial-ventas', label: 'Ventas Liquidadas', icon: History },
   ];
 
   return (
@@ -101,8 +107,8 @@ const VendedorLiquidaciones = () => {
       {/* Encabezado con Datos del Vendedor */}
       <div className="flex-shrink-0">
         <PageHeader
-          title={vendedor ? `Actividad: ${capitalizeFirst(vendedor.nombre)} ${capitalizeFirst(vendedor.apellido)}` : 'Actividad Financiera'}
-          description={vendedor ? `Gestione las ventas y liquidaciones de ${capitalizeFirst(vendedor.nombre)}` : 'Obteniendo información...'}
+          title={vendedor ? `Vendedor: ${capitalizeFirst(vendedor.nombre)} ${capitalizeFirst(vendedor.apellido)}` : 'Cargando...'}
+          description="Gestión integral de ventas comerciales y comisiones"
           backTo="/admin/vendedores"
           icon={TrendingUp}
           loading={loading && !vendedor}
@@ -117,11 +123,12 @@ const VendedorLiquidaciones = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               disabled={loading && !vendedor}
-              className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors disabled:opacity-50 ${activeTab === tab.id
+              className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors disabled:opacity-50 ${activeTab === tab.id
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                 }`}
             >
+              <tab.icon className="h-4 w-4" />
               {tab.label}
             </button>
           ))}
@@ -132,191 +139,171 @@ const VendedorLiquidaciones = () => {
       <div className="flex-grow flex flex-col overflow-hidden">
         {loading && !vendedor ? (
           <div className="flex-1 flex items-center justify-center">
-            <InnerLoading message="Cargando datos de liquidación..." />
+            <InnerLoading message="Cargando..." />
           </div>
         ) : (
           <div className="animate-in fade-in duration-500 h-full flex flex-col">
 
-            {/* ─── PESTAÑA: Resumen y Liquidar ─── */}
-            {activeTab === 'resumen' && (
-              <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar space-y-6">
-                {/* Cards de resumen */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {/* Total Facturado */}
-                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 transition-all hover:shadow-md">
+            {/* ─── PESTAÑA: Resumen y Liquidación ─── */}
+            {activeTab === 'liquidacion' && (
+              <div className="flex-grow flex flex-col gap-6 overflow-hidden">
+                {/* Dashboard Metrics */}
+                <div className="flex-shrink-0 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 pr-2">
+                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/20">
                         <Receipt className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Facturado</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${totalSalesAmount.toLocaleString()}</h3>
+                        <p className="text-xs font-medium text-gray-500">Total Facturado</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">${totalSalesAmount.toLocaleString()}</h3>
                       </div>
                     </div>
                   </div>
 
-                  {/* Ventas pendientes (cantidad) */}
-                  <div className="rounded-xl border border-amber-100 bg-white p-5 shadow-sm dark:border-amber-900/20 dark:bg-gray-800 transition-all hover:shadow-md text-amber-600">
+                  <div className="rounded-xl border border-amber-100 bg-white p-5 shadow-sm dark:border-amber-900/10 dark:bg-gray-800">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
                         <ShoppingBag className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Ventas Pendientes</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{pendingSales.length}</h3>
+                        <p className="text-xs font-medium text-gray-500">Ventas Pendientes</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{pendingSales.length}</h3>
                       </div>
                     </div>
                   </div>
 
-                  {/* Monto pendiente */}
-                  <div className="rounded-xl border border-orange-100 bg-white p-5 shadow-sm dark:border-orange-900/20 dark:bg-gray-800 transition-all hover:shadow-md text-orange-600">
+                  <div className="rounded-xl border border-orange-100 bg-white p-5 shadow-sm dark:border-orange-900/10 dark:bg-gray-800 text-orange-600">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
                         <DollarSign className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Comisión Pendiente</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${pendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                        <p className="text-xs font-medium text-gray-500">Por Liquidar</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">${pendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                       </div>
                     </div>
                   </div>
 
-                  {/* Total liquidado */}
-                  <div className="rounded-xl border border-emerald-100 bg-white p-5 shadow-sm dark:border-emerald-900/20 dark:bg-gray-800 transition-all hover:shadow-md text-emerald-600">
+                  <div className="rounded-xl border border-emerald-100 bg-white p-5 shadow-sm dark:border-emerald-900/10 dark:bg-gray-800 text-emerald-600">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                         <CheckCircle2 className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Pagado</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                        <p className="text-xs font-medium text-gray-500">Total Pagado</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Panel para generar nueva liquidación */}
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
-                  <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Generar Nueva Liquidación</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                      Seleccione el periodo para calcular y registrar las comisiones pendientes.
-                    </p>
-                  </div>
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end">
-                      <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                          Fecha Inicio
-                        </label>
-                        <div className="relative">
-                          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <Calendar className="h-4 w-4 text-gray-400" />
-                          </div>
-                          <input
-                            type="date"
-                            id="liq-start"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                          Fecha Fin
-                        </label>
-                        <div className="relative">
-                          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <Calendar className="h-4 w-4 text-gray-400" />
-                          </div>
-                          <input
-                            type="date"
-                            id="liq-end"
-                            defaultValue={new Date().toISOString().split('T')[0]}
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                          />
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleLiquidar}
-                        disabled={loadingAction || pendingSales.length === 0}
-                        className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm"
-                      >
-                        <DollarSign className="h-4 w-4" />
-                        {loadingAction ? 'Procesando...' : 'Liquidar Periodo'}
-                      </button>
+                {/* Table of Pending Sales */}
+                <div className="flex-grow flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
+                  <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Ventas por Liquidar</h2>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Seleccione los elementos para procesar la liquidación</p>
                     </div>
-                    {pendingSales.length === 0 && (
-                      <p className="mt-4 text-xs text-center text-gray-400 italic">
-                        No hay ventas pendientes para liquidar.
-                      </p>
-                    )}
+                    
+                    <button
+                      onClick={handleLiquidarSeleccionadas}
+                      disabled={selectedVentas.length === 0 || loadingAction}
+                      className="flex items-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-green-700 shadow-md transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+                    >
+                      <DollarSign className="h-4 w-4" />
+                      Liquidar
+                    </button>
+                  </div>
+                  
+                  <div className="flex-grow overflow-auto custom-scrollbar">
+                    <table className="w-full text-left text-sm relative">
+                      <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
+                        <tr>
+                          <th className="px-6 py-3 w-10">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              checked={selectedVentas.length === pendingSales.length && pendingSales.length > 0}
+                              onChange={handleSelectAll}
+                              disabled={pendingSales.length === 0}
+                            />
+                          </th>
+                          <th className="px-6 py-3">Descripción</th>
+                          <th className="px-6 py-3 text-right">Monto</th>
+                          <th className="px-6 py-3 text-right">Comisión (2%)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                        {pendingSales.length > 0 ? (
+                          pendingSales.map((v) => (
+                            <tr key={v.id} className="transition-colors hover:bg-blue-50/20 dark:hover:bg-blue-900/10">
+                              <td className="px-6 py-4">
+                                <input
+                                  type="checkbox"
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer h-4 w-4"
+                                  checked={selectedVentas.includes(v.id)}
+                                  onChange={() => handleToggleSeleccion(v.id)}
+                                />
+                              </td>
+                              <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{v.descripcion}</td>
+                              <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
+                                ${Number(v.subtotal).toFixed(2)}
+                              </td>
+                              <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
+                                ${(Number(v.subtotal) * 0.02).toFixed(2)}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4" className="px-6 py-12 text-center text-gray-400 italic font-medium">
+                              <AlertCircle className="h-10 w-10 mx-auto mb-2 opacity-20" />
+                              No hay ventas pendientes.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* ─── PESTAÑA: Historial de Ventas ─── */}
-            {activeTab === 'ventas' && (
+            {/* ─── PESTAÑA: Ventas Liquidadas ─── */}
+            {activeTab === 'historial-ventas' && (
               <div className="h-full flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
-                <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
-                  <div>
+                <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Historial de Ventas</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{ventas.length} ventas totales</p>
-                  </div>
-                  {/* Filtro de estado */}
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-gray-400 shrink-0" />
-                    <select
-                      value={filtroVentas}
-                      onChange={(e) => setFiltroVentas(e.target.value)}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                    >
-                      <option value="todos">Todos los estados</option>
-                      <option value="pendiente">Pendiente</option>
-                      <option value="pagado">Pagado</option>
-                    </select>
-                  </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Ventas que ya han sido procesadas</p>
                 </div>
+                
                 <div className="flex-grow overflow-auto custom-scrollbar">
                   <table className="w-full text-left text-sm relative">
-                    <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
+                    <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-800 dark:text-gray-400">
                       <tr>
-                        <th className="px-4 py-3">ID</th>
-                        <th className="px-4 py-3">Descripción</th>
-                        <th className="px-4 py-3 text-right">Monto Venta</th>
-                        <th className="px-4 py-3 text-right">Comisión (2%)</th>
-                        <th className="px-4 py-3 text-center">Estado</th>
+                        <th className="px-6 py-3">Descripción</th>
+                        <th className="px-6 py-3 text-right">Monto</th>
+                        <th className="px-6 py-3 text-right">Comisión</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {ventasFiltradas.length > 0 ? (
-                        ventasFiltradas.map((v) => (
+                      {liquidatedSales.length > 0 ? (
+                        liquidatedSales.map((v) => (
                           <tr key={v.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                            <td className="px-4 py-2.5 text-xs font-mono text-gray-400">#{v.id}</td>
-                            <td className="px-4 py-2.5 font-medium text-gray-900 dark:text-white">{v.descripcion}</td>
-                            <td className="px-4 py-2.5 text-right text-gray-700 dark:text-gray-300">
+                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{v.descripcion}</td>
+                            <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
                               ${Number(v.subtotal).toFixed(2)}
                             </td>
-                            <td className="px-4 py-2.5 text-right text-gray-500 dark:text-gray-400">
+                            <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
                               ${(Number(v.subtotal) * 0.02).toFixed(2)}
                             </td>
-                            <td className="px-4 py-2.5 text-center">
-                              {v.liquidacionId ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30">
-                                  <CheckCircle2 className="h-3.5 w-3.5" /> Liquidado
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/30">
-                                  <AlertCircle className="h-3.5 w-3.5" /> Pendiente
-                                </span>
-                              )}
-                            </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic">
-                            No hay ventas{filtroVentas !== 'todos' ? ` con estado "${filtroVentas}"` : ''}.
+                          <td colSpan="3" className="px-6 py-12 text-center text-gray-400 italic">
+                            No hay registros de ventas liquidadas.
                           </td>
                         </tr>
                       )}
@@ -325,57 +312,6 @@ const VendedorLiquidaciones = () => {
                 </div>
               </div>
             )}
-
-            {/* ─── PESTAÑA: Historial de Pagos ─── */}
-            {activeTab === 'pagos' && (
-              <div className="h-full flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
-                <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex flex-col gap-1 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Historial de Pagos</h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{liquidaciones.length} liquidaciones totales</p>
-                </div>
-                <div className="flex-grow overflow-auto custom-scrollbar">
-                  <table className="w-full text-left text-sm relative">
-                    <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
-                      <tr>
-                        <th className="px-4 py-3">Nro.</th>
-                        <th className="px-4 py-3">Fecha de Liquidación</th>
-                        <th className="px-4 py-3 text-right">Total</th>
-                        <th className="px-4 py-3 text-center">Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {liquidaciones.length > 0 ? (
-                        liquidaciones.map((l) => (
-                          <tr key={l.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                            <td className="px-4 py-2.5 font-mono text-xs font-medium text-gray-500 dark:text-gray-400">
-                              #{l.numero}
-                            </td>
-                            <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                              {new Date(l.fechaEmision).toLocaleDateString()}
-                            </td>
-                            <td className="px-4 py-2.5 text-right font-bold text-green-600 dark:text-green-400">
-                              ${Number(l.total).toFixed(2)}
-                            </td>
-                            <td className="px-4 py-2.5 text-center">
-                              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                <CheckCircle2 className="h-3 w-3" /> Pagado
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="4" className="px-6 py-12 text-center text-gray-400 italic">
-                            Sin historial de liquidaciones.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
           </div>
         )}
       </div>
