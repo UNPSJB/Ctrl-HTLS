@@ -47,8 +47,31 @@ const listarLiquidaciones = async (req, res) => {
   }
 };
 
+const liquidarVendedorPorDetallesController = async (req, res) => {
+  const { vendedorId } = req.params;
+  const { detalleIds } = req.body;
+
+  if (!detalleIds || !Array.isArray(detalleIds) || detalleIds.length === 0) {
+    return res.status(400).json({
+      message: 'Por favor ingresa un array de detalleIds.',
+    });
+  }
+
+  try {
+    const resultado = await liquidacionesServices.liquidarVendedorPorDetalles(
+      vendedorId,
+      detalleIds,
+    );
+    res.status(201).json(resultado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   liquidarComisiones,
   liquidarVendedor,
   listarLiquidaciones,
+  liquidarVendedorPorDetalles: liquidarVendedorPorDetallesController,
 };

@@ -32,7 +32,10 @@ const liquidarComisiones = async (fechaInicio, fechaFin) => {
   const hasta = parsearFecha(fechaFin, 'de fin');
 
   if (desde > hasta) {
-    throw new CustomError('La fecha de inicio debe ser anterior a la fecha fin', 400);
+    throw new CustomError(
+      'La fecha de inicio debe ser anterior a la fecha fin',
+      400,
+    );
   }
 
   const hastaFinDeDia = new Date(hasta);
@@ -105,7 +108,9 @@ const liquidarComisiones = async (fechaInicio, fechaFin) => {
       }
 
       ultimoNumero += 1;
-      const totalComision = Number((info.totalVentas * PARCIAL_COMISION).toFixed(2));
+      const totalComision = Number(
+        (info.totalVentas * PARCIAL_COMISION).toFixed(2),
+      );
 
       const liquidacion = await Liquidacion.create(
         {
@@ -175,7 +180,10 @@ const liquidarVendedorPorId = async (vendedorId, fechaInicio, fechaFin) => {
   const hasta = parsearFecha(fechaFin, 'de fin');
 
   if (desde > hasta) {
-    throw new CustomError('La fecha de inicio debe ser anterior a la fecha fin', 400);
+    throw new CustomError(
+      'La fecha de inicio debe ser anterior a la fecha fin',
+      400,
+    );
   }
 
   const hastaFinDeDia = new Date(hasta);
@@ -209,7 +217,8 @@ const liquidarVendedorPorId = async (vendedorId, fechaInicio, fechaFin) => {
     if (!detallesPendientes.length) {
       await transaction.rollback();
       return {
-        message: 'El vendedor no tiene comisiones pendientes para el rango indicado',
+        message:
+          'El vendedor no tiene comisiones pendientes para el rango indicado',
         liquidacion: null,
       };
     }
@@ -227,7 +236,8 @@ const liquidarVendedorPorId = async (vendedorId, fechaInicio, fechaFin) => {
       };
     }
 
-    const ultimoNumero = (await obtenerUltimoNumeroLiquidacion(transaction)) + 1;
+    const ultimoNumero =
+      (await obtenerUltimoNumeroLiquidacion(transaction)) + 1;
     const comision = Number((totalVentas * PARCIAL_COMISION).toFixed(2));
     const fechaEmision = new Date();
 
@@ -306,8 +316,112 @@ const obtenerLiquidaciones = async (fechaInicio, fechaFin) => {
   return liquidaciones;
 };
 
+const liquidarVendedorPorDetalles = async (vendedorId, detalleIds) => {
+  const idNumerico = Number(vendedorId);
+  if (Number.isNaN(idNumerico) || idNumerico <= 0) {
+    throw new CustomError('El id del vendedor no es válido', 400);
+  }
+
+  if (!Array.isArray(detalleIds) || detalleIds.length === 0) {
+    throw new CustomError('Debe proporcionar al menos un id de venta', 400);
+  }
+
+  const vendedor = await Empleado.findByPk(idNumerico);
+  if (!vendedor || vendedor.rol !== 'vendedor') {
+    throw new CustomError('Vendedor no encontrado', 404);
+  }
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    const detallesPendientes = await DetalleFactura.findAll({
+      where: {
+        id: detalleIds,
+        liquidacionId: null,
+        empleadoId: idNumerico,
+      },
+      attributes: ['id', 'subtotal'],
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
+
+    if (detallesPendientes.length !== detalleIds.length) {
+      await transaction.rollback();
+      const encontrados = detallesPendientes.map((d) => d.id);
+      const noEncontrados = detalleIds.filter(
+        (id) => !encontrados.includes(id),
+      );
+      throw new CustomError(
+        `Algunos detalles no existen, ya están liquidados o no pertenecen al vendedor: ${noEncontrados.join(', ')}`,
+        400,
+      );
+    }
+
+    const totalVentas = detallesPendientes.reduce(
+      (acumulado, detalle) => acumulado + Number(detalle.subtotal),
+      0,
+    );
+
+    if (totalVentas <= 0) {
+      await transaction.rollback();
+      return {
+        message: 'El vendedor no posee montos pendientes para liquidar',
+        liquidacion: null,
+      };
+    }
+
+    const ultimoNumero =
+      (await obtenerUltimoNumeroLiquidacion(transaction)) + 1;
+    const comision = Number((totalVentas * PARCIAL_COMISION).toFixed(2));
+    const fechaEmision = new Date();
+
+    const liquidacion = await Liquidacion.create(
+      {
+        numero: ultimoNumero,
+        fecha_emision: fechaEmision,
+        fecha_pago: fechaEmision,
+        total: comision,
+        empleadoId: idNumerico,
+      },
+      { transaction },
+    );
+
+    const detallesActualizados = detallesPendientes.map(
+      (detalle) => detalle.id,
+    );
+    await DetalleFactura.update(
+      { liquidacionId: liquidacion.id },
+      {
+        where: { id: detallesActualizados },
+        transaction,
+      },
+    );
+
+    await transaction.commit();
+
+    return {
+      message: 'Liquidación generada correctamente',
+      liquidacion: {
+        liquidacion: liquidacion.toJSON(),
+        totalVentas: Number(totalVentas.toFixed(2)),
+        comision,
+        detalles: detallesActualizados,
+      },
+    };
+  } catch (error) {
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
+    throw new CustomError(
+      `Error al liquidar vendedor: ${error.message}`,
+      error.statusCode || 500,
+    );
+  }
+};
+
 module.exports = {
   liquidarComisiones,
   liquidarVendedorPorId,
   obtenerLiquidaciones,
+  liquidarVendedorPorDetalles,
 };
