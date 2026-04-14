@@ -124,8 +124,8 @@ const AdministradoresForm = () => {
 
     const onSubmit = async (data) => {
         try {
-            // Eliminar contraseña vacía en modo edición
-            if (isEditing && !data.password) delete data.password;
+            // Eliminar contraseña en modo edición
+            if (isEditing) delete data.password;
 
             if (isEditing) {
                 // Usar endpoint exclusivo de administradores para la actualización
@@ -166,8 +166,8 @@ const AdministradoresForm = () => {
                             { id: 'personal', icon: User, label: 'Información Personal' },
                             { id: 'contacto', icon: Phone, label: 'Medios de Contacto' },
                             { id: 'ubicacion', icon: MapPin, label: 'Ubicación Geográfica' },
-                            { id: 'seguridad', icon: Lock, label: 'Seguridad de la Cuenta' },
-                        ]}
+                            (!isEditing) && { id: 'seguridad', icon: Lock, label: 'Seguridad de la Cuenta' },
+                        ].filter(Boolean)}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
                         loading={loadingData}
@@ -259,26 +259,27 @@ const AdministradoresForm = () => {
                             </div>
 
                             {/* Seguridad de la Cuenta */}
-                            <div className={activeTab === 'seguridad' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
-                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                    <FormField
-                                        label={isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña'}
-                                        required={!isEditing}
-                                        error={errors.password}
-                                    >
-                                        <PasswordInput
-                                            id="password"
-                                            {...register('password', {
-                                                required: !isEditing ? 'La contraseña es obligatoria' : false,
-                                                minLength: { value: 6, message: 'Mínimo 6 caracteres' }
-                                            })}
-                                            placeholder="••••••••"
-                                        />
-                                    </FormField>
-                                    {isEditing && <p className="mt-1 text-xs text-gray-500 italic flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Deje en blanco para mantener la contraseña actual.</p>}
+                            {(!isEditing) && (
+                                <div className={activeTab === 'seguridad' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguridad de la Cuenta</h3>
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <FormField
+                                            label="Contraseña"
+                                            required={true}
+                                            error={errors.password}
+                                        >
+                                            <PasswordInput
+                                                id="password"
+                                                {...register('password', {
+                                                    required: 'La contraseña es obligatoria',
+                                                    minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+                                                })}
+                                                placeholder="••••••••"
+                                            />
+                                        </FormField>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
 

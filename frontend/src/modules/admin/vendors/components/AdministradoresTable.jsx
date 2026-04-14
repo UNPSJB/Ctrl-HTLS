@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Trash2, Search, Plus, X, User } from 'lucide-react';
+import { Edit, Trash2, Search, Plus, X, User, Key } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
+import ChangePasswordModal from './ChangePasswordModal';
 import axiosInstance from '@api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -19,6 +20,8 @@ const AdministradoresTable = () => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+    const [selectedAdminId, setSelectedAdminId] = useState(null);
 
     useEffect(() => {
         fetchAdmins();
@@ -52,6 +55,11 @@ const AdministradoresTable = () => {
 
     const handleEdit = (id) => {
         navigate(`/admin/administradores/editar/${id}`);
+    };
+
+    const handlePasswordChange = (id) => {
+        setSelectedAdminId(id);
+        setPasswordModalOpen(true);
     };
 
     const filteredAdmins = useMemo(() => {
@@ -138,6 +146,7 @@ const AdministradoresTable = () => {
                       </td>
                       <td className="px-6 py-3 text-right">
                                                 <div className="flex justify-end gap-2">
+                                                    <TableButton variant="view" icon={Key} onClick={() => handlePasswordChange(admin.id)} title="Cambiar Contraseña" />
                                                     <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(admin.id)} />
                                                     <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(admin.id)} />
                                                 </div>
@@ -168,6 +177,12 @@ const AdministradoresTable = () => {
                     itemsPerPage={ITEMS_PER_PAGE}
                     onPageChange={setCurrentPage}
                     disabled={loading}
+                />
+
+                <ChangePasswordModal 
+                    isOpen={passwordModalOpen}
+                    onClose={() => setPasswordModalOpen(false)}
+                    empleadoId={selectedAdminId}
                 />
             </div>
         </div>

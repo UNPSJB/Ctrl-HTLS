@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Edit, Trash2, BarChart3, User, Users } from 'lucide-react';
+import { Edit, Trash2, BarChart3, User, Users, Key } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
+import ChangePasswordModal from './ChangePasswordModal';
 import axiosInstance from '@api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -20,6 +21,8 @@ const VendedoresTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [selectedVendedorId, setSelectedVendedorId] = useState(null);
 
   useEffect(() => {
     fetchVendedores();
@@ -42,6 +45,11 @@ const VendedoresTable = () => {
 
   const handleEdit = (id) => {
     navigate(`/admin/vendedores/editar/${id}`);
+  };
+
+  const handlePasswordChange = (id) => {
+    setSelectedVendedorId(id);
+    setPasswordModalOpen(true);
   };
 
   const filteredVendedores = useMemo(() => {
@@ -140,6 +148,7 @@ const VendedoresTable = () => {
                       </td>
                       <td className="px-6 py-3 text-right">
                         <div className="flex justify-end gap-2">
+                          <TableButton variant="view" icon={Key} onClick={() => handlePasswordChange(vendedor.id)} title="Cambiar Contraseña" />
                           <TableButton
                             variant="view"
                             icon={BarChart3}
@@ -169,13 +178,18 @@ const VendedoresTable = () => {
           </div>
         </div>
 
-        {/* Paginación */}
         <TablePagination
           currentPage={currentPage}
           totalItems={filteredVendedores.length}
           itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
           disabled={loading}
+        />
+
+        <ChangePasswordModal 
+          isOpen={passwordModalOpen}
+          onClose={() => setPasswordModalOpen(false)}
+          empleadoId={selectedVendedorId}
         />
       </div>
     </div>
