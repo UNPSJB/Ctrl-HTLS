@@ -241,6 +241,11 @@ export function CarritoProvider({ children }) {
     }
   }, []);
 
+  // Sincroniza el estado del reducer nativo con el LocalStorage cada que vez que cambie
+  useEffect(() => {
+    setPersistedState(estado);
+  }, [estado, setPersistedState]);
+
   const agregarHabitacion = useCallback(
     (hotelInfo, habitacion, fechas) => {
       if (estado.reservaConfirmada) {

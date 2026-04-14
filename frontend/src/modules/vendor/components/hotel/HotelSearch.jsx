@@ -49,8 +49,8 @@ function HotelSearch({
     if (isCompact && filtros) {
       setLocalFilters({
         nombre: filtros.nombre || '',
-        fechaInicio: filtros.fechaInicio ? toISODate(new Date(filtros.fechaInicio)) : toISODate(new Date()),
-        fechaFin: filtros.fechaFin ? toISODate(new Date(filtros.fechaFin)) : toISODate(new Date(Date.now() + 86400000)),
+        fechaInicio: filtros.fechaInicio ? toISODate(filtros.fechaInicio) : toISODate(new Date()),
+        fechaFin: filtros.fechaFin ? toISODate(filtros.fechaFin) : toISODate(new Date(Date.now() + 86400000)),
         capacidad: filtros.capacidad || 2,
       });
 
