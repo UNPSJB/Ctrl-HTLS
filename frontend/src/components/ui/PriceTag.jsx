@@ -2,13 +2,22 @@ import { formatCurrency } from '@utils/pricingUtils';
 
 // Componente para mostrar precios con formato de moneda ARS
 function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
+  const hasOriginal = typeof original === 'number';
+  const isDiscount = hasOriginal && original > precio;
+  const isSurcharge = hasOriginal && original < precio;
+  const mostrarOriginal = isDiscount || isSurcharge;
 
-  const mostrarOriginal = typeof original === 'number' && original > precio;
   const isColumn = seasonLayout === 'column';
 
   const layoutClass = isColumn
     ? 'flex-col items-center gap-2'
     : 'flex-row items-baseline gap-3';
+
+  const mainColorClass = isDiscount
+    ? 'text-green-600 dark:text-green-400'
+    : isSurcharge
+      ? 'text-red-600 dark:text-red-400'
+      : 'text-gray-800 dark:text-gray-200';
 
   return (
     <>
@@ -16,10 +25,7 @@ function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
         <div className={`flex ${layoutClass}`}>
           { }
           <p
-            className={`text-md font-bold ${isColumn
-                ? 'w-full text-green-600 dark:text-green-400 sm:w-auto'
-                : 'text-green-600 dark:text-green-400'
-              }`}
+            className={`text-md font-bold ${isColumn ? `w-full ${mainColorClass} sm:w-auto` : mainColorClass}`}
             aria-label={`Precio actual ${formatCurrency(precio)}`}
             title={`Precio: ${formatCurrency(precio)}`}
           >

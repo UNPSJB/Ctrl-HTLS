@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { User, Lock, Loader2, LogIn } from 'lucide-react';
+import TextInput from '@ui/form/TextInput';
+import PasswordInput from '@ui/form/PasswordInput';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -52,13 +54,12 @@ const LoginPage = () => {
                 Usuario / Email
               </label>
               <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3">
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  type="text" // Assuming username can be email or plain text
+                <TextInput
                   placeholder="admin@ejemplo.com"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  className="pl-10"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isLoading}
@@ -71,13 +72,12 @@ const LoginPage = () => {
                 Contraseña
               </label>
               <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  type="password"
+                <PasswordInput
                   placeholder="••••••••"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  className="pl-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}

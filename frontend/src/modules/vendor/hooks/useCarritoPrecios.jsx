@@ -23,6 +23,11 @@ export function useCarritoPrecios() {
     const porHotel = {};
     let totalOriginal = 0;
     let totalFinal = 0;
+    
+    let globalTemporadaAlta = 0;
+    let globalTemporadaBaja = 0;
+    let globalDescuentoCantidad = 0;
+    let globalDescuentoPaquetes = 0;
 
     (carrito.hoteles || []).forEach((hotel) => {
       const temporada = hotel?.temporada ?? null;
@@ -93,6 +98,16 @@ export function useCarritoPrecios() {
       // Acumular totales globales
       totalOriginal += subtotalHabsOriginal + subtotalPaquetesOriginal;
       totalFinal += subtotalHotel;
+      
+      // Acumular desglose global
+      const ajusteTemporadaTotal = ajusteTemporadaHabs + ajusteTemporadaPaquetes;
+      if (ajusteTemporadaTotal > 0) {
+        globalTemporadaAlta += ajusteTemporadaTotal;
+      } else if (ajusteTemporadaTotal < 0) {
+        globalTemporadaBaja += Math.abs(ajusteTemporadaTotal);
+      }
+      globalDescuentoCantidad += descInfo.montoDescuento;
+      globalDescuentoPaquetes += descuentoPaquetes;
     });
 
     return {
@@ -100,6 +115,10 @@ export function useCarritoPrecios() {
       totalOriginal: Math.round(totalOriginal),
       totalFinal: Math.round(totalFinal),
       totalDescuento: Math.round(totalOriginal - totalFinal),
+      globalTemporadaAlta: Math.round(globalTemporadaAlta),
+      globalTemporadaBaja: Math.round(globalTemporadaBaja),
+      globalDescuentoCantidad: Math.round(globalDescuentoCantidad),
+      globalDescuentoPaquetes: Math.round(globalDescuentoPaquetes),
     };
   }, [carrito.hoteles]);
 

@@ -9,7 +9,14 @@ import FacturaSelector from './FacturaSelector';
 // Resumen final de la transacción y procesamiento del pago
 function PaymentSummary() {
   const { client } = useCliente();
-  const { porHotel, totalFinal } = useCarritoPrecios();
+  const {
+    porHotel,
+    totalFinal,
+    globalTemporadaAlta,
+    globalTemporadaBaja,
+    globalDescuentoCantidad,
+    globalDescuentoPaquetes
+  } = useCarritoPrecios();
   const { pagar, isProcessing, canConfirm } = usePagar();
 
   // Estados locales que antes estaban en PagoContext
@@ -72,35 +79,11 @@ function PaymentSummary() {
         {tieneHabitaciones && (
           <>
             <div className="flex justify-between text-gray-600 dark:text-gray-400">
-              <span>Habitaciones</span>
+              <span>Subtotal Habitaciones</span>
               <span className="font-medium text-gray-800 dark:text-gray-200">
                 {formatCurrency(breakdown.subtotalHabitaciones)}
               </span>
             </div>
-
-            {breakdown.ajusteTemporadaHabs !== 0 && (
-              <div className={`flex justify-between pl-3 text-xs ${
-                breakdown.ajusteTemporadaHabs < 0
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-orange-600 dark:text-orange-400'
-              }`}>
-                <span>
-                  {breakdown.ajusteTemporadaHabs < 0 ? 'Temporada baja' : 'Temporada alta'}
-                </span>
-                <span className="font-medium">
-                  {breakdown.ajusteTemporadaHabs < 0
-                    ? `-${formatCurrency(Math.abs(breakdown.ajusteTemporadaHabs))}`
-                    : `+${formatCurrency(breakdown.ajusteTemporadaHabs)}`}
-                </span>
-              </div>
-            )}
-
-            {breakdown.descuentoCantidad > 0 && (
-              <div className="flex justify-between pl-3 text-xs text-blue-600 dark:text-blue-400">
-                <span>Desc. por cantidad</span>
-                <span className="font-medium">-{formatCurrency(breakdown.descuentoCantidad)}</span>
-              </div>
-            )}
           </>
         )}
 
@@ -117,36 +100,39 @@ function PaymentSummary() {
                 {formatCurrency(breakdown.subtotalPaquetes)}
               </span>
             </div>
-
-            {breakdown.descuentoPaquetes > 0 && (
-              <div className="flex justify-between pl-3 text-xs text-green-600 dark:text-green-400">
-                <span>Desc. paquete</span>
-                <span className="font-medium">-{formatCurrency(breakdown.descuentoPaquetes)}</span>
-              </div>
-            )}
-
-            {breakdown.ajusteTemporadaPaquetes !== 0 && (
-              <div className={`flex justify-between pl-3 text-xs ${
-                breakdown.ajusteTemporadaPaquetes < 0
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-orange-600 dark:text-orange-400'
-              }`}>
-                <span>
-                  {breakdown.ajusteTemporadaPaquetes < 0 ? 'Temporada baja' : 'Temporada alta'}
-                </span>
-                <span className="font-medium">
-                  {breakdown.ajusteTemporadaPaquetes < 0
-                    ? `-${formatCurrency(Math.abs(breakdown.ajusteTemporadaPaquetes))}`
-                    : `+${formatCurrency(breakdown.ajusteTemporadaPaquetes)}`}
-                </span>
-              </div>
-            )}
           </>
         )}
 
-        {/* Total */}
+        {/* Desglose General */}
         <div className="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
-          <div className="flex items-baseline justify-between">
+          <div className="mb-2 flex flex-col gap-1">
+            {globalTemporadaBaja > 0 && (
+              <div className="flex justify-between text-xs font-medium text-green-600 dark:text-green-400">
+                <span>Descuento Temporada</span>
+                <span>-{formatCurrency(globalTemporadaBaja)}</span>
+              </div>
+            )}
+            {globalTemporadaAlta > 0 && (
+              <div className="flex justify-between text-xs font-medium text-red-600 dark:text-red-400">
+                <span>Aumento Temporada</span>
+                <span>+{formatCurrency(globalTemporadaAlta)}</span>
+              </div>
+            )}
+            {globalDescuentoPaquetes > 0 && (
+              <div className="flex justify-between text-xs font-medium text-green-600 dark:text-green-400">
+                <span>Desc. de Paquetes</span>
+                <span>-{formatCurrency(globalDescuentoPaquetes)}</span>
+              </div>
+            )}
+            {globalDescuentoCantidad > 0 && (
+              <div className="flex justify-between text-xs font-medium text-blue-600 dark:text-blue-400">
+                <span>Desc. por Cantidad</span>
+                <span>-{formatCurrency(globalDescuentoCantidad)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-baseline justify-between border-t border-gray-100 pt-2 dark:border-gray-700/50">
             <span className="text-base font-bold text-gray-900 dark:text-gray-100">
               Total a cobrar
             </span>
@@ -179,8 +165,8 @@ function PaymentSummary() {
           onClick={handlePagar}
           disabled={!canConfirm}
           className={`flex w-full items-center justify-center rounded-lg px-4 py-3 font-semibold text-white transition-colors ${canConfirm
-              ? 'bg-blue-600 hover:bg-blue-700'
-              : 'cursor-not-allowed bg-gray-400'
+            ? 'bg-blue-600 hover:bg-blue-700'
+            : 'cursor-not-allowed bg-gray-400'
             }`}
         >
           {isProcessing ? (

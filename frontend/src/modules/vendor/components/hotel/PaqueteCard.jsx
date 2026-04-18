@@ -132,7 +132,7 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
             </div>
           )}
           {priceInfo.ajusteTemporadaMonto !== 0 && (
-            <div className={`flex items-center gap-2 ${priceInfo.ajusteTemporadaMonto < 0 ? 'text-green-600' : 'text-blue-600'}`}>
+            <div className={`flex items-center gap-2 ${priceInfo.ajusteTemporadaMonto < 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-500'}`}>
               <span>Ajuste de Temporada:</span>
               <span className="font-bold">
                 {priceInfo.ajusteTemporadaMonto < 0 ? '-' : '+'}{formatCurrency(Math.abs(priceInfo.ajusteTemporadaMonto))}
@@ -146,7 +146,7 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
             Subtotal
           </span>
           <div className="text-lg font-black text-gray-900 dark:text-white">
-            <PriceTag precio={priceInfo.final} />
+            <PriceTag precio={priceInfo.final} original={priceInfo.original} />
           </div>
         </div>
       </div>

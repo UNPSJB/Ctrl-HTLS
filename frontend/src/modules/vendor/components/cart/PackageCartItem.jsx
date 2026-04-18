@@ -10,7 +10,7 @@ import { capitalizeWords } from '@/utils/stringUtils';
 function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
   const { fechaInicio, fechaFin, nombre, _cartId } = pack || {};
 
-  const { original: originalTotal } = useMemo(() => {
+  const { original: originalTotal, final: finalTotal } = useMemo(() => {
     return calcPackageTotal({
       paquete: pack,
       temporada: hotel?.temporada,
@@ -42,7 +42,7 @@ function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
               <span className="truncate">{capitalizeWords(nombre ?? 'Paquete')}</span>
             </h4>
           </div>
-          <PriceTag precio={originalTotal} />
+          <PriceTag precio={finalTotal} original={originalTotal} />
         </div>
 
         <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-600">
@@ -52,9 +52,9 @@ function PackageCartItem({ pack, hotel, onRemove = null, isLocked = false }) {
             aria-label={`Eliminar paquete ${nombre ?? ''}`}
             title="Eliminar paquete"
             disabled={!_cartId || isLocked}
-            className="group rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-red-500 focus:outline-none focus:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-500 dark:hover:text-red-400 dark:focus:text-red-400"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-5 w-5" />
           </button>
         </div>
       </div>

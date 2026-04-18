@@ -68,9 +68,9 @@ const Header = () => {
               <button
                 onClick={handleLogoutClick}
                 title="Cerrar sesión"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-red-500 focus:outline-none focus:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-500 dark:hover:text-red-400 dark:focus:text-red-400"
               >
-                <LogOut size={18} />
+                <LogOut className="h-5 w-5" />
               </button>
             </div>
           </div>

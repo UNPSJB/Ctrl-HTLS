@@ -13,7 +13,7 @@ const Temporada = ({ porcentaje, tipo }) => {
   }
 
   return (
-    <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
+    <span className="text-sm font-medium text-red-600 dark:text-red-400">
       +{porcentajeVisual}% (Temporada alta)
     </span>
   );
