@@ -118,9 +118,10 @@ export function dateRangesOverlap(range1, range2) {
 
   if (!start1 || !end1 || !start2 || !end2) return false;
 
-  // La superposición ocurre si un rango comienza antes de que el otro termine,
-  // y termina después de que el otro comience.
-  return start1 < end2 && start2 < end1;
+  // La superposición ocurre si un rango comienza antes O exactamente el mismo día
+  // que el otro termina, y termina después de que el otro comience.
+  // Evita colisiones de "buffer de noches de limpieza".
+  return start1 <= end2 && start2 <= end1;
 }
 
 const DEFAULT = {

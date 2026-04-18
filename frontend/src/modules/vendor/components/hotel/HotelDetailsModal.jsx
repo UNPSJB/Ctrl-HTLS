@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Star, MapPin, AlignLeft, Info, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, AlignLeft, Info, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import Modal from '@ui/Modal';
 import { capitalizeWords } from '@/utils/stringUtils';
+import Calificacion from './Calificacion';
 
 function HotelDetailsModal({ hotel, onClose }) {
   const [showAllServices, setShowAllServices] = useState(false);
 
   if (!hotel) return null;
-
-  const estrellas = Number(hotel.estrellas) || 0;
 
   const categoria = hotel.categoria || {};
   const servicios = categoria?.servicios || [];
@@ -19,8 +18,7 @@ function HotelDetailsModal({ hotel, onClose }) {
       onClose={onClose}
       title={capitalizeWords(hotel.nombre)}
       description="Ficha Técnica y Operativa Comercial"
-      onConfirm={onClose}
-      confirmLabel="Cerrar Ficha"
+      cancelLabel="Cerrar Ficha"
     >
       <div className="flex flex-col gap-6">
         {/* Cabecera: Estrellas y Ubicación alineados a los extremos */}
@@ -34,9 +32,7 @@ function HotelDetailsModal({ hotel, onClose }) {
             </address>
           )}
           <div className="flex items-center gap-1.5">
-            {Array.from({ length: estrellas }).map((_, i) => (
-              <Star key={i} className="h-5 w-5 text-yellow-500" fill="currentColor" />
-            ))}
+            <Calificacion estrellas={hotel.categoria?.estrellas || hotel.estrellas || 0} />
           </div>
         </div>
 

@@ -43,7 +43,13 @@ function HotelCard({ hotel: rawHotel }) {
               </h3>
             </div>
             <ul className="space-y-3">
-              {hotel.habitaciones.map((habitacionTipo) => (
+              {[...hotel.habitaciones]
+                .sort((a, b) => {
+                  const capA = a.capacidad || (a.habitaciones && a.habitaciones[0]?.capacidad) || 0;
+                  const capB = b.capacidad || (b.habitaciones && b.habitaciones[0]?.capacidad) || 0;
+                  return capA - capB;
+                })
+                .map((habitacionTipo) => (
                 <li key={`${hotel.hotelId}-${habitacionTipo.tipo}`}>
                   <HabitacionItem
                     hotelData={hotel}

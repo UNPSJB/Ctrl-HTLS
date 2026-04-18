@@ -20,9 +20,14 @@ const Calificacion = ({ estrellas }) => {
           <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />
         </>
       ) : (
-        <span className="text-xl font-bold text-gray-700 dark:text-gray-300">
-          {String(estrellas).toUpperCase()}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-bold text-gray-700 dark:text-gray-300 leading-none">
+            {String(estrellas).toUpperCase()}
+          </span>
+          <span className="text-sm font-medium text-gray-500 dark:text-gray-400 capitalize flex items-center">
+            (Hospedaje)
+          </span>
+        </div>
       )}
     </div>
   );

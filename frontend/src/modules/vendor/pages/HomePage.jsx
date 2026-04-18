@@ -8,7 +8,7 @@ import { useCarrito } from '@vendor-context/CarritoContext';
 
 const HomePage = () => {
   const { hoteles, isLoading, error, buscarDisponibilidad } = useDisponibilidadSearch();
-  const { reservaConfirmada } = useCarrito();
+  const { reservaConfirmada, isReserving } = useCarrito();
   
   const [isEditing, setIsEditing] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -19,7 +19,9 @@ const HomePage = () => {
     await buscarDisponibilidad(params);
   };
 
-  const estaBloqueado = !!reservaConfirmada;
+  const estaBloqueado = !!reservaConfirmada || isReserving;
+  const isGlobalLoading = isLoading || isReserving;
+
   // El modo compacto se activa si hay hoteles, si ya se ha buscado O si el sistema está bloqueado por una reserva activa
   const showCompact = (hasSearched || hoteles.length > 0 || estaBloqueado) && !isEditing;
 
@@ -28,15 +30,15 @@ const HomePage = () => {
       <HotelSearch
         onSearch={handleSearch}
         onExpand={() => setIsEditing(true)}
-        isLoading={isLoading}
+        isLoading={isGlobalLoading}
         isDisabled={estaBloqueado}
         isCompact={showCompact}
       />
       
       {showCompact && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-          <div className="lg:col-span-3">
-            {estaBloqueado ? (
+          <div className={`lg:col-span-3 transition-opacity duration-300 ${isReserving ? 'pointer-events-none opacity-50' : ''}`}>
+            {!!reservaConfirmada ? (
               <ReservaPendienteView />
             ) : (
               <HotelList
@@ -47,7 +49,7 @@ const HomePage = () => {
               />
             )}
           </div>
-          <div className="lg:col-span-2">
+          <div className={`lg:col-span-2 transition-opacity duration-300 ${isLoading ? 'pointer-events-none opacity-60' : ''}`}>
             <CartSummary />
           </div>
         </div>

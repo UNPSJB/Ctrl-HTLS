@@ -5,6 +5,7 @@ import {
   useMemo,
   useEffect,
   useCallback,
+  useState,
 } from 'react';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import dateUtils from '@/utils/dateUtils';
@@ -211,6 +212,7 @@ export function CarritoProvider({ children }) {
     estadoInicial
   );
   const [estado, dispatch] = useReducer(carritoReducer, persistedState);
+  const [isReserving, setIsReserving] = useState(false);
 
   useEffect(() => {
     const normalizeHoteles = (hoteles = []) =>
@@ -401,6 +403,8 @@ export function CarritoProvider({ children }) {
     () => ({
       carrito: estado,
       reservaConfirmada: estado.reservaConfirmada,
+      isReserving,
+      setIsReserving,
       agregarHabitacion,
       agregarPaquete,
       removerHabitacion,
@@ -417,6 +421,8 @@ export function CarritoProvider({ children }) {
     }),
     [
       estado,
+      isReserving,
+      setIsReserving,
       agregarHabitacion,
       agregarPaquete,
       removerHabitacion,

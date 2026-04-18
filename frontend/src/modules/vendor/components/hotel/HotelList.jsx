@@ -2,6 +2,7 @@ import { useState } from 'react';
 import HotelCard from './HotelCard';
 import HotelFilter from './HotelFilter';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import StateMessage from '@/components/ui/StateMessage';
 
 const HotelList = ({ hoteles, isLoading, error, hasSearched = false }) => {
   const [filters, setFilters] = useState({
@@ -70,10 +71,11 @@ const HotelList = ({ hoteles, isLoading, error, hasSearched = false }) => {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-100 bg-red-50 p-6 text-center text-red-600 dark:border-red-900/30 dark:bg-red-900/20">
-        <p className="font-bold">Error en la búsqueda</p>
-        <p className="text-sm opacity-80">{error}</p>
-      </div>
+      <StateMessage
+        variant="error"
+        title="Error en la búsqueda"
+        description={error}
+      />
     );
   }
 
@@ -101,37 +103,20 @@ const HotelList = ({ hoteles, isLoading, error, hasSearched = false }) => {
           />
 
           {hoteles.length === 0 ? (
-            <div className="w-full animate-in fade-in zoom-in-95 duration-500">
-              <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div className="mb-6 flex items-center gap-4 border-b border-gray-100 pb-4 dark:border-gray-700">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                    <Search className="h-6 w-6 text-blue-500 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                      {hasSearched ? 'Sin disponibilidad' : 'Buscador de Disponibilidad'}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {hasSearched ? 'Búsqueda finalizada' : 'Listo para buscar'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mb-2">
-                  <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-                    {hasSearched 
-                      ? 'Lo sentimos, no hemos encontrado habitaciones disponibles para los criterios seleccionados. Intente ajustar las fechas de estancia o seleccionar una ciudad cercana para ampliar los resultados.' 
-                      : 'Utilice el buscador superior para encontrar las mejores opciones de alojamiento para sus clientes. Los resultados aparecerán detallados en esta sección.'}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <StateMessage
+              variant="info"
+              title={hasSearched ? 'Sin disponibilidad' : 'Buscador de Disponibilidad'}
+              subtitle={hasSearched ? 'Búsqueda finalizada' : 'Listo para buscar'}
+              description={hasSearched 
+                ? 'Lo sentimos, no hemos encontrado habitaciones disponibles para los criterios seleccionados. Intente ajustar las fechas de estancia o seleccionar una ciudad cercana para ampliar los resultados.' 
+                : 'Utilice el buscador superior para encontrar las mejores opciones de alojamiento para sus clientes. Los resultados aparecerán detallados en esta sección.'}
+            />
           ) : sortedHotels.length === 0 ? (
-            <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-6 text-center dark:border-gray-700 dark:bg-gray-800/30">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                No hay hoteles que coincidan con los filtros aplicados (categoría/estrellas).
-              </p>
-            </div>
+            <StateMessage
+              variant="warning"
+              title="Sin resultados"
+              description="No hay hoteles que coincidan con los filtros aplicados (categoría/estrellas)."
+            />
           ) : (
             <ul className="flex flex-col gap-4">
               {sortedHotels.map((hotel) => (

@@ -17,9 +17,8 @@ import { calcRoomInstanceTotal, calcPackageTotal } from '@utils/pricingUtils';
  */
 export function useReservar() {
   const navigate = useNavigate();
-  const [isReserving, setIsReserving] = useState(false);
 
-  const { carrito, setReservaConfirmada } = useCarrito();
+  const { carrito, setReservaConfirmada, isReserving, setIsReserving } = useCarrito();
   const { filtros } = useBusqueda();
   const { user } = useAuth();
   const { porHotel } = useCarritoPrecios();

@@ -160,6 +160,7 @@ function HotelSearch({
           <Input
             type="date"
             value={localFilters.fechaInicio}
+            min={getToday()}
             onChange={(e) => handleChange('fechaInicio', e.target.value)}
             className="h-10 px-2 text-xs border-gray-200 dark:border-gray-700 shadow-none"
           />
@@ -169,6 +170,7 @@ function HotelSearch({
           <Input
             type="date"
             value={localFilters.fechaFin}
+            min={localFilters.fechaInicio || getToday()}
             onChange={(e) => handleChange('fechaFin', e.target.value)}
             className="h-10 px-2 text-xs border-gray-200 dark:border-gray-700 shadow-none"
           />
@@ -180,6 +182,7 @@ function HotelSearch({
           icon={Users}
           value={localFilters.capacidad}
           min={1}
+          max={5}
           onChange={(val) => handleChange('capacidad', val)}
         />
       </div>
@@ -281,6 +284,7 @@ function HotelSearch({
               icon={Users}
               value={localFilters.capacidad}
               min={1}
+              max={5}
               onChange={(val) => handleChange('capacidad', val)}
               className="rounded-md h-[50px]"
             />
@@ -309,8 +313,7 @@ function HotelSearch({
 
       {!isCompact && (
         <div className="mb-8 text-left">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white md:text-3xl">Buscador de Disponibilidad</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Terminal de reservas corporativas.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white md:text-3xl">Busqueda de Alojamientos</h1>
         </div>
       )}
 
