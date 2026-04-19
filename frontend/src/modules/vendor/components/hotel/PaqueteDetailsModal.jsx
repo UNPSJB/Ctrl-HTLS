@@ -1,9 +1,9 @@
-import { Bed, Calendar, Tag, CheckCircle, Package } from 'lucide-react';
+import { Bed, Calendar, CheckCircle, Package } from 'lucide-react';
 import Modal from '@ui/Modal';
-import { normalizeDiscount, roundTwo, toNumber, calcSeasonalPrice, formatCurrency } from '@utils/pricingUtils';
+import { normalizeDiscount, roundTwo, toNumber, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
 
-function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
+function PaqueteDetailsModal({ paquete, onClose, onReserve }) {
   if (!paquete) return null;
 
   const habitaciones = Array.isArray(paquete.habitaciones)
@@ -16,18 +16,7 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
   );
 
   const packageDisc = normalizeDiscount(paquete.descuento);
-  const descuentoAplicado = roundTwo(precioTotal * packageDisc);
-  const precioConDescuentoPaquete = roundTwo(precioTotal * (1 - packageDisc));
-
-  // Aplicamos ajuste de temporada (alta sube, baja baja)
-  const finalPrice = temporada
-    ? calcSeasonalPrice(precioConDescuentoPaquete, temporada)
-    : precioConDescuentoPaquete;
-
-  const esBaja = temporada?.tipo === 'baja';
-  const porcentajeTemporada = Math.round(toNumber(temporada?.porcentaje) * 100);
-  const hasHotelDiscount = esBaja && toNumber(temporada?.porcentaje) > 0;
-  const hasPackageDiscount = packageDisc > 0;
+  const finalPrice = roundTwo(precioTotal * (1 - packageDisc));
 
   return (
     <Modal
@@ -41,27 +30,6 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
       confirmLabel="Seleccionar Paquete"
     >
       <div className="flex flex-col gap-6">
-        {/* Banner de descuentos combinados */}
-        {(hasHotelDiscount || hasPackageDiscount) && (
-          <div className="flex flex-col gap-2">
-            {hasPackageDiscount && (
-              <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
-                <Package className="h-5 w-5 text-blue-500" />
-                <span className="font-medium text-blue-600 dark:text-blue-400">
-                  Bonificación de paquete del {(packageDisc * 100).toFixed(0)}% incluida
-                </span>
-              </div>
-            )}
-            {hasHotelDiscount && (
-              <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-                <Tag className="h-5 w-5 text-green-500" />
-                <span className="font-medium text-green-600 dark:text-green-400">
-                  {porcentajeTemporada}% de descuento adicional por temporada baja
-                </span>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Bloque 1: Configuración Operativa (Grilla) */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900/50 shadow-sm">
@@ -107,33 +75,11 @@ function PaqueteDetailsModal({ paquete, temporada, onClose, onReserve }) {
           </h3>
 
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between text-gray-600 dark:text-gray-400 font-medium">
-              <span>Tarifa Base (Habitaciones × {noches} noches)</span>
-              <span>{formatCurrency(precioTotal)}</span>
-            </div>
-
-            {hasPackageDiscount && (
-              <div className="flex justify-between text-blue-600 dark:text-blue-400 font-semibold">
-                <span>Bonificación Especial de Paquete ({(packageDisc * 100).toFixed(0)}%)</span>
-                <span>-{formatCurrency(descuentoAplicado)}</span>
-              </div>
-            )}
-
-            {hasHotelDiscount && (
-              <div className="flex justify-between text-green-600 dark:text-green-400 font-semibold">
-                <span>Bonificación Temporal Temporada Baja</span>
-                <span>-{formatCurrency(precioConDescuentoPaquete - finalPrice)}</span>
-              </div>
-            )}
-
-            <div className="border-t border-gray-200 dark:border-gray-600 pt-3 flex justify-between items-end">
+            <div className="flex justify-between items-end">
               <span className="text-gray-900 dark:text-white font-semibold flex flex-col">
-                Valor Neto Final
+                Valor del Paquete
               </span>
-              <span
-                className={`text-2xl font-bold ${hasHotelDiscount || hasPackageDiscount ? 'text-green-600 dark:text-green-400' : 'text-indigo-600 dark:text-indigo-400'
-                  }`}
-              >
+              <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {formatCurrency(finalPrice)}
               </span>
             </div>

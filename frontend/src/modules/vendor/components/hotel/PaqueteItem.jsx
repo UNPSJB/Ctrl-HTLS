@@ -31,9 +31,8 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
   const { original: precioBase, final: precioDescuento } = useMemo(() => {
     return calcPackageTotal({
       paquete: instancias[0],
-      temporada: hotelData?.temporada,
     });
-  }, [instancias, hotelData?.temporada]);
+  }, [instancias]);
 
   const handleIncrement = useCallback(() => {
     if (selectedCount >= maxAvailable || !onAdd) return;
@@ -92,12 +91,6 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
                 <Calendar className="h-4 w-4" />
                 <span>{noches} noches</span>
               </div>
-              {descuento > 0 && (
-                <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
-                  <Percent className="h-4 w-4" />
-                  <span>{(descuento * 100).toFixed(0)}%</span>
-                </div>
-              )}
               <button
                 onClick={handleShowDetails}
                 className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
@@ -119,7 +112,7 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
           </div>
 
           <div className="flex justify-end">
-            <PriceTag precio={precioDescuento} original={precioBase} />
+            <PriceTag precio={precioDescuento} />
           </div>
         </div>
 
@@ -129,7 +122,6 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
         createPortal(
           <PaqueteDetailsModal
             paquete={instancias[0]}
-            temporada={hotelData?.temporada}
             onClose={handleCloseModal}
             onReserve={handleReserveFromModal}
           />,

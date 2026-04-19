@@ -14,9 +14,8 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
   const priceInfo = useMemo(() => {
     return calcPackageTotal({
       paquete,
-      temporada: hotel?.temporada,
     });
-  }, [paquete, hotel]);
+  }, [paquete]);
 
   if (!paquete) return null;
 
@@ -119,34 +118,14 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
       <div className="mx-5 border-t border-gray-200/50 dark:border-gray-700/50" />
 
       {/* Fila 3: Desbloce Económico y Precio Final */}
-      <div className="flex flex-col items-end gap-2 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-0.5 text-xs text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-2">
-            <span>Subtotal Paquete:</span>
-            <span className="font-semibold text-gray-700 dark:text-gray-200">{formatCurrency(priceInfo.original)}</span>
-          </div>
-          {priceInfo.descuentoPaqueteMonto > 0 && (
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <span>Bonificación Paquete ({(priceInfo.descuentoPaquetePorcentaje * 100).toFixed(0)}%):</span>
-              <span className="font-bold">-{formatCurrency(priceInfo.descuentoPaqueteMonto)}</span>
-            </div>
-          )}
-          {priceInfo.ajusteTemporadaMonto !== 0 && (
-            <div className={`flex items-center gap-2 ${priceInfo.ajusteTemporadaMonto < 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-500'}`}>
-              <span>Ajuste de Temporada:</span>
-              <span className="font-bold">
-                {priceInfo.ajusteTemporadaMonto < 0 ? '-' : '+'}{formatCurrency(Math.abs(priceInfo.ajusteTemporadaMonto))}
-              </span>
-            </div>
-          )}
-        </div>
+      <div className="flex justify-end p-5">
 
         <div className="flex flex-col items-end">
           <span className="text-[10px] uppercase tracking-tighter text-gray-400 dark:text-gray-500">
             Subtotal
           </span>
           <div className="text-lg font-black text-gray-900 dark:text-white">
-            <PriceTag precio={priceInfo.final} original={priceInfo.original} />
+            <PriceTag precio={priceInfo.final} />
           </div>
         </div>
       </div>

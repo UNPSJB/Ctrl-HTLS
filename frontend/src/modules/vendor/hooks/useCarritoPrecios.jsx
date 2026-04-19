@@ -27,7 +27,6 @@ export function useCarritoPrecios() {
     let globalTemporadaAlta = 0;
     let globalTemporadaBaja = 0;
     let globalDescuentoCantidad = 0;
-    let globalDescuentoPaquetes = 0;
 
     (carrito.hoteles || []).forEach((hotel) => {
       const temporada = hotel?.temporada ?? null;
@@ -64,18 +63,13 @@ export function useCarritoPrecios() {
 
       // --- Paquetes ---
       let subtotalPaquetesOriginal = 0;
-      let descuentoPaquetes = 0;
-      let ajusteTemporadaPaquetes = 0;
       let paquetesFinal = 0;
 
       (hotel.paquetes || []).forEach((pack) => {
         const calc = calcPackageTotal({
           paquete: pack,
-          temporada,
         });
         subtotalPaquetesOriginal += calc.original;
-        descuentoPaquetes += calc.descuentoPaqueteMonto;
-        ajusteTemporadaPaquetes += calc.ajusteTemporadaMonto;
         paquetesFinal += calc.final;
       });
 
@@ -90,8 +84,7 @@ export function useCarritoPrecios() {
         porcentajeDescCantidad: descInfo.porcentajeAplicado,
         cantidadHabs,
         subtotalPaquetesOriginal: Math.round(subtotalPaquetesOriginal),
-        descuentoPaquetes: Math.round(descuentoPaquetes),
-        ajusteTemporadaPaquetes: Math.round(ajusteTemporadaPaquetes),
+        ajusteTemporadaPaquetes: 0,
         subtotalHotel,
       };
 
@@ -100,14 +93,13 @@ export function useCarritoPrecios() {
       totalFinal += subtotalHotel;
       
       // Acumular desglose global
-      const ajusteTemporadaTotal = ajusteTemporadaHabs + ajusteTemporadaPaquetes;
+      const ajusteTemporadaTotal = ajusteTemporadaHabs;
       if (ajusteTemporadaTotal > 0) {
         globalTemporadaAlta += ajusteTemporadaTotal;
       } else if (ajusteTemporadaTotal < 0) {
         globalTemporadaBaja += Math.abs(ajusteTemporadaTotal);
       }
       globalDescuentoCantidad += descInfo.montoDescuento;
-      globalDescuentoPaquetes += descuentoPaquetes;
     });
 
     return {
@@ -118,7 +110,6 @@ export function useCarritoPrecios() {
       globalTemporadaAlta: Math.round(globalTemporadaAlta),
       globalTemporadaBaja: Math.round(globalTemporadaBaja),
       globalDescuentoCantidad: Math.round(globalDescuentoCantidad),
-      globalDescuentoPaquetes: Math.round(globalDescuentoPaquetes),
     };
   }, [carrito.hoteles]);
 

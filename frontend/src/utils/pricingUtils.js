@@ -86,12 +86,11 @@ export function calcRoomInstanceTotal({
 }
 
 /**
- * Calcula el total de un paquete turístico con descuento propio + ajuste de temporada.
+ * Calcula el total de un paquete turístico con descuento propio. (Ya NO aplica temporada)
  * @param {object} params
  * @param {object} params.paquete - Datos del paquete.
- * @param {object|null} params.temporada - Objeto de temporada { tipo, porcentaje, ... }.
  */
-export function calcPackageTotal({ paquete, temporada = null }) {
+export function calcPackageTotal({ paquete }) {
   const habitaciones = Array.isArray(paquete.habitaciones)
     ? paquete.habitaciones
     : [];
@@ -107,18 +106,15 @@ export function calcPackageTotal({ paquete, temporada = null }) {
   const descuentoPaqueteMonto = roundToInteger(
     totalOriginal * descuentoPaquetePorcentaje
   );
-  const totalConDescuentoPaquete = totalOriginal - descuentoPaqueteMonto;
-
-  const final = calcSeasonalPrice(totalConDescuentoPaquete, temporada);
-  const ajusteTemporadaMonto = final - totalConDescuentoPaquete;
+  const final = totalOriginal - descuentoPaqueteMonto;
 
   return {
-    original: totalOriginal,
+    original: final,
     final,
     sumPerNight: roundToInteger(sumPerNight),
     noches,
-    descuentoPaqueteMonto,
-    ajusteTemporadaMonto,
+    descuentoPaqueteMonto: 0,
+    ajusteTemporadaMonto: 0,
     descuentoPaquetePorcentaje: paquete.descuento,
   };
 }

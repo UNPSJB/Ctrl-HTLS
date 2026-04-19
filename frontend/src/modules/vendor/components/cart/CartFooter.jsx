@@ -13,8 +13,7 @@ function CartFooter({ onClose }) {
     totalDescuento,
     globalTemporadaAlta,
     globalTemporadaBaja,
-    globalDescuentoCantidad,
-    globalDescuentoPaquetes
+    globalDescuentoCantidad
   } = useCarritoPrecios();
   const { reservar, isReserving } = useReservar();
 
@@ -48,7 +47,7 @@ function CartFooter({ onClose }) {
             <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(totalOriginal)}</span>
           </div>
 
-          {(globalTemporadaBaja > 0 || globalTemporadaAlta > 0 || globalDescuentoPaquetes > 0 || globalDescuentoCantidad > 0) && (
+          {(globalTemporadaBaja > 0 || globalTemporadaAlta > 0 || globalDescuentoCantidad > 0) && (
             <div className="my-1 border-t border-dashed border-gray-200 dark:border-gray-600" />
           )}
 
@@ -58,12 +57,7 @@ function CartFooter({ onClose }) {
               <span>-{formatCurrency(globalTemporadaBaja)}</span>
             </div>
           )}
-          {globalDescuentoPaquetes > 0 && (
-            <div className="flex justify-between text-xs font-medium text-green-600 dark:text-green-400">
-              <span>Desc. Paquetes</span>
-              <span>-{formatCurrency(globalDescuentoPaquetes)}</span>
-            </div>
-          )}
+
           {globalDescuentoCantidad > 0 && (
             <div className="flex justify-between text-xs font-medium text-blue-600 dark:text-blue-400">
               <span>Desc. Habitaciones</span>
