@@ -1,9 +1,8 @@
 import { memo, useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, Percent, Info } from 'lucide-react';
+import { Calendar, Info, Plus, Trash2 } from 'lucide-react';
 import PaqueteDetailsModal from './PaqueteDetailsModal';
 import PriceTag from '@ui/PriceTag';
-import Counter from '@ui/Counter';
 import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@vendor-context/CarritoContext';
 import useBookingDates from '@vendor-hooks/useBookingDates';
@@ -58,16 +57,15 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
 
   const handleDecrement = useCallback(() => {
     if (selectedCount <= 0 || !onRemove) return;
-    const idsEnCarrito = new Set(
-      hotelEnCarrito?.paquetes.map((p) => p.id) || []
+    
+    const backendIds = new Set(instancias.map((inst) => inst.id));
+    const paquetesEnCarrito = (hotelEnCarrito?.paquetes || []).filter((p) => 
+      backendIds.has(p.id)
     );
-    const instanciasSeleccionadas = instancias.filter((inst) =>
-      idsEnCarrito.has(inst.id)
-    );
-    if (instanciasSeleccionadas.length > 0) {
-      const idARemover =
-        instanciasSeleccionadas[instanciasSeleccionadas.length - 1].id;
-      onRemove(idARemover);
+
+    if (paquetesEnCarrito.length > 0) {
+      const cartIdARemover = paquetesEnCarrito[paquetesEnCarrito.length - 1]._cartId;
+      onRemove(cartIdARemover);
     }
   }, [selectedCount, onRemove, hotelEnCarrito, instancias]);
 
@@ -103,12 +101,26 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
           </div>
 
           <div className="flex justify-center">
-            <Counter
-              value={selectedCount}
-              onIncrement={handleIncrement}
-              onDecrement={handleDecrement}
-              max={maxAvailable}
-            />
+            {selectedCount > 0 ? (
+              <button
+                type="button"
+                onClick={handleDecrement}
+                className="flex items-center gap-1.5 rounded-lg bg-red-50 px-4 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+              >
+                <Trash2 className="h-4 w-4" />
+                Quitar
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleIncrement}
+                disabled={maxAvailable <= 0}
+                className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+              >
+                <Plus className="h-4 w-4" />
+                Agregar
+              </button>
+            )}
           </div>
 
           <div className="flex justify-end">
