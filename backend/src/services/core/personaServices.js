@@ -51,6 +51,13 @@ const incluirRelacionesVendedor = [
     model: DetalleFactura,
     as: 'detallesFactura',
     attributes: ['id', 'descripcion', 'subtotal', 'facturaId', 'liquidacionId'],
+    include: [
+      {
+        model: Factura,
+        as: 'factura',
+        attributes: ['fecha'],
+      },
+    ],
   },
   {
     model: Liquidacion,
@@ -105,6 +112,7 @@ const formatearVendedor = (vendedor) => ({
     subtotal: Number(detalle.subtotal),
     facturaId: detalle.facturaId,
     liquidacionId: detalle.liquidacionId,
+    fechaVenta: detalle.factura ? detalle.factura.fecha : null,
   })),
   liquidaciones: (vendedor.liquidaciones || []).map((liquidacion) => ({
     id: liquidacion.id,
@@ -285,6 +293,13 @@ const obtenerVentasVendedor = async (id) => {
           'facturaId',
           'liquidacionId',
         ],
+        include: [
+          {
+            model: Factura,
+            as: 'factura',
+            attributes: ['fecha'],
+          },
+        ],
       },
     ],
   });
@@ -303,6 +318,7 @@ const obtenerVentasVendedor = async (id) => {
     subtotal: Number(detalle.subtotal),
     facturaId: detalle.facturaId,
     liquidacionId: detalle.liquidacionId,
+    fechaVenta: detalle.factura ? detalle.factura.fecha : null,
   }));
 
   return {

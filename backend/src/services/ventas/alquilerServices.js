@@ -13,6 +13,8 @@ const paquetePromocionalServices = require('../hotel/paquetePromocionalServices'
 const Alquiler = require('../../models/ventas/Alquiler');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
+const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
+const { Op } = require('sequelize');
 const DetalleFactura = require('../../models/ventas/DetalleFactura');
 
 const obtenerDisponibilidad = async (consultaAlquiler) => {
@@ -81,8 +83,6 @@ const crearReserva = async (reservas) => {
         const paquetesDisponibles =
           await verificarDisponibilidad.verificarDisponibilidadPaquetes(
             paquetes,
-            fechaInicio,
-            fechaFin,
           );
         if (paquetesDisponibles.length > 0) {
           throw new CustomError(
@@ -117,8 +117,6 @@ const crearReserva = async (reservas) => {
           await paquetePromocionalServices.guardarPaquetes(
             nuevoAlquiler.id,
             paquetes,
-            fechaInicio,
-            fechaFin,
             transaction, // Pasar la transacción
           );
         }
@@ -247,14 +245,20 @@ const actualizarReserva = async (reservas) => {
           (id) => !paquetes.includes(id),
         );
 
-        // Agregar nuevos paquetes
+        // Agregar nuevos paquetes (usando las fechas reales de cada paquete)
         if (paquetesAgregar.length > 0) {
+          const paquetesDB = await PaquetePromocional.findAll({
+            where: { id: { [Op.in]: paquetesAgregar } },
+            attributes: ['id', 'fecha_inicio', 'fecha_fin'],
+            transaction,
+          });
+
           await AlquilerPaquetePromocional.bulkCreate(
-            paquetesAgregar.map((paquetePromocionalId) => ({
+            paquetesDB.map((paquete) => ({
               alquilerId,
-              paquetePromocionalId,
-              fechaInicio,
-              fechaFin,
+              paquetePromocionalId: paquete.id,
+              fechaInicio: paquete.fecha_inicio,
+              fechaFin: paquete.fecha_fin,
             })),
             { transaction },
           );

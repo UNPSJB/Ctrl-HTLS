@@ -245,6 +245,8 @@ const obtenerPaquetesTuristicos = async (idHotel, fechaInicio, fechaFin) => {
     paquetesDisponibles.push({
       id: paquete.id,
       nombre: paquete.nombre,
+      fechaInicio: paquete.fecha_inicio,
+      fechaFin: paquete.fecha_fin,
       noches: cantidadNoches,
       descuento: paquete.coeficiente_descuento,
       capacidad_maxima: paquete.capacidad_maxima,
@@ -255,20 +257,21 @@ const obtenerPaquetesTuristicos = async (idHotel, fechaInicio, fechaFin) => {
   return paquetesDisponibles;
 };
 
-const guardarPaquetes = async (
-  alquilerId,
-  paquetes,
-  fechaInicio,
-  fechaFin,
-  transaction,
-) => {
+const guardarPaquetes = async (alquilerId, paquetes, transaction) => {
   if (!paquetes || paquetes.length === 0) return;
 
-  const paquetesData = paquetes.map((paqueteId) => ({
+  // Obtener las fechas reales de cada paquete desde la BD
+  const paquetesDB = await PaquetePromocional.findAll({
+    where: { id: { [Op.in]: paquetes } },
+    attributes: ['id', 'fecha_inicio', 'fecha_fin'],
+    transaction,
+  });
+
+  const paquetesData = paquetesDB.map((paquete) => ({
     alquilerId,
-    paquetePromocionalId: paqueteId,
-    fechaInicio,
-    fechaFin,
+    paquetePromocionalId: paquete.id,
+    fechaInicio: paquete.fecha_inicio,
+    fechaFin: paquete.fecha_fin,
   }));
 
   await AlquilerPaquetePromocional.bulkCreate(paquetesData, { transaction });

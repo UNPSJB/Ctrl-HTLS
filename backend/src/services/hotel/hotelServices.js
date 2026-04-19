@@ -966,6 +966,11 @@ const getDisponibilidadPorHotel = async (
           fechaFin,
         );
 
+      // No incluir hoteles que no tienen habitaciones ni paquetes disponibles
+      if (habitaciones.length === 0 && paquetes.length === 0) {
+        continue;
+      }
+
       // Estructurar el objeto del hotel
       disponibilidad.push({
         hotelId: hotel.id,
