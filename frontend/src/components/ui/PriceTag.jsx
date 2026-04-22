@@ -25,7 +25,7 @@ function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
         <div className={`flex ${layoutClass}`}>
           { }
           <p
-            className={`text-md font-bold ${isColumn ? `w-full ${mainColorClass} sm:w-auto` : mainColorClass}`}
+            className={`text-base font-bold ${isColumn ? `w-full ${mainColorClass} sm:w-auto` : mainColorClass}`}
             aria-label={`Precio actual ${formatCurrency(precio)}`}
             title={`Precio: ${formatCurrency(precio)}`}
           >
@@ -34,7 +34,7 @@ function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
 
           { }
           <p
-            className={`${isColumn ? 'w-full text-sm text-gray-500 line-through dark:text-gray-400 sm:w-auto' : 'text-sm text-gray-500 line-through dark:text-gray-400'}`}
+            className={`${isColumn ? 'w-full text-xs text-gray-500 line-through dark:text-gray-400 sm:w-auto' : 'text-sm text-gray-500 line-through dark:text-gray-400'}`}
             aria-label={`Precio original ${formatCurrency(original)}`}
             title={`Precio original: ${formatCurrency(original)}`}
           >
@@ -43,7 +43,7 @@ function PriceTag({ precio = 0, original, seasonLayout = 'row' }) {
         </div>
       ) : (
         <p
-          className="text-md font-bold text-gray-800 dark:text-gray-200"
+          className="text-base font-bold text-gray-800 dark:text-gray-200"
           aria-label={`Precio ${formatCurrency(precio)}`}
         >
           {formatCurrency(precio)}

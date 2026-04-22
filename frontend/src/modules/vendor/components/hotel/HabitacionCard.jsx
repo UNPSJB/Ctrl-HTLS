@@ -1,15 +1,16 @@
-import PriceTag from '@ui/PriceTag';
-import { Users, Hash, Layers3, Trash2, CalendarDays, ArrowRight, Moon } from 'lucide-react';
+import { Users, Hash, Layers3, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { calcRoomInstanceTotal, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
-import dateUtils from '@utils/dateUtils';
-
-const { formatFecha } = dateUtils;
+import DateDisplay from '@ui/DateDisplay';
+import PriceTag from '@ui/PriceTag';
+import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 
 // Tarjeta detallada para una instancia de habitación en el carrito (Vista de Pago)
 function HabitacionCard({ habitacion, hotel, onRemove }) {
   if (!habitacion) return null;
+
+  const { porHotel } = useCarritoPrecios();
 
   const priceInfo = useMemo(() => {
     return calcRoomInstanceTotal({
@@ -21,6 +22,15 @@ function HabitacionCard({ habitacion, hotel, onRemove }) {
       },
     });
   }, [habitacion, hotel]);
+
+  const hotelStats = porHotel[hotel?.hotelId] || {};
+  const porcentajeDescCantidad = hotelStats.porcentajeDescCantidad || 0;
+
+  const totalBase = priceInfo.original;
+  const totalTemporada = priceInfo.final;
+  const ajusteTemporadaMonto = totalTemporada - totalBase;
+  const descuentoCantidadMonto = totalTemporada * porcentajeDescCantidad;
+  const totalFinalHabitacion = totalTemporada - descuentoCantidadMonto;
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900/60">
@@ -60,57 +70,43 @@ function HabitacionCard({ habitacion, hotel, onRemove }) {
 
       <div className="my-4 border-t border-gray-200/50 dark:border-gray-700/50" />
 
-      {/* Fila 2: Cronología Personalizada */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
-              <CalendarDays className="h-5 w-5" />
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Check-in</span>
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{formatFecha(habitacion.fechaInicio)}</span>
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-300" />
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Check-out</span>
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{formatFecha(habitacion.fechaFin)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-          <Moon className="h-4 w-4" />
-          <span>{priceInfo.nights} NOCHES</span>
-        </div>
+      {/* Fila 2: Cronología */}
+      <div className="px-1">
+        <DateDisplay 
+          fechaInicio={habitacion.fechaInicio} 
+          fechaFin={habitacion.fechaFin} 
+          noches={priceInfo.nights} 
+        />
       </div>
 
       <div className="my-4 border-t border-gray-200/50 dark:border-gray-700/50" />
 
-      {/* Fila 3: Desbloce Económico y Precio Final */}
-      <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-0.5 text-xs text-gray-500 dark:text-gray-400">
+      {/* Fila 3: Desglose Económico y Precio Final */}
+      <div className="flex flex-col items-end gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-2">
-            <span>Precio base p/noche:</span>
-            <span className="font-semibold text-gray-700 dark:text-gray-200">{formatCurrency(priceInfo.pricePerNight)}</span>
+            <span>Base:</span>
+            <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(totalBase)}</span>
           </div>
           {priceInfo.hasSeasonalAdjustment && (
-            <div className={`flex items-center gap-2 ${hotel?.temporada?.tipo === 'alta' ? 'text-orange-600 dark:text-orange-500' : 'text-green-600 dark:text-green-400'}`}>
-              <span>Incluye ajuste de temporada ({hotel?.temporada?.porcentaje * 100}%):</span>
-              <span className="font-bold">{formatCurrency(priceInfo.seasonalPricePerNight)}</span>
+            <div className="flex items-center gap-2">
+              <span>Ajuste por temporada ({ajusteTemporadaMonto > 0 ? '+' : '-'}{Math.round(hotel?.temporada?.porcentaje * 100)}%):</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(totalTemporada)}</span>
+            </div>
+          )}
+          {porcentajeDescCantidad > 0 && (
+            <div className="flex items-center gap-2">
+              <span>Por habitaciones (-{Math.round(porcentajeDescCantidad * 100)}%):</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(totalFinalHabitacion)}</span>
             </div>
           )}
         </div>
 
         <div className="flex flex-col items-end">
-          <span className="text-[10px] uppercase tracking-tighter text-gray-400 dark:text-gray-500">
-            Subtotal
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">
+            Total
           </span>
-          <div className="text-lg font-black text-gray-900 dark:text-white">
-            <PriceTag precio={priceInfo.final} original={priceInfo.original} />
-          </div>
+          <PriceTag precio={totalFinalHabitacion} />
         </div>
       </div>
     </div>

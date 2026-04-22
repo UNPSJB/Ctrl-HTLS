@@ -110,7 +110,6 @@ export function usePagar() {
           medioPago: metodoPago,
           montoTarjeta: pagoTarjetaFinal,
           montoEfectivo: pagoEfectivoFinal,
-          montonEfectivo: pagoEfectivoFinal,
           montoTotal: Number(totalAEnviar.toFixed(2)),
           vendedorId: user?.id,
           clienteId: finalClienteId,
@@ -119,47 +118,37 @@ export function usePagar() {
         const response = await axiosInstance.post('/confirmar-pago', payload);
 
         if (response.status === 201 || response.status === 200) {
-          // Descargar automáticamente la factura PDF devuelta por el backend
-          const pdfBase64 = response.data?.pdfBase64;
-          if (pdfBase64) {
-            try {
-              const byteCharacters = atob(pdfBase64);
-              const byteNumbers = new Array(byteCharacters.length);
-              for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-              }
-              const byteArray = new Uint8Array(byteNumbers);
-              const blob = new Blob([byteArray], { type: 'application/pdf' });
+          // Cálculos simulados de puntos basados en las reglas del backend
+          const puntosAnteriores = client?.puntos || 0;
+          let puntosGanados = 0;
+          let puntosGastados = 0;
 
-              // Generar nombre descriptivo con el número de factura si está disponible
-              const nroFactura = response.data?.nroFactura || response.data?.id || Date.now();
-              const nombreArchivo = `Factura_${nroFactura}.pdf`;
-
-              // Crear enlace temporal para desencadenar la descarga
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = nombreArchivo;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-
-              toast.success('Factura descargada correctamente.');
-            } catch (pdfError) {
-              console.error('Error al procesar el PDF de la factura:', pdfError);
-              toast.error('El pago se realizó pero no se pudo descargar la factura.');
-            }
+          if (metodoPago === 'Efectivo') {
+            puntosGanados = Math.floor(totalAEnviar / 5);
+          } else if (metodoPago === 'Puntos') {
+            puntosGastados = Math.ceil(totalAEnviar);
           }
+          const puntosActuales = puntosAnteriores + puntosGanados - puntosGastados;
 
-          toast.success('¡Pago registrado con éxito!');
+          // Redirección destructiva a la nueva página de éxito primero
+          navigate('/pago/exito', {
+            replace: true,
+            state: {
+              facturacionInfo: response.data,
+              clienteNombre: client?.nombre,
+              puntosGanados,
+              puntosGastados,
+              puntosActuales
+            }
+          });
 
-          // Limpiar todos los contextos de la sesión de venta
-          limpiarCarritoYReserva();
-          clearClient();
-          limpiarFiltros();
-
-          navigate('/');
+          // Limpiamos los contextos de forma asíncrona para que PagoPage.jsx
+          // se desmonte antes y su useEffect no intercepte la navegación llevándonos al Home (/).
+          setTimeout(() => {
+            limpiarCarritoYReserva();
+            clearClient();
+            limpiarFiltros();
+          }, 0);
         }
       } catch (error) {
         console.error('Error al procesar el pago:', error);

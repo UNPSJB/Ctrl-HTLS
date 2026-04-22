@@ -107,15 +107,12 @@ export function useReservar() {
               fechaFin: grupo.fechaFin,
               pasajeros: filtros.capacidad || 1,
               montoTotal: montoCalculado,
-              subTotal: montoCalculado,
               habitaciones: grupo.habitaciones.map((h) => h.id),
               paquetes: grupo.paquetes.map((p) => p.id),
             };
           });
 
           return {
-            hotelId: hotel.hotelId,
-            vendedorId: user?.id,
             clienteId: clienteSeleccionado.id,
             alquiler,
           };

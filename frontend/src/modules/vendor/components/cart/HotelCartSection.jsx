@@ -16,7 +16,7 @@ function HotelCartSection({ hotel = {}, isLocked = false }) {
   const tieneDescuento = hotelBreakdown && hotelBreakdown.descuentoCantidad > 0;
 
   return (
-    <section className="mb-6">
+    <section className="my-4">
       <div className="mb-4">
         <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
           {capitalizeWords(hotel?.nombre)}

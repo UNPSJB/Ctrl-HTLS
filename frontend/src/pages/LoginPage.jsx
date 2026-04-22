@@ -31,7 +31,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
       {/* Background decoration (optional) */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 -z-10" />
 
@@ -50,7 +50,7 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+              <label htmlFor="login-username" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
                 Usuario / Email
               </label>
               <div className="relative">
@@ -58,6 +58,7 @@ const LoginPage = () => {
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <TextInput
+                  id="login-username"
                   placeholder="admin@ejemplo.com"
                   className="pl-10"
                   value={username}
@@ -68,7 +69,7 @@ const LoginPage = () => {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+              <label htmlFor="login-password" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
                 Contraseña
               </label>
               <div className="relative">
@@ -76,6 +77,7 @@ const LoginPage = () => {
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <PasswordInput
+                  id="login-password"
                   placeholder="••••••••"
                   className="pl-10"
                   value={password}
@@ -107,7 +109,7 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

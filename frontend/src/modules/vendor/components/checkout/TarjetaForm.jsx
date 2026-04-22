@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { TextInput } from '@ui/form';
 
 function simpleValidate(card) {
   const num = String(card.number || '').replace(/\s+/g, '');
@@ -28,120 +29,6 @@ function formatExpiry(value = '') {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}`;
 }
 
-function detectCardType(number = '') {
-  const d = onlyDigits(number);
-  if (d.startsWith('4')) return 'visa';
-  const two = Number(d.slice(0, 2));
-  const four = Number(d.slice(0, 4));
-  if ((two >= 51 && two <= 55) || (four >= 2221 && four <= 2720))
-    return 'mastercard';
-  if (d.startsWith('34') || d.startsWith('37')) return 'amex';
-  if (
-    d.startsWith('6011') ||
-    d.startsWith('65') ||
-    d.startsWith('644') ||
-    d.startsWith('645') ||
-    d.startsWith('646') ||
-    d.startsWith('647') ||
-    d.startsWith('648') ||
-    d.startsWith('649')
-  )
-    return 'discover';
-  return 'unknown';
-}
-
-function CardBrandIcon({ type }) {
-  switch (type) {
-    case 'visa':
-      return (
-        <div
-          aria-hidden
-          className="flex h-7 w-10 items-center justify-center rounded bg-blue-100"
-        >
-          <svg
-            width="22"
-            height="14"
-            viewBox="0 0 22 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect width="22" height="14" rx="2" fill="#1A6ED8" />
-            <path d="M3 10L5 4H7L9 10H7L6.3 7H5.1L4.4 10H3Z" fill="white" />
-          </svg>
-        </div>
-      );
-    case 'mastercard':
-      return (
-        <div
-          aria-hidden
-          className="flex h-7 w-10 items-center justify-center rounded bg-red-50"
-        >
-          <svg
-            width="22"
-            height="14"
-            viewBox="0 0 22 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle cx="8" cy="7" r="5" fill="#FF5F00" />
-            <circle cx="14" cy="7" r="5" fill="#EB001B" />
-          </svg>
-        </div>
-      );
-    case 'amex':
-      return (
-        <div
-          aria-hidden
-          className="flex h-7 w-10 items-center justify-center rounded bg-green-50"
-        >
-          <svg
-            width="22"
-            height="14"
-            viewBox="0 0 22 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect width="22" height="14" rx="2" fill="#2A9D8F" />
-          </svg>
-        </div>
-      );
-    case 'discover':
-      return (
-        <div
-          aria-hidden
-          className="flex h-7 w-10 items-center justify-center rounded bg-yellow-50"
-        >
-          <svg
-            width="22"
-            height="14"
-            viewBox="0 0 22 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect width="22" height="14" rx="2" fill="#FFA500" />
-          </svg>
-        </div>
-      );
-    default:
-      return (
-        <div
-          aria-hidden
-          className="flex h-7 w-10 items-center justify-center rounded bg-gray-100"
-        >
-          <svg
-            width="18"
-            height="12"
-            viewBox="0 0 18 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect width="18" height="12" rx="2" fill="#D1D5DB" />
-          </svg>
-        </div>
-      );
-  }
-}
-
 // Formulario para ingresar datos de tarjeta de crédito/débito
 function TarjetaForm({ onChange, className = '' }) {
   const [cardData, setCardData] = useState({
@@ -149,17 +36,15 @@ function TarjetaForm({ onChange, className = '' }) {
     name: '',
     expiry: '',
     cvc: '',
-    cardType: 'unknown',
   });
 
-  const cardType = useMemo(() => detectCardType(cardData.number), [cardData.number]);
   const valid = useMemo(() => simpleValidate(cardData), [cardData]);
 
   useEffect(() => {
     if (typeof onChange === 'function') {
-      onChange({ cardData: { ...cardData, cardType }, valid });
+      onChange({ cardData, valid });
     }
-  }, [cardData, cardType, valid, onChange]);
+  }, [cardData, valid, onChange]);
 
   const handleNumber = useCallback((e) => {
     const raw = e.target.value;
@@ -185,68 +70,61 @@ function TarjetaForm({ onChange, className = '' }) {
     <div className={`space-y-3 ${className}`}>
       <label className="block">
         <span className="text-sm text-gray-700 dark:text-gray-300">Número de tarjeta</span>
-        <div className="mt-1 flex items-center gap-3">
-          <div className="min-w-0 flex-1">
-            <input
-              id="card-number"
-              type="text"
-              placeholder="1234 5678 9012 3456"
-              value={cardData.number}
-              onChange={handleNumber}
-              className="w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
-              inputMode="numeric"
-              aria-label="Número de tarjeta"
-              autoComplete="cc-number"
-            />
-          </div>
-          <div className="shrink-0">
-            <CardBrandIcon type={cardType} />
-          </div>
+        <div className="mt-1">
+          <TextInput
+            id="card-number"
+            placeholder="1234 5678 9012 3456"
+            value={cardData.number}
+            onChange={handleNumber}
+            inputMode="numeric"
+            aria-label="Número de tarjeta"
+            autoComplete="cc-number"
+          />
         </div>
       </label>
 
       <label className="block">
         <span className="text-sm text-gray-700 dark:text-gray-300">Nombre en la tarjeta</span>
-        <input
-          id="card-name"
-          type="text"
-          placeholder="Nombre completo"
-          value={cardData.name}
-          onChange={handleName}
-          className="mt-1 w-full min-w-0 rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
-          aria-label="Nombre en la tarjeta"
-          autoComplete="cc-name"
-        />
+        <div className="mt-1">
+          <TextInput
+            id="card-name"
+            placeholder="Nombre completo"
+            value={cardData.name}
+            onChange={handleName}
+            aria-label="Nombre en la tarjeta"
+            autoComplete="cc-name"
+          />
+        </div>
       </label>
 
       <div className="grid grid-cols-2 gap-2">
         <label className="block">
           <span className="text-sm text-gray-700 dark:text-gray-300">MM/YY</span>
-          <input
-            id="card-expiry"
-            type="text"
-            placeholder="MM/YY"
-            value={cardData.expiry}
-            onChange={handleExpiry}
-            className="mt-1 w-full min-w-0 rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
-            aria-label="Fecha de expiración"
-            inputMode="numeric"
-            autoComplete="cc-exp"
-          />
+          <div className="mt-1">
+            <TextInput
+              id="card-expiry"
+              placeholder="MM/YY"
+              value={cardData.expiry}
+              onChange={handleExpiry}
+              aria-label="Fecha de expiración"
+              inputMode="numeric"
+              autoComplete="cc-exp"
+            />
+          </div>
         </label>
         <label className="block">
           <span className="text-sm text-gray-700 dark:text-gray-300">CVC</span>
-          <input
-            id="card-cvc"
-            type="text"
-            placeholder="123"
-            value={cardData.cvc}
-            onChange={handleCvc}
-            className="mt-1 w-full min-w-0 rounded border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
-            inputMode="numeric"
-            aria-label="CVC"
-            autoComplete="cc-csc"
-          />
+          <div className="mt-1">
+            <TextInput
+              id="card-cvc"
+              placeholder="123"
+              value={cardData.cvc}
+              onChange={handleCvc}
+              inputMode="numeric"
+              aria-label="CVC"
+              autoComplete="cc-csc"
+            />
+          </div>
         </label>
       </div>
 

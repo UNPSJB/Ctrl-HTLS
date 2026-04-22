@@ -3,6 +3,7 @@ import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 import { usePagar } from '@vendor-hooks/usePagar';
 import { useCliente } from '@vendor-context/ClienteContext';
 import { formatCurrency } from '@utils/pricingUtils';
+import PriceTag from '@ui/PriceTag';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
 
@@ -74,71 +75,76 @@ function PaymentSummary() {
         Resumen del Pago
       </h3>
 
-      <div className="space-y-1 text-sm">
+      <div className="space-y-4 text-sm">
         {/* Sección Habitaciones */}
         {tieneHabitaciones && (
-          <>
+          <div className="flex flex-col gap-1">
             <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Subtotal Habitaciones</span>
               <span className="font-medium text-gray-800 dark:text-gray-200">
                 {formatCurrency(breakdown.subtotalHabitaciones)}
               </span>
             </div>
-          </>
+            
+            {breakdown.ajusteTemporadaHabs < 0 && (
+              <div className="flex justify-between text-xs font-medium text-green-600 dark:text-green-400">
+                <span>Descuento Temporada</span>
+                <span>{formatCurrency(breakdown.ajusteTemporadaHabs)}</span>
+              </div>
+            )}
+            {breakdown.ajusteTemporadaHabs > 0 && (
+              <div className="flex justify-between text-xs font-medium text-red-600 dark:text-red-400">
+                <span>Aumento Temporada</span>
+                <span>+{formatCurrency(breakdown.ajusteTemporadaHabs)}</span>
+              </div>
+            )}
+            {breakdown.descuentoCantidad > 0 && (
+              <div className="flex justify-between text-xs font-medium text-blue-600 dark:text-blue-400">
+                <span>Descuento por Cantidad</span>
+                <span>-{formatCurrency(breakdown.descuentoCantidad)}</span>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Sección Paquetes */}
         {tienePaquetes && (
-          <>
-            {tieneHabitaciones && (
-              <div className="my-2 border-t border-dashed border-gray-200 dark:border-gray-700" />
-            )}
-
+          <div className="flex flex-col gap-1">
             <div className="flex justify-between text-gray-600 dark:text-gray-400">
-              <span>Paquetes</span>
+              <span>Subtotal Paquetes</span>
               <span className="font-medium text-gray-800 dark:text-gray-200">
                 {formatCurrency(breakdown.subtotalPaquetes)}
               </span>
             </div>
-          </>
-        )}
-
-        {/* Desglose General */}
-        <div className="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
-          <div className="mb-2 flex flex-col gap-1">
-            {globalTemporadaBaja > 0 && (
+            
+            {breakdown.ajusteTemporadaPaquetes < 0 && (
               <div className="flex justify-between text-xs font-medium text-green-600 dark:text-green-400">
                 <span>Descuento Temporada</span>
-                <span>-{formatCurrency(globalTemporadaBaja)}</span>
+                <span>{formatCurrency(breakdown.ajusteTemporadaPaquetes)}</span>
               </div>
             )}
-            {globalTemporadaAlta > 0 && (
+            {breakdown.ajusteTemporadaPaquetes > 0 && (
               <div className="flex justify-between text-xs font-medium text-red-600 dark:text-red-400">
                 <span>Aumento Temporada</span>
-                <span>+{formatCurrency(globalTemporadaAlta)}</span>
+                <span>+{formatCurrency(breakdown.ajusteTemporadaPaquetes)}</span>
               </div>
             )}
-            {globalDescuentoPaquetes > 0 && (
-              <div className="flex justify-between text-xs font-medium text-green-600 dark:text-green-400">
-                <span>Desc. de Paquetes</span>
-                <span>-{formatCurrency(globalDescuentoPaquetes)}</span>
-              </div>
-            )}
-            {globalDescuentoCantidad > 0 && (
+            {breakdown.descuentoPaquetes > 0 && (
               <div className="flex justify-between text-xs font-medium text-blue-600 dark:text-blue-400">
-                <span>Desc. por Cantidad</span>
-                <span>-{formatCurrency(globalDescuentoCantidad)}</span>
+                <span>Descuento de Paquete</span>
+                <span>-{formatCurrency(breakdown.descuentoPaquetes)}</span>
               </div>
             )}
           </div>
+        )}
 
-          <div className="flex items-baseline justify-between border-t border-gray-100 pt-2 dark:border-gray-700/50">
+        {/* Total General */}
+        <div className="mt-2 border-t border-gray-200 pt-3 dark:border-gray-700">
+          <div className="flex items-center justify-between">
             <span className="text-base font-bold text-gray-900 dark:text-gray-100">
               Total a cobrar
             </span>
-            <span className="text-xl font-extrabold text-gray-900 dark:text-white">
-              {formatCurrency(totalFinal)}
-            </span>
+            <PriceTag precio={totalFinal} />
           </div>
         </div>
       </div>

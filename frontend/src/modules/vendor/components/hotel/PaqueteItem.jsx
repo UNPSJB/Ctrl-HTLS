@@ -5,13 +5,15 @@ import PaqueteDetailsModal from './PaqueteDetailsModal';
 import PriceTag from '@ui/PriceTag';
 import { calcPackageTotal } from '@utils/pricingUtils';
 import { useCarrito } from '@vendor-context/CarritoContext';
-import useBookingDates from '@vendor-hooks/useBookingDates';
 import { capitalizeWords } from '@/utils/stringUtils';
+import dateUtils from '@/utils/dateUtils';
+import DateDisplay from '@ui/DateDisplay';
+
+const { toISODate, formatFecha } = dateUtils;
 
 // Elemento de lista para un paquete turístico dentro del detalle del hotel
 function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
   const [mostrarModal, setMostrarModal] = useState(false);
-  const { isoFechaInicio, isoFechaFin } = useBookingDates();
   const { carrito } = useCarrito();
 
   const { nombre, noches, descuento, descripcion, instancias } = paqueteGroup;
@@ -42,18 +44,17 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
       (inst) => !idsEnCarrito.has(inst.id)
     );
     if (instanciaParaAgregar) {
-      const fechas = { fechaInicio: isoFechaInicio, fechaFin: isoFechaFin };
+      const rawIn = instanciaParaAgregar.fechaInicio || instanciaParaAgregar.fecha_inicio;
+      const rawOut = instanciaParaAgregar.fechaFin || instanciaParaAgregar.fecha_fin;
+      
+      const fechas = { 
+        fechaInicio: toISODate(new Date(rawIn)), 
+        fechaFin: toISODate(new Date(rawOut)) 
+      };
+      
       onAdd(instanciaParaAgregar, fechas);
     }
-  }, [
-    selectedCount,
-    maxAvailable,
-    instancias,
-    hotelEnCarrito,
-    onAdd,
-    isoFechaInicio,
-    isoFechaFin,
-  ]);
+  }, [selectedCount, maxAvailable, instancias, hotelEnCarrito, onAdd]);
 
   const handleDecrement = useCallback(() => {
     if (selectedCount <= 0 || !onRemove) return;
@@ -81,14 +82,10 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
       <article className="flex flex-col rounded-lg border border-gray-100 bg-gray-50 dark:border-gray-800/60 dark:bg-gray-900/40">
         <div className="grid grid-cols-4 items-center px-4 py-3">
           <div className="col-span-2 flex flex-col gap-2">
-            <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {capitalizeWords(nombre)}
-            </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
-                <Calendar className="h-4 w-4" />
-                <span>{noches} noches</span>
-              </div>
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                {capitalizeWords(nombre)}
+              </h4>
               <button
                 onClick={handleShowDetails}
                 className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
@@ -97,6 +94,12 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
                 <Info className="h-4 w-4" />
                 <span>Detalles</span>
               </button>
+            </div>
+            <div className="flex items-center gap-4">
+              <DateDisplay 
+                fechaInicio={instancias[0].fecha_inicio || instancias[0].fechaInicio}
+                fechaFin={instancias[0].fecha_fin || instancias[0].fechaFin}
+              />
             </div>
           </div>
 

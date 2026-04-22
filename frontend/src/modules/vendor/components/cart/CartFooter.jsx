@@ -3,6 +3,7 @@ import ClienteModal from '@client/ClienteModal';
 import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 import { useReservar } from '@vendor-hooks/useReservar';
 import { formatCurrency } from '@utils/pricingUtils';
+import PriceTag from '@ui/PriceTag';
 
 // Pie del carrito con resumen de totales y botón de reservar
 function CartFooter({ onClose }) {
@@ -74,11 +75,9 @@ function CartFooter({ onClose }) {
           <div className="my-1 border-t border-gray-200 dark:border-gray-600" />
 
           {/* Gran Total */}
-          <div className="flex items-baseline justify-between pt-1">
+          <div className="flex items-center justify-between pt-1">
             <span className="font-bold text-gray-900 dark:text-gray-100">Total</span>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalFinal)}
-            </span>
+            <PriceTag precio={totalFinal} />
           </div>
         </div>
 

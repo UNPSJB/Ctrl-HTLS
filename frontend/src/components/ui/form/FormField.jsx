@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import FormLabel from './FormLabel';
 import FormError from './FormError';
 
@@ -14,10 +14,15 @@ const FormField = ({
   children,
   containerClassName = '',
 }) => {
-  // Inyectamos el estado de error al componente hijo (el input)
+  const autoId = useId();
+
+  // Inyectamos el estado de error y el auto ID al componente hijo (el input)
   const childrenWithProps = React.Children.map(children, (child) => {
     if (React.isValidElement(child)) {
-      return React.cloneElement(child, { error: !!error });
+      return React.cloneElement(child, { 
+        error: !!error,
+        id: child.props.id || autoId 
+      });
     }
     return child;
   });
@@ -25,7 +30,7 @@ const FormField = ({
   return (
     <div className={`space-y-1 ${containerClassName}`}>
       {label && (
-        <FormLabel required={required} icon={icon}>
+        <FormLabel htmlFor={React.isValidElement(children) ? (children.props.id || autoId) : autoId} required={required} icon={icon}>
           {label}
         </FormLabel>
       )}

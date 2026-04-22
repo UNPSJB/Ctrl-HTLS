@@ -8,6 +8,7 @@ import { useCarrito } from '@vendor-context/CarritoContext';
 import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 import { capitalizeWords } from '@/utils/stringUtils';
 import { formatCurrency } from '@utils/pricingUtils';
+import PriceTag from '@ui/PriceTag';
 
 // Componente interno para mostrar un hotel con sus ítems en la vista de pago
 function HotelItem({ hotel }) {
@@ -56,13 +57,11 @@ function HotelItem({ hotel }) {
             )}
           </div>
 
-          <div className="flex flex-col sm:items-end">
+          <div className="flex flex-col sm:items-end gap-1">
             <span className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Monto Total
             </span>
-            <span className="text-lg font-bold text-gray-900 dark:text-white">
-              {formatCurrency(subtotalHotel)}
-            </span>
+            <PriceTag precio={subtotalHotel} />
           </div>
         </div>
 

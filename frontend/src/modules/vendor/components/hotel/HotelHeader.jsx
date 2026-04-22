@@ -19,7 +19,7 @@ const HotelHeader = ({ hotel, isExpanded, setIsExpanded }) => {
   return (
     <>
       <header
-        className={`flex flex-col cursor-pointer transition-colors p-5 ${isExpanded ? 'bg-blue-50/30 dark:bg-blue-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/80'}`}
+        className={`flex flex-col cursor-pointer transition-colors p-4 ${isExpanded ? 'bg-blue-50/30 dark:bg-blue-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/80'}`}
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
       >

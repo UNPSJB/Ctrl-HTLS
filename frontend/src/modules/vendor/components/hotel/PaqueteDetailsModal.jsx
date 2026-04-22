@@ -2,6 +2,9 @@ import { Bed, Calendar, CheckCircle, Package } from 'lucide-react';
 import Modal from '@ui/Modal';
 import { normalizeDiscount, roundTwo, toNumber, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
+import dateUtils from '@/utils/dateUtils';
+
+const { formatFecha } = dateUtils;
 
 function PaqueteDetailsModal({ paquete, onClose, onReserve }) {
   if (!paquete) return null;
@@ -39,8 +42,15 @@ function PaqueteDetailsModal({ paquete, onClose, onReserve }) {
                 <Calendar className="h-4 w-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Duración</span>
-                <span className="text-gray-800 dark:text-gray-200 font-medium">{noches} noches de estancia</span>
+                <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold flex items-center justify-between">
+                  Fechas del Paquete 
+                  <span className="text-indigo-600 dark:text-indigo-400 tracking-normal ml-2 bg-indigo-50 dark:bg-indigo-900/40 px-1.5 py-0.5 rounded text-[10px]">
+                    {noches} NOCHES
+                  </span>
+                </span>
+                <span className="text-gray-800 dark:text-gray-200 font-medium">
+                  {formatFecha(paquete.fecha_inicio || paquete.fechaInicio)} al {formatFecha(paquete.fecha_fin || paquete.fechaFin)}
+                </span>
               </div>
             </div>
 
