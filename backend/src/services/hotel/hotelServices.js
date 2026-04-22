@@ -98,7 +98,6 @@ const crearHotel = async (
       ciudadCompleta,
     };
   } catch (error) {
-    await deleteEncargado(encargadoId);
     throw new CustomError(error.message, error.statusCode || 500);
   }
 };
