@@ -317,11 +317,11 @@ function HotelSearch({
         </div>
       )}
 
-      <fieldset disabled={fieldDisabled} className={fieldDisabled ? 'opacity-60 grayscale-[50%]' : ''}>
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
+        <fieldset disabled={fieldDisabled} className={fieldDisabled ? 'opacity-60 grayscale-[50%]' : ''}>
           {isCompact ? renderCompact() : renderHero()}
-        </form>
-      </fieldset>
+        </fieldset>
+      </form>
     </div>
   );
 }

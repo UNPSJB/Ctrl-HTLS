@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { formatCurrency } from '@utils/pricingUtils';
 import TarjetaForm from './TarjetaForm';
+import { SelectInput, NumberInput } from '@ui/form';
 
 // Selector de métodos de pago (Efectivo, Puntos, Tarjeta, Mixto)
 function MetodoPago({
@@ -38,38 +39,23 @@ function MetodoPago({
 
   const showCardForm = metodoPago === 'Tarjeta' || metodoPago === 'Mixto';
 
-  const selectClasses =
-    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 appearance-none';
-
   return (
     <fieldset className={`mt-3 ${className}`} aria-label="Método de pago">
       <legend className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
         Método de Pago
       </legend>
 
-      <div className="relative">
-        <select
-          id="metodo-pago-select"
-          value={metodoPago}
-          onChange={(e) => onChangeMetodo(e.target.value)}
-          className={selectClasses}
-        >
-          {methods.map((m) => (
-            <option key={m.id} value={m.id} disabled={m.disabled}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-          <svg
-            className="h-4 w-4 fill-current"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-          >
-            <path d="M5.516 7.548c.436-.446 1.043-.48 1.576 0L10 10.405l2.908-2.857c.533-.48 1.14-.446 1.576 0 .436.445.408 1.197 0 1.615l-3.69 3.63c-.533.48-1.408.48-1.94 0l-3.69-3.63c-.408-.418-.436-1.17 0-1.615z" />
-          </svg>
-        </div>
-      </div>
+      <SelectInput
+        id="metodo-pago-select"
+        value={metodoPago}
+        onChange={(e) => onChangeMetodo(e.target.value)}
+      >
+        {methods.map((m) => (
+          <option key={m.id} value={m.id} disabled={m.disabled}>
+            {m.label}
+          </option>
+        ))}
+      </SelectInput>
 
       {!puntoEnabled && (
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -79,23 +65,17 @@ function MetodoPago({
       )}
 
       {metodoPago === 'Mixto' && (
-        <div className="mt-4 appearance-none rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-          <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
-            Desglose Mixto
-          </h4>
+        <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
           <div className="space-y-3">
             <label className="block">
               <span className="text-sm text-gray-700 dark:text-gray-300">Monto en Efectivo</span>
-              <div className="relative mt-1 flex items-center">
-                <span className="absolute left-3 text-gray-500">$</span>
-                <input
-                  type="number"
+              <div className="mt-1">
+                <NumberInput
                   min="0"
                   max={baseTotal}
                   step="0.01"
                   value={montoEfectivo || ''}
                   onChange={(e) => onChangeMontoEfectivo(Number(e.target.value))}
-                  className="w-full rounded border border-gray-300 bg-white py-2 pl-7 pr-3 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                   placeholder="0.00"
                 />
               </div>

@@ -34,9 +34,9 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
       <article className="grid grid-cols-4 items-center rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 shadow-sm dark:border-gray-800/60 dark:bg-gray-900/40">
         <div className="col-span-2 flex items-center gap-4">
           <div className="flex items-center gap-4">
-            <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
               {capitalizeWords(tipo)}
-            </div>
+            </h4>
             <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
               <Users className="h-4 w-4" />
               <span>{capacidad ?? '—'}</span>

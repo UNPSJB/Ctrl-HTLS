@@ -213,6 +213,7 @@ export function CarritoProvider({ children }) {
   );
   const [estado, dispatch] = useReducer(carritoReducer, persistedState);
   const [isReserving, setIsReserving] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   useEffect(() => {
     const normalizeHoteles = (hoteles = []) =>
@@ -321,6 +322,8 @@ export function CarritoProvider({ children }) {
   const cancelarReserva = useCallback(async () => {
     if (!estado.reservaConfirmada) return;
 
+    setIsCanceling(true);
+
     const alquilerIds = estado.reservaConfirmada
       .flatMap((res) => res.alquiler.map((alq) => alq.alquilerId))
       .filter(Boolean);
@@ -328,6 +331,7 @@ export function CarritoProvider({ children }) {
     if (alquilerIds.length === 0) {
       toast.error('Error: No se encontraron IDs para cancelar.');
       limpiarCarritoYReserva();
+      setIsCanceling(false);
       return;
     }
 
@@ -347,6 +351,8 @@ export function CarritoProvider({ children }) {
       });
     } catch (error) {
       console.error('Error al cancelar:', error);
+    } finally {
+      setIsCanceling(false);
     }
   }, [estado.reservaConfirmada, limpiarCarritoYReserva]);
 
@@ -405,6 +411,7 @@ export function CarritoProvider({ children }) {
       reservaConfirmada: estado.reservaConfirmada,
       isReserving,
       setIsReserving,
+      isCanceling,
       agregarHabitacion,
       agregarPaquete,
       removerHabitacion,
@@ -423,6 +430,7 @@ export function CarritoProvider({ children }) {
       estado,
       isReserving,
       setIsReserving,
+      isCanceling,
       agregarHabitacion,
       agregarPaquete,
       removerHabitacion,

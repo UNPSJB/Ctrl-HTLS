@@ -1,11 +1,8 @@
 import { useState, useMemo } from 'react';
-import PriceTag from '@ui/PriceTag';
-import { Users, Trash2, CalendarDays, Package, ChevronDown, ChevronUp, BedDouble, Hash, ArrowRight, Moon } from 'lucide-react';
+import { Users, Trash2, Package, ChevronDown, ChevronUp, BedDouble, Hash } from 'lucide-react';
 import { calcPackageTotal, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
-import dateUtils from '@utils/dateUtils';
-
-const { formatFecha } = dateUtils;
+import DateDisplay from '@ui/DateDisplay';
 
 // Tarjeta detallada para un paquete turístico en el carrito (Vista de Pago)
 function PaqueteCard({ paquete, hotel, onRemove }) {
@@ -18,6 +15,9 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
   }, [paquete]);
 
   if (!paquete) return null;
+
+  console.log(paquete);
+
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50 shadow-sm dark:border-gray-700 dark:bg-gray-900/60">
@@ -88,44 +88,41 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
 
       <div className="mx-5 border-t border-gray-200/50 dark:border-gray-700/50" />
 
-      {/* Fila 2: Cronología Personalizada */}
-      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
-              <CalendarDays className="h-5 w-5" />
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Inicia paquete</span>
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{formatFecha(paquete.fechaInicio)}</span>
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-300" />
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Finaliza</span>
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{formatFecha(paquete.fechaFin)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-          <Moon className="h-4 w-4" />
-          <span>{paquete.noches} NOCHES</span>
-        </div>
+      {/* Fila 2: Cronología */}
+      <div className="p-5">
+        <DateDisplay
+          fechaInicio={paquete.fechaInicio}
+          fechaFin={paquete.fechaFin}
+          noches={paquete.noches}
+        />
       </div>
 
       <div className="mx-5 border-t border-gray-200/50 dark:border-gray-700/50" />
 
-      {/* Fila 3: Desbloce Económico y Precio Final */}
-      <div className="flex justify-end p-5">
+      {/* Fila 3: Desglose Económico y Precio Final */}
+      <div className="flex flex-col items-end gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">
+
+        <div className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-2">
+            <span>Base:</span>
+            <span className="font-medium text-gray-800 dark:text-gray-200">
+              {formatCurrency(priceInfo.sumPerNight * priceInfo.noches)}
+            </span>
+          </div>
+          {priceInfo.descuentoPaquetePorcentaje > 0 && (
+            <div className="flex items-center gap-2">
+              <span>Descuento de paquete (-{Math.round(priceInfo.descuentoPaquetePorcentaje * 100)}%):</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(priceInfo.final)}</span>
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col items-end">
-          <span className="text-[10px] uppercase tracking-tighter text-gray-400 dark:text-gray-500">
-            Subtotal
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Total
           </span>
-          <div className="text-lg font-black text-gray-900 dark:text-white">
-            <PriceTag precio={priceInfo.final} />
+          <div className="text-xl font-black text-gray-900 dark:text-white">
+            {formatCurrency(priceInfo.final)}
           </div>
         </div>
       </div>
