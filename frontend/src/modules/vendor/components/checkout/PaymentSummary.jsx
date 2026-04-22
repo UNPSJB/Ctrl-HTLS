@@ -3,6 +3,7 @@ import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 import { usePagar } from '@vendor-hooks/usePagar';
 import { useCliente } from '@vendor-context/ClienteContext';
 import { formatCurrency } from '@utils/pricingUtils';
+import PriceTag from '@ui/PriceTag';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
 
@@ -139,13 +140,11 @@ function PaymentSummary() {
 
         {/* Total General */}
         <div className="mt-2 border-t border-gray-200 pt-3 dark:border-gray-700">
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-base font-bold text-gray-900 dark:text-gray-100">
               Total a cobrar
             </span>
-            <span className="text-xl font-extrabold text-gray-900 dark:text-white">
-              {formatCurrency(totalFinal)}
-            </span>
+            <PriceTag precio={totalFinal} />
           </div>
         </div>
       </div>

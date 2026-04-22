@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { calcRoomInstanceTotal, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
 import DateDisplay from '@ui/DateDisplay';
+import PriceTag from '@ui/PriceTag';
 import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 
 // Tarjeta detallada para una instancia de habitación en el carrito (Vista de Pago)
@@ -102,12 +103,10 @@ function HabitacionCard({ habitacion, hotel, onRemove }) {
         </div>
 
         <div className="flex flex-col items-end">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">
             Total
           </span>
-          <div className="text-xl font-black text-gray-900 dark:text-white">
-            {formatCurrency(totalFinalHabitacion)}
-          </div>
+          <PriceTag precio={totalFinalHabitacion} />
         </div>
       </div>
     </div>

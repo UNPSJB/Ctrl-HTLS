@@ -6,7 +6,7 @@ import { Search, MapPin, Calendar, Users, Globe, Building, ChevronRight, Sliders
 import useUbicacion from '@hooks/useUbicacion';
 import { toast } from 'react-hot-toast';
 import { FormField, Input, SelectInput, SearchInput } from '@ui/form';
-import CounterInput from '@ui/form/CounterInput';
+import Counter from '@ui/Counter';
 
 const { toISODate } = dateUtils;
 
@@ -177,13 +177,14 @@ function HotelSearch({
         </div>
       </div>
 
-      <div className="w-24">
-        <CounterInput
+      <div className="w-auto">
+        <Counter
           icon={Users}
           value={localFilters.capacidad}
           min={1}
           max={5}
           onChange={(val) => handleChange('capacidad', val)}
+          className="w-28"
         />
       </div>
 
@@ -280,13 +281,13 @@ function HotelSearch({
 
         <div className="md:col-span-3">
           <FormField label="Pasajeros" icon={Users}>
-            <CounterInput
+            <Counter
               icon={Users}
               value={localFilters.capacidad}
               min={1}
               max={5}
               onChange={(val) => handleChange('capacidad', val)}
-              className="rounded-md h-[50px]"
+              className="w-full rounded-md h-[50px]"
             />
           </FormField>
         </div>
@@ -307,7 +308,7 @@ function HotelSearch({
 
 
   return (
-    <div className={`transition-all duration-700 ease-in-out ${isCompact
+    <div className={`transition-[padding,margin,box-shadow] duration-700 ease-in-out ${isCompact
       ? 'mb-6 rounded-lg border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800'
       : 'mx-auto max-w-6xl rounded-lg border border-gray-200 bg-white p-8 shadow-lg dark:border-gray-700 dark:bg-gray-800'}`}>
 

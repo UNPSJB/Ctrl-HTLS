@@ -6,7 +6,7 @@ function Descuento({ descuento }) {
 
   return (
     <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-      {porcentaje}% OFF (Por {descuento.cantidad_de_habitaciones} habitaciones)
+      {porcentaje}% OFF (Por {descuento.cantidad_de_habitaciones} Habitaciones)
     </span>
   );
 }

@@ -6,67 +6,54 @@ import StateMessage from '@/components/ui/StateMessage';
 
 const HotelList = ({ hoteles, isLoading, error, hasSearched = false }) => {
   const [filters, setFilters] = useState({
-    hospedajes: ['A', 'B', 'C'],
-    estrellas: 5,
+    categoriaMaxIndex: 11,
     soloPaquetes: false,
     soloDescuentos: false,
+    ordenDescendente: true,
   });
 
-  const parseCategoria = (catStr) => {
-    if (!catStr) return { type: 'unknown', value: 0 };
+  const parseCategoriaIndex = (catStr) => {
+    if (!catStr) return 0;
     
     const str = String(catStr).trim().toUpperCase();
 
-    // 1. Detectar si el string ES exactamente A, B o C, o si termina en ellas (ej: "Hospedaje A")
+    // 1. Letras A, B, C
     const letterMatch = str.match(/\b([ABC])\b/); 
     if (letterMatch) {
-      return { type: 'letter', value: letterMatch[1] };
+      const letter = letterMatch[1];
+      if (letter === 'A') return 0;
+      if (letter === 'B') return 1;
+      if (letter === 'C') return 2;
     }
 
-    // 2. Si no es letra, intentamos extraer el primer número (ej: "3.5 Estrellas" o "5")
+    // 2. Números (1 a 5)
     const numberStr = str.split(' ')[0];
     const val = parseFloat(numberStr);
     
     if (!isNaN(val)) {
-      return { type: 'number', value: val };
+      // Mapear el número al índice: 1 -> 3, 1.5 -> 4, ..., 5 -> 11
+      const idx = (val - 1) * 2 + 3;
+      return Math.max(3, Math.min(11, Math.round(idx)));
     }
 
-    return { type: 'unknown', value: 0 };
+    return 0; // Desconocido -> peor
   };
 
   const filteredHotels = hoteles.filter((hotel) => {
     if (filters.soloPaquetes && (!hotel.paquetes || hotel.paquetes.length === 0)) return false;
     if (filters.soloDescuentos && (!hotel.descuentos || hotel.descuentos.length === 0)) return false;
 
-    const cat = parseCategoria(hotel.categoria?.estrellas || hotel.estrellas || '');
-
-    if (cat.type === 'letter') {
-      return filters.hospedajes.includes(cat.value);
-    }
-
-    if (cat.type === 'number') {
-      return cat.value <= filters.estrellas; // Filtra para mostrar desde ese numero HASTA abajo.
-    }
-
-    return true;
+    const catIndex = parseCategoriaIndex(hotel.categoria?.estrellas || hotel.estrellas || '');
+    return catIndex <= filters.categoriaMaxIndex;
   });
 
-  // Algoritmo de puntuación para ordenamiento (Mejor a Peor)
-  const categoryScore = (catStr) => {
-    const cat = parseCategoria(catStr);
-    if (cat.type === 'number') return cat.value; // Puntuacion 1 a 5
-    if (cat.type === 'letter') {
-      if (cat.value === 'C') return 0.3; // Mejores hospedajes
-      if (cat.value === 'B') return 0.2;
-      if (cat.value === 'A') return 0.1; // Peores hospedajes
-    }
-    return 0; // Desconocidos
-  };
-
   const sortedHotels = [...filteredHotels].sort((a, b) => {
-    const scoreA = categoryScore(a.categoria?.estrellas || a.estrellas || '');
-    const scoreB = categoryScore(b.categoria?.estrellas || b.estrellas || '');
-    return scoreB - scoreA; // Orden Descendente
+    const indexA = parseCategoriaIndex(a.categoria?.estrellas || a.estrellas || '');
+    const indexB = parseCategoriaIndex(b.categoria?.estrellas || b.estrellas || '');
+    
+    return filters.ordenDescendente 
+      ? indexB - indexA // Mejor a peor
+      : indexA - indexB; // Peor a mejor
   });
 
   if (error) {

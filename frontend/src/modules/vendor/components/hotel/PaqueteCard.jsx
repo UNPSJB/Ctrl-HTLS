@@ -3,6 +3,7 @@ import { Users, Trash2, Package, ChevronDown, ChevronUp, BedDouble, Hash } from 
 import { calcPackageTotal, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
 import DateDisplay from '@ui/DateDisplay';
+import PriceTag from '@ui/PriceTag';
 
 // Tarjeta detallada para un paquete turístico en el carrito (Vista de Pago)
 function PaqueteCard({ paquete, hotel, onRemove }) {
@@ -118,12 +119,10 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
         </div>
 
         <div className="flex flex-col items-end">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">
             Total
           </span>
-          <div className="text-xl font-black text-gray-900 dark:text-white">
-            {formatCurrency(priceInfo.final)}
-          </div>
+          <PriceTag precio={priceInfo.final} />
         </div>
       </div>
     </div>
