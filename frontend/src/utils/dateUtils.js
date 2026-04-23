@@ -4,6 +4,8 @@ export function parseDate(value) {
     return Number.isFinite(value.getTime()) ? new Date(value.getTime()) : null;
   }
   const s = String(value).trim();
+
+  // Caso 1: fecha pura "YYYY-MM-DD" → construir en hora local (correcto)
   const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
   if (dateOnlyMatch) {
     const y = Number(dateOnlyMatch[1]);
@@ -12,6 +14,20 @@ export function parseDate(value) {
     const localDate = new Date(y, m, d);
     return Number.isFinite(localDate.getTime()) ? localDate : null;
   }
+
+  // Caso 2: timestamp ISO "YYYY-MM-DDThh:mm:ss.sssZ" (lo que devuelve el backend)
+  // Extraemos solo la parte de la fecha para evitar el desfase UTC→Local
+  // Ej: "2026-04-18T00:00:00.000Z" en AR (UTC-3) sería 17/04 → incorrecto
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})T/.exec(s);
+  if (isoMatch) {
+    const y = Number(isoMatch[1]);
+    const m = Number(isoMatch[2]) - 1;
+    const d = Number(isoMatch[3]);
+    const localDate = new Date(y, m, d);
+    return Number.isFinite(localDate.getTime()) ? localDate : null;
+  }
+
+  // Fallback genérico
   const d = new Date(s);
   return Number.isFinite(d.getTime()) ? d : null;
 }

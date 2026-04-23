@@ -9,7 +9,7 @@ import { capitalizeWords } from '@/utils/stringUtils';
 import dateUtils from '@/utils/dateUtils';
 import DateDisplay from '@ui/DateDisplay';
 
-const { toISODate, formatFecha } = dateUtils;
+const { toISODate, formatFecha, parseDate } = dateUtils;
 
 // Elemento de lista para un paquete turístico dentro del detalle del hotel
 function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
@@ -48,8 +48,8 @@ function PaqueteItem({ hotelData, paqueteGroup, onAdd, onRemove }) {
       const rawOut = instanciaParaAgregar.fechaFin || instanciaParaAgregar.fecha_fin;
       
       const fechas = { 
-        fechaInicio: toISODate(new Date(rawIn)), 
-        fechaFin: toISODate(new Date(rawOut)) 
+        fechaInicio: toISODate(parseDate(rawIn)), 
+        fechaFin: toISODate(parseDate(rawOut)) 
       };
       
       onAdd(instanciaParaAgregar, fechas);

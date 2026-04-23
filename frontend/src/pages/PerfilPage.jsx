@@ -10,6 +10,7 @@ import {
   DollarSign, CheckCircle2,
   Receipt, History, CalendarDays, Clock
 } from 'lucide-react';
+import { formatFecha } from '@/utils/dateUtils';
 
 // Obtiene el lunes de la semana actual a las 00:00:00
 const getLunesDeSemana = () => {
@@ -22,12 +23,7 @@ const getLunesDeSemana = () => {
   return lunes;
 };
 
-const formatFecha = (fechaStr) => {
-  if (!fechaStr) return '—';
-  return new Date(fechaStr).toLocaleDateString('es-AR', {
-    day: '2-digit', month: '2-digit', year: 'numeric'
-  });
-};
+
 
 // Página de Perfil para Vendedores - Solo Visualización
 function PerfilPage() {
