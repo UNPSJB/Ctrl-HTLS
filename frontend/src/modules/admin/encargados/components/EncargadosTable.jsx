@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Users, User, Edit } from 'lucide-react';
+import { Trash2, Users, User, Edit, Filter } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
+import SortableHeader from '@admin-ui/SortableHeader';
 import axiosInstance from '@/api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
+import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -16,7 +18,24 @@ const EncargadosTable = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  // Filtro de asignación: 'todos' | 'asignados' | 'libres'
+  const [assignFilter, setAssignFilter] = useState('todos');
   const navigate = useNavigate();
+
+  // Cicla entre todos → asignados → libres
+  const ASSIGN_CYCLE = ['todos', 'asignados', 'libres'];
+  const ASSIGN_META = {
+    todos:    { label: 'Todos',       color: 'text-gray-500 dark:text-gray-400',      bg: 'bg-white dark:bg-gray-700',           border: 'border-gray-200 dark:border-gray-600' },
+    asignados:{ label: 'Con hotel',   color: 'text-blue-600 dark:text-blue-400',      bg: 'bg-blue-50 dark:bg-blue-900/20',      border: 'border-blue-300 dark:border-blue-700' },
+    libres:   { label: 'Sin hotel',   color: 'text-amber-600 dark:text-amber-400',    bg: 'bg-amber-50 dark:bg-amber-900/20',    border: 'border-amber-300 dark:border-amber-700' },
+  };
+  const cycleAssign = () => {
+    setAssignFilter(prev => {
+      const idx = ASSIGN_CYCLE.indexOf(prev);
+      return ASSIGN_CYCLE[(idx + 1) % ASSIGN_CYCLE.length];
+    });
+    setCurrentPage(1);
+  };
 
   useEffect(() => {
     fetchEncargados();
@@ -49,29 +68,22 @@ const EncargadosTable = () => {
   };
 
   const filteredEncargados = useMemo(() => {
-    // 1. Filtrar por término de búsqueda
-    const filtered = encargados.filter(e =>
+    // 1. Filtrar por texto
+    let result = encargados.filter(e =>
       e.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.apellido?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.dni?.includes(searchTerm)
     );
+    // 2. Filtrar por asignación
+    if (assignFilter === 'asignados') result = result.filter(e =>  !!e.hotel);
+    if (assignFilter === 'libres')    result = result.filter(e => !e.hotel);
+    return result;
+  }, [encargados, searchTerm, assignFilter]);
 
-    // 2. Ordenar: los que NO tienen hotel asignado van primero
-    return filtered.sort((a, b) => {
-      const aAsignado = !!a.hotel;
-      const bAsignado = !!b.hotel;
+  const { sortedData: sortedEncargados, sortKey, sortDir, handleSort } = useSort(filteredEncargados, 'nombre');
 
-      // Si uno está asignado y el otro no
-      if (!aAsignado && bAsignado) return -1; // a va primero
-      if (aAsignado && !bAsignado) return 1;  // b va primero
-
-      // Si ambos están en la misma situación, podríamos ordenar por nombre
-      return (a.nombre || '').localeCompare(b.nombre || '');
-    });
-  }, [encargados, searchTerm]);
-
-  const totalPages = Math.ceil(filteredEncargados.length / ITEMS_PER_PAGE);
-  const currentItems = filteredEncargados.slice(
+  const totalPages = Math.ceil(sortedEncargados.length / ITEMS_PER_PAGE);
+  const currentItems = sortedEncargados.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -79,19 +91,39 @@ const EncargadosTable = () => {
   return (
     <div className="flex-grow flex flex-col h-full overflow-hidden">
       <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {/* Barra de Búsqueda Interna */}
+        {/* Barra de Búsqueda + Filtro de Asignación */}
         <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <div className="max-w-md">
-            <SearchInput
-              placeholder="Buscar por nombre o documento..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              onClear={() => setSearchTerm('')}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 max-w-md">
+              <SearchInput
+                placeholder="Buscar por nombre o documento..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                onClear={() => setSearchTerm('')}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Botón ciclo: todos → con hotel → sin hotel */}
+            <button
+              type="button"
+              onClick={cycleAssign}
               disabled={loading}
-            />
+              title={`Filtro: ${ASSIGN_META[assignFilter].label}. Click para cambiar.`}
+              className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${
+                ASSIGN_META[assignFilter].color
+              } ${
+                ASSIGN_META[assignFilter].bg
+              } ${
+                ASSIGN_META[assignFilter].border
+              }`}
+            >
+              <Filter className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">{ASSIGN_META[assignFilter].label}</span>
+            </button>
           </div>
         </div>
 
@@ -106,14 +138,14 @@ const EncargadosTable = () => {
             <table className="w-full text-left text-sm">
               <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4">Nombre Completo</th>
-                  <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Teléfono</th>
-                  <th className="px-6 py-4">Hotel</th>
+                  <SortableHeader column="nombre" label="Nombre Completo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="dni" label="Documento" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="telefono" label="Teléfono" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="hotel.nombre" label="Hotel" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              {filteredEncargados.length > 0 ? (
+              {sortedEncargados.length > 0 ? (
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {currentItems.map((encargado) => (
                     <tr key={encargado.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
@@ -188,7 +220,7 @@ const EncargadosTable = () => {
         {/* Paginación */}
         <TablePagination
           currentPage={currentPage}
-          totalItems={filteredEncargados.length}
+          totalItems={sortedEncargados.length}
           itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
           disabled={loading}

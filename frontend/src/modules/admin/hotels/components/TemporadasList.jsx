@@ -2,16 +2,20 @@ import { useState } from 'react';
 import { Calendar, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatFecha } from '@/utils/dateUtils';
 import TablePagination from '@admin-ui/TablePagination';
+import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
+import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
 export default function TemporadasList({ data = [], loading = false, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
-  const currentItems = data.slice(
+  const { sortedData, sortKey, sortDir, handleSort } = useSort(data, 'fechaInicio');
+
+  const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
+  const currentItems = sortedData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -27,10 +31,10 @@ export default function TemporadasList({ data = [], loading = false, onDelete })
         <table className="w-full text-left text-sm">
           <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
             <tr>
-              <th className="px-6 py-4">Tipo</th>
-              <th className="px-6 py-4">Inicio</th>
-              <th className="px-6 py-4">Fin</th>
-              <th className="px-6 py-4 text-center">Ajuste</th>
+              <SortableHeader column="tipo" label="Tipo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader column="fechaInicio" label="Inicio" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader column="fechaFin" label="Fin" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader column="porcentaje" label="Ajuste" className="text-center" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
               <th className="px-6 py-4 text-right">Acción</th>
             </tr>
           </thead>
@@ -90,7 +94,7 @@ export default function TemporadasList({ data = [], loading = false, onDelete })
       {/* Paginación */}
       <TablePagination
         currentPage={currentPage}
-        totalItems={data.length}
+        totalItems={sortedData.length}
         itemsPerPage={ITEMS_PER_PAGE}
         onPageChange={setCurrentPage}
         disabled={loading}

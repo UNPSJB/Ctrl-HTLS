@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { User, Search, RefreshCw, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 import axiosInstance from '@/api/axiosInstance';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import TablePagination from '@admin-ui/TablePagination';
+import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
 import { SearchInput } from '@form';
+import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -55,12 +57,14 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
     );
   }, [encargados, searchTerm]);
 
+  const { sortedData: sortedFiltered, sortKey, sortDir, handleSort } = useSort(filtered, 'nombre');
+
   const currentItems = useMemo(() => {
-    return filtered.slice(
+    return sortedFiltered.slice(
       (currentPage - 1) * ITEMS_PER_PAGE,
       currentPage * ITEMS_PER_PAGE
     );
-  }, [filtered, currentPage]);
+  }, [sortedFiltered, currentPage]);
 
   if (error) {
     return (
@@ -118,7 +122,7 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
                 Todos los encargados registrados ya están asignados a un hotel. Registrá uno nuevo.
               </p>
             </div>
-          ) : !loading && filtered.length === 0 ? (
+          ) : !loading && sortedFiltered.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-10 text-center">
               <User className="mb-2 h-8 w-8 text-gray-400 opacity-50" />
               <p className="text-sm text-gray-500 dark:text-gray-400">No se encontraron encargados.</p>
@@ -127,9 +131,9 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
             <table className="w-full border-collapse text-left text-sm">
               <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4">Nombre Completo</th>
-                  <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Contacto</th>
+                  <SortableHeader column="nombre" label="Nombre Completo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="dni" label="Documento" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="email" label="Contacto" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th className="px-6 py-4 text-right">Seleccionar</th>
                 </tr>
               </thead>
@@ -177,12 +181,7 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
 
                       {/* Contacto */}
                       <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                        <div className="flex flex-col">
-                          <span>{e.email || <span className="italic text-gray-400">—</span>}</span>
-                          <span className="text-gray-500">
-                            {e.telefono || <span className="italic text-gray-400">—</span>}
-                          </span>
-                        </div>
+                        {e.telefono || <span className="italic text-gray-400">—</span>}
                       </td>
 
                       {/* Acción */}
@@ -211,7 +210,7 @@ export default function EncargadosList({ value, onChange, exclude = null }) {
       <div className="border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 flex-shrink-0">
         <TablePagination
           currentPage={currentPage}
-          totalItems={filtered.length}
+          totalItems={sortedFiltered.length}
           itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
           disabled={loading}

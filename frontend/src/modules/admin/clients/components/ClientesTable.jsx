@@ -2,12 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Users, User, History } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
+import SortableHeader from '@admin-ui/SortableHeader';
 import axiosInstance from '@api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
+import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -64,8 +66,10 @@ const ClientesTable = () => {
     );
   }, [clientes, searchTerm]);
 
-  const totalPages = Math.ceil(filteredClientes.length / ITEMS_PER_PAGE);
-  const currentItems = filteredClientes.slice(
+  const { sortedData: sortedClientes, sortKey, sortDir, handleSort } = useSort(filteredClientes, 'apellido');
+
+  const totalPages = Math.ceil(sortedClientes.length / ITEMS_PER_PAGE);
+  const currentItems = sortedClientes.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -100,14 +104,14 @@ const ClientesTable = () => {
             <table className="w-full text-left text-sm">
               <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4">Nombre Completo</th>
-                  <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Email</th>
-                  <th className="px-6 py-4">Teléfono</th>
+                  <SortableHeader column="apellido" label="Nombre Completo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="numeroDocumento" label="Documento" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="email" label="Email" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="telefono" label="Teléfono" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              {filteredClientes.length > 0 ? (
+              {sortedClientes.length > 0 ? (
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {currentItems.map((cliente) => (
                     <tr key={cliente.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
@@ -167,7 +171,7 @@ const ClientesTable = () => {
         {/* Paginación */}
         <TablePagination
           currentPage={currentPage}
-          totalItems={filteredClientes.length}
+          totalItems={sortedClientes.length}
           itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
           disabled={loading}

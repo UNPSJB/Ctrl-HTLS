@@ -4,7 +4,9 @@ import { capitalizeFirst } from '@/utils/stringUtils';
 import { formatFecha } from '@/utils/dateUtils';
 import TableButton from '@admin-ui/TableButton';
 import TablePagination from '@admin-ui/TablePagination';
+import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -15,7 +17,9 @@ const ITEMS_PER_PAGE = 100;
 export default function PaquetesList({ data = [], loading = false, onEdit, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const currentItems = data.slice(
+  const { sortedData, sortKey, sortDir, handleSort } = useSort(data, 'nombre');
+
+  const currentItems = sortedData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -31,10 +35,10 @@ export default function PaquetesList({ data = [], loading = false, onEdit, onDel
         <table className="w-full text-left text-sm">
           <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
             <tr>
-              <th className="px-6 py-4">Nombre Paquete</th>
-              <th className="px-6 py-4 text-center">Desde</th>
-              <th className="px-6 py-4 text-center">Hasta</th>
-              <th className="px-6 py-4 text-center">Descuento</th>
+              <SortableHeader column="nombre" label="Nombre Paquete" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader column="fecha_inicio" label="Desde" className="text-center" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader column="fecha_fin" label="Hasta" className="text-center" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader column="coeficiente_descuento" label="Descuento" className="text-center" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
               <th className="px-6 py-4">Habitaciones</th>
               <th className="px-6 py-4 text-right">Acciones</th>
             </tr>
@@ -121,7 +125,7 @@ export default function PaquetesList({ data = [], loading = false, onEdit, onDel
       {/* Paginación */}
       <TablePagination
         currentPage={currentPage}
-        totalItems={data.length}
+        totalItems={sortedData.length}
         itemsPerPage={ITEMS_PER_PAGE}
         onPageChange={setCurrentPage}
         disabled={loading}

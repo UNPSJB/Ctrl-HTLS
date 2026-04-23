@@ -7,8 +7,10 @@ import {
 } from 'lucide-react';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import TablePagination from '@admin-ui/TablePagination';
+import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
+import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -22,8 +24,16 @@ export default function HabitacionesList({
 }) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
-  const currentItems = data.slice(
+  // Enriquecer data con el nombre del tipo para poder ordenar por él
+  const enrichedData = data.map((hab) => ({
+    ...hab,
+    tipoNombre: (tiposGlobales.find((t) => t.id === Number(hab.tipoHabitacionId)) || hab.tipoHabitacion)?.nombre ?? '',
+  }));
+
+  const { sortedData, sortKey, sortDir, handleSort } = useSort(enrichedData, 'numero');
+
+  const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
+  const currentItems = sortedData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -39,9 +49,9 @@ export default function HabitacionesList({
         <table className="w-full text-left text-sm">
           <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
             <tr>
-              <th className="px-6 py-4">Habitación</th>
-              <th className="px-6 py-4">Ubicación</th>
-              <th className="px-6 py-4">Categoría / Tipo</th>
+              <SortableHeader column="numero" label="Habitación" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader column="piso" label="Ubicación" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader column="tipoNombre" label="Categoría / Tipo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
               <th className="px-6 py-4 text-right">Acciones</th>
             </tr>
           </thead>
@@ -114,7 +124,7 @@ export default function HabitacionesList({
       {/* Paginación */}
       <TablePagination
         currentPage={currentPage}
-        totalItems={data.length}
+        totalItems={sortedData.length}
         itemsPerPage={ITEMS_PER_PAGE}
         onPageChange={setCurrentPage}
         disabled={loading}

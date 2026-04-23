@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Edit, Trash2, BarChart3, User, Users, Key } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
+import SortableHeader from '@admin-ui/SortableHeader';
 import ChangePasswordModal from './ChangePasswordModal';
 import axiosInstance from '@api/axiosInstance';
 import TablePagination from '@admin-ui/TablePagination';
@@ -9,6 +10,7 @@ import { InnerLoading } from '@/components/ui/InnerLoading';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import { toast } from 'react-hot-toast';
+import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -63,11 +65,13 @@ const VendedoresTable = () => {
     );
   }, [vendedores, searchTerm]);
 
-  const totalPages = Math.ceil(filteredVendedores.length / ITEMS_PER_PAGE);
+  const { sortedData: sortedVendedores, sortKey, sortDir, handleSort } = useSort(filteredVendedores, 'apellido');
+
+  const totalPages = Math.ceil(sortedVendedores.length / ITEMS_PER_PAGE);
   const currentItems = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredVendedores.slice(start, start + ITEMS_PER_PAGE);
-  }, [currentPage, filteredVendedores]);
+    return sortedVendedores.slice(start, start + ITEMS_PER_PAGE);
+  }, [currentPage, sortedVendedores]);
 
   const handleDelete = async (id) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este vendedor?')) {
@@ -113,14 +117,14 @@ const VendedoresTable = () => {
             <table className="w-full text-left text-sm">
               <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4">Nombre Completo</th>
-                  <th className="px-6 py-4">Documento</th>
-                  <th className="px-6 py-4">Email</th>
-                  <th className="px-6 py-4">Teléfono</th>
+                  <SortableHeader column="apellido" label="Nombre Completo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="numeroDocumento" label="Documento" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="email" label="Email" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="telefono" label="Teléfono" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              {filteredVendedores.length > 0 ? (
+              {sortedVendedores.length > 0 ? (
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {currentItems.map((vendedor) => (
                     <tr key={vendedor.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
@@ -180,7 +184,7 @@ const VendedoresTable = () => {
 
         <TablePagination
           currentPage={currentPage}
-          totalItems={filteredVendedores.length}
+          totalItems={sortedVendedores.length}
           itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
           disabled={loading}

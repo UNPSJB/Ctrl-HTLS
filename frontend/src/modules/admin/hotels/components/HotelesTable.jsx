@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Eye, Building2, X, PowerOff, CheckCircle2 } from 'lucide-react';
+import { Eye, Building2, PowerOff, CheckCircle2, Filter } from 'lucide-react';
 import TableButton from '@admin-ui/TableButton';
+import SortableHeader from '@admin-ui/SortableHeader';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import { useHotelsData } from '@admin-hooks/useHotelsData';
 import TablePagination from '@admin-ui/TablePagination';
@@ -11,6 +12,7 @@ import { Modal } from '@admin-ui';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
+import { useSort } from '@/hooks/useSort';
 
 // Lista principal de hoteles para administración
 const HotelesTable = () => {
@@ -21,7 +23,24 @@ const HotelesTable = () => {
   const [hotelToToggle, setHotelToToggle] = useState(null);
   const [isToggling, setIsToggling] = useState(false);
   const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
+  // Filtro de estado: 'todos' | 'activos' | 'inactivos'
+  const [statusFilter, setStatusFilter] = useState('todos');
   const ITEMS_PER_PAGE = 100;
+
+  // Cicla entre todos → activos → inactivos → todos
+  const STATUS_CYCLE = ['todos', 'activos', 'inactivos'];
+  const STATUS_META = {
+    todos:    { label: 'Todos',    color: 'text-gray-500 dark:text-gray-400',   bg: 'bg-white dark:bg-gray-700',          border: 'border-gray-200 dark:border-gray-600' },
+    activos:  { label: 'Activos', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-300 dark:border-emerald-700' },
+    inactivos:{ label: 'Inactivos', color: 'text-red-500 dark:text-red-400',     bg: 'bg-red-50 dark:bg-red-900/20',         border: 'border-red-300 dark:border-red-700' },
+  };
+  const cycleStatus = () => {
+    setStatusFilter(prev => {
+      const idx = STATUS_CYCLE.indexOf(prev);
+      return STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
+    });
+    setCurrentPage(1);
+  };
 
   const handleToggleStatus = (hotel) => {
     setHotelToToggle(hotel); // Invocamos el modal sea para activar o desactivar
@@ -55,21 +74,46 @@ const HotelesTable = () => {
 
   const filteredHoteles = useMemo(() => {
     if (!hoteles) return [];
-    if (!searchTerm) return hoteles;
+    // 1. Filtrar por texto de búsqueda
     const lowerTerm = searchTerm.toLowerCase();
-    return hoteles.filter(h =>
-      h.nombre.toLowerCase().includes(lowerTerm) ||
-      h.ubicacion?.nombreCiudad?.toLowerCase().includes(lowerTerm) ||
-      h.ubicacion?.nombreProvincia?.toLowerCase().includes(lowerTerm)
-    );
-  }, [hoteles, searchTerm]);
+    let result = searchTerm
+      ? hoteles.filter(h =>
+          h.nombre.toLowerCase().includes(lowerTerm) ||
+          h.ubicacion?.nombreCiudad?.toLowerCase().includes(lowerTerm) ||
+          h.ubicacion?.nombreProvincia?.toLowerCase().includes(lowerTerm)
+        )
+      : hoteles;
+    // 2. Filtrar por estado
+    if (statusFilter === 'activos')   result = result.filter(h => !h.eliminado);
+    if (statusFilter === 'inactivos') result = result.filter(h =>  h.eliminado);
+    return result;
+  }, [hoteles, searchTerm, statusFilter]);
 
-  const totalPages = Math.ceil(filteredHoteles.length / ITEMS_PER_PAGE);
+  /**
+   * Orden de categorías: a=0, b=1, c=2, luego numérico (1=3, 1.5=4, 2=5 ... 5=12).
+   * Los valores sin categoría (null/undefined) van al final con Infinity.
+   */
+  const CATEGORIA_ORDEN = { a: 0, b: 1, c: 2 };
+  const getCategoriaOrden = (hotel) => {
+    const raw = String(hotel.categoria?.estrellas ?? '').toLowerCase().trim();
+    if (!raw) return Infinity;
+    if (raw in CATEGORIA_ORDEN) return CATEGORIA_ORDEN[raw];
+    const num = parseFloat(raw);
+    return isNaN(num) ? Infinity : num + 3; // offset: numéricos van después de a/b/c
+  };
+
+  const categoriaComparators = {
+    'categoria.estrellas': (a, b) => getCategoriaOrden(a) - getCategoriaOrden(b),
+  };
+
+  const { sortedData: sortedHoteles, sortKey, sortDir, handleSort } = useSort(filteredHoteles, 'nombre', 'asc', categoriaComparators);
+
+  const totalPages = Math.ceil(sortedHoteles.length / ITEMS_PER_PAGE);
 
   const currentItems = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredHoteles.slice(start, start + ITEMS_PER_PAGE);
-  }, [currentPage, filteredHoteles]);
+    return sortedHoteles.slice(start, start + ITEMS_PER_PAGE);
+  }, [currentPage, sortedHoteles]);
 
 
 
@@ -77,31 +121,45 @@ const HotelesTable = () => {
     navigate(`/admin/hoteles/${id}/dashboard`);
   };
 
-  // Resetear página al buscar
+  // Resetear página al buscar o cambiar filtro
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, statusFilter]);
 
   return (
     <div className="flex-grow flex flex-col h-full overflow-hidden">
       <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {/* Barra de Búsqueda */}
+        {/* Barra de Búsqueda + Filtro de Estado */}
         <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <div className="relative max-w-md">
-            <SearchInput
-              placeholder="Buscar por nombre o ubicación..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+          <div className="flex items-center gap-3">
+            {/* Buscador */}
+            <div className="flex-1 max-w-md">
+              <SearchInput
+                placeholder="Buscar por nombre o ubicación..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onClear={() => setSearchTerm('')}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Botón de filtro de estado: cicla todos → activos → inactivos */}
+            <button
+              type="button"
+              onClick={cycleStatus}
               disabled={loading}
-            />
-            {searchTerm && !loading && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+              title={`Filtro actual: ${STATUS_META[statusFilter].label}. Click para cambiar.`}
+              className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${
+                STATUS_META[statusFilter].color
+              } ${
+                STATUS_META[statusFilter].bg
+              } ${
+                STATUS_META[statusFilter].border
+              }`}
+            >
+              <Filter className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">{STATUS_META[statusFilter].label}</span>
+            </button>
           </div>
         </div>
 
@@ -116,10 +174,10 @@ const HotelesTable = () => {
             <table className="w-full text-left text-sm">
               <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
-                  <th className="px-6 py-4">Nombre Hotel</th>
-                  <th className="px-6 py-4">Encargado</th>
-                  <th className="px-6 py-4">Ubicación</th>
-                  <th className="px-6 py-4">Categoría</th>
+                  <SortableHeader column="nombre" label="Nombre Hotel" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="encargadoNombre" label="Encargado" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="ubicacion.nombreCiudad" label="Ubicación" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <SortableHeader column="categoria.estrellas" label="Categoría" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -196,7 +254,7 @@ const HotelesTable = () => {
         {/* Paginación */}
         <TablePagination
           currentPage={currentPage}
-          totalItems={filteredHoteles.length}
+          totalItems={sortedHoteles.length}
           itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
           disabled={loading}

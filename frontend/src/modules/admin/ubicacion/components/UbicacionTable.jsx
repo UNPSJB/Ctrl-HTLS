@@ -2,9 +2,11 @@ import { useState, useMemo } from 'react';
 import { ChevronRight, Pencil, Trash2, ArrowRight, Search } from 'lucide-react';
 import TablePagination from '@admin-ui/TablePagination';
 import TableButton from '@admin-ui/TableButton';
+import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
+import { useSort } from '@/hooks/useSort';
 
 const PAGE_SIZE = 15;
 
@@ -22,9 +24,11 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
     );
   }, [items, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const { sortedData: sortedItems, sortKey, sortDir, handleSort } = useSort(filtered, 'nombre');
+
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
-  const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pageItems = sortedItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const handleSearch = (v) => { setSearch(v); setPage(1); };
 
@@ -61,9 +65,9 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
               <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
                 <tr>
                   <th className="px-6 py-4">#</th>
-                  <th className="px-6 py-4">Nombre</th>
+                  <SortableHeader column="nombre" label="Nombre" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   {tipo === 'ciudad' && (
-                    <th className="px-6 py-4">Código Postal</th>
+                    <SortableHeader column="codigoPostal" label="Código Postal" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   )}
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
@@ -127,7 +131,7 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
         {/* Paginación */}
         <TablePagination
           currentPage={page}
-          totalItems={filtered.length}
+          totalItems={sortedItems.length}
           itemsPerPage={PAGE_SIZE}
           onPageChange={setPage}
           disabled={loading}

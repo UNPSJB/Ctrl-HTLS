@@ -182,11 +182,8 @@ export default function HabitacionesTab({
     reset();
   };
 
-  // Ordenamiento estable por Piso y luego por Número
-  const sortedRooms = [...habitaciones].sort((a, b) => {
-    if (a.piso !== b.piso) return a.piso - b.piso;
-    return a.numero - b.numero;
-  });
+
+
 
 
 
@@ -310,7 +307,7 @@ export default function HabitacionesTab({
 
       {/* Listado de Habitaciones */}
       <HabitacionesList
-        data={sortedRooms}
+        data={habitaciones}
         tiposGlobales={tiposGlobales}
         loading={loading}
         isCreating={isCreating}

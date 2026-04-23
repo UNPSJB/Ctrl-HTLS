@@ -5,3 +5,5 @@ export { default as Breadcrumbs } from './Breadcrumbs';
 export { SidebarLayout, PageSidebar, PageContentCard } from './LayoutComponents';
 export { default as Modal } from '@/components/ui/Modal';
 export { default as ListHeader } from './ListHeader';
+export { default as SortableHeader } from './SortableHeader';
+

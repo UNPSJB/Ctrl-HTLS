@@ -296,8 +296,8 @@ export default function HotelesForm() {
                 </div>
 
                 {/* Encargado */}
-                <div className={activeTab === 'encargado' ? 'space-y-4 animate-in fade-in duration-300 flex flex-col h-full' : 'hidden'}>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Encargado del Hotel</h3>
+                <div className={activeTab === 'encargado' ? 'animate-in fade-in duration-300 flex flex-col' : 'hidden'}>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Encargado del Hotel</h3>
                   <EncargadosList
                     value={selectedEncargadoId}
                     onChange={setSelectedEncargadoId}
@@ -305,11 +305,11 @@ export default function HotelesForm() {
                   />
                   <RedirectLink
                     to="/admin/encargados/nuevo"
+                    text="¿El encargado que buscas no aparece o no está registrado?"
                     label="Hacé clic acá para gestionarlos."
                     newTab
                     className="mt-4"
                   />
-                  <p className="text-xs text-gray-500 italic mt-1 text-center">¿El encargado que buscas no aparece o no está registrado?</p>
                 </div>
               </div>
           )}
