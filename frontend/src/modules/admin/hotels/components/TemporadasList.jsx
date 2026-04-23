@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Calendar, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { formatFecha } from '@/utils/dateUtils';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
@@ -59,10 +60,10 @@ export default function TemporadasList({ data = [], loading = false, onDelete })
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                    {new Date(t.fechaInicio).toLocaleDateString()}
+                    {formatFecha(t.fechaInicio)}
                   </td>
                   <td className="whitespace-nowrap px-6 py-3 text-sm text-gray-600 dark:text-gray-300">
-                    {new Date(t.fechaFin).toLocaleDateString()}
+                    {formatFecha(t.fechaFin)}
                   </td>
                   <td className="px-6 py-3 text-center">
                     <span className="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">

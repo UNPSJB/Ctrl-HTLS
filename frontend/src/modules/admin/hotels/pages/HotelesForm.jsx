@@ -214,7 +214,10 @@ export default function HotelesForm() {
                     <FormField label="Nombre" required error={errors.nombre}>
                       <TextInput
                         id="nombre"
-                        {...register('nombre', { required: 'El nombre es obligatorio' })}
+                        {...register('nombre', {
+                          required: 'El nombre es obligatorio',
+                          maxLength: { value: 100, message: 'Máximo 100 caracteres' },
+                        })}
                         placeholder="Ej: Hotel Paradise Resort"
                       />
                     </FormField>
@@ -238,9 +241,13 @@ export default function HotelesForm() {
                     <FormField label="Descripción del Hotel" error={errors.descripcion}>
                       <TextAreaInput
                         id="descripcion"
-                        {...register('descripcion')}
+                        {...register('descripcion', {
+                          maxLength: { value: 500, message: 'Máximo 500 caracteres' },
+                        })}
                         placeholder="Escriba una descripción comercial que los clientes verán..."
                         rows={4}
+                        showCount
+                        maxLength={500}
                       />
                     </FormField>
                   </div>
@@ -263,7 +270,11 @@ export default function HotelesForm() {
                     <FormField label="Teléfono" error={errors.telefono}>
                       <TelInput
                         id="telefono"
-                        {...register('telefono', { onChange: handleNumericChange })}
+                        {...register('telefono', {
+                          onChange: handleNumericChange,
+                          minLength: { value: 7, message: 'Mínimo 7 dígitos' },
+                          maxLength: { value: 20, message: 'Máximo 20 dígitos' },
+                        })}
                         placeholder="Ej: 3764556677"
                       />
                     </FormField>

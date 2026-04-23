@@ -3,6 +3,7 @@ import { Tag, Plus, BedDouble } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
+import { toISODate } from '@/utils/dateUtils';
 import PaquetesList from '../components/PaquetesList';
 import { Modal } from '@admin-ui';
 import {
@@ -23,6 +24,9 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isValid } } = useForm({
     mode: 'onChange'
   });
+
+  // Fecha mínima = hoy en formato YYYY-MM-DD (zona local Argentina)
+  const hoy = toISODate(new Date());
 
   // Observar fecha inicio para limitar fecha fin
   const fechaInicio = watch('fecha_inicio');
@@ -187,21 +191,35 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
                 <FormField label="Nombre del Paquete" required error={errors.nombre}>
                   <TextInput
                     placeholder="Ej: Finde Romántico"
-                    {...register('nombre', { required: 'Requerido' })}
+                    {...register('nombre', {
+                      required: 'El nombre del paquete es obligatorio',
+                      maxLength: { value: 80, message: 'Máximo 80 caracteres' },
+                    })}
                   />
                 </FormField>
               </div>
               <FormField label="Desde" required error={errors.fecha_inicio}>
                 <TextInput
                   type="date"
-                  {...register('fecha_inicio', { required: 'Requerido' })}
+                  min={hoy}
+                  {...register('fecha_inicio', {
+                    required: 'La fecha de inicio es obligatoria',
+                    validate: (val) => val >= hoy || 'No se permiten fechas pasadas',
+                  })}
                 />
               </FormField>
               <FormField label="Hasta" required error={errors.fecha_fin}>
                 <TextInput
                   type="date"
-                  min={fechaInicio || ''}
-                  {...register('fecha_fin', { required: 'Requerido' })}
+                  min={fechaInicio || hoy}
+                  {...register('fecha_fin', {
+                    required: 'La fecha de fin es obligatoria',
+                    validate: (val) => {
+                      if (val < hoy) return 'No se permiten fechas pasadas';
+                      if (fechaInicio && val < fechaInicio) return 'Debe ser igual o posterior al inicio';
+                      return true;
+                    },
+                  })}
                 />
               </FormField>
             </div>
@@ -210,8 +228,14 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
               <FormField label="Descuento (%)" required error={errors.coeficiente_descuento}>
                 <NumberInput
                   step="1"
+                  min="1"
+                  max="100"
                   placeholder="Ej: 20"
-                  {...register('coeficiente_descuento', { required: 'Requerido', min: 1, max: 100 })}
+                  {...register('coeficiente_descuento', {
+                    required: 'El descuento es obligatorio',
+                    min: { value: 1, message: 'El descuento mínimo es 1%' },
+                    max: { value: 100, message: 'El descuento máximo es 100%' },
+                  })}
                 />
               </FormField>
             </div>

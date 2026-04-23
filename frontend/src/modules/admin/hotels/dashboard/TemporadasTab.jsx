@@ -3,6 +3,7 @@ import { Plus, Calendar } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
+import { toISODate } from '@/utils/dateUtils';
 import TemporadasList from '../components/TemporadasList';
 import { Modal } from '@admin-ui';
 import {
@@ -19,6 +20,12 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
   const [showForm, setShowForm] = useState(false);
 
   const form = useForm();
+
+  // Fecha mínima = hoy en formato YYYY-MM-DD (zona local Argentina)
+  const hoy = toISODate(new Date());
+
+  // Observar fechaInicio para limitar la fecha fin
+  const fechaInicio = form.watch('fechaInicio');
 
   useEffect(() => {
     if (isActive) {
@@ -114,7 +121,7 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <FormField label="Tipo de Ajuste" required error={form.formState.errors.tipo}>
-                <SelectInput {...form.register('tipo', { required: true })}>
+                <SelectInput {...form.register('tipo', { required: 'Seleccione un tipo de ajuste' })}>
                   <option value="alta">Temporada Alta (+ Aumento)</option>
                   <option value="baja">Temporada Baja (- Descuento)</option>
                 </SelectInput>
@@ -124,22 +131,40 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
             <FormField label="Fecha de Inicio" required error={form.formState.errors.fechaInicio}>
               <TextInput
                 type="date"
-                {...form.register('fechaInicio', { required: true })}
+                min={hoy}
+                {...form.register('fechaInicio', {
+                  required: 'La fecha de inicio es obligatoria',
+                  validate: (val) => val >= hoy || 'No se permiten fechas pasadas',
+                })}
               />
             </FormField>
 
             <FormField label="Fecha de Fin" required error={form.formState.errors.fechaFin}>
               <TextInput
                 type="date"
-                {...form.register('fechaFin', { required: true })}
+                min={fechaInicio || hoy}
+                {...form.register('fechaFin', {
+                  required: 'La fecha de fin es obligatoria',
+                  validate: (val) => {
+                    if (val < hoy) return 'No se permiten fechas pasadas';
+                    if (fechaInicio && val <= fechaInicio) return 'Debe ser posterior a la fecha de inicio';
+                    return true;
+                  },
+                })}
               />
             </FormField>
 
             <div className="sm:col-span-2">
               <FormField label="Porcentaje de Ajuste (%)" required error={form.formState.errors.porcentaje}>
                 <NumberInput
+                  min="1"
+                  max="100"
                   placeholder="Ej: 15"
-                  {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
+                  {...form.register('porcentaje', {
+                    required: 'El porcentaje es obligatorio',
+                    min: { value: 1, message: 'El porcentaje mínimo es 1%' },
+                    max: { value: 100, message: 'El porcentaje máximo es 100%' },
+                  })}
                 />
               </FormField>
             </div>

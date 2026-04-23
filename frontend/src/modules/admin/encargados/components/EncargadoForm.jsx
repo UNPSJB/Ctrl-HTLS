@@ -36,6 +36,10 @@ const EncargadoForm = ({ register, errors, loading }) => {
                 value: 2,
                 message: 'El nombre debe tener al menos 2 caracteres',
               },
+              maxLength: {
+                value: 50,
+                message: 'El nombre no puede superar los 50 caracteres',
+              },
             })}
           />
         </FormField>
@@ -50,6 +54,10 @@ const EncargadoForm = ({ register, errors, loading }) => {
               minLength: {
                 value: 2,
                 message: 'El apellido debe tener al menos 2 caracteres',
+              },
+              maxLength: {
+                value: 50,
+                message: 'El apellido no puede superar los 50 caracteres',
               },
             })}
           />
@@ -89,6 +97,10 @@ const EncargadoForm = ({ register, errors, loading }) => {
                 value: 6,
                 message:
                   'El número de documento debe tener al menos 6 caracteres',
+              },
+              maxLength: {
+                value: 20,
+                message: 'El número de documento no puede superar los 20 caracteres',
               },
             })}
           />

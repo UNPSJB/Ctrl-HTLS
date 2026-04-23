@@ -32,8 +32,10 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
   const validate = () => {
     const newErrors = {};
     if (!nombre.trim()) newErrors.nombre = 'El nombre es requerido';
-    if (tipo === 'ciudad' && !codigoPostal.trim()) {
-      newErrors.codigoPostal = 'El código postal es requerido';
+    if (nombre.trim().length > 100) newErrors.nombre = 'El nombre no puede superar los 100 caracteres';
+    if (tipo === 'ciudad') {
+      if (!codigoPostal.trim()) newErrors.codigoPostal = 'El código postal es requerido';
+      else if (codigoPostal.trim().length > 10) newErrors.codigoPostal = 'Máximo 10 caracteres';
     }
     return newErrors;
   };
@@ -81,6 +83,7 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
               setNombre(e.target.value);
               setErrors((p) => ({ ...p, nombre: undefined }));
             }}
+            maxLength={100}
             placeholder={`Ej: ${tipo === 'pais' ? 'Argentina' : tipo === 'provincia' ? 'Buenos Aires' : 'La Plata'}`}
             autoFocus
           />
@@ -95,6 +98,7 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
                 setCodigoPostal(e.target.value);
                 setErrors((p) => ({ ...p, codigoPostal: undefined }));
               }}
+              maxLength={10}
               placeholder="Ej: 1900"
             />
           </FormField>

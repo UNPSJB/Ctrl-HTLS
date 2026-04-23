@@ -101,15 +101,26 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
             <FormField label="Cantidad de Habitaciones" required error={form.formState.errors.cantidad_de_habitaciones}>
               <NumberInput
                 min="1"
+                max="50"
                 placeholder="Ej: 3"
-                {...form.register('cantidad_de_habitaciones', { required: true, min: 1 })}
+                {...form.register('cantidad_de_habitaciones', {
+                  required: 'La cantidad de habitaciones es obligatoria',
+                  min: { value: 1, message: 'La cantidad mínima es 1 habitación' },
+                  max: { value: 50, message: 'La cantidad máxima es 50 habitaciones' },
+                })}
               />
             </FormField>
 
             <FormField label="Porcentaje de Descuento (%)" required error={form.formState.errors.porcentaje}>
               <NumberInput
+                min="1"
+                max="100"
                 placeholder="Ej: 5"
-                {...form.register('porcentaje', { required: true, min: 0, max: 100 })}
+                {...form.register('porcentaje', {
+                  required: 'El porcentaje es obligatorio',
+                  min: { value: 1, message: 'El porcentaje mínimo es 1%' },
+                  max: { value: 100, message: 'El porcentaje máximo es 100%' },
+                })}
               />
             </FormField>
           </div>

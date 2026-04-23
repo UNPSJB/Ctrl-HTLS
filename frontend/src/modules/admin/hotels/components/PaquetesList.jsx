@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Tag, BedDouble, Edit, Trash2 } from 'lucide-react';
 import { capitalizeFirst } from '@/utils/stringUtils';
+import { formatFecha } from '@/utils/dateUtils';
 import TableButton from '@admin-ui/TableButton';
 import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -61,14 +62,14 @@ export default function PaquetesList({ data = [], loading = false, onEdit, onDel
                   {/* Desde */}
                   <td className="px-6 py-4 text-center">
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
-                      {new Date(paquete.fecha_inicio).toLocaleDateString()}
+                      {formatFecha(paquete.fecha_inicio)}
                     </span>
                   </td>
 
                   {/* Hasta */}
                   <td className="px-6 py-4 text-center">
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
-                      {new Date(paquete.fecha_fin).toLocaleDateString()}
+                      {formatFecha(paquete.fecha_fin)}
                     </span>
                   </td>
 

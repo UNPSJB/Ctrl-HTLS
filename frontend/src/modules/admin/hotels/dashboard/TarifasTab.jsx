@@ -201,12 +201,15 @@ export default function TarifasTab({ hotelId, isActive = false }) {
                           <>
                             <NumberInput
                               step="0.01"
+                              min="0.01"
+                              max="9999999"
                               {...register(`precios.${tipo.id}`, {
                                 validate: (val) => {
                                   if (!val) return 'Se requiere precio';
                                   const num = parseFloat(val);
                                   if (isNaN(num)) return 'No es un número';
-                                  if (num <= 0) return 'Mayor a 0 estricto';
+                                  if (num <= 0) return 'Debe ser mayor a 0';
+                                  if (num > 9999999) return 'Máximo $9.999.999';
                                   return true;
                                 },
                               })}

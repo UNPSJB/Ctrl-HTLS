@@ -161,17 +161,12 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
         >
           <div className="flex flex-col h-[55vh]">
             <div className="flex-shrink-0 pb-4">
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre, DNI o email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full h-12 pl-11 pr-4 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all dark:bg-gray-900/50 dark:border-gray-800 dark:focus:bg-gray-900 dark:text-white"
-                  autoFocus
-                />
-              </div>
+              <SearchInput
+                placeholder="Buscar por nombre, DNI o email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                autoFocus
+              />
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar pb-2">

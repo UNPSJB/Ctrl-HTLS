@@ -181,6 +181,7 @@ export default function AjustesGeneralesTab({
                 <TextInput
                   {...register('nombre', {
                     required: 'El nombre es obligatorio',
+                    maxLength: { value: 100, message: 'Máximo 100 caracteres' },
                   })}
                   placeholder="Ej: Hotel Paradise Resort"
                 />
@@ -205,6 +206,8 @@ export default function AjustesGeneralesTab({
                 <TelInput
                   {...register('telefono', {
                     required: 'El teléfono es obligatorio',
+                    minLength: { value: 7, message: 'Mínimo 7 dígitos' },
+                    maxLength: { value: 20, message: 'Máximo 20 dígitos' },
                     onChange: handleNumericChange
                   })}
                   placeholder="Ej: 3764556677"
@@ -225,9 +228,13 @@ export default function AjustesGeneralesTab({
             <div className="mt-6">
                <FormField label="Descripción Básica" error={errors.descripcion}>
                  <TextAreaInput
-                   {...register('descripcion')}
+                   {...register('descripcion', {
+                     maxLength: { value: 500, message: 'Máximo 500 caracteres' },
+                   })}
                    placeholder="Escriba una descripción o información general del hotel..."
                    rows={4}
+                   showCount
+                   maxLength={500}
                  />
                </FormField>
             </div>

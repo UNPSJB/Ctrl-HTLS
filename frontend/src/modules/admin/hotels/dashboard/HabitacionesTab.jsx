@@ -255,7 +255,13 @@ export default function HabitacionesTab({
             icon={Hash}
           >
             <NumberInput
-              {...register('numero', { required: 'Campo obligatorio' })}
+              min="1"
+              max="999"
+              {...register('numero', {
+                required: 'El número de habitación es obligatorio',
+                min: { value: 1, message: 'El número mínimo es 1' },
+                max: { value: 999, message: 'El número máximo es 999' },
+              })}
               placeholder="Ej: 101"
             />
           </FormField>
@@ -267,7 +273,13 @@ export default function HabitacionesTab({
             icon={Layers}
           >
             <NumberInput
-              {...register('piso', { required: 'Campo obligatorio' })}
+              min="1"
+              max="999"
+              {...register('piso', {
+                required: 'El piso es obligatorio',
+                min: { value: 1, message: 'El piso mínimo es 1 (Planta Baja = 1)' },
+                max: { value: 999, message: 'El piso máximo es 999' },
+              })}
               placeholder="Ej: 1"
             />
           </FormField>

@@ -230,14 +230,20 @@ const VendedoresForm = () => {
                   <FormField label="Nombre" required error={errors.nombre}>
                     <TextInput
                       id="nombre"
-                      {...register('nombre', { required: 'El nombre es obligatorio' })}
+                      {...register('nombre', {
+                        required: 'El nombre es obligatorio',
+                        maxLength: { value: 50, message: 'Máximo 50 caracteres' },
+                      })}
                       placeholder="Ej: Juan Carlos"
                     />
                   </FormField>
                   <FormField label="Apellido" required error={errors.apellido}>
                     <TextInput
                       id="apellido"
-                      {...register('apellido', { required: 'El apellido es obligatorio' })}
+                      {...register('apellido', {
+                        required: 'El apellido es obligatorio',
+                        maxLength: { value: 50, message: 'Máximo 50 caracteres' },
+                      })}
                       placeholder="Ej: García López"
                     />
                   </FormField>
@@ -257,6 +263,7 @@ const VendedoresForm = () => {
                       {...register('numeroDocumento', {
                         required: 'El documento es obligatorio',
                         minLength: { value: 7, message: 'Mínimo 7 caracteres' },
+                        maxLength: { value: 15, message: 'Máximo 15 caracteres' },
                         onChange: handleDocumentoChange
                       })}
                       maxLength={15}
@@ -286,7 +293,11 @@ const VendedoresForm = () => {
                   <FormField label="Teléfono" error={errors.telefono}>
                     <TelInput
                       id="telefono"
-                      {...register('telefono', { onChange: handleNumericChange })}
+                      {...register('telefono', {
+                        onChange: handleNumericChange,
+                        minLength: { value: 7, message: 'Mínimo 7 dígitos' },
+                        maxLength: { value: 20, message: 'Máximo 20 dígitos' },
+                      })}
                       placeholder="Ej: 3764556677"
                     />
                   </FormField>
