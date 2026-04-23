@@ -6,6 +6,7 @@ import { formatCurrency } from '@utils/pricingUtils';
 import PriceTag from '@ui/PriceTag';
 import MetodoPago from './MetodoPago';
 import FacturaSelector from './FacturaSelector';
+import AppButton from '@/components/ui/AppButton';
 
 // Resumen final de la transacción y procesamiento del pago
 function PaymentSummary() {
@@ -166,24 +167,15 @@ function PaymentSummary() {
 
       {/* Botón de confirmar */}
       <div className="mt-5">
-        <button
-          type="button"
-          onClick={handlePagar}
+        <AppButton
+          fullWidth
+          size="lg"
+          loading={isProcessing}
           disabled={!canConfirm}
-          className={`flex w-full items-center justify-center rounded-lg px-4 py-3 font-semibold text-white transition-colors ${canConfirm
-            ? 'bg-blue-600 hover:bg-blue-700'
-            : 'cursor-not-allowed bg-gray-400'
-            }`}
+          onClick={handlePagar}
         >
-          {isProcessing ? (
-            <span className="flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Procesando...
-            </span>
-          ) : (
-            'Finalizar Reserva y Pagar'
-          )}
-        </button>
+          Finalizar Reserva y Pagar
+        </AppButton>
       </div>
     </div>
   );

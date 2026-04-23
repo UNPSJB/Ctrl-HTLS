@@ -11,11 +11,8 @@ export const useDisponibilidadSearch = () => {
     setError(null);
     setHoteles([]); // Limpiar resultados anteriores
 
-    //console.log('Enviando parámetros a la API:', params);
-
     try {
       const response = await axiosInstance.get('/disponibilidad', { params });
-      //console.log('✅ Respuesta del Backend:', response.data);
       setHoteles(response.data || []);
     } catch (err) {
       // Si el servidor devuelve 404 (No se encontro hotel o disponibilidad), 

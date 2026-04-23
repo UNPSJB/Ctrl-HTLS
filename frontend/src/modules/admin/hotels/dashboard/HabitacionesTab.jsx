@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import HabitacionesList from '../components/HabitacionesList';
 import { Modal } from '@admin-ui';
+import AppButton from '@/components/ui/AppButton';
 import {
   FormField,
   SelectInput,
@@ -221,13 +222,13 @@ export default function HabitacionesTab({
           </p>
         </div>
 
-        <button
+        <AppButton
           onClick={() => setIsCreating(true)}
           disabled={loading}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+          icon={Plus}
         >
-          <Plus className="h-4 w-4" /> Registrar Habitación
-        </button>
+          Registrar Habitación
+        </AppButton>
       </div>
 
       <div className="flex-grow mt-6 flex flex-col overflow-hidden relative">

@@ -4,6 +4,7 @@ import { useCarritoPrecios } from '@vendor-hooks/useCarritoPrecios';
 import { useReservar } from '@vendor-hooks/useReservar';
 import { formatCurrency } from '@utils/pricingUtils';
 import PriceTag from '@ui/PriceTag';
+import AppButton from '@/components/ui/AppButton';
 
 // Pie del carrito con resumen de totales y botón de reservar
 function CartFooter({ onClose }) {
@@ -82,17 +83,14 @@ function CartFooter({ onClose }) {
         </div>
 
         {/* Action Button */}
-        <button
-          onClick={handleReservar}
+        <AppButton
+          fullWidth
+          loading={isReserving}
           disabled={isDisabled || isReserving}
-          className={`w-full rounded-md px-4 py-2.5 font-medium text-white transition-colors ${
-            isDisabled || isReserving
-              ? 'cursor-not-allowed bg-gray-400'
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
+          onClick={handleReservar}
         >
-          {isReserving ? 'Reservando...' : 'Reservar'}
-        </button>
+          Reservar
+        </AppButton>
       </div>
 
       {isClienteModalOpen && (

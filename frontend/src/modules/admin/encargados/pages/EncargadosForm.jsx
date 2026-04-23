@@ -10,8 +10,8 @@ import {
     TextInput,
     SelectInput,
     TelInput,
-    RedirectLink
 } from '@form';
+import AppButton from '@/components/ui/AppButton';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },
@@ -209,30 +209,22 @@ const EncargadosForm = () => {
 
                     {/* Botones de Acción */}
                     <div className="flex-shrink-0 flex items-center justify-end gap-3 border-t border-gray-100 bg-white dark:bg-gray-800 pt-6 mt-6 dark:border-gray-700">
-                        <RedirectLink
-                            to="/admin/encargados"
-                            label="Cancelar"
-                            className="px-5 py-2.5"
+                        <AppButton
+                            variant="ghost"
+                            onClick={handleCancel}
                             disabled={loading}
-                        />
+                        >
+                            Cancelar
+                        </AppButton>
 
-                        <button
+                        <AppButton
                             type="submit"
                             disabled={!isValid || loading}
-                            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+                            loading={loading}
+                            icon={Save}
                         >
-                            {loading ? (
-                                <>
-                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                    {isEditing ? 'Actualizando...' : 'Guardando...'}
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="h-4 w-4" />
-                                    {isEditing ? 'Actualizar Cambios' : 'Guardar Encargado'}
-                                </>
-                            )}
-                        </button>
+                            {isEditing ? 'Actualizar Cambios' : 'Guardar Encargado'}
+                        </AppButton>
                     </div>
                 </PageContentCard>
             </SidebarLayout>

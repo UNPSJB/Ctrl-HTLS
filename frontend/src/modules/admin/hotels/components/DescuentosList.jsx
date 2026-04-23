@@ -1,14 +1,22 @@
 import { useState } from 'react';
-import { Tag } from 'lucide-react';
+import { Tag, Trash2 } from 'lucide-react';
 import TablePagination from '@admin-ui/TablePagination';
 import SortableHeader from '@admin-ui/SortableHeader';
+import TableButton from '@admin-ui/TableButton';
+import Modal from '@/components/ui/Modal';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
-export default function DescuentosList({ data = [], loading = false }) {
+/**
+ * Lista de descuentos por cantidad de habitaciones.
+ * NOTA: El backend aún no expone DELETE para descuentos.
+ * El botón está deshabilitado hasta que se pase el prop onDelete.
+ */
+export default function DescuentosList({ data = [], loading = false, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [descuentoToDelete, setDescuentoToDelete] = useState(null);
 
   const { sortedData, sortKey, sortDir, handleSort } = useSort(data, 'cantidad_de_habitaciones');
 
@@ -17,6 +25,12 @@ export default function DescuentosList({ data = [], loading = false }) {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const handleConfirmDelete = () => {
+    if (!descuentoToDelete) return;
+    onDelete?.(descuentoToDelete.id);
+    setDescuentoToDelete(null);
+  };
 
   return (
     <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -31,12 +45,13 @@ export default function DescuentosList({ data = [], loading = false }) {
             <tr>
               <SortableHeader column="cantidad_de_habitaciones" label="Mínimo de Habitaciones" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
               <SortableHeader column="porcentaje" label="Descuento (%)" className="text-center" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <th className="px-6 py-4 text-right">Acción</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
             {data.length === 0 && !loading ? (
               <tr>
-                <td colSpan="2" className="px-6 py-12 text-center text-gray-400 italic">
+                <td colSpan="3" className="px-6 py-12 text-center text-gray-400 italic">
                   <div className="flex flex-col items-center gap-2">
                     <Tag className="h-8 w-8 opacity-20" />
                     <p>No hay descuentos configurados.</p>
@@ -54,6 +69,15 @@ export default function DescuentosList({ data = [], loading = false }) {
                       {(d.porcentaje * 100).toFixed(0)}%
                     </span>
                   </td>
+                  <td className="px-6 py-3 text-right">
+                    <TableButton
+                      variant="delete"
+                      icon={Trash2}
+                      onClick={() => setDescuentoToDelete(d)}
+                      disabled={loading || !onDelete}
+                      title={onDelete ? 'Eliminar descuento' : 'Función no disponible aún'}
+                    />
+                  </td>
                 </tr>
               ))
             )}
@@ -61,7 +85,6 @@ export default function DescuentosList({ data = [], loading = false }) {
         </table>
       </div>
 
-      {/* Paginación */}
       <TablePagination
         currentPage={currentPage}
         totalItems={sortedData.length}
@@ -69,6 +92,27 @@ export default function DescuentosList({ data = [], loading = false }) {
         onPageChange={setCurrentPage}
         disabled={loading}
       />
+
+      <Modal
+        isOpen={!!descuentoToDelete}
+        onClose={() => setDescuentoToDelete(null)}
+        title="Eliminar Descuento"
+        onConfirm={handleConfirmDelete}
+        confirmLabel="Sí, eliminar"
+        confirmIcon={Trash2}
+        variant="red"
+        size="sm"
+      >
+        {descuentoToDelete && (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            ¿Confirma la eliminación del descuento del{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">{(descuentoToDelete.porcentaje * 100).toFixed(0)}%</span>{' '}
+            para reservas de{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">{descuentoToDelete.cantidad_de_habitaciones}</span>{' '}
+            o más habitaciones?
+          </p>
+        )}
+      </Modal>
     </div>
   );
 }

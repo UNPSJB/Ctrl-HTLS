@@ -6,6 +6,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import Modal from '@/components/ui/Modal';
 import { NumberInput } from '@form';
+import AppButton from '@/components/ui/AppButton';
 
 // Pestaña de configuración de tarifas por tipo de habitación.
 export default function TarifasTab({ hotelId, isActive = false }) {
@@ -250,27 +251,14 @@ export default function TarifasTab({ hotelId, isActive = false }) {
         </div>
 
         <div className="flex-shrink-0 mt-6 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 pt-4 pb-2">
-          <button
+          <AppButton
             type="submit"
             disabled={isSubmitting || !isValid || loading}
-            className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                isSubmitting || !isValid || loading
-                  ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
-                  : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 shadow-blue-500/20 active:scale-95'
-              }`}
+            loading={isSubmitting}
+            icon={Save}
           >
-            {isSubmitting ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Guardando Modalidad...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                Guardar Tarifario y Disp.
-              </>
-            )}
-          </button>
+            Guardar Tarifario y Disp.
+          </AppButton>
         </div>
       </form>
 

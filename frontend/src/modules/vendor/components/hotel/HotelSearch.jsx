@@ -7,6 +7,7 @@ import useUbicacion from '@hooks/useUbicacion';
 import { toast } from 'react-hot-toast';
 import { FormField, Input, SelectInput, SearchInput } from '@ui/form';
 import Counter from '@ui/Counter';
+import AppButton from '@/components/ui/AppButton';
 
 const { toISODate } = dateUtils;
 
@@ -188,14 +189,15 @@ function HotelSearch({
         />
       </div>
 
-      <button
+      <AppButton
         type="submit"
         disabled={!canSubmit}
-        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 text-sm font-bold text-white transition-all hover:bg-blue-700 active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm"
+        loading={isLoading}
+        icon={Search}
+        size="sm"
       >
-        {isLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" /> : <Search className="h-4 w-4" />}
-        <span>Actualizar</span>
-      </button>
+        Actualizar
+      </AppButton>
     </div>
   );
 
@@ -293,14 +295,17 @@ function HotelSearch({
         </div>
 
         <div className="md:col-span-3">
-          <button
+          <AppButton
             type="submit"
             disabled={!canSubmit}
-            className="flex h-[50px] w-full px-2 items-center justify-center gap-2 rounded-md bg-blue-700 text-sm font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-800 active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+            loading={isLoading}
+            icon={Search}
+            fullWidth
+            size="lg"
+            className="uppercase tracking-wider"
           >
-            {isLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <Search className="h-4 w-4" />}
-            <span>Consultar Disponibilidad</span>
-          </button>
+            Consultar Disponibilidad
+          </AppButton>
         </div>
       </div>
     </div>

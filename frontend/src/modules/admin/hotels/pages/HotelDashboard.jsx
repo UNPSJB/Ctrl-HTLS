@@ -23,6 +23,7 @@ import TarifasTab from '@/modules/admin/hotels/dashboard/TarifasTab';
 import PaquetesTab from '@/modules/admin/hotels/dashboard/PaquetesTab';
 import TemporadasTab from '@/modules/admin/hotels/dashboard/TemporadasTab';
 import DescuentosTab from '@/modules/admin/hotels/dashboard/DescuentosTab';
+import AppButton from '@/components/ui/AppButton';
 
 export default function HotelDashboard() {
   const { id } = useParams();
@@ -98,12 +99,12 @@ export default function HotelDashboard() {
               <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-4 dark:bg-red-900/20 dark:text-red-400">
                 No se pudo cargar la información del hotel.
               </div>
-              <button
+              <AppButton
                 onClick={fetchHotelDashboardData}
-                className="text-blue-600 font-medium hover:underline"
+                variant="outline"
               >
                 Reintentar carga
-              </button>
+              </AppButton>
             </div>
           ) : (
             <div className="flex-grow flex flex-col relative overflow-hidden">

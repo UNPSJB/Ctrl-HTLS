@@ -21,6 +21,7 @@ import {
   RedirectLink,
   TextAreaInput
 } from '@form';
+import AppButton from '@/components/ui/AppButton';
 
 // Formulario para creación y edición básica de hoteles
 export default function HotelesForm() {
@@ -316,29 +317,21 @@ export default function HotelesForm() {
 
           {/* Footer Estático */}
           <div className="flex-shrink-0 flex items-center justify-end gap-3 border-t border-gray-100 bg-white dark:bg-gray-800 pt-6 mt-6 dark:border-gray-700">
-            <RedirectLink
-              to="/admin/hoteles"
-              label="Cancelar"
-              className="px-5 py-2.5"
+            <AppButton
+              variant="ghost"
+              onClick={() => navigate('/admin/hoteles')}
               disabled={isSubmitting}
-            />
-            <button
+            >
+              Cancelar
+            </AppButton>
+            <AppButton
               type="submit"
               disabled={!isValid || isSubmitting || loadingResources || loadingData || !selectedEncargadoId}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+              loading={isSubmitting}
+              icon={Save}
             >
-              {isSubmitting ? (
-                <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  {isEditing ? 'Actualizar Hotel' : 'Guardar Hotel'}
-                </>
-              )}
-            </button>
+              {isEditing ? 'Actualizar Hotel' : 'Guardar Hotel'}
+            </AppButton>
           </div>
         </PageContentCard>
       </SidebarLayout>

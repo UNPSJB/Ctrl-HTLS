@@ -13,6 +13,7 @@ import { capitalizeFirst } from '@/utils/stringUtils';
 import PersonalAsignadoList from '../components/PersonalAsignadoList';
 import { PageHeader, Modal } from '@admin-ui';
 import { SearchInput } from '@form';
+import AppButton from '@/components/ui/AppButton';
 
 /**
  * Gestión de personal (vendedores) asignados a un hotel específico.
@@ -132,13 +133,13 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
           </p>
         </div>
 
-        <button
+        <AppButton
           onClick={() => setIsAssigning(true)}
           disabled={loading}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+          icon={UserPlus}
         >
-          <UserPlus className="h-4 w-4" /> Autorizar Nuevo Vendedor
-        </button>
+          Autorizar Nuevo Vendedor
+        </AppButton>
       </div>
 
       <div className="flex-grow mt-6 flex flex-col overflow-hidden relative">

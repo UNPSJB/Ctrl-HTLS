@@ -2,12 +2,14 @@ import { useState } from 'react';
 import {
   Trash2,
   Users,
+  UserMinus,
 } from 'lucide-react';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import TablePagination from '@admin-ui/TablePagination';
 import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
+import Modal from '@/components/ui/Modal';
 import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
@@ -19,6 +21,8 @@ export default function PersonalAsignadoList({
   onDesasignar,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
+  // Estado del modal de confirmación de desasignación
+  const [vendedorToRemove, setVendedorToRemove] = useState(null);
 
   const { sortedData, sortKey, sortDir, handleSort } = useSort(data, 'empleadoNombre');
 
@@ -27,6 +31,12 @@ export default function PersonalAsignadoList({
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const handleConfirmDesasignar = () => {
+    if (!vendedorToRemove) return;
+    onDesasignar(vendedorToRemove.empleadoId);
+    setVendedorToRemove(null);
+  };
 
   return (
     <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -79,7 +89,7 @@ export default function PersonalAsignadoList({
                       <TableButton
                         variant="delete"
                         icon={Trash2}
-                        onClick={() => onDesasignar(v.empleadoId)}
+                        onClick={() => setVendedorToRemove(v)}
                         disabled={loadingAction || loading}
                         title="Revocar Acceso"
                       />
@@ -100,6 +110,29 @@ export default function PersonalAsignadoList({
         onPageChange={setCurrentPage}
         disabled={loading || loadingAction}
       />
+
+      {/* Modal de confirmación de desasignación */}
+      <Modal
+        isOpen={!!vendedorToRemove}
+        onClose={() => setVendedorToRemove(null)}
+        title="Revocar Acceso"
+        onConfirm={handleConfirmDesasignar}
+        loading={loadingAction}
+        confirmLabel="Sí, revocar acceso"
+        confirmIcon={UserMinus}
+        variant="red"
+        size="sm"
+      >
+        {vendedorToRemove && (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            ¿Confirma revocar el acceso de{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {capitalizeFirst(vendedorToRemove.empleadoNombre)} {capitalizeFirst(vendedorToRemove.empleadoApellido)}
+            </span>{' '}
+            a este hotel? El vendedor ya no podrá realizar reservas aquí.
+          </p>
+        )}
+      </Modal>
     </div>
   );
 }

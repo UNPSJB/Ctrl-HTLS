@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
+import AppButton from '@/components/ui/AppButton';
 
 /**
  * Modal - Componente Universal
@@ -59,7 +60,7 @@ const Modal = ({
     blue: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
     indigo: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
     green: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500',
-    red: 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500',
+    red: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
     amber: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500',
   };
 
@@ -131,34 +132,24 @@ const Modal = ({
             ) : (
               <>
                 {onClose && (
-                  <button
-                    type="button"
+                  <AppButton
+                    variant="ghost"
                     onClick={onClose}
                     disabled={loading}
-                    className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all active:scale-95 disabled:opacity-50"
                   >
                     {cancelLabel}
-                  </button>
+                  </AppButton>
                 )}
                 {onConfirm && (
-                  <button
-                    type="button"
+                  <AppButton
+                    variant={variant}
                     onClick={onConfirm}
                     disabled={loading || confirmDisabled}
-                    className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 disabled:grayscale-[0.5] focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${variantClasses[variant]}`}
+                    loading={loading}
+                    icon={ConfirmIcon}
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        {ConfirmIcon && <ConfirmIcon className="w-4 h-4" />}
-                        {confirmLabel}
-                      </>
-                    )}
-                  </button>
+                    {confirmLabel}
+                  </AppButton>
                 )}
               </>
             )}

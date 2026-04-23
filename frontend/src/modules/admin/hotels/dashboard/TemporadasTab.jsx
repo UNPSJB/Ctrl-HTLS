@@ -12,6 +12,7 @@ import {
   TextInput,
   NumberInput
 } from '@form';
+import AppButton from '@/components/ui/AppButton';
 
 export default function TemporadasTab({ hotelId, isActive = false }) {
   const [temporadas, setTemporadas] = useState([]);
@@ -19,7 +20,7 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
-  const form = useForm();
+  const form = useForm({ mode: 'onChange' });
 
   // Fecha mínima = hoy en formato YYYY-MM-DD (zona local Argentina)
   const hoy = toISODate(new Date());
@@ -92,14 +93,13 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
             Gestione periodos de alta y baja demanda con ajustes porcentuales automáticos.
           </p>
         </div>
-        <button
+        <AppButton
           onClick={() => setShowForm(true)}
           disabled={loading || submitting}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+          icon={Plus}
         >
-          <Plus className="h-4 w-4" />
           Nueva Temporada
-        </button>
+        </AppButton>
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
@@ -115,19 +115,35 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
           description="Defina un periodo de tiempo y su ajuste porcentual sobre la tarifa base."
           onConfirm={form.handleSubmit(handleAdd)}
           loading={submitting}
+          confirmDisabled={!form.formState.isValid || submitting}
           confirmLabel="Registrar Temporada"
           confirmIcon={Plus}
         >
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <FormField label="Tipo de Ajuste" required error={form.formState.errors.tipo}>
-                <SelectInput {...form.register('tipo', { required: 'Seleccione un tipo de ajuste' })}>
-                  <option value="alta">Temporada Alta (+ Aumento)</option>
-                  <option value="baja">Temporada Baja (- Descuento)</option>
-                </SelectInput>
-              </FormField>
-            </div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+            {/* Fila 1: Tipo de temporada + Porcentaje */}
+            <FormField label="Tipo de Temporada" required error={form.formState.errors.tipo}>
+              <SelectInput {...form.register('tipo', { required: 'Seleccione un tipo' })}>
+                <option value="">Seleccione...</option>
+                <option value="alta">Temporada Alta</option>
+                <option value="baja">Temporada Baja</option>
+              </SelectInput>
+            </FormField>
 
+            <FormField label="Porcentaje de Ajuste (%)" required error={form.formState.errors.porcentaje}>
+              <NumberInput
+                min="1"
+                max="100"
+                placeholder="Ej: 15"
+                {...form.register('porcentaje', {
+                  required: 'El porcentaje es obligatorio',
+                  valueAsNumber: true,
+                  min: { value: 1, message: 'El porcentaje mínimo es 1%' },
+                  max: { value: 100, message: 'El porcentaje máximo es 100%' },
+                })}
+              />
+            </FormField>
+
+            {/* Fila 2: Fecha inicio + Fecha fin */}
             <FormField label="Fecha de Inicio" required error={form.formState.errors.fechaInicio}>
               <TextInput
                 type="date"
@@ -153,21 +169,6 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
                 })}
               />
             </FormField>
-
-            <div className="sm:col-span-2">
-              <FormField label="Porcentaje de Ajuste (%)" required error={form.formState.errors.porcentaje}>
-                <NumberInput
-                  min="1"
-                  max="100"
-                  placeholder="Ej: 15"
-                  {...form.register('porcentaje', {
-                    required: 'El porcentaje es obligatorio',
-                    min: { value: 1, message: 'El porcentaje mínimo es 1%' },
-                    max: { value: 100, message: 'El porcentaje máximo es 100%' },
-                  })}
-                />
-              </FormField>
-            </div>
           </div>
         </Modal>
 

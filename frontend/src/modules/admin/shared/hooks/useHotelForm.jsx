@@ -103,8 +103,6 @@ const useHotelForm = () => {
         numeroDocumento: data.encargadoNumeroDocumento,
       };
 
-      console.log('Enviando datos del encargado:', encargadoData);
-
       // Crear el encargado primero
       let encargadoId;
       try {

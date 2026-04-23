@@ -5,12 +5,15 @@ import TablePagination from '@admin-ui/TablePagination';
 import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
+import Modal from '@/components/ui/Modal';
 import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
 export default function TemporadasList({ data = [], loading = false, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
+  // Estado del modal de confirmación de eliminación
+  const [temporadaToDelete, setTemporadaToDelete] = useState(null);
 
   const { sortedData, sortKey, sortDir, handleSort } = useSort(data, 'fechaInicio');
 
@@ -19,6 +22,12 @@ export default function TemporadasList({ data = [], loading = false, onDelete })
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const handleConfirmDelete = () => {
+    if (!temporadaToDelete) return;
+    onDelete(temporadaToDelete.id);
+    setTemporadaToDelete(null);
+  };
 
   return (
     <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -79,7 +88,7 @@ export default function TemporadasList({ data = [], loading = false, onDelete })
                       <TableButton
                         variant="delete"
                         icon={Trash2}
-                        onClick={() => onDelete(t.id)}
+                        onClick={() => setTemporadaToDelete(t)}
                         disabled={loading}
                       />
                     </div>
@@ -99,6 +108,30 @@ export default function TemporadasList({ data = [], loading = false, onDelete })
         onPageChange={setCurrentPage}
         disabled={loading}
       />
+
+      {/* Modal de confirmación de eliminación */}
+      <Modal
+        isOpen={!!temporadaToDelete}
+        onClose={() => setTemporadaToDelete(null)}
+        title="Eliminar Temporada"
+        onConfirm={handleConfirmDelete}
+        confirmLabel="Sí, eliminar"
+        confirmIcon={Trash2}
+        variant="red"
+        size="sm"
+      >
+        {temporadaToDelete && (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            ¿Confirma la eliminación de la temporada de{' '}
+            <span className="font-semibold text-gray-900 dark:text-white capitalize">{temporadaToDelete.tipo}</span>{' '}
+            del{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">{formatFecha(temporadaToDelete.fechaInicio)}</span>{' '}
+            al{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">{formatFecha(temporadaToDelete.fechaFin)}</span>?
+            Esta acción no se puede deshacer.
+          </p>
+        )}
+      </Modal>
     </div>
   );
 }

@@ -17,9 +17,6 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
 
   if (!paquete) return null;
 
-  console.log(paquete);
-
-
   return (
     <div className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50 shadow-sm dark:border-gray-700 dark:bg-gray-900/60">
       {/* Fila 1: Títulos y Acción */}

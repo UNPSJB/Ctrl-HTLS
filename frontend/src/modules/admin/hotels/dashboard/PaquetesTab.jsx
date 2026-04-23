@@ -6,6 +6,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { toISODate } from '@/utils/dateUtils';
 import PaquetesList from '../components/PaquetesList';
 import { Modal } from '@admin-ui';
+import AppButton from '@/components/ui/AppButton';
 import {
   FormField,
   TextInput,
@@ -161,14 +162,13 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
             Cree ofertas combinando múltiples habitaciones por un precio especial.
           </p>
         </div>
-        <button
+        <AppButton
           onClick={handleOpenCreate}
           disabled={loadingInitial}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+          icon={Plus}
         >
-          <Plus className="h-4 w-4" />
           Nuevo Paquete
-        </button>
+        </AppButton>
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
@@ -191,8 +191,10 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
                 <FormField label="Nombre del Paquete" required error={errors.nombre}>
                   <TextInput
                     placeholder="Ej: Finde Romántico"
+                    maxLength={80}
                     {...register('nombre', {
                       required: 'El nombre del paquete es obligatorio',
+                      minLength: { value: 3, message: 'Mínimo 3 caracteres' },
                       maxLength: { value: 80, message: 'Máximo 80 caracteres' },
                     })}
                   />
@@ -233,6 +235,7 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
                   placeholder="Ej: 20"
                   {...register('coeficiente_descuento', {
                     required: 'El descuento es obligatorio',
+                    valueAsNumber: true,
                     min: { value: 1, message: 'El descuento mínimo es 1%' },
                     max: { value: 100, message: 'El descuento máximo es 100%' },
                   })}

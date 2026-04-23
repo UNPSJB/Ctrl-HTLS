@@ -6,6 +6,7 @@ import TableButton from '@admin-ui/TableButton';
 import TablePagination from '@admin-ui/TablePagination';
 import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import Modal from '@/components/ui/Modal';
 import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
@@ -16,6 +17,8 @@ const ITEMS_PER_PAGE = 100;
  */
 export default function PaquetesList({ data = [], loading = false, onEdit, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
+  // Estado del modal de confirmación de eliminación
+  const [paqueteToDelete, setPaqueteToDelete] = useState(null);
 
   const { sortedData, sortKey, sortDir, handleSort } = useSort(data, 'nombre');
 
@@ -110,7 +113,7 @@ export default function PaquetesList({ data = [], loading = false, onEdit, onDel
                       <TableButton
                         variant="delete"
                         icon={Trash2}
-                        onClick={() => onDelete?.(paquete.id)}
+                        onClick={() => setPaqueteToDelete(paquete)}
                         title="Eliminar paquete"
                       />
                     </div>
@@ -130,6 +133,29 @@ export default function PaquetesList({ data = [], loading = false, onEdit, onDel
         onPageChange={setCurrentPage}
         disabled={loading}
       />
+
+      {/* Modal de confirmación de eliminación */}
+      <Modal
+        isOpen={!!paqueteToDelete}
+        onClose={() => setPaqueteToDelete(null)}
+        title="Eliminar Paquete"
+        onConfirm={() => {
+          onDelete?.(paqueteToDelete.id);
+          setPaqueteToDelete(null);
+        }}
+        confirmLabel="Sí, eliminar"
+        confirmIcon={Trash2}
+        variant="red"
+        size="sm"
+      >
+        {paqueteToDelete && (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            ¿Confirma la eliminación del paquete{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">"{capitalizeFirst(paqueteToDelete.nombre)}"</span>?
+            Esta acción no se puede deshacer.
+          </p>
+        )}
+      </Modal>
     </div>
   );
 }

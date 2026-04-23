@@ -17,6 +17,7 @@ import Avatar from '@/components/ui/Avatar';
 import logoLight from '@/assets/logo.svg';
 import logoDark from '@/assets/logo-dark.svg';
 import { NavLink } from 'react-router-dom';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Barra lateral de navegación para el módulo Admin
 function AdminSidebar({ onClose }) {
@@ -98,10 +99,10 @@ function AdminSidebar({ onClose }) {
             <Avatar className="h-11 w-11 text-base" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100 line-height-tight">
-                {user?.nombre} {user?.apellido}
+                {capitalizeWords(user?.nombre + ' ' + user.apellido)}
               </p>
               <p className="truncate text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {user?.rol}
+                {capitalizeWords(user.rol)}
               </p>
             </div>
           </div>

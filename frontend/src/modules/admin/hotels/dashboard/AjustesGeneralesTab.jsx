@@ -9,6 +9,7 @@ import { capitalizeFirst } from '@/utils/stringUtils';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
 import { InnerLoading } from '@/components/ui/InnerLoading';
+import AppButton from '@/components/ui/AppButton';
 import {
   FormField,
   TextInput,
@@ -270,26 +271,15 @@ export default function AjustesGeneralesTab({
         </div>
 
         <div className="flex-shrink-0 mt-4 pt-4 flex justify-end border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-transparent pb-1">
-          <button
+          <AppButton
             type="submit"
             disabled={isSubmitting || !form.formState.isValid}
-            className={`flex items-center gap-2 rounded-lg px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSubmitting || !form.formState.isValid
-                ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
-                : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 shadow-blue-500/20 active:scale-[0.98]'
-              }`}
+            loading={isSubmitting}
+            icon={Save}
+            className="px-8 py-3 shadow-lg shadow-blue-500/20"
           >
-            {isSubmitting ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Guardando Cambios...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                Guardar Ajustes Generales
-              </>
-            )}
-          </button>
+            Guardar Ajustes Generales
+          </AppButton>
         </div>
       </form>
     </div>

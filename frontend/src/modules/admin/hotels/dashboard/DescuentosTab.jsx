@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import DescuentosList from '../components/DescuentosList';
 import { Modal } from '@admin-ui';
+import AppButton from '@/components/ui/AppButton';
 import {
   FormField,
   NumberInput
@@ -70,14 +71,13 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
             Configure beneficios para clientes que reservan múltiples habitaciones simultáneamente.
           </p>
         </div>
-        <button
+        <AppButton
           onClick={() => setShowForm(true)}
           disabled={loading || submitting}
-          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50"
+          icon={Plus}
         >
-          <Plus className="h-4 w-4" />
           Nuevo Descuento
-        </button>
+        </AppButton>
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">

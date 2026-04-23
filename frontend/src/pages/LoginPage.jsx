@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { User, Lock, Loader2, LogIn } from 'lucide-react';
+import { User, Lock, LogIn } from 'lucide-react';
 import TextInput from '@ui/form/TextInput';
 import PasswordInput from '@ui/form/PasswordInput';
+import AppButton from '@/components/ui/AppButton';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -87,20 +88,15 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <button
+            <AppButton
               type="submit"
+              loading={isLoading}
               disabled={isLoading}
-              className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-5 py-3 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              fullWidth
+              size="lg"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Verificando...
-                </>
-              ) : (
-                'Iniciar Sesión'
-              )}
-            </button>
+              Iniciar Sesión
+            </AppButton>
           </form>
 
           {/* Optional Footer Text */}

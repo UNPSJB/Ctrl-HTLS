@@ -10,6 +10,7 @@ import TablePagination from '@admin-ui/TablePagination';
 import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import TableButton from '@admin-ui/TableButton';
+import Modal from '@/components/ui/Modal';
 import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
@@ -23,6 +24,8 @@ export default function HabitacionesList({
   onDelete,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
+  // Estado del modal de confirmación de desactivación
+  const [habitacionToDelete, setHabitacionToDelete] = useState(null);
 
   // Enriquecer data con el nombre del tipo para poder ordenar por él
   const enrichedData = data.map((hab) => ({
@@ -37,6 +40,12 @@ export default function HabitacionesList({
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const handleConfirmDelete = () => {
+    if (!habitacionToDelete) return;
+    onDelete(habitacionToDelete.id, habitacionToDelete.tempId);
+    setHabitacionToDelete(null);
+  };
 
   return (
     <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -107,7 +116,7 @@ export default function HabitacionesList({
                         <TableButton
                           variant="delete"
                           icon={PowerOff}
-                          onClick={() => onDelete(habitacion.id, habitacion.tempId)}
+                          onClick={() => setHabitacionToDelete(habitacion)}
                           disabled={loading}
                           title="Desactivar Habitación"
                         />
@@ -129,6 +138,26 @@ export default function HabitacionesList({
         onPageChange={setCurrentPage}
         disabled={loading}
       />
+
+      {/* Modal de confirmación de desactivación */}
+      <Modal
+        isOpen={!!habitacionToDelete}
+        onClose={() => setHabitacionToDelete(null)}
+        title="Desactivar Habitación"
+        onConfirm={handleConfirmDelete}
+        confirmLabel="Sí, desactivar"
+        confirmIcon={PowerOff}
+        variant="red"
+        size="sm"
+      >
+        {habitacionToDelete && (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            ¿Confirma la desactivación de la habitación{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">N° {habitacionToDelete.numero}</span>{' '}
+            (Piso {habitacionToDelete.piso})? La habitación dejará de estar disponible para reservas.
+          </p>
+        )}
+      </Modal>
     </div>
   );
 }
