@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Globe, Map, Building, ChevronRight, AlertTriangle } from 'lucide-react';
 import { ListHeader } from '@admin-ui';
+import AppButton from '@/components/ui/AppButton';
 import useLocalidad from '../hooks/useLocalidad';
 import UbicacionTable from '../components/UbicacionTable';
 import UbicacionModal from '../components/UbicacionModal';
@@ -38,19 +39,20 @@ function ConfirmDeleteModal({ entidad, tipo, onConfirm, onClose, loading }) {
           Esta acción no se puede deshacer. Los registros dependientes también serán eliminados.
         </p>
         <div className="flex justify-end gap-3">
-          <button
+          <AppButton
+            variant="ghost"
             onClick={onClose}
-            className="rounded-lg border border-gray-200 px-4 h-9 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+            disabled={loading}
           >
             Cancelar
-          </button>
-          <button
+          </AppButton>
+          <AppButton
+            variant="red"
             onClick={onConfirm}
-            disabled={loading}
-            className="rounded-lg bg-red-600 px-4 h-9 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
+            loading={loading}
           >
-            {loading ? 'Eliminando...' : 'Eliminar'}
-          </button>
+            Eliminar
+          </AppButton>
         </div>
       </div>
     </div>

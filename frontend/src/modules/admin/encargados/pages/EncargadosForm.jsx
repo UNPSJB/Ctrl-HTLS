@@ -12,6 +12,7 @@ import {
     TelInput,
 } from '@form';
 import AppButton from '@/components/ui/AppButton';
+import { RULES, LIMITS } from '@/utils/validationRules';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },
@@ -158,14 +159,20 @@ const EncargadosForm = () => {
                                 <FormField label="Nombre" required error={errors.nombre}>
                                     <TextInput
                                         id="nombre"
-                                        {...register('nombre', { required: 'El nombre es obligatorio' })}
+                                        {...register('nombre', {
+                            required: 'El nombre es obligatorio',
+                            ...RULES.nombre,
+                        })}
                                         placeholder="Ej: Juan Carlos"
                                     />
                                 </FormField>
                                 <FormField label="Apellido" required error={errors.apellido}>
                                     <TextInput
                                         id="apellido"
-                                        {...register('apellido', { required: 'El apellido es obligatorio' })}
+                                        {...register('apellido', {
+                            required: 'El apellido es obligatorio',
+                            ...RULES.apellido,
+                        })}
                                         placeholder="Ej: García López"
                                     />
                                 </FormField>
@@ -182,10 +189,10 @@ const EncargadosForm = () => {
                                         id="numeroDocumento"
                                         {...register('numeroDocumento', {
                                             required: 'El documento es obligatorio',
-                                            minLength: { value: 7, message: 'Mínimo 7 caracteres' },
+                                            ...RULES.documento,
                                             onChange: handleDocumentoChange
                                         })}
-                                        maxLength={15}
+                                        maxLength={LIMITS.documento.max}
                                         placeholder="Sin puntos ni guiones"
                                     />
                                 </FormField>
@@ -199,7 +206,10 @@ const EncargadosForm = () => {
                                 <FormField label="Teléfono" error={errors.telefono}>
                                     <TelInput
                                         id="telefono"
-                                        {...register('telefono', { onChange: handleNumericChange })}
+                                        {...register('telefono', {
+                            onChange: handleNumericChange,
+                            ...RULES.telefono,
+                        })}
                                         placeholder="Ej: 3764556677"
                                     />
                                 </FormField>

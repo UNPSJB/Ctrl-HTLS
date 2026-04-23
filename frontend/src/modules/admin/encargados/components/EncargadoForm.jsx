@@ -3,6 +3,7 @@ import {
   TextInput,
   SelectInput
 } from '@form';
+import { RULES, LIMITS } from '@/utils/validationRules';
 
 
 const tiposDocumento = [
@@ -32,14 +33,7 @@ const EncargadoForm = ({ register, errors, loading }) => {
             disabled={loading}
             {...register('encargadoNombre', {
               required: 'El nombre del encargado es obligatorio',
-              minLength: {
-                value: 2,
-                message: 'El nombre debe tener al menos 2 caracteres',
-              },
-              maxLength: {
-                value: 50,
-                message: 'El nombre no puede superar los 50 caracteres',
-              },
+              ...RULES.nombre,
             })}
           />
         </FormField>
@@ -51,14 +45,7 @@ const EncargadoForm = ({ register, errors, loading }) => {
             disabled={loading}
             {...register('encargadoApellido', {
               required: 'El apellido del encargado es obligatorio',
-              minLength: {
-                value: 2,
-                message: 'El apellido debe tener al menos 2 caracteres',
-              },
-              maxLength: {
-                value: 50,
-                message: 'El apellido no puede superar los 50 caracteres',
-              },
+              ...RULES.apellido,
             })}
           />
         </FormField>
@@ -88,20 +75,7 @@ const EncargadoForm = ({ register, errors, loading }) => {
             disabled={loading}
             {...register('encargadoNumeroDocumento', {
               required: 'El número de documento es obligatorio',
-              pattern: {
-                value: /^[0-9A-Za-z-]+$/,
-                message:
-                  'El número de documento solo puede contener números, letras y guiones',
-              },
-              minLength: {
-                value: 6,
-                message:
-                  'El número de documento debe tener al menos 6 caracteres',
-              },
-              maxLength: {
-                value: 20,
-                message: 'El número de documento no puede superar los 20 caracteres',
-              },
+              ...RULES.documento,
             })}
           />
         </FormField>

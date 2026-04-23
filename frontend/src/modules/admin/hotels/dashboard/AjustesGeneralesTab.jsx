@@ -19,6 +19,7 @@ import {
   RedirectLink,
   TextAreaInput
 } from '@form';
+import { RULES, LIMITS } from '@/utils/validationRules';
 
 export default function AjustesGeneralesTab({
   hotelId,
@@ -182,7 +183,7 @@ export default function AjustesGeneralesTab({
                 <TextInput
                   {...register('nombre', {
                     required: 'El nombre es obligatorio',
-                    maxLength: { value: 100, message: 'Máximo 100 caracteres' },
+                    ...RULES.nombreHotel,
                   })}
                   placeholder="Ej: Hotel Paradise Resort"
                 />
@@ -207,8 +208,7 @@ export default function AjustesGeneralesTab({
                 <TelInput
                   {...register('telefono', {
                     required: 'El teléfono es obligatorio',
-                    minLength: { value: 7, message: 'Mínimo 7 dígitos' },
-                    maxLength: { value: 20, message: 'Máximo 20 dígitos' },
+                    ...RULES.telefono,
                     onChange: handleNumericChange
                   })}
                   placeholder="Ej: 3764556677"
@@ -219,7 +219,7 @@ export default function AjustesGeneralesTab({
                 <EmailInput
                   {...register('email', {
                     required: 'El email es obligatorio',
-                    pattern: { value: /^\S+@\S+$/i, message: 'Email inválido' }
+                    ...RULES.email,
                   })}
                   placeholder="contacto@hotel.com"
                 />
@@ -230,12 +230,12 @@ export default function AjustesGeneralesTab({
                <FormField label="Descripción Básica" error={errors.descripcion}>
                  <TextAreaInput
                    {...register('descripcion', {
-                     maxLength: { value: 500, message: 'Máximo 500 caracteres' },
+                     ...RULES.descripcion,
                    })}
                    placeholder="Escriba una descripción o información general del hotel..."
                    rows={4}
                    showCount
-                   maxLength={500}
+                   maxLength={LIMITS.descripcion}
                  />
                </FormField>
             </div>

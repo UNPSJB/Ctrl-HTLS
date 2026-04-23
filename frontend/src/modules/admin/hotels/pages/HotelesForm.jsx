@@ -22,6 +22,7 @@ import {
   TextAreaInput
 } from '@form';
 import AppButton from '@/components/ui/AppButton';
+import { RULES, LIMITS } from '@/utils/validationRules';
 
 // Formulario para creación y edición básica de hoteles
 export default function HotelesForm() {
@@ -217,7 +218,7 @@ export default function HotelesForm() {
                         id="nombre"
                         {...register('nombre', {
                           required: 'El nombre es obligatorio',
-                          maxLength: { value: 100, message: 'Máximo 100 caracteres' },
+                          ...RULES.nombreHotel,
                         })}
                         placeholder="Ej: Hotel Paradise Resort"
                       />
@@ -243,12 +244,12 @@ export default function HotelesForm() {
                       <TextAreaInput
                         id="descripcion"
                         {...register('descripcion', {
-                          maxLength: { value: 500, message: 'Máximo 500 caracteres' },
+                          ...RULES.descripcion,
                         })}
                         placeholder="Escriba una descripción comercial que los clientes verán..."
                         rows={4}
                         showCount
-                        maxLength={500}
+                        maxLength={LIMITS.descripcion}
                       />
                     </FormField>
                   </div>
@@ -263,7 +264,7 @@ export default function HotelesForm() {
                         id="email"
                         {...register('email', {
                           required: 'El email es obligatorio',
-                          pattern: { value: /^\S+@\S+$/i, message: 'Email inválido' }
+                          ...RULES.email,
                         })}
                         placeholder="contacto@hotel.com"
                       />
@@ -273,8 +274,7 @@ export default function HotelesForm() {
                         id="telefono"
                         {...register('telefono', {
                           onChange: handleNumericChange,
-                          minLength: { value: 7, message: 'Mínimo 7 dígitos' },
-                          maxLength: { value: 20, message: 'Máximo 20 dígitos' },
+                          ...RULES.telefono,
                         })}
                         placeholder="Ej: 3764556677"
                       />

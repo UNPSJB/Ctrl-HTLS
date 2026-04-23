@@ -12,6 +12,7 @@ import {
   TextInput,
   NumberInput
 } from '@form';
+import { RULES, LIMITS } from '@/utils/validationRules';
 
 export default function PaquetesTab({ hotelId, isActive = false }) {
   const [paquetes, setPaquetes] = useState([]);
@@ -191,11 +192,10 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
                 <FormField label="Nombre del Paquete" required error={errors.nombre}>
                   <TextInput
                     placeholder="Ej: Finde Romántico"
-                    maxLength={80}
+                    maxLength={LIMITS.nombrePaquete}
                     {...register('nombre', {
                       required: 'El nombre del paquete es obligatorio',
-                      minLength: { value: 3, message: 'Mínimo 3 caracteres' },
-                      maxLength: { value: 80, message: 'Máximo 80 caracteres' },
+                      ...RULES.nombrePaquete,
                     })}
                   />
                 </FormField>

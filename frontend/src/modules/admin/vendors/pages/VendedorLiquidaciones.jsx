@@ -14,6 +14,7 @@ import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader } from '@admin-ui';
 import { capitalizeFirst } from '@/utils/stringUtils';
+import AppButton from '@/components/ui/AppButton';
 
 // Detalle de ventas y liquidaciones de un vendedor
 const VendedorLiquidaciones = () => {
@@ -206,14 +207,15 @@ const VendedorLiquidaciones = () => {
                       <p className="text-xs text-gray-500 dark:text-gray-400">Seleccione los elementos para procesar la liquidación</p>
                     </div>
                     
-                    <button
+                    <AppButton
+                      variant="green"
                       onClick={handleLiquidarSeleccionadas}
-                      disabled={selectedVentas.length === 0 || loadingAction}
-                      className="flex items-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-green-700 shadow-md transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+                      disabled={selectedVentas.length === 0}
+                      loading={loadingAction}
+                      icon={DollarSign}
                     >
-                      <DollarSign className="h-4 w-4" />
-                      Liquidar
-                    </button>
+                      Liquidar ({selectedVentas.length})
+                    </AppButton>
                   </div>
                   
                   <div className="flex-grow overflow-auto custom-scrollbar">

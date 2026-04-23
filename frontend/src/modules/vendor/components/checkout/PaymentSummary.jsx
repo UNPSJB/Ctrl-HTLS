@@ -70,6 +70,16 @@ function PaymentSummary() {
     });
   };
 
+  const isPaymentValid = () => {
+    if (metodoPago === 'Efectivo' || metodoPago === 'Puntos') return true;
+    if (metodoPago === 'Tarjeta' || metodoPago === 'Mixto') {
+      return cardData?.valid === true;
+    }
+    return false;
+  };
+
+  const isFormValid = canConfirm && isPaymentValid();
+
   return (
     <div className="rounded-lg bg-white p-5 shadow-xl dark:bg-gray-800">
       <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-gray-100">
@@ -171,7 +181,7 @@ function PaymentSummary() {
           fullWidth
           size="lg"
           loading={isProcessing}
-          disabled={!canConfirm}
+          disabled={!isFormValid}
           onClick={handlePagar}
         >
           Finalizar Reserva y Pagar

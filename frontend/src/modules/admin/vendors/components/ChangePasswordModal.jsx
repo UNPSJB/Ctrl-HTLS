@@ -5,6 +5,9 @@ import { toast } from 'react-hot-toast';
 import Modal from '@/components/ui/Modal';
 import axiosInstance from '@/api/axiosInstance';
 import { FormField, PasswordInput } from '@form';
+import { RULES, LIMITS, confirmarPasswordValidation } from '@/utils/validationRules';
+
+
 
 export default function ChangePasswordModal({ isOpen, onClose, empleadoId }) {
   const [loading, setLoading] = useState(false);
@@ -14,8 +17,9 @@ export default function ChangePasswordModal({ isOpen, onClose, empleadoId }) {
     handleSubmit,
     reset,
     watch,
-    formState: { errors }
+    formState: { errors, isValid }
   } = useForm({
+    mode: 'onChange', // Validar en tiempo real para habilitar/deshabilitar el botón
     defaultValues: {
       contrasenaActual: '',
       contrasenaNueva: '',
@@ -59,33 +63,44 @@ export default function ChangePasswordModal({ isOpen, onClose, empleadoId }) {
       confirmIcon={Key}
       onConfirm={handleSubmit(onSubmit)}
       loading={loading}
+      confirmDisabled={!isValid}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Contraseña actual — solo requerida, sin reglas de formato */}
         <FormField label="Contraseña Actual" required error={errors.contrasenaActual}>
           <PasswordInput
             id="contrasenaActual"
-            {...register('contrasenaActual', { required: 'La contraseña actual es obligatoria' })}
-            placeholder="••••••••"
-          />
-        </FormField>
-        
-        <FormField label="Nueva Contraseña" required error={errors.contrasenaNueva}>
-          <PasswordInput
-            id="contrasenaNueva"
-            {...register('contrasenaNueva', { 
-              required: 'La contraseña nueva es obligatoria',
-              minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+            {...register('contrasenaActual', {
+              required: 'La contraseña actual es obligatoria',
+              minLength: { value: 1, message: 'Campo obligatorio' },
             })}
             placeholder="••••••••"
           />
         </FormField>
         
+        {/* Nueva contraseña — con todas las reglas de seguridad */}
+        <FormField label="Nueva Contraseña" required error={errors.contrasenaNueva}>
+          <PasswordInput
+            id="contrasenaNueva"
+            {...register('contrasenaNueva', {
+              required: 'La contraseña nueva es obligatoria',
+              ...RULES.passwordNueva,
+            })}
+            placeholder="••••••••"
+          />
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+            Mínimo {LIMITS.password.min} caracteres, con mayúsculas, minúsculas y números.
+          </p>
+        </FormField>
+        
+        {/* Confirmar contraseña — valida que coincida con la nueva */}
         <FormField label="Confirmar Nueva Contraseña" required error={errors.confirmarContrasena}>
           <PasswordInput
             id="confirmarContrasena"
             {...register('confirmarContrasena', { 
               required: 'Debe confirmar la contraseña',
-              validate: (val) => val === nueva || 'Las contraseñas no coinciden'
+              maxLength: { value: LIMITS.password.max, message: `Máximo ${LIMITS.password.max} caracteres` },
+              validate: confirmarPasswordValidation(nueva),
             })}
             placeholder="••••••••"
           />

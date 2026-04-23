@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Globe, Building, Map } from 'lucide-react';
 import Modal from '@ui/Modal';
 import { FormField, TextInput } from '@form';
+import { LIMITS } from '@/utils/validationRules';
 
 const TIPO_META = {
   pais:      { label: 'País',      icon: Globe,     variant: 'blue' },
@@ -32,10 +33,12 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
   const validate = () => {
     const newErrors = {};
     if (!nombre.trim()) newErrors.nombre = 'El nombre es requerido';
-    if (nombre.trim().length > 100) newErrors.nombre = 'El nombre no puede superar los 100 caracteres';
+    if (nombre.trim().length > LIMITS.nombreUbicacion)
+      newErrors.nombre = `El nombre no puede superar los ${LIMITS.nombreUbicacion} caracteres`;
     if (tipo === 'ciudad') {
       if (!codigoPostal.trim()) newErrors.codigoPostal = 'El código postal es requerido';
-      else if (codigoPostal.trim().length > 10) newErrors.codigoPostal = 'Máximo 10 caracteres';
+      else if (codigoPostal.trim().length > LIMITS.codigoPostal)
+        newErrors.codigoPostal = `Máximo ${LIMITS.codigoPostal} caracteres`;
     }
     return newErrors;
   };
@@ -83,7 +86,7 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
               setNombre(e.target.value);
               setErrors((p) => ({ ...p, nombre: undefined }));
             }}
-            maxLength={100}
+            maxLength={LIMITS.nombreUbicacion}
             placeholder={`Ej: ${tipo === 'pais' ? 'Argentina' : tipo === 'provincia' ? 'Buenos Aires' : 'La Plata'}`}
             autoFocus
           />
@@ -98,7 +101,7 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
                 setCodigoPostal(e.target.value);
                 setErrors((p) => ({ ...p, codigoPostal: undefined }));
               }}
-              maxLength={10}
+              maxLength={LIMITS.codigoPostal}
               placeholder="Ej: 1900"
             />
           </FormField>

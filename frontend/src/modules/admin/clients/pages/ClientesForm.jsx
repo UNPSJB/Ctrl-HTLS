@@ -17,6 +17,7 @@ import {
     SelectInput,
 } from '@form';
 import AppButton from '@/components/ui/AppButton';
+import { RULES, LIMITS } from '@/utils/validationRules';
 
 const tiposDocumento = [
     { id: 'dni', nombre: 'DNI' },
@@ -192,7 +193,7 @@ const ClientesForm = () => {
                                             id="nombre"
                                             {...register('nombre', {
                                               required: 'El nombre es obligatorio',
-                                              maxLength: { value: 50, message: 'Máximo 50 caracteres' },
+                                              ...RULES.nombre,
                                             })}
                                             placeholder="Ej: Juan Carlos"
                                         />
@@ -202,7 +203,7 @@ const ClientesForm = () => {
                                             id="apellido"
                                             {...register('apellido', {
                                               required: 'El apellido es obligatorio',
-                                              maxLength: { value: 50, message: 'Máximo 50 caracteres' },
+                                              ...RULES.apellido,
                                             })}
                                             placeholder="Ej: García López"
                                         />
@@ -220,11 +221,10 @@ const ClientesForm = () => {
                                             id="numeroDocumento"
                                             {...register('numeroDocumento', {
                                                 required: 'El documento es obligatorio',
-                                                minLength: { value: 7, message: 'Mínimo 7 caracteres' },
-                                                maxLength: { value: 15, message: 'Máximo 15 caracteres' },
+                                                ...RULES.documento,
                                                 onChange: handleDocumentoChange
                                             })}
-                                            maxLength={15}
+                                            maxLength={LIMITS.documento.max}
                                             placeholder="Sin puntos ni guiones"
                                         />
                                     </FormField>
@@ -240,7 +240,7 @@ const ClientesForm = () => {
                                             id="email"
                                             {...register('email', {
                                                 required: 'El email es obligatorio',
-                                                pattern: { value: /^\S+@\S+$/i, message: 'Email inválido' }
+                                                ...RULES.email,
                                             })}
                                             placeholder="cliente@empresa.com"
                                         />
@@ -250,8 +250,7 @@ const ClientesForm = () => {
                                             id="telefono"
                                             {...register('telefono', {
                                               onChange: handleNumericChange,
-                                              minLength: { value: 7, message: 'Mínimo 7 dígitos' },
-                                              maxLength: { value: 20, message: 'Máximo 20 dígitos' },
+                                              ...RULES.telefono,
                                             })}
                                             placeholder="Ej: 3764556677"
                                         />
