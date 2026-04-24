@@ -29,4 +29,24 @@ const verificarDescuentoExistente = async (idHotel, descuento) => {
   }
 };
 
-module.exports = { crearDescuento, verificarDescuentoExistente };
+const eliminarDescuento = async (hotelId, descuentoId) => {
+  const descuento = await Descuento.findOne({
+    where: { id: descuentoId, hotelId },
+  });
+
+  if (!descuento) {
+    throw new CustomError(
+      'El descuento no existe o no pertenece a este hotel',
+      404,
+    );
+  }
+
+  await descuento.destroy();
+  return { message: 'Descuento eliminado correctamente' };
+};
+
+module.exports = {
+  crearDescuento,
+  verificarDescuentoExistente,
+  eliminarDescuento,
+};

@@ -425,6 +425,26 @@ const getDescuentos = async (req, res) => {
   }
 };
 
+const deleteDescuento = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id, idDescuento } = req.params;
+
+  try {
+    const resultado = await hotelServices.eliminarDescuentoDeHotel(
+      id,
+      idDescuento,
+    );
+    res.json(resultado);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getTiposDeHabitacion = async (req, res) => {
   try {
     const tipos = await hotelServices.obtenerTiposDeHabitacion();
@@ -540,6 +560,32 @@ const desasignarEmpleado = async (req, res) => {
   }
 };
 
+const getDisponibilidadHotel = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+  const { fechaInicio, fechaFin } = req.query;
+  const pasajeros = req.query.pasajeros
+    ? Number(req.query.pasajeros)
+    : undefined;
+
+  try {
+    const disponibilidad = await hotelServices.getDisponibilidadPorHotelId(
+      id,
+      fechaInicio,
+      fechaFin,
+      pasajeros,
+    );
+    res.status(200).json(disponibilidad);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createHotel,
   updateHotel,
@@ -558,6 +604,7 @@ module.exports = {
   setHabitaciones,
   setDescuento,
   getDescuentos,
+  deleteDescuento,
   updateHabitacion,
   deleteHabitacion,
   setPaquetePromocional,
@@ -572,4 +619,5 @@ module.exports = {
   asignarEmpleado,
   desasignarEmpleado,
   updateTarifas,
+  getDisponibilidadHotel,
 };

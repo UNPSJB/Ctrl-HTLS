@@ -2,6 +2,9 @@ const Temporada = require('../../models/hotel/Temporada');
 const CustomError = require('../../utils/CustomError');
 const { Op } = require('sequelize');
 
+// Normaliza un string YYYY-MM-DD a un Date UTC 00:00:00 para comparaciones consistentes en PostgreSQL
+const toUTCDate = (dateStr) => new Date(`${dateStr}T00:00:00Z`);
+
 const crearTemporada = async (idHotel, temporada) => {
   try {
     const temporadaNueva = await Temporada.create({
@@ -19,31 +22,9 @@ const verificarTemporadas = async (idHotel, inicio, fin) => {
   const temporadas = await Temporada.findAll({
     where: {
       hotelId: idHotel,
-      [Op.or]: [
-        {
-          fechaInicio: {
-            [Op.between]: [inicio, fin],
-          },
-        },
-        {
-          fechaFin: {
-            [Op.between]: [inicio, fin],
-          },
-        },
-        {
-          [Op.and]: [
-            {
-              fechaInicio: {
-                [Op.lte]: inicio,
-              },
-            },
-            {
-              fechaFin: {
-                [Op.gte]: fin,
-              },
-            },
-          ],
-        },
+      [Op.and]: [
+        { fechaFin: { [Op.gte]: toUTCDate(inicio) } },
+        { fechaInicio: { [Op.lte]: toUTCDate(fin) } },
       ],
     },
   });
@@ -155,37 +136,9 @@ const actualizarTemporada = async (hotelId, temporadaId, datosTemporada) => {
       where: {
         hotelId,
         id: { [Op.ne]: temporadaId },
-        [Op.or]: [
-          {
-            fechaInicio: {
-              [Op.between]: [
-                datosTemporada.fechaInicio,
-                datosTemporada.fechaFin,
-              ],
-            },
-          },
-          {
-            fechaFin: {
-              [Op.between]: [
-                datosTemporada.fechaInicio,
-                datosTemporada.fechaFin,
-              ],
-            },
-          },
-          {
-            [Op.and]: [
-              {
-                fechaInicio: {
-                  [Op.lte]: datosTemporada.fechaInicio,
-                },
-              },
-              {
-                fechaFin: {
-                  [Op.gte]: datosTemporada.fechaFin,
-                },
-              },
-            ],
-          },
+        [Op.and]: [
+          { fechaFin: { [Op.gte]: toUTCDate(datosTemporada.fechaInicio) } },
+          { fechaInicio: { [Op.lte]: toUTCDate(datosTemporada.fechaFin) } },
         ],
       },
     });

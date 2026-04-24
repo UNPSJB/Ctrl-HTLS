@@ -57,7 +57,6 @@ const crearHabitaciones = async (idHotel, habitaciones) => {
     const habitacionesExistentes = await Habitacion.findAll({
       where: {
         hotelId: idHotel,
-        eliminado: false,
         numero: { [Op.in]: numerosHabitacion },
       },
       transaction,
@@ -113,7 +112,7 @@ const obtenerHabitaciones = async (idHotel) => {
 
   // Obtener las habitaciones del hotel
   const habitaciones = await Habitacion.findAll({
-    where: { hotelId: idHotel, eliminado: false },
+    where: { hotelId: idHotel },
     attributes: ['id', 'numero', 'piso', 'tipoHabitacionId', 'eliminado'],
     include: [
       {
@@ -581,7 +580,6 @@ const getHabitacionPorNumeroYHotel = (idHotel, numero) => {
     where: {
       hotelId: idHotel,
       numero: numero,
-      eliminado: false,
     },
   });
 };

@@ -831,6 +831,11 @@ const getDescuentosDeHotel = async (hotelId) => {
   }
 };
 
+const eliminarDescuentoDeHotel = async (hotelId, descuentoId) => {
+  await verificarIdHotel(hotelId);
+  return descuentoServices.eliminarDescuento(hotelId, descuentoId);
+};
+
 /**
  * VERIFICAR QUE EXISTAN HOTELES EN LA CIUDAD
  * QUE TENGA HABITACIONES
@@ -901,6 +906,14 @@ const getDisponibilidadPorHotel = async (
       fechaInicio,
       fechaFin,
     );
+
+    // No incluir hoteles que no tienen habitaciones ni paquetes disponibles
+    if (habitaciones.length === 0 && paquetes.length === 0) {
+      throw new CustomError(
+        `El hotel ${nombreHotel} no tiene habitaciones ni paquetes disponibles en las fechas seleccionadas`,
+        404,
+      );
+    }
 
     // Estructurar el objeto del hotel
     disponibilidad.push({
@@ -993,8 +1006,83 @@ const getDisponibilidadPorHotel = async (
         paquetes: paquetes,
       });
     }
+
+    if (disponibilidad.length === 0) {
+      throw new CustomError(
+        'No hay hoteles con disponibilidad en la ciudad especificada para las fechas seleccionadas',
+        404,
+      );
+    }
   }
   return disponibilidad;
+};
+
+const getDisponibilidadPorHotelId = async (
+  hotelId,
+  fechaInicio,
+  fechaFin,
+  pasajeros,
+) => {
+  const pasajerosNum = pasajeros || Number.MAX_SAFE_INTEGER;
+  const hotel = await Hotel.findOne({
+    where: { id: hotelId, eliminado: false },
+    include: [
+      {
+        model: Categoria,
+        as: 'categoria',
+        include: [
+          {
+            model: Servicio,
+            as: 'servicios',
+            through: { attributes: [] },
+          },
+        ],
+      },
+      {
+        model: Ciudad,
+        as: 'ciudad',
+        include: [
+          {
+            model: Provincia,
+            as: 'provincia',
+            include: [
+              {
+                model: Pais,
+                as: 'pais',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!hotel) {
+    throw new CustomError('El hotel no existe', 404);
+  }
+
+  const habitaciones =
+    await habitacionServices.obtenerHabitacionesDisponiblesPorTipo(
+      hotel.id,
+      fechaInicio,
+      fechaFin,
+      pasajerosNum,
+    );
+
+  const paquetes = await paquetePromocionalServices.obtenerPaquetesTuristicos(
+    hotel.id,
+    fechaInicio,
+    fechaFin,
+  );
+
+  if (habitaciones.length === 0 && paquetes.length === 0) {
+    throw new CustomError(
+      'El hotel no tiene habitaciones ni paquetes disponibles en las fechas seleccionadas',
+      404,
+    );
+  }
+
+  return { habitaciones, paquetes };
 };
 
 const obtenerTiposDeHabitacion = async () => {
@@ -1379,6 +1467,7 @@ module.exports = {
   actualizarTemporadaDeHotel,
   agregarDescuentos,
   getDescuentosDeHotel,
+  eliminarDescuentoDeHotel,
   getDisponibilidadPorHotel,
   getHotelesPorCiudad,
   obtenerTiposDeHabitacion,
@@ -1393,4 +1482,5 @@ module.exports = {
   obtenerEncargados,
   obtenerTarifasDeHotel,
   actualizarTarifasDeHotel,
+  getDisponibilidadPorHotelId,
 };

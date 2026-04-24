@@ -1,4 +1,4 @@
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 const validateHotel = [
   body('nombre')
@@ -74,10 +74,31 @@ const validatePaqueteId = [
     .withMessage('El idPaquete debe ser un número entero'),
 ];
 
+const validateDescuentoId = [
+  param('idDescuento')
+    .isInt()
+    .withMessage('El idDescuento debe ser un número entero'),
+];
+
+const validateDisponibilidadQuery = [
+  query('fechaInicio')
+    .isISO8601()
+    .withMessage(
+      'La fecha de inicio debe ser una fecha válida en formato ISO8601',
+    ),
+  query('fechaFin')
+    .isISO8601()
+    .withMessage(
+      'La fecha de fin debe ser una fecha válida en formato ISO8601',
+    ),
+];
+
 module.exports = {
   validateHotel,
   validateId,
   validateTarifasPayload,
   validateTemporadaId,
   validatePaqueteId,
+  validateDescuentoId,
+  validateDisponibilidadQuery,
 };

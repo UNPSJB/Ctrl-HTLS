@@ -279,6 +279,7 @@ const guardarPaquetes = async (alquilerId, paquetes, transaction) => {
 
 const verificarAlquileresActualesOFuturos = async (paqueteId) => {
   const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
   const alquileres = await AlquilerPaquetePromocional.findAll({
     where: {
       paquetePromocionalId: paqueteId,
@@ -392,13 +393,12 @@ const actualizarPaquete = async (hotelId, paqueteId, datosPaquete) => {
   });
   const idsActuales = habitacionesActuales.map((h) => h.habitacionId);
 
-  // Lógica de toggle para habitaciones (si se enviaron)
-  if (habitaciones && habitaciones.length > 0) {
-    // Las que ya estaban asignadas se quitan, las nuevas se agregan
-    const aQuitar = habitaciones.filter((id) => idsActuales.includes(id));
+  // Lógica de sincronización para habitaciones: lo que llega en el array
+  // se mantiene o agrega; lo que no llega se elimina.
+  if (Array.isArray(habitaciones)) {
+    const aMantener = habitaciones.filter((id) => idsActuales.includes(id));
     const aAgregar = habitaciones.filter((id) => !idsActuales.includes(id));
-    // Las que no se mencionaron se mantienen
-    const aMantener = idsActuales.filter((id) => !habitaciones.includes(id));
+    const aQuitar = idsActuales.filter((id) => !habitaciones.includes(id));
     // El resultado final de habitaciones del paquete
     const habitacionesFinales = [...aMantener, ...aAgregar];
 

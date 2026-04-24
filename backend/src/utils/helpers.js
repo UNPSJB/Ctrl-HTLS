@@ -64,6 +64,7 @@ const verificarTelefono = async (telefono, excludeHotelId = null) => {
     hotelExistenteTelefono,
     clienteExistenteTelefono,
     empleadoExistenteTelefono,
+    encargadoExistenteTelefono,
   ] = await Promise.all([
     Hotel.findOne({
       where: {
@@ -74,12 +75,14 @@ const verificarTelefono = async (telefono, excludeHotelId = null) => {
     }),
     Cliente.findOne({ where: { telefono } }),
     Empleado.findOne({ where: { telefono } }),
+    Encargado.findOne({ where: { telefono } }),
   ]);
 
   if (
     hotelExistenteTelefono ||
     clienteExistenteTelefono ||
-    empleadoExistenteTelefono
+    empleadoExistenteTelefono ||
+    encargadoExistenteTelefono
   ) {
     throw new CustomError('Ya existe un registro con el mismo teléfono', 409); // Conflict
   }
