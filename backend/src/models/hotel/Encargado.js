@@ -18,7 +18,7 @@ const Encargado = sequelize.define(
       unique: true,
     },
     tipoDocumento: {
-      type: DataTypes.ENUM('dni', 'li', 'le', 'pasaporte'),
+      type: DataTypes.ENUM('dni', 'lc', 'le', 'pasaporte'),
       allowNull: false,
     },
     telefono: {

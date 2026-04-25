@@ -1210,7 +1210,11 @@ const actualizarEncargado = async (id, datosEncargado) => {
 const verificarHotelUbicacion = async (nombreHotel, ciudadId) => {
   try {
     const hotel = await Hotel.findOne({
-      where: { nombre: nombreHotel, ciudadId: ciudadId, eliminado: false },
+      where: {
+        nombre: { [Op.iLike]: `%${nombreHotel}%` },
+        ciudadId: ciudadId,
+        eliminado: false,
+      },
       include: [
         {
           model: Categoria,

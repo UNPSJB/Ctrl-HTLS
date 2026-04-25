@@ -14,6 +14,8 @@ const Alquiler = require('../../models/ventas/Alquiler');
 const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
 const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
+const Habitacion = require('../../models/hotel/Habitacion');
+const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const { Op } = require('sequelize');
 const DetalleFactura = require('../../models/ventas/DetalleFactura');
 
@@ -134,6 +136,61 @@ const crearReserva = async (reservas) => {
       }
     }
     await transaction.commit();
+
+    // Enriquecer la respuesta con datos completos de habitaciones y paquetes
+    const alquilerIds = [];
+    for (const reserva of reservas) {
+      for (const alquiler of reserva.alquiler) {
+        alquilerIds.push(alquiler.alquilerId);
+      }
+    }
+
+    const alquileresCompletos = await Alquiler.findAll({
+      where: { id: { [Op.in]: alquilerIds } },
+      include: [
+        {
+          model: Habitacion,
+          as: 'habitaciones',
+          attributes: ['id', 'numero', 'piso'],
+          include: [
+            {
+              model: TipoHabitacion,
+              as: 'tipoHabitacion',
+              attributes: ['id', 'nombre', 'capacidad'],
+            },
+          ],
+        },
+        {
+          model: PaquetePromocional,
+          as: 'paquetesPromocionales',
+          attributes: [
+            'id',
+            'nombre',
+            'fecha_inicio',
+            'fecha_fin',
+            'coeficiente_descuento',
+            'capacidad_maxima',
+          ],
+        },
+      ],
+    });
+
+    const alquilerMap = new Map(alquileresCompletos.map((a) => [a.id, a]));
+
+    for (const reserva of reservas) {
+      for (const alquiler of reserva.alquiler) {
+        const completo = alquilerMap.get(alquiler.alquilerId);
+        if (completo) {
+          alquiler.habitaciones = (completo.habitaciones || []).map((h) =>
+            h.toJSON(),
+          );
+          alquiler.paquetes = (completo.paquetesPromocionales || []).map((p) =>
+            p.toJSON(),
+          );
+        }
+      }
+    }
+
     return reservas;
   } catch (error) {
     await transaction.rollback();
@@ -278,6 +335,54 @@ const actualizarReserva = async (reservas) => {
     }
 
     await transaction.commit();
+
+    // Enriquecer la respuesta con datos completos de habitaciones y paquetes
+    const alquilerIds = reservas.alquileres.map((a) => a.alquilerId);
+
+    const alquileresCompletos = await Alquiler.findAll({
+      where: { id: { [Op.in]: alquilerIds } },
+      include: [
+        {
+          model: Habitacion,
+          as: 'habitaciones',
+          attributes: ['id', 'numero', 'piso'],
+          include: [
+            {
+              model: TipoHabitacion,
+              as: 'tipoHabitacion',
+              attributes: ['id', 'nombre', 'capacidad'],
+            },
+          ],
+        },
+        {
+          model: PaquetePromocional,
+          as: 'paquetesPromocionales',
+          attributes: [
+            'id',
+            'nombre',
+            'fecha_inicio',
+            'fecha_fin',
+            'coeficiente_descuento',
+            'capacidad_maxima',
+          ],
+        },
+      ],
+    });
+
+    const alquilerMap = new Map(alquileresCompletos.map((a) => [a.id, a]));
+
+    for (const alquiler of reservas.alquileres) {
+      const completo = alquilerMap.get(alquiler.alquilerId);
+      if (completo) {
+        alquiler.habitaciones = (completo.habitaciones || []).map((h) =>
+          h.toJSON(),
+        );
+        alquiler.paquetes = (completo.paquetesPromocionales || []).map((p) =>
+          p.toJSON(),
+        );
+      }
+    }
+
     return reservas;
   } catch (error) {
     await transaction.rollback();

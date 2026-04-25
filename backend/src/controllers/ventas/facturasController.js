@@ -56,7 +56,18 @@ const confirmarPago = async (req, res) => {
   }
 };
 
+const getVentasResumen = async (req, res) => {
+  try {
+    const resumen = await facturaServices.obtenerVentasResumen();
+    res.status(200).json(resumen);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   setFactura,
   confirmarPago,
+  getVentasResumen,
 };

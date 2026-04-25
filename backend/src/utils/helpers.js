@@ -29,7 +29,7 @@ const verificarDocumento = async (numeroDocumento) => {
 };
 
 const verificarTipoDocumento = (tipoDocumento) => {
-  const tiposValidos = ['dni', 'li', 'le', 'pasaporte'];
+  const tiposValidos = ['dni', 'lc', 'le', 'pasaporte'];
   if (!tiposValidos.includes(tipoDocumento)) {
     throw new CustomError(
       `Tipo de documento inválido. Debe ser uno de: ${tiposValidos.join(', ')}`,
@@ -52,8 +52,16 @@ const verificarEmail = async (email, excludeHotelId = null) => {
       Empleado.findOne({ where: { email } }),
     ]);
 
-  if (hotelExistenteEmail || clienteExistenteEmail || empleadoExistenteEmail) {
-    throw new CustomError('Ya existe un registro con el mismo email', 409); // Conflict
+  if (hotelExistenteEmail) {
+    throw new CustomError('Ya existe un hotel con el mismo email', 409); // Conflict
+  }
+
+  if (clienteExistenteEmail) {
+    throw new CustomError('Ya existe un cliente con el mismo email', 409); // Conflict
+  }
+
+  if (empleadoExistenteEmail) {
+    throw new CustomError('Ya existe un empleado con el mismo email', 409); // Conflict
   }
 };
 
