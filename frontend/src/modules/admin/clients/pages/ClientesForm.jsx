@@ -18,13 +18,7 @@ import {
 } from '@form';
 import AppButton from '@/components/ui/AppButton';
 import { RULES, LIMITS } from '@/utils/validationRules';
-
-const tiposDocumento = [
-    { id: 'dni', nombre: 'DNI' },
-    { id: 'li', nombre: 'LI' },
-    { id: 'le', nombre: 'LE' },
-    { id: 'pasaporte', nombre: 'Pasaporte' },
-];
+import { TIPOS_DOCUMENTO } from '@/utils/constants';
 
 // Formulario para registro y edición de clientes con Estilo Industrial
 const ClientesForm = () => {
@@ -124,7 +118,6 @@ const ClientesForm = () => {
 
     const handleTipoChange = (e) => {
         setValue('tipoDocumento', e.target.value, { shouldValidate: true });
-        setValue('numeroDocumento', '', { shouldValidate: true }); // Limpiar documento al cambiar tipo
     };
 
     // Envío del formulario
@@ -213,7 +206,7 @@ const ClientesForm = () => {
                                             id="tipoDocumento"
                                             {...register('tipoDocumento', { onChange: handleTipoChange })}
                                         >
-                                            {tiposDocumento.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                                            {TIPOS_DOCUMENTO.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
                                         </SelectInput>
                                     </FormField>
                                     <FormField label="Número de Documento" required error={errors.numeroDocumento}>

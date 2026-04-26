@@ -9,12 +9,7 @@ import {
   SelectInput 
 } from '@/components/ui/form';
 
-const tiposDocumento = [
-  { id: 'dni', nombre: 'DNI' },
-  { id: 'li', nombre: 'LI' },
-  { id: 'le', nombre: 'LE' },
-  { id: 'pasaporte', nombre: 'Pasaporte' },
-];
+import { TIPOS_DOCUMENTO } from '@/utils/constants';
 
 // Formulario para la creación de un nuevo cliente refactorizado con componentes UI estandarizados
 function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
@@ -75,7 +70,7 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
 
         <FormField label="Tipo de Documento" required error={errors.tipoDocumento}>
           <SelectInput {...register('tipoDocumento', { required: 'Seleccione un tipo' })}>
-            {tiposDocumento.map((tipo) => (
+            {TIPOS_DOCUMENTO.map((tipo) => (
               <option key={tipo.id} value={tipo.id}>
                 {tipo.nombre}
               </option>
