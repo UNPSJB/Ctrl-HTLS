@@ -17,7 +17,7 @@ const Cliente = sequelize.define(
       allowNull: true,
     },
     tipoDocumento: {
-      type: DataTypes.ENUM('dni', 'li', 'le', 'pasaporte'),
+      type: DataTypes.ENUM('dni', 'lc', 'le', 'pasaporte'),
       allowNull: false,
     },
     numeroDocumento: {

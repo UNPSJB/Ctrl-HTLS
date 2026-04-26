@@ -234,6 +234,8 @@ const obtenerPaquetesTuristicos = async (idHotel, fechaInicio, fechaFin) => {
 
     // Estructurar las habitaciones asignadas al paquete
     const habitaciones = paquete.habitaciones.map((habitacion) => ({
+      numero: habitacion.numero,
+      piso: habitacion.piso,
       nombre: habitacion.tipoHabitacion.nombre,
       capacidad: habitacion.tipoHabitacion.capacidad,
       precio:

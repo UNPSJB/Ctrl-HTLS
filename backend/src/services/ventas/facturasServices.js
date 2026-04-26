@@ -1,4 +1,5 @@
 const sequelize = require('../../config/database');
+const { Op } = require('sequelize');
 const CustomError = require('../../utils/CustomError');
 const Factura = require('../../models/ventas/Factura');
 const DetalleFactura = require('../../models/ventas/DetalleFactura');
@@ -74,7 +75,10 @@ const confirmarPago = async (
   clienteId,
 ) => {
   if (!Array.isArray(alquileres) || alquileres.length === 0) {
-    throw new CustomError('Debe indicar al menos un alquiler para facturar', 400);
+    throw new CustomError(
+      'Debe indicar al menos un alquiler para facturar',
+      400,
+    );
   }
 
   if (!vendedorId) {
@@ -94,7 +98,9 @@ const confirmarPago = async (
     0,
   );
 
-  if (Number(totalDetalles.toFixed(2)) !== Number(Number(montoTotal).toFixed(2))) {
+  if (
+    Number(totalDetalles.toFixed(2)) !== Number(Number(montoTotal).toFixed(2))
+  ) {
     throw new CustomError(
       'La suma de los subtotales de alquiler no coincide con el monto total',
       400,
@@ -108,7 +114,10 @@ const confirmarPago = async (
   const tarjeta = Number(montoTarjeta ?? 0);
 
   if (Number.isNaN(efectivo) || Number.isNaN(tarjeta)) {
-    throw new CustomError('Los montos de efectivo o tarjeta no son válidos', 400);
+    throw new CustomError(
+      'Los montos de efectivo o tarjeta no son válidos',
+      400,
+    );
   }
 
   const coincideTotal = (a, b) => Math.abs(Number(a) - Number(b)) < 0.01;
@@ -197,6 +206,11 @@ const confirmarPago = async (
       if (puntosGanados > 0) {
         puntosDelta += puntosGanados;
       }
+    } else if (tipoPagoNormalizado === 'Mixto') {
+      const puntosGanados = Math.floor(efectivo / 5);
+      if (puntosGanados > 0) {
+        puntosDelta += puntosGanados;
+      }
     }
 
     const pago = await Pago.create(
@@ -236,7 +250,8 @@ const confirmarPago = async (
           empleadoId: vendedorId,
           subtotal: detalle.subTotal,
           precio_unitario: detalle.subTotal,
-          descripcion: detalle.descripcion || `Alquiler #${alquilerRelacionado.id}`,
+          descripcion:
+            detalle.descripcion || `Alquiler #${alquilerRelacionado.id}`,
         },
         { transaction },
       );
@@ -247,19 +262,28 @@ const confirmarPago = async (
     if (puntosDelta !== 0) {
       cliente.puntos += puntosDelta;
       if (cliente.puntos < 0) {
-        throw new CustomError('El ajuste de puntos generó un saldo negativo', 500);
+        throw new CustomError(
+          'El ajuste de puntos generó un saldo negativo',
+          500,
+        );
       }
       await cliente.save({ transaction });
     }
 
     await transaction.commit();
 
-    const pdfBuffer = await generarPDFFactura(factura, pago, detallesCreados, cliente);
+    const pdfBuffer = await generarPDFFactura(
+      factura,
+      pago,
+      detallesCreados,
+      cliente,
+    );
 
     return {
       factura,
       pago,
       detalles: detallesCreados,
+      puntos: cliente.puntos,
       pdfBuffer,
     };
   } catch (error) {
@@ -271,7 +295,111 @@ const confirmarPago = async (
   }
 };
 
+const obtenerVentasResumen = async () => {
+  const ahora = new Date();
+
+  const inicioDia = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+  const finDia = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  const distanciaLunes = (ahora.getDay() + 6) % 7;
+  const inicioSemana = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate() - distanciaLunes,
+    0,
+    0,
+    0,
+    0,
+  );
+  const finSemana = new Date(
+    inicioSemana.getFullYear(),
+    inicioSemana.getMonth(),
+    inicioSemana.getDate() + 6,
+    23,
+    59,
+    59,
+    999,
+  );
+
+  const inicioMes = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    1,
+    0,
+    0,
+    0,
+    0,
+  );
+  const finMes = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
+
+  const [facturasDia, facturasSemana, facturasMes] = await Promise.all([
+    Factura.findAll({
+      where: {
+        fecha: {
+          [Op.gte]: inicioDia,
+          [Op.lte]: finDia,
+        },
+      },
+      attributes: ['importe_total'],
+    }),
+    Factura.findAll({
+      where: {
+        fecha: {
+          [Op.gte]: inicioSemana,
+          [Op.lte]: finSemana,
+        },
+      },
+      attributes: ['importe_total'],
+    }),
+    Factura.findAll({
+      where: {
+        fecha: {
+          [Op.gte]: inicioMes,
+          [Op.lte]: finMes,
+        },
+      },
+      attributes: ['importe_total'],
+    }),
+  ]);
+
+  const calcular = (facturas) => ({
+    cantidad: facturas.length,
+    total: facturas.reduce((sum, f) => sum + Number(f.importe_total), 0),
+  });
+
+  return {
+    dia: calcular(facturasDia),
+    semana: calcular(facturasSemana),
+    mes: calcular(facturasMes),
+  };
+};
+
 module.exports = {
   generarFactura,
   confirmarPago,
+  obtenerVentasResumen,
 };

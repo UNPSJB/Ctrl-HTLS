@@ -28,9 +28,9 @@ const commonValidations = [
   body('tipoDocumento')
     .notEmpty()
     .withMessage('El tipo de documento es requerido')
-    .isIn(['dni', 'li', 'le', 'pasaporte'])
+    .isIn(['dni', 'lc', 'le', 'pasaporte'])
     .withMessage(
-      'El tipo de documento debe ser uno de los siguientes: DNI, LI, LE, Pasaporte',
+      'El tipo de documento debe ser uno de los siguientes: DNI, LC, LE, Pasaporte',
     )
     .toLowerCase(),
   body('numeroDocumento')

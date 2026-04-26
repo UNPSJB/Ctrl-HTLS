@@ -30,7 +30,7 @@ const Empleado = sequelize.define(
       allowNull: true, // Opcional
     },
     tipoDocumento: {
-      type: DataTypes.ENUM('dni', 'li', 'le', 'pasaporte'),
+      type: DataTypes.ENUM('dni', 'lc', 'le', 'pasaporte'),
       allowNull: false,
     },
     numeroDocumento: {
