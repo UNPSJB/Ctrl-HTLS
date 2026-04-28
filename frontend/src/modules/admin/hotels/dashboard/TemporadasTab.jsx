@@ -1,32 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Plus, Calendar } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import { toISODate } from '@/utils/dateUtils';
 import TemporadasList from '../components/TemporadasList';
-import { Modal } from '@admin-ui';
-import {
-  FormField,
-  SelectInput,
-  TextInput,
-  NumberInput
-} from '@form';
+import TemporadaFormModal from '../components/TemporadaFormModal';
 import AppButton from '@/components/ui/AppButton';
 
 export default function TemporadasTab({ hotelId, isActive = false }) {
   const [temporadas, setTemporadas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
-
-  const form = useForm({ mode: 'onChange' });
-
-  // Fecha mínima = hoy en formato YYYY-MM-DD (zona local Argentina)
-  const hoy = toISODate(new Date());
-
-  // Observar fechaInicio para limitar la fecha fin
-  const fechaInicio = form.watch('fechaInicio');
 
   useEffect(() => {
     if (isActive) {
@@ -49,7 +32,6 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
 
   const handleAdd = async (data) => {
     try {
-      setSubmitting(true);
       const payload = {
         ...data,
         porcentaje: parseFloat(data.porcentaje) / 100
@@ -57,13 +39,11 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
       await axiosInstance.post(`/hotel/${hotelId}/temporada`, payload);
       toast.success('Temporada agregada correctamente');
       setShowForm(false);
-      form.reset();
       await fetchTemporadas();
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.error || 'Error al agregar temporada');
-    } finally {
-      setSubmitting(false);
+      throw error;
     }
   };
 
@@ -80,7 +60,6 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
     }
   };
 
-
   return (
     <div className="h-full flex flex-col animate-in fade-in duration-300">
       <div className="flex-shrink-0 flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -95,7 +74,7 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
         </div>
         <AppButton
           onClick={() => setShowForm(true)}
-          disabled={loading || submitting}
+          disabled={loading}
           icon={Plus}
         >
           Nueva Temporada
@@ -103,78 +82,15 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
-
-      {/* Modal de Temporada */}
-        <Modal
-          isOpen={showForm}
-          onClose={() => {
-            setShowForm(false);
-            form.reset();
-          }}
-          title="Configurar Temporada"
-          description="Defina un periodo de tiempo y su ajuste porcentual sobre la tarifa base."
-          onConfirm={form.handleSubmit(handleAdd)}
-          loading={submitting}
-          confirmDisabled={!form.formState.isValid || submitting}
-          confirmLabel="Registrar Temporada"
-          confirmIcon={Plus}
-        >
-          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-            {/* Fila 1: Tipo de temporada + Porcentaje */}
-            <FormField label="Tipo de Temporada" required error={form.formState.errors.tipo}>
-              <SelectInput {...form.register('tipo', { required: 'Seleccione un tipo' })}>
-                <option value="">Seleccione...</option>
-                <option value="alta">Temporada Alta</option>
-                <option value="baja">Temporada Baja</option>
-              </SelectInput>
-            </FormField>
-
-            <FormField label="Porcentaje de Ajuste (%)" required error={form.formState.errors.porcentaje}>
-              <NumberInput
-                min="1"
-                max="100"
-                placeholder="Ej: 15"
-                {...form.register('porcentaje', {
-                  required: 'El porcentaje es obligatorio',
-                  valueAsNumber: true,
-                  min: { value: 1, message: 'El porcentaje mínimo es 1%' },
-                  max: { value: 100, message: 'El porcentaje máximo es 100%' },
-                })}
-              />
-            </FormField>
-
-            {/* Fila 2: Fecha inicio + Fecha fin */}
-            <FormField label="Fecha de Inicio" required error={form.formState.errors.fechaInicio}>
-              <TextInput
-                type="date"
-                min={hoy}
-                {...form.register('fechaInicio', {
-                  required: 'La fecha de inicio es obligatoria',
-                  validate: (val) => val >= hoy || 'No se permiten fechas pasadas',
-                })}
-              />
-            </FormField>
-
-            <FormField label="Fecha de Fin" required error={form.formState.errors.fechaFin}>
-              <TextInput
-                type="date"
-                min={fechaInicio || hoy}
-                {...form.register('fechaFin', {
-                  required: 'La fecha de fin es obligatoria',
-                  validate: (val) => {
-                    if (val < hoy) return 'No se permiten fechas pasadas';
-                    if (fechaInicio && val <= fechaInicio) return 'Debe ser posterior a la fecha de inicio';
-                    return true;
-                  },
-                })}
-              />
-            </FormField>
-          </div>
-        </Modal>
-
-        {/* Tabla */}
         <TemporadasList data={temporadas} loading={loading} onDelete={handleDelete} />
       </div>
+
+      <TemporadaFormModal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        onSave={handleAdd}
+      />
     </div>
   );
 }
+

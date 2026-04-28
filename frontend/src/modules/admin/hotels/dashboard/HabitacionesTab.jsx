@@ -1,22 +1,10 @@
 import { useState, useEffect } from 'react';
-import {
-  Plus,
-  DoorOpen,
-  Layers,
-  Hash,
-  Bed,
-} from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { Plus, DoorOpen } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import HabitacionesList from '../components/HabitacionesList';
-import { Modal } from '@admin-ui';
+import HabitacionFormModal from '../components/HabitacionFormModal';
 import AppButton from '@/components/ui/AppButton';
-import {
-  FormField,
-  SelectInput,
-  NumberInput
-} from '@form';
 
 const EMPTY_ARRAY = [];
 
@@ -35,19 +23,8 @@ export default function HabitacionesTab({
   const [tiposGlobales, setTiposGlobales] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [editingHabitacion, setEditingHabitacion] = useState(null);
   const [tarifasCompletas, setTarifasCompletas] = useState([]);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors, isValid },
-  } = useForm({
-    mode: 'onChange'
-  });
 
   const isLocalMode = !hotelId;
 
@@ -60,16 +37,13 @@ export default function HabitacionesTab({
   useEffect(() => {
     if (!isLocalMode) {
       if (isActive) {
-        fetchHabitaciones(); // Re-carga al activar: asegura tarifas y habitaciones actualizadas
+        fetchHabitaciones();
       }
     } else {
       setHabitaciones(localRooms);
     }
-    // No incluimos localRooms aquí si esLocalMode es falso,
-    // y usamos EMPTY_ARRAY como default para evitar loops de referencia.
   }, [hotelId, isLocalMode, localRooms, isActive]);
 
-  // Carga todos los tipos de habitación disponibles en el sistema
   const fetchGlobalTypes = async () => {
     try {
       const res = await axiosInstance.get('/obtener-tiposHabitaciones');
@@ -79,7 +53,6 @@ export default function HabitacionesTab({
     }
   };
 
-  // Carga habitaciones existentes del servidor para este hotel
   const fetchHabitaciones = async () => {
     try {
       setLoading(true);
@@ -97,19 +70,12 @@ export default function HabitacionesTab({
     }
   };
 
-  const onSubmit = async (data) => {
+  const handleSave = async (payload, habitacion) => {
     try {
-      setSubmitting(true);
-      const payload = {
-        numero: Number(data.numero),
-        piso: Number(data.piso),
-        idTipoHabitacion: Number(data.tipoHabitacionId),
-      };
-
       if (isLocalMode) {
-        if (editingId) {
+        if (habitacion) {
           const updated = habitaciones.map((h) =>
-            h.tempId === editingId ? { ...payload, tempId: editingId } : h
+            h.tempId === habitacion.tempId ? { ...payload, tempId: habitacion.tempId } : h
           );
           onLocalChange(updated);
           toast.success('Borrador actualizado');
@@ -119,15 +85,13 @@ export default function HabitacionesTab({
           toast.success('Borrador agregado');
         }
       } else {
-        if (editingId) {
+        if (habitacion) {
           await axiosInstance.put(
-            `/hotel/${hotelId}/habitacion/${editingId}`,
+            `/hotel/${hotelId}/habitacion/${habitacion.id}`,
             payload
           );
           toast.success('Habitación actualizada correctamente');
         } else {
-          // El backend espera un objeto con una propiedad 'habitaciones' o un arreglo directo dependiendo del controller
-          // Según el controller, setHabitaciones soporta payload directo o array
           await axiosInstance.post(`/hotel/${hotelId}/habitacion`, [payload]);
           toast.success('Habitación creada correctamente');
         }
@@ -135,15 +99,13 @@ export default function HabitacionesTab({
       }
 
       setIsCreating(false);
-      setEditingId(null);
-      reset();
+      setEditingHabitacion(null);
     } catch (error) {
       console.error(error);
       toast.error(
         error.response?.data?.error || 'Error al procesar habitación'
       );
-    } finally {
-      setSubmitting(false);
+      throw error; // Para que el modal quite el estado de cargando
     }
   };
 
@@ -170,23 +132,14 @@ export default function HabitacionesTab({
   };
 
   const startEdit = (habitacion) => {
-    setEditingId(isLocalMode ? habitacion.tempId : habitacion.id);
+    setEditingHabitacion(habitacion);
     setIsCreating(true);
-    setValue('numero', habitacion.numero);
-    setValue('piso', habitacion.piso);
-    setValue('tipoHabitacionId', habitacion.tipoHabitacionId);
   };
 
   const cancelForm = () => {
     setIsCreating(false);
-    setEditingId(null);
-    reset();
+    setEditingHabitacion(null);
   };
-
-
-
-
-
 
   // Filtrar tipos que tienen precio asignado en este hotel
   const sourceTarifas = hotelId ? tarifasCompletas : tarifasAsignadas;
@@ -197,7 +150,6 @@ export default function HabitacionesTab({
         const matchingTarifa = sourceTarifas.find(
           (ta) => Number(ta.tipoHabitacionId || ta.id) === Number(t.id)
         );
-        // Omitir si no hay tarifa o si el precio es 0 (no habilitada)
         if (!matchingTarifa || Number(matchingTarifa.precio) === 0) return null;
         return {
           ...t,
@@ -209,7 +161,6 @@ export default function HabitacionesTab({
 
   return (
     <div className="h-full flex flex-col animate-in fade-in duration-300">
-      {/* Encabezado con estadísticas rápidas o descripción */}
       <div className="flex-shrink-0 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
@@ -217,13 +168,15 @@ export default function HabitacionesTab({
             Control de Habitaciones Físicas
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Administre las unidades reales del hotel, asignando su ubicación y
-            tipo.
+            Administre las unidades reales del hotel, asignando su ubicación y tipo.
           </p>
         </div>
 
         <AppButton
-          onClick={() => setIsCreating(true)}
+          onClick={() => {
+            setEditingHabitacion(null);
+            setIsCreating(true);
+          }}
           disabled={loading}
           icon={Plus}
         >
@@ -232,91 +185,23 @@ export default function HabitacionesTab({
       </div>
 
       <div className="flex-grow mt-6 flex flex-col overflow-hidden relative">
+        <HabitacionFormModal
+          isOpen={isCreating}
+          onClose={cancelForm}
+          habitacion={editingHabitacion}
+          tiposFiltrados={tiposFiltrados}
+          onSave={handleSave}
+        />
 
-      {/* Formulario de Alta/Edición en Modal */}
-      <Modal
-        isOpen={isCreating}
-        onClose={cancelForm}
-        title={editingId ? 'Editar Habitación' : 'Nueva Habitación'}
-        description={editingId ? 'Modifique los datos de la habitación física' : 'Complete los datos para registrar una nueva unidad'}
-        onConfirm={handleSubmit(onSubmit)}
-        loading={submitting}
-        confirmDisabled={!isValid || submitting}
-        confirmLabel={editingId ? 'Guardar Cambios' : 'Registrar'}
-        confirmIcon={Plus}
-      >
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <FormField
-            label="Número"
-            required
-            error={errors.numero}
-            icon={Hash}
-          >
-            <NumberInput
-              min="1"
-              max="999"
-              {...register('numero', {
-                required: 'El número de habitación es obligatorio',
-                min: { value: 1, message: 'El número mínimo es 1' },
-                max: { value: 999, message: 'El número máximo es 999' },
-              })}
-              placeholder="Ej: 101"
-            />
-          </FormField>
-
-          <FormField
-            label="Piso"
-            required
-            error={errors.piso}
-            icon={Layers}
-          >
-            <NumberInput
-              min="1"
-              max="999"
-              {...register('piso', {
-                required: 'El piso es obligatorio',
-                min: { value: 1, message: 'El piso mínimo es 1 (Planta Baja = 1)' },
-                max: { value: 999, message: 'El piso máximo es 999' },
-              })}
-              placeholder="Ej: 1"
-            />
-          </FormField>
-
-          <div className="sm:col-span-2">
-            <FormField
-              label="Tipo de Habitación"
-              required
-              error={errors.tipoHabitacionId}
-              icon={Bed}
-            >
-              <SelectInput
-                {...register('tipoHabitacionId', {
-                  required: 'Campo obligatorio',
-                })}
-              >
-                <option value="">Seleccione tipo...</option>
-                {tiposFiltrados.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.nombre} {t.precio !== undefined ? `- $${t.precio}` : ''}
-                  </option>
-                ))}
-              </SelectInput>
-            </FormField>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Listado de Habitaciones */}
-      <HabitacionesList
-        data={habitaciones}
-        tiposGlobales={tiposGlobales}
-        loading={loading}
-        isCreating={isCreating}
-        onEdit={startEdit}
-        onDelete={handleDelete}
-      />
+        <HabitacionesList
+          data={habitaciones}
+          tiposGlobales={tiposGlobales}
+          loading={loading}
+          isCreating={isCreating}
+          onEdit={startEdit}
+          onDelete={handleDelete}
+        />
       </div>
-
     </div>
   );
 }

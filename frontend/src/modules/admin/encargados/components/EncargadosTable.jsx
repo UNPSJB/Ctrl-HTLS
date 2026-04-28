@@ -10,6 +10,7 @@ import { toast } from 'react-hot-toast';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import { useSort } from '@/hooks/useSort';
+import { Modal } from '@admin-ui';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -18,16 +19,18 @@ const EncargadosTable = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  // Filtro de asignación: 'todos' | 'asignados' | 'libres'
-  const [assignFilter, setAssignFilter] = useState('todos');
+  // Filtro de asignación: 'asignados' | 'libres' | 'todos'
+  const [assignFilter, setAssignFilter] = useState('asignados');
+  const [encargadoToDelete, setEncargadoToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
-  // Cicla entre todos → asignados → libres
-  const ASSIGN_CYCLE = ['todos', 'asignados', 'libres'];
+  // Cicla entre asignados → libres → todos
+  const ASSIGN_CYCLE = ['asignados', 'libres', 'todos'];
   const ASSIGN_META = {
-    todos:    { label: 'Todos',       color: 'text-gray-500 dark:text-gray-400',      bg: 'bg-white dark:bg-gray-700',           border: 'border-gray-200 dark:border-gray-600' },
-    asignados:{ label: 'Con hotel',   color: 'text-blue-600 dark:text-blue-400',      bg: 'bg-blue-50 dark:bg-blue-900/20',      border: 'border-blue-300 dark:border-blue-700' },
-    libres:   { label: 'Sin hotel',   color: 'text-amber-600 dark:text-amber-400',    bg: 'bg-amber-50 dark:bg-amber-900/20',    border: 'border-amber-300 dark:border-amber-700' },
+    asignados:{ label: 'Con hotel',   color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    libres:   { label: 'Sin hotel',   color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    todos:    { label: 'Todos',       color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
   };
   const cycleAssign = () => {
     setAssignFilter(prev => {
@@ -55,15 +58,22 @@ const EncargadosTable = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este encargado?')) {
-      try {
-        await axiosInstance.delete(`/hotel/encargados/${id}`);
-        setEncargados(encargados.filter(e => e.id !== id));
-        toast.success('Encargado eliminado');
-      } catch (error) {
-        toast.error(error.response?.data?.error || 'Error al eliminar encargado');
-      }
+  const handleDeleteClick = (encargado) => {
+    setEncargadoToDelete(encargado);
+  };
+
+  const confirmDelete = async () => {
+    if (!encargadoToDelete) return;
+    setIsDeleting(true);
+    try {
+      await axiosInstance.delete(`/hotel/encargados/${encargadoToDelete.id}`);
+      setEncargados(encargados.filter(e => e.id !== encargadoToDelete.id));
+      toast.success('Encargado eliminado');
+      setEncargadoToDelete(null);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al eliminar encargado');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -195,7 +205,7 @@ const EncargadosTable = () => {
                             icon={Edit}
                             onClick={() => navigate(`/admin/encargados/editar/${encargado.id}`)}
                           />
-                          <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(encargado.id)} />
+                          <TableButton variant="delete" icon={Trash2} onClick={() => handleDeleteClick(encargado)} />
                         </div>
                       </td>
                     </tr>
@@ -217,7 +227,6 @@ const EncargadosTable = () => {
           </div>
         </div>
 
-        {/* Paginación */}
         <TablePagination
           currentPage={currentPage}
           totalItems={sortedEncargados.length}
@@ -226,6 +235,29 @@ const EncargadosTable = () => {
           disabled={loading}
         />
       </div>
+
+      <Modal
+        isOpen={!!encargadoToDelete}
+        onClose={() => setEncargadoToDelete(null)}
+        title={encargadoToDelete?.hotel ? "Acción no permitida" : "Eliminar Encargado"}
+        onConfirm={encargadoToDelete?.hotel ? () => setEncargadoToDelete(null) : confirmDelete}
+        loading={isDeleting}
+        confirmLabel={encargadoToDelete?.hotel ? "Entendido" : "Sí, eliminar"}
+        confirmIcon={encargadoToDelete?.hotel ? null : Trash2}
+        variant={encargadoToDelete?.hotel ? "default" : "red"}
+      >
+        <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+          {encargadoToDelete?.hotel ? (
+            <p>
+              El encargado <strong className="text-gray-900 dark:text-white font-medium">{capitalizeFirst(encargadoToDelete.nombre)} {capitalizeFirst(encargadoToDelete.apellido)}</strong> se encuentra actualmente asignado al hotel <strong className="text-gray-900 dark:text-white font-medium">{capitalizeFirst(encargadoToDelete.hotel.nombre)}</strong>. No puede ser eliminado hasta que sea desvinculado de dicho hotel.
+            </p>
+          ) : (
+            <p>
+              ¿Estás seguro de que deseas eliminar permanentemente al encargado <strong className="text-gray-900 dark:text-white font-medium">{encargadoToDelete ? `${capitalizeFirst(encargadoToDelete.nombre)} ${capitalizeFirst(encargadoToDelete.apellido)}` : ''}</strong>?
+            </p>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

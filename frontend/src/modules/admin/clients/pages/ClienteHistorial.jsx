@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader } from '@admin-ui';
 import ClienteHistorialList from '../components/ClienteHistorialList';
+import { capitalizeWords } from '@/utils/stringUtils';
 
 // Vista de historial de alquileres/ventas de un cliente
 const ClienteHistorial = () => {
@@ -43,7 +44,7 @@ const ClienteHistorial = () => {
     <div className="h-full flex flex-col gap-6 overflow-hidden">
       <div className="flex-shrink-0">
         <PageHeader
-          title={data ? `Historial: ${clienteNombre}` : 'Historial del Cliente'}
+          title={data ? `Historial: ${capitalizeWords(clienteNombre)}` : 'Historial del Cliente'}
           description="Consulte el historial de alquileres y facturación del cliente"
           backTo="/admin/clientes"
           icon={History}
@@ -79,7 +80,7 @@ const ClienteHistorial = () => {
                   <DollarSign className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Inversión Total</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Alquilado</p>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                     ${montoTotal?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h3>

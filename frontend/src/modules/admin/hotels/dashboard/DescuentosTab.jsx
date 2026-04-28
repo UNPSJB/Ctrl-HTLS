@@ -1,23 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Plus, Tag } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import DescuentosList from '../components/DescuentosList';
-import { Modal } from '@admin-ui';
+import DescuentoFormModal from '../components/DescuentoFormModal';
 import AppButton from '@/components/ui/AppButton';
-import {
-  FormField,
-  NumberInput
-} from '@form';
 
 export default function DescuentosTab({ hotelId, isActive = false }) {
   const [descuentos, setDescuentos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
-
-  const form = useForm();
 
   useEffect(() => {
     if (isActive) {
@@ -40,7 +32,6 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
 
   const handleAdd = async (data) => {
     try {
-      setSubmitting(true);
       const payload = {
         ...data,
         porcentaje: parseFloat(data.porcentaje) / 100
@@ -48,16 +39,13 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
       await axiosInstance.post(`/hotel/${hotelId}/descuentos`, payload);
       toast.success('Descuento agregado correctamente');
       setShowForm(false);
-      form.reset();
       await fetchDescuentos();
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.error || 'Error al agregar descuento');
-    } finally {
-      setSubmitting(false);
+      throw error;
     }
   };
-
 
   return (
     <div className="h-full flex flex-col animate-in fade-in duration-300">
@@ -73,7 +61,7 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
         </div>
         <AppButton
           onClick={() => setShowForm(true)}
-          disabled={loading || submitting}
+          disabled={loading}
           icon={Plus}
         >
           Nuevo Descuento
@@ -81,54 +69,15 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
-
-      {/* Modal de Descuento */}
-        <Modal
-          isOpen={showForm}
-          onClose={() => {
-            setShowForm(false);
-            form.reset();
-          }}
-          title="Configurar Descuento"
-          description="Premie a clientes que reservan múltiples habitaciones simultáneamente."
-          onConfirm={form.handleSubmit(handleAdd)}
-          loading={submitting}
-          confirmLabel="Registrar Descuento"
-          confirmIcon={Plus}
-          variant="indigo" // Usamos indigo para esta sección según el diseño original
-        >
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <FormField label="Cantidad de Habitaciones" required error={form.formState.errors.cantidad_de_habitaciones}>
-              <NumberInput
-                min="1"
-                max="50"
-                placeholder="Ej: 3"
-                {...form.register('cantidad_de_habitaciones', {
-                  required: 'La cantidad de habitaciones es obligatoria',
-                  min: { value: 1, message: 'La cantidad mínima es 1 habitación' },
-                  max: { value: 50, message: 'La cantidad máxima es 50 habitaciones' },
-                })}
-              />
-            </FormField>
-
-            <FormField label="Porcentaje de Descuento (%)" required error={form.formState.errors.porcentaje}>
-              <NumberInput
-                min="1"
-                max="100"
-                placeholder="Ej: 5"
-                {...form.register('porcentaje', {
-                  required: 'El porcentaje es obligatorio',
-                  min: { value: 1, message: 'El porcentaje mínimo es 1%' },
-                  max: { value: 100, message: 'El porcentaje máximo es 100%' },
-                })}
-              />
-            </FormField>
-          </div>
-        </Modal>
-
-        {/* Tabla */}
         <DescuentosList data={descuentos} loading={loading} />
       </div>
+
+      <DescuentoFormModal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        onSave={handleAdd}
+      />
     </div>
   );
 }
+

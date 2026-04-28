@@ -23,16 +23,16 @@ const HotelesTable = () => {
   const [hotelToToggle, setHotelToToggle] = useState(null);
   const [isToggling, setIsToggling] = useState(false);
   const [selectedEncargadoId, setSelectedEncargadoId] = useState(null);
-  // Filtro de estado: 'todos' | 'activos' | 'inactivos'
-  const [statusFilter, setStatusFilter] = useState('todos');
+  // Filtro de estado: 'activos' | 'inactivos' | 'todos'
+  const [statusFilter, setStatusFilter] = useState('activos');
   const ITEMS_PER_PAGE = 100;
 
-  // Cicla entre todos → activos → inactivos → todos
-  const STATUS_CYCLE = ['todos', 'activos', 'inactivos'];
+  // Cicla entre activos → inactivos → todos
+  const STATUS_CYCLE = ['activos', 'inactivos', 'todos'];
   const STATUS_META = {
-    todos:    { label: 'Todos',    color: 'text-gray-500 dark:text-gray-400',   bg: 'bg-white dark:bg-gray-700',          border: 'border-gray-200 dark:border-gray-600' },
-    activos:  { label: 'Activos', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-300 dark:border-emerald-700' },
-    inactivos:{ label: 'Inactivos', color: 'text-red-500 dark:text-red-400',     bg: 'bg-red-50 dark:bg-red-900/20',         border: 'border-red-300 dark:border-red-700' },
+    activos:  { label: 'Activos',   color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    inactivos:{ label: 'Inactivos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    todos:    { label: 'Todos',     color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
   };
   const cycleStatus = () => {
     setStatusFilter(prev => {

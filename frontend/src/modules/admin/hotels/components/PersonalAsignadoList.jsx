@@ -118,8 +118,7 @@ export default function PersonalAsignadoList({
         title="Revocar Acceso"
         onConfirm={handleConfirmDesasignar}
         loading={loadingAction}
-        confirmLabel="Sí, revocar acceso"
-        confirmIcon={UserMinus}
+        confirmLabel="Confirmar"
         variant="red"
         size="sm"
       >
