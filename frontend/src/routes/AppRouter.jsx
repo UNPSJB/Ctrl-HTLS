@@ -18,9 +18,7 @@ import VendedorLiquidaciones from '@/modules/admin/vendors/pages/VendedorLiquida
 import Administradores from '@/modules/admin/vendors/pages/Administradores';
 import Vendedores from '@/modules/admin/vendors/pages/Vendedores';
 import AdministradoresForm from '@/modules/admin/vendors/pages/AdministradoresForm';
-import Paises from '@/modules/admin/ubicacion/pages/Paises';
-import Provincias from '@/modules/admin/ubicacion/pages/Provincias';
-import Ciudades from '@/modules/admin/ubicacion/pages/Ciudades';
+import UbicacionPage from '@/modules/admin/ubicacion/pages/UbicacionPage';
 
 import Encargados from '@/modules/admin/encargados/pages/Encargados';
 import EncargadosForm from '@/modules/admin/encargados/pages/EncargadosForm';
@@ -78,10 +76,7 @@ function AppRouter() {
                 <Route path="clientes/:id/historial" element={<ClienteHistorial />} />
 
                 {/* Rutas de Ubicación */}
-                <Route path="ubicacion" element={<Navigate to="/admin/ubicacion/paises" replace />} />
-                <Route path="ubicacion/paises" element={<Paises />} />
-                <Route path="ubicacion/paises/:paisId/provincias" element={<Provincias />} />
-                <Route path="ubicacion/paises/:paisId/provincias/:provinciaId/ciudades" element={<Ciudades />} />
+                <Route path="ubicacion" element={<UbicacionPage />} />
 
                 {/* Rutas de Encargados */}
                 <Route path="encargados" element={<Encargados />} />

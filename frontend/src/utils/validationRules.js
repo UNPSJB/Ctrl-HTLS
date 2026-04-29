@@ -120,6 +120,21 @@ export const RULES = {
     },
   },
 
+  // ── Ubicaciones Geográficas ────────────────────────────────────────────────
+  nombreUbicacion: {
+    maxLength: {
+      value: LIMITS.nombreUbicacion,
+      message: `El nombre no puede superar los ${LIMITS.nombreUbicacion} caracteres`,
+    },
+  },
+
+  codigoPostal: {
+    maxLength: {
+      value: LIMITS.codigoPostal,
+      message: `El código postal no puede superar los ${LIMITS.codigoPostal} caracteres`,
+    },
+  },
+
   // ── Documentos de Identidad ────────────────────────────────────────────────
   documento: {
     minLength: {

@@ -10,6 +10,7 @@ const ListHeader = ({
     onAction,
     actionLabel,
     actionIcon: ActionIcon = Plus,
+    actionDisabled = false,
 }) => {
     return (
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center py-2">
@@ -29,6 +30,7 @@ const ListHeader = ({
                     <AppButton
                         onClick={onAction}
                         icon={ActionIcon}
+                        disabled={actionDisabled}
                     >
                         {actionLabel}
                     </AppButton>
