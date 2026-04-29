@@ -10,7 +10,7 @@ import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader } from '@admin-ui';
-import ClienteHistorialList from '../components/ClienteHistorialList';
+import HistorialTable from '../components/HistorialTable';
 import { capitalizeWords } from '@/utils/stringUtils';
 
 // Vista de historial de alquileres/ventas de un cliente
@@ -106,7 +106,7 @@ const ClienteHistorial = () => {
 
           {/* Listado Detallado - Expandible */}
           <div className="flex-grow flex flex-col h-full overflow-hidden">
-            <ClienteHistorialList data={ventas} loading={loading} />
+            <HistorialTable data={ventas} loading={loading} />
           </div>
         </>
       )}

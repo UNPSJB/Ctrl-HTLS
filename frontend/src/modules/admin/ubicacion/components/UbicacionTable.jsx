@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ChevronRight, Pencil, Trash2, ArrowRight, Search } from 'lucide-react';
-import TablePagination from '@admin-ui/TablePagination';
+import DataTablePagination from '@admin-ui/DataTablePagination';
 import TableButton from '@admin-ui/TableButton';
 import SortableHeader from '@admin-ui/SortableHeader';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -129,7 +129,7 @@ function UbicacionTable({ tipo, items, loading, onEdit, onDelete, onDrillDown, d
         </div>
 
         {/* Paginación */}
-        <TablePagination
+        <DataTablePagination
           currentPage={page}
           totalItems={sortedItems.length}
           itemsPerPage={PAGE_SIZE}

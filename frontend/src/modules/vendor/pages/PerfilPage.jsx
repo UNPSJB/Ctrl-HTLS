@@ -11,6 +11,8 @@ import {
   Receipt, History, CalendarDays, Clock
 } from 'lucide-react';
 import { formatFecha } from '@/utils/dateUtils';
+import VentasTable from '@/modules/vendor/components/VentasTable';
+import LiquidacionesTable from '@/modules/vendor/components/LiquidacionesTable';
 
 // Obtiene el lunes de la semana actual a las 00:00:00
 const getLunesDeSemana = () => {
@@ -249,137 +251,26 @@ function PerfilPage() {
               </nav>
             </div>
 
-            <div className="flex-grow overflow-auto custom-scrollbar">
+            <div className="flex-grow overflow-hidden flex flex-col pt-4">
               {/* Tab: Semana Actual */}
               {activeTab === 'semana' && (
-                <table className="w-full text-left text-sm relative">
-                  <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
-                    <tr>
-                      <th className="px-6 py-4">Descripción</th>
-                      <th className="px-6 py-4">Fecha</th>
-                      <th className="px-6 py-4 text-right">Monto</th>
-                      <th className="px-6 py-4 text-right">Comisión (2%)</th>
-                      <th className="px-6 py-4 text-center">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                    {ventasSemana.length > 0 ? (
-                      ventasSemana.map((v) => (
-                        <tr key={v.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                          <td className="px-6 py-4 font-medium text-gray-900 dark:text-white capitalize">{v.descripcion}</td>
-                          <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{formatFecha(v.fechaVenta)}</td>
-                          <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">{formatCurrency(v.subtotal)}</td>
-                          <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">{formatCurrency(Number(v.subtotal) * 0.02)}</td>
-                          <td className="px-6 py-4 text-center">
-                            {v.liquidacionId ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                <CheckCircle2 className="h-3 w-3" /> Liquidada
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                                <Clock className="h-3 w-3" /> Pendiente
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic">
-                          No hay ventas registradas en la semana actual (lunes a hoy).
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <VentasTable 
+                  data={ventasSemana} 
+                  emptyMessage="No hay ventas registradas en la semana actual (lunes a hoy)." 
+                />
               )}
 
               {/* Tab: Historial de Ventas */}
               {activeTab === 'historial' && (
-                <table className="w-full text-left text-sm relative">
-                  <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
-                    <tr>
-                      <th className="px-6 py-4">Descripción</th>
-                      <th className="px-6 py-4">Fecha</th>
-                      <th className="px-6 py-4 text-right">Monto</th>
-                      <th className="px-6 py-4 text-right">Comisión (2%)</th>
-                      <th className="px-6 py-4 text-center">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                    {ventasHistorial.length > 0 ? (
-                      ventasHistorial.map((v) => (
-                        <tr key={v.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                          <td className="px-6 py-4 font-medium text-gray-900 dark:text-white capitalize">{v.descripcion}</td>
-                          <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{formatFecha(v.fechaVenta)}</td>
-                          <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">{formatCurrency(v.subtotal)}</td>
-                          <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">{formatCurrency(Number(v.subtotal) * 0.02)}</td>
-                          <td className="px-6 py-4 text-center">
-                            {v.liquidacionId ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                <CheckCircle2 className="h-3 w-3" /> Liquidada
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                                <Clock className="h-3 w-3" /> Pendiente
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic">No se encontraron ventas.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <VentasTable 
+                  data={ventasHistorial} 
+                  emptyMessage="No se encontraron ventas." 
+                />
               )}
 
               {/* Tab: Liquidaciones */}
               {activeTab === 'liquidaciones' && (
-                <table className="w-full text-left text-sm relative">
-                  <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
-                    <tr>
-                      <th className="px-6 py-4">Referencia</th>
-                      <th className="px-6 py-4">Fecha Emisión</th>
-                      <th className="px-6 py-4">Fecha Pago</th>
-                      <th className="px-6 py-4 text-right">Total Comisión</th>
-                      <th className="px-6 py-4 text-center">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                    {liquidaciones.length > 0 ? (
-                      [...liquidaciones]
-                        .sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision))
-                        .map((l) => (
-                          <tr key={l.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                            <td className="px-6 py-4">
-                              <span className="font-mono text-xs text-gray-500">#{l.numero}</span>
-                            </td>
-                            <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{formatFecha(l.fechaEmision)}</td>
-                            <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{formatFecha(l.fechaPago)}</td>
-                            <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">{formatCurrency(l.total)}</td>
-                            <td className="px-6 py-4 text-center">
-                              {l.fechaPago ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                  <CheckCircle2 className="h-3 w-3" /> Cobrada
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                                  <Clock className="h-3 w-3" /> Por Cobrar
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="px-6 py-12 text-center text-gray-400 italic">No hay liquidaciones registradas.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <LiquidacionesTable data={liquidaciones} />
               )}
             </div>
           </div>

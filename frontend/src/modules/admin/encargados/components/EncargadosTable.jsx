@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Users, User, Edit, Filter } from 'lucide-react';
+import { DataTable, DataTableToolbar, DataTablePagination } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
-import SortableHeader from '@admin-ui/SortableHeader';
 import axiosInstance from '@/api/axiosInstance';
-import TablePagination from '@admin-ui/TablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
 import { SearchInput } from '@form';
@@ -19,13 +18,11 @@ const EncargadosTable = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  // Filtro de asignación: 'asignados' | 'libres' | 'todos'
   const [assignFilter, setAssignFilter] = useState('asignados');
   const [encargadoToDelete, setEncargadoToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
-  // Cicla entre asignados → libres → todos
   const ASSIGN_CYCLE = ['asignados', 'libres', 'todos'];
   const ASSIGN_META = {
     asignados:{ label: 'Con hotel',   color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
@@ -47,7 +44,7 @@ const EncargadosTable = () => {
   const fetchEncargados = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/hotel/encargados'); // Ruta confirmada del backend
+      const response = await axiosInstance.get('/hotel/encargados');
       setEncargados(response.data);
     } catch (error) {
       console.error(error);
@@ -78,13 +75,11 @@ const EncargadosTable = () => {
   };
 
   const filteredEncargados = useMemo(() => {
-    // 1. Filtrar por texto
     let result = encargados.filter(e =>
       e.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.apellido?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.dni?.includes(searchTerm)
     );
-    // 2. Filtrar por asignación
     if (assignFilter === 'asignados') result = result.filter(e =>  !!e.hotel);
     if (assignFilter === 'libres')    result = result.filter(e => !e.hotel);
     return result;
@@ -92,18 +87,87 @@ const EncargadosTable = () => {
 
   const { sortedData: sortedEncargados, sortKey, sortDir, handleSort } = useSort(filteredEncargados, 'nombre');
 
-  const totalPages = Math.ceil(sortedEncargados.length / ITEMS_PER_PAGE);
   const currentItems = sortedEncargados.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
+  const columns = [
+    {
+      key: 'nombre',
+      label: 'Nombre Completo',
+      render: (encargado) => (
+        <div className="flex items-center truncate">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <User className="h-5 w-5" />
+          </div>
+          <div className="ml-4 truncate">
+            <div className="text-sm font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
+              {capitalizeFirst(encargado.nombre)} {capitalizeFirst(encargado.apellido)}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'dni',
+      label: 'Documento',
+      render: (encargado) => (
+        <span className="text-sm text-gray-600 dark:text-gray-300 max-w-[150px] truncate block">
+          <span className="font-semibold uppercase mr-2">
+            {encargado.tipoDocumento}
+          </span>
+          {encargado.dni}
+        </span>
+      )
+    },
+    {
+      key: 'telefono',
+      label: 'Teléfono',
+      render: (encargado) => (
+        <span className="text-sm text-gray-500 dark:text-gray-400 max-w-[150px] truncate block">
+          {encargado.telefono || <span className="italic text-gray-400">—</span>}
+        </span>
+      )
+    },
+    {
+      key: 'hotel.nombre',
+      label: 'Hotel',
+      render: (encargado) => (
+        <span className="truncate max-w-[200px] md:max-w-[250px] block">
+          {encargado.hotel ? (
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 truncate max-w-full">
+              {capitalizeFirst(encargado.hotel.nombre)}
+            </span>
+          ) : (
+            <span className="italic text-gray-400">—</span>
+          )}
+        </span>
+      )
+    },
+    {
+      key: 'acciones',
+      label: 'Acciones',
+      align: 'right',
+      sortable: false,
+      render: (encargado) => (
+        <div className="flex justify-end gap-2">
+          <TableButton
+            variant="edit"
+            icon={Edit}
+            onClick={() => navigate(`/admin/encargados/editar/${encargado.id}`)}
+          />
+          <TableButton variant="delete" icon={Trash2} onClick={() => handleDeleteClick(encargado)} />
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="flex-grow flex flex-col h-full overflow-hidden">
       <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        {/* Barra de Búsqueda + Filtro de Asignación */}
-        <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <div className="flex items-center gap-3">
+        <DataTableToolbar>
+          <div className="flex items-center gap-3 w-full">
             <div className="flex-1 max-w-md">
               <SearchInput
                 placeholder="Buscar por nombre o documento..."
@@ -117,7 +181,6 @@ const EncargadosTable = () => {
               />
             </div>
 
-            {/* Botón ciclo: todos → con hotel → sin hotel */}
             <button
               type="button"
               onClick={cycleAssign}
@@ -135,99 +198,21 @@ const EncargadosTable = () => {
               <span className="hidden sm:inline">{ASSIGN_META[assignFilter].label}</span>
             </button>
           </div>
-        </div>
+        </DataTableToolbar>
 
-        <div className="relative flex flex-col flex-grow overflow-hidden">
-          {loading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-              <InnerLoading message="Cargando encargados..." />
-            </div>
-          )}
+        <DataTable
+          columns={columns}
+          data={currentItems}
+          loading={loading}
+          loadingMessage="Cargando encargados..."
+          emptyIcon={Users}
+          emptyMessage="No se encontraron encargados que coincidan con la búsqueda."
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort}
+        />
 
-          <div className="flex-grow overflow-auto custom-scrollbar">
-            <table className="w-full text-left text-sm">
-              <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
-                <tr>
-                  <SortableHeader column="nombre" label="Nombre Completo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <SortableHeader column="dni" label="Documento" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <SortableHeader column="telefono" label="Teléfono" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <SortableHeader column="hotel.nombre" label="Hotel" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <th className="px-6 py-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              {sortedEncargados.length > 0 ? (
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                  {currentItems.map((encargado) => (
-                    <tr key={encargado.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                      {/* Nombre y Avatar */}
-                      <td className="px-6 py-3">
-                        <div className="flex items-center truncate">
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                            <User className="h-5 w-5" />
-                          </div>
-                          <div className="ml-4 truncate">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
-                              {capitalizeFirst(encargado.nombre)} {capitalizeFirst(encargado.apellido)}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Documento */}
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[150px] truncate">
-                        <span className="font-semibold uppercase mr-2">
-                          {encargado.tipoDocumento}
-                        </span>
-                        {encargado.dni}
-                      </td>
-
-                      {/* Teléfono */}
-                      <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[150px] truncate">
-                        {encargado.telefono || <span className="italic text-gray-400">—</span>}
-                      </td>
-
-                      {/* Estado de Asignación */}
-                      <td className="px-6 py-3 truncate max-w-[200px] md:max-w-[250px]">
-                        {encargado.hotel ? (
-                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 truncate max-w-full">
-                            {capitalizeFirst(encargado.hotel.nombre)}
-                          </span>
-                        ) : (
-                          <span className="italic text-gray-400">—</span>
-                        )}
-                      </td>
-
-                      {/* Acciones */}
-                      <td className="px-6 py-3 text-right">
-                        <div className="flex justify-end gap-2">
-                          <TableButton
-                            variant="edit"
-                            icon={Edit}
-                            onClick={() => navigate(`/admin/encargados/editar/${encargado.id}`)}
-                          />
-                          <TableButton variant="delete" icon={Trash2} onClick={() => handleDeleteClick(encargado)} />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              ) : (
-                <tbody>
-                  <tr>
-                    <td colSpan="6" className="p-12 text-center text-gray-500 dark:text-gray-400">
-                      <div className="flex flex-col items-center justify-center">
-                        <Users className="mb-2 h-8 w-8 opacity-50" />
-                        <p>No se encontraron encargados que coincidan con la búsqueda.</p>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              )}
-            </table>
-          </div>
-        </div>
-
-        <TablePagination
+        <DataTablePagination
           currentPage={currentPage}
           totalItems={sortedEncargados.length}
           itemsPerPage={ITEMS_PER_PAGE}

@@ -10,7 +10,7 @@ import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-
 import { capitalizeFirst } from '@/utils/stringUtils';
 
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
-import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
+import EncargadosSelector from '@/modules/admin/shared/components/selectors/EncargadosSelector';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { 
   FormField, 
@@ -299,7 +299,7 @@ export default function HotelesForm() {
                 {/* Encargado */}
                 <div className={activeTab === 'encargado' ? 'animate-in fade-in duration-300 flex flex-col' : 'hidden'}>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Encargado del Hotel</h3>
-                  <EncargadosList
+                  <EncargadosSelector
                     value={selectedEncargadoId}
                     onChange={setSelectedEncargadoId}
                     exclude={initialEncargadoId}

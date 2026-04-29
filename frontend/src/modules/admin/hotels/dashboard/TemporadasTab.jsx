@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Calendar } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import TemporadasList from '../components/TemporadasList';
+import TemporadasTable from '../components/TemporadasTable';
 import TemporadaFormModal from '../components/TemporadaFormModal';
 import AppButton from '@/components/ui/AppButton';
 
@@ -82,7 +82,7 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
-        <TemporadasList data={temporadas} loading={loading} onDelete={handleDelete} />
+        <TemporadasTable data={temporadas} loading={loading} onDelete={handleDelete} />
       </div>
 
       <TemporadaFormModal

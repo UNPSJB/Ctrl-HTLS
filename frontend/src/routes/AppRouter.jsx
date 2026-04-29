@@ -25,7 +25,7 @@ import Ciudades from '@/modules/admin/ubicacion/pages/Ciudades';
 import Encargados from '@/modules/admin/encargados/pages/Encargados';
 import EncargadosForm from '@/modules/admin/encargados/pages/EncargadosForm';
 import ClienteHistorial from '@/modules/admin/clients/pages/ClienteHistorial';
-import PerfilPage from '@/pages/PerfilPage';
+import PerfilPage from '@/modules/vendor/pages/PerfilPage';
 
 function AppRouter() {
   const { user, loading } = useAuth();

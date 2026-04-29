@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Tag, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import PaquetesList from '../components/PaquetesList';
+import PaquetesTable from '../components/PaquetesTable';
 import PaqueteFormModal from '../components/PaqueteFormModal';
 import AppButton from '@/components/ui/AppButton';
 
@@ -89,7 +89,7 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
-        <PaquetesList
+        <PaquetesTable
           data={paquetes}
           loading={loadingInitial}
           onEdit={handleOpenEdit}

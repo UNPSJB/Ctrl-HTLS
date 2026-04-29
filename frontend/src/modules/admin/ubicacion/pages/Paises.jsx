@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Globe, Pencil, Trash2, ChevronRight } from 'lucide-react';
 import { ListHeader, Modal } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
-import TablePagination from '@admin-ui/TablePagination';
+import DataTablePagination from '@admin-ui/DataTablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
@@ -151,7 +151,7 @@ function Paises() {
           </div>
 
           {/* Paginación */}
-          <TablePagination
+          <DataTablePagination
             currentPage={safePage}
             totalItems={filteredPaises.length}
             itemsPerPage={ITEMS_PER_PAGE}

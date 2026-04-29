@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Tag } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import DescuentosList from '../components/DescuentosList';
+import DescuentosTable from '../components/DescuentosTable';
 import DescuentoFormModal from '../components/DescuentoFormModal';
 import AppButton from '@/components/ui/AppButton';
 
@@ -69,7 +69,7 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
-        <DescuentosList data={descuentos} loading={loading} />
+        <DescuentosTable data={descuentos} loading={loading} />
       </div>
 
       <DescuentoFormModal

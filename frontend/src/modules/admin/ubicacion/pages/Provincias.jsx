@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Map, Pencil, Trash2, ChevronRight } from 'lucide-react';
 import { ListHeader, Modal } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
-import TablePagination from '@admin-ui/TablePagination';
+import DataTablePagination from '@admin-ui/DataTablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
@@ -166,7 +166,7 @@ function Provincias() {
           </div>
 
           {/* Paginación */}
-          <TablePagination
+          <DataTablePagination
             currentPage={safePage}
             totalItems={filteredProvincias.length}
             itemsPerPage={ITEMS_PER_PAGE}

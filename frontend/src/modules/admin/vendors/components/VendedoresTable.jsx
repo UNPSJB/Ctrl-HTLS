@@ -1,15 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, BarChart3, User, Users, Key } from 'lucide-react';
+import { DataTable, DataTableToolbar, DataTablePagination } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
-import SortableHeader from '@admin-ui/SortableHeader';
 import ChangePasswordModal from './ChangePasswordModal';
 import axiosInstance from '@api/axiosInstance';
-import TablePagination from '@admin-ui/TablePagination';
-import { InnerLoading } from '@/components/ui/InnerLoading';
+import { toast } from 'react-hot-toast';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
-import { toast } from 'react-hot-toast';
 import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
@@ -22,7 +20,6 @@ const VendedoresTable = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState([]);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [selectedVendedorId, setSelectedVendedorId] = useState(null);
 
@@ -67,7 +64,6 @@ const VendedoresTable = () => {
 
   const { sortedData: sortedVendedores, sortKey, sortDir, handleSort } = useSort(filteredVendedores, 'apellido');
 
-  const totalPages = Math.ceil(sortedVendedores.length / ITEMS_PER_PAGE);
   const currentItems = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return sortedVendedores.slice(start, start + ITEMS_PER_PAGE);
@@ -88,13 +84,77 @@ const VendedoresTable = () => {
     setCurrentPage(1);
   }, [searchTerm]);
 
+  const columns = [
+    {
+      key: 'apellido',
+      label: 'Nombre Completo',
+      render: (vendedor) => (
+        <div className="flex items-center truncate">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+            <User className="h-5 w-5" />
+          </div>
+          <div className="ml-4 truncate">
+            <div className="font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
+              {capitalizeFirst(vendedor.nombre)} {capitalizeFirst(vendedor.apellido)}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'numeroDocumento',
+      label: 'Documento',
+      render: (vendedor) => (
+        <span className="text-sm text-gray-600 dark:text-gray-300 max-w-[150px] truncate block">
+          <span className="font-semibold uppercase mr-2">{vendedor.tipoDocumento}</span>
+          {vendedor.numeroDocumento}
+        </span>
+      )
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      render: (vendedor) => (
+        <span className="text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate block">
+          {vendedor.email || <span className="italic text-gray-400">—</span>}
+        </span>
+      )
+    },
+    {
+      key: 'telefono',
+      label: 'Teléfono',
+      render: (vendedor) => (
+        <span className="text-sm text-gray-500 dark:text-gray-400 max-w-[150px] truncate block">
+          {vendedor.telefono || <span className="italic text-gray-400">—</span>}
+        </span>
+      )
+    },
+    {
+      key: 'acciones',
+      label: 'Acciones',
+      align: 'right',
+      sortable: false,
+      render: (vendedor) => (
+        <div className="flex justify-end gap-2">
+          <TableButton variant="view" icon={Key} onClick={() => handlePasswordChange(vendedor.id)} title="Cambiar Contraseña" />
+          <TableButton
+            variant="view"
+            icon={BarChart3}
+            onClick={() => navigate(`/admin/vendedores/liquidaciones/${vendedor.id}`)}
+            title="Actividad y Liquidaciones"
+          />
+          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />
+          <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(vendedor.id)} />
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="flex-grow flex flex-col h-full overflow-hidden">
       <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-
-        {/* Barra de Búsqueda: Centrada y dentro de la tabla */}
-        <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <div className="max-w-md">
+        <DataTableToolbar>
+          <div className="w-full max-w-md">
             <SearchInput
               placeholder="Buscar por nombre o documento..."
               value={searchTerm}
@@ -103,86 +163,21 @@ const VendedoresTable = () => {
               disabled={loading}
             />
           </div>
-        </div>
+        </DataTableToolbar>
 
-        {/* Tabla Estándar */}
-        <div className="relative flex flex-col flex-grow overflow-hidden">
-          {loading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-              <InnerLoading message="Cargando personal de ventas..." />
-            </div>
-          )}
+        <DataTable
+          columns={columns}
+          data={currentItems}
+          loading={loading}
+          loadingMessage="Cargando personal de ventas..."
+          emptyIcon={Users}
+          emptyMessage="No se encontraron vendedores que coincidan con la búsqueda."
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort}
+        />
 
-          <div className="flex-grow overflow-auto custom-scrollbar">
-            <table className="w-full text-left text-sm">
-              <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50/95 backdrop-blur text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800/95 dark:text-gray-400">
-                <tr>
-                  <SortableHeader column="apellido" label="Nombre Completo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <SortableHeader column="numeroDocumento" label="Documento" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <SortableHeader column="email" label="Email" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <SortableHeader column="telefono" label="Teléfono" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <th className="px-6 py-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              {sortedVendedores.length > 0 ? (
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                  {currentItems.map((vendedor) => (
-                    <tr key={vendedor.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                      <td className="px-6 py-3">
-                        <div className="flex items-center truncate">
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                            <User className="h-5 w-5" />
-                          </div>
-                          <div className="ml-4 truncate">
-                            <div className="font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
-                              {capitalizeFirst(vendedor.nombre)} {capitalizeFirst(vendedor.apellido)}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[150px] truncate">
-                        <span className="font-semibold uppercase mr-2">{vendedor.tipoDocumento}</span>
-                        {vendedor.numeroDocumento}
-                      </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate">
-                        {vendedor.email || <span className="italic text-gray-400">—</span>}
-                      </td>
-                      <td className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[150px] truncate">
-                        {vendedor.telefono || <span className="italic text-gray-400">—</span>}
-                      </td>
-                      <td className="px-6 py-3 text-right">
-                        <div className="flex justify-end gap-2">
-                          <TableButton variant="view" icon={Key} onClick={() => handlePasswordChange(vendedor.id)} title="Cambiar Contraseña" />
-                          <TableButton
-                            variant="view"
-                            icon={BarChart3}
-                            onClick={() => navigate(`/admin/vendedores/liquidaciones/${vendedor.id}`)}
-                            title="Actividad y Liquidaciones"
-                          />
-                          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />
-                          <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(vendedor.id)} />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              ) : (
-                <tbody>
-                  <tr>
-                    <td colSpan="5" className="p-12 text-center text-gray-500 dark:text-gray-400">
-                      <div className="flex flex-col items-center justify-center">
-                        <Users className="mb-2 h-8 w-8 opacity-50" />
-                        <p>No se encontraron vendedores que coincidan con la búsqueda.</p>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              )}
-            </table>
-          </div>
-        </div>
-
-        <TablePagination
+        <DataTablePagination
           currentPage={currentPage}
           totalItems={sortedVendedores.length}
           itemsPerPage={ITEMS_PER_PAGE}

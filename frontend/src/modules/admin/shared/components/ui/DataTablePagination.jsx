@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function TablePagination({
+export default function DataDataTablePagination({
   currentPage,
   totalItems,
   itemsPerPage = 100,

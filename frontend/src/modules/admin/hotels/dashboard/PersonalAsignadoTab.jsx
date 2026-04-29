@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { UserPlus, Users } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import PersonalAsignadoList from '../components/PersonalAsignadoList';
+import PersonalTable from '../components/PersonalTable';
 import PersonalFormModal from '../components/PersonalFormModal';
 import AppButton from '@/components/ui/AppButton';
 
@@ -115,7 +115,7 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
 
       <div className="flex-grow mt-6 flex flex-col overflow-hidden relative">
         {/* Tabla de asignados */}
-        <PersonalAsignadoList
+        <PersonalTable
           data={asignados}
           loading={loading}
           loadingAction={loadingAction}

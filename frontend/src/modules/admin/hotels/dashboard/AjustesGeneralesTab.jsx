@@ -7,7 +7,7 @@ import useHotel from '@admin-hooks/useHotel';
 import { capitalizeFirst } from '@/utils/stringUtils';
 
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
-import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
+import EncargadosSelector from '@/modules/admin/shared/components/selectors/EncargadosSelector';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import AppButton from '@/components/ui/AppButton';
 import {
@@ -254,7 +254,7 @@ export default function AjustesGeneralesTab({
 
           {/* Sección: Encargado */}
           <div className={activeSubTab === 'encargado' ? 'animate-in fade-in duration-300 flex flex-col' : 'hidden'}>
-            <EncargadosList
+            <EncargadosSelector
               value={selectedEncargadoId}
               onChange={setSelectedEncargadoId}
               exclude={initialData?.encargado?.id}

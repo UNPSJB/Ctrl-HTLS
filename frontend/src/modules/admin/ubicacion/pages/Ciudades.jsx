@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Building, Pencil, Trash2 } from 'lucide-react';
 import { ListHeader, Modal } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
-import TablePagination from '@admin-ui/TablePagination';
+import DataTablePagination from '@admin-ui/DataTablePagination';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
@@ -171,7 +171,7 @@ function Ciudades() {
           </div>
 
           {/* Paginación */}
-          <TablePagination
+          <DataTablePagination
             currentPage={safePage}
             totalItems={filteredCiudades.length}
             itemsPerPage={ITEMS_PER_PAGE}

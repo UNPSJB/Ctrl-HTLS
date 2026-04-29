@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, DoorOpen } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import HabitacionesList from '../components/HabitacionesList';
+import HabitacionesTable from '../components/HabitacionesTable';
 import HabitacionFormModal from '../components/HabitacionFormModal';
 import AppButton from '@/components/ui/AppButton';
 
@@ -193,7 +193,7 @@ export default function HabitacionesTab({
           onSave={handleSave}
         />
 
-        <HabitacionesList
+        <HabitacionesTable
           data={habitaciones}
           tiposGlobales={tiposGlobales}
           loading={loading}
