@@ -200,6 +200,7 @@ const EncargadosForm = () => {
                                 <FormField label="Teléfono" error={errors.telefono}>
                                     <TelInput
                                         id="telefono"
+                                        maxLength={LIMITS.telefono.max}
                                         {...register('telefono', {
                             onChange: handleNumericChange,
                             ...RULES.telefono,

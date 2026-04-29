@@ -3,14 +3,15 @@ import {
   Search,
   User,
   Users,
-  CheckCircle2,
+  Check,
 } from 'lucide-react';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import { Modal } from '@admin-ui';
 import { SearchInput } from '@form';
 
 /**
- * Modal para buscar y seleccionar un vendedor a asignar al hotel.
+ * Modal para buscar y seleccionar múltiples vendedores a asignar al hotel.
+ * Permite seleccionar varios vendedores de una sola vez.
  */
 export default function PersonalFormModal({
   isOpen,
@@ -21,13 +22,13 @@ export default function PersonalFormModal({
   loading = false
 }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedVendedor, setSelectedVendedor] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
 
   // Resetear al abrir/cerrar
   useEffect(() => {
     if (!isOpen) {
       setSearchTerm('');
-      setSelectedVendedor(null);
+      setSelectedIds(new Set());
     }
   }, [isOpen]);
 
@@ -45,9 +46,24 @@ export default function PersonalFormModal({
     );
   });
 
+  // Alternar selección de un vendedor
+  const toggleVendedor = (vendedorId) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(vendedorId)) {
+        next.delete(vendedorId);
+      } else {
+        next.add(vendedorId);
+      }
+      return next;
+    });
+  };
+
   const handleConfirm = () => {
-    if (selectedVendedor) {
-      onSave(selectedVendedor);
+    if (selectedIds.size > 0) {
+      // Enviar array de vendedores completos
+      const vendedoresSeleccionados = todosVendedores.filter(v => selectedIds.has(v.id));
+      onSave(vendedoresSeleccionados);
     }
   };
 
@@ -55,12 +71,12 @@ export default function PersonalFormModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Autorizar Vendedor"
-      description="Busca y selecciona un vendedor para otorgarle acceso a este hotel."
+      title="Autorizar Vendedores"
+      description="Busca y selecciona los vendedores para otorgarles acceso a este hotel."
       onConfirm={handleConfirm}
-      confirmLabel="Confirmar"
+      confirmLabel={selectedIds.size > 0 ? `Confirmar (${selectedIds.size})` : 'Confirmar'}
       loading={loading}
-      confirmDisabled={!selectedVendedor}
+      confirmDisabled={selectedIds.size === 0}
     >
       <div className="flex flex-col h-[38vh]">
         <div className="flex-shrink-0 pb-4">
@@ -90,11 +106,11 @@ export default function PersonalFormModal({
           ) : (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-2">
               {filteredSearch.map((v) => {
-                const isSelected = selectedVendedor?.id === v.id;
+                const isSelected = selectedIds.has(v.id);
                 return (
                   <button
                     key={v.id}
-                    onClick={() => setSelectedVendedor(v)}
+                    onClick={() => toggleVendedor(v.id)}
                     className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${isSelected
                       ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500 shadow-sm dark:bg-blue-500/10 dark:border-blue-500'
                       : 'border-gray-200 hover:border-blue-300 bg-white hover:shadow-sm dark:bg-gray-900 dark:border-gray-800 dark:hover:border-gray-700'
@@ -121,9 +137,9 @@ export default function PersonalFormModal({
                       </div>
                     </div>
                     <div className="shrink-0 pl-3">
-                      <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300 dark:border-gray-600'
+                      <div className={`h-6 w-6 rounded-md border-2 flex items-center justify-center transition-colors ${isSelected ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300 dark:border-gray-600'
                         }`}>
-                        {isSelected && <CheckCircle2 className="h-4 w-4" />}
+                        {isSelected && <Check className="h-4 w-4" />}
                       </div>
                     </div>
                   </button>

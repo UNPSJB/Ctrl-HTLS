@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { User, Save, Lock, MapPin, ShieldCheck, Phone } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import { capitalizeFirst } from '@/utils/stringUtils';
@@ -24,7 +24,7 @@ import { TIPOS_DOCUMENTO } from '@/utils/constants';
 const AdministradoresForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { setCrumbLabel } = useBreadcrumbs();
+
     const isEditing = Boolean(id);
 
     const {
@@ -72,9 +72,7 @@ const AdministradoresForm = () => {
             const response = await axiosInstance.get(`/administrador/${id}`);
             const data = response.data;
 
-            if (data.nombre) {
-                setCrumbLabel(id, `${capitalizeFirst(data.nombre)} ${capitalizeFirst(data.apellido || '')}`.trim());
-            }
+
 
             reset({
                 nombre: capitalizeFirst(data.nombre) || '',
@@ -229,6 +227,7 @@ const AdministradoresForm = () => {
                                     <FormField label="Email" required error={errors.email}>
                                         <EmailInput
                                             id="email"
+                                            maxLength={LIMITS.email}
                                             {...register('email', {
                                                 required: 'El email es obligatorio',
                                                 ...RULES.email,
@@ -239,6 +238,7 @@ const AdministradoresForm = () => {
                                     <FormField label="Teléfono" error={errors.telefono}>
                                         <TelInput
                                             id="telefono"
+                                            maxLength={LIMITS.telefono.max}
                                             {...register('telefono', {
                                               onChange: handleNumericChange,
                                               ...RULES.telefono,

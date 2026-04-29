@@ -54,19 +54,27 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
     }
   };
 
-  const handleAsignar = async (vendedor) => {
+  // Asignar múltiples vendedores al hotel
+  const handleAsignar = async (vendedores) => {
     try {
       setLoadingAction(true);
-      await axiosInstance.post('/hotel/asignar-empleado', {
-        hotelId: Number(hotelId),
-        vendedorId: Number(vendedor.id),
-      });
-      toast.success('Vendedor asignado correctamente');
+      await Promise.all(
+        vendedores.map(v =>
+          axiosInstance.post('/hotel/asignar-empleado', {
+            hotelId: Number(hotelId),
+            vendedorId: Number(v.id),
+          })
+        )
+      );
+      const msg = vendedores.length === 1
+        ? 'Vendedor asignado correctamente'
+        : `${vendedores.length} vendedores asignados correctamente`;
+      toast.success(msg);
       setIsAssigning(false);
       await fetchAsignados();
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.error || 'Error al asignar vendedor');
+      toast.error(error.response?.data?.error || 'Error al asignar vendedor(es)');
     } finally {
       setLoadingAction(false);
     }

@@ -181,6 +181,7 @@ export default function AjustesGeneralesTab({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField label="Nombre del Hotel" required error={errors.nombre}>
                 <TextInput
+                  maxLength={LIMITS.nombreHotel}
                   {...register('nombre', {
                     required: 'El nombre es obligatorio',
                     ...RULES.nombreHotel,
@@ -206,6 +207,7 @@ export default function AjustesGeneralesTab({
 
               <FormField label="Teléfono" required error={errors.telefono}>
                 <TelInput
+                  maxLength={LIMITS.telefono.max}
                   {...register('telefono', {
                     required: 'El teléfono es obligatorio',
                     ...RULES.telefono,
@@ -217,6 +219,7 @@ export default function AjustesGeneralesTab({
 
               <FormField label="Email" required error={errors.email}>
                 <EmailInput
+                  maxLength={LIMITS.email}
                   {...register('email', {
                     required: 'El email es obligatorio',
                     ...RULES.email,

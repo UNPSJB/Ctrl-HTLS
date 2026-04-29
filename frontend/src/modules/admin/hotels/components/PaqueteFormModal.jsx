@@ -177,22 +177,31 @@ export default function PaqueteFormModal({
           <FormField label="Desde" required error={errors.fecha_inicio}>
             <TextInput
               type="date"
-              min={hoy}
+              min={!paquete ? hoy : undefined}
+              disabled={!!paquete}
               {...register('fecha_inicio', {
                 required: 'La fecha de inicio es obligatoria',
-                validate: (val) => val >= hoy || 'No se permiten fechas pasadas',
+                validate: (val) => {
+                  // Solo validar fecha mínima en modo creación
+                  if (!paquete && val < hoy) return 'No se permiten fechas pasadas';
+                  return true;
+                },
               })}
             />
           </FormField>
           <FormField label="Hasta" required error={errors.fecha_fin}>
             <TextInput
               type="date"
-              min={fechaInicio || hoy}
+              min={!paquete ? (fechaInicio || hoy) : undefined}
+              disabled={!!paquete}
               {...register('fecha_fin', {
                 required: 'La fecha de fin es obligatoria',
                 validate: (val) => {
-                  if (val < hoy) return 'No se permiten fechas pasadas';
-                  if (fechaInicio && val < fechaInicio) return 'Debe ser igual o posterior al inicio';
+                  // Solo validar fechas en modo creación
+                  if (!paquete) {
+                    if (val < hoy) return 'No se permiten fechas pasadas';
+                    if (fechaInicio && val < fechaInicio) return 'Debe ser igual o posterior al inicio';
+                  }
                   return true;
                 },
               })}

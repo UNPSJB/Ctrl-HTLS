@@ -2,12 +2,10 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { Save, X, Users, User, Phone, Search } from 'lucide-react';
+import { Save, Users, User, Phone } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
-import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import { 
     FormField, 
@@ -24,7 +22,6 @@ import { TIPOS_DOCUMENTO } from '@/utils/constants';
 const ClientesForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { setCrumbLabel } = useBreadcrumbs();
     const isEditing = Boolean(id);
 
     const {
@@ -42,10 +39,6 @@ const ClientesForm = () => {
             numeroDocumento: '',
             email: '',
             telefono: '',
-            direccion: '',
-            paisId: '',
-            provinciaId: '',
-            ciudadId: '',
         },
         mode: 'onChange'
     });
@@ -69,9 +62,7 @@ const ClientesForm = () => {
             const response = await axiosInstance.get(`/cliente/${id}`);
             const data = response.data;
 
-            if (data.nombre) {
-                setCrumbLabel(id, `${capitalizeFirst(data.nombre)} ${capitalizeFirst(data.apellido || '')}`.trim());
-            }
+
 
             reset({
                 nombre: capitalizeFirst(data.nombre) || '',
@@ -80,10 +71,6 @@ const ClientesForm = () => {
                 telefono: data.telefono || '',
                 tipoDocumento: data.tipoDocumento || 'dni',
                 numeroDocumento: data.numeroDocumento || '',
-                paisId: data.paisId ? String(data.paisId) : '',
-                provinciaId: data.provinciaId ? String(data.provinciaId) : '',
-                ciudadId: data.ciudadId ? String(data.ciudadId) : '',
-                direccion: capitalizeFirst(data.direccion) || '',
             });
         } catch (error) {
             console.error(error);
@@ -241,6 +228,7 @@ const ClientesForm = () => {
                                     <FormField label="Teléfono" error={errors.telefono}>
                                         <TelInput
                                             id="telefono"
+                                            maxLength={LIMITS.telefono.max}
                                             {...register('telefono', {
                                               onChange: handleNumericChange,
                                               ...RULES.telefono,
@@ -251,18 +239,7 @@ const ClientesForm = () => {
                                 </div>
                             </div>
 
-                            {/* Ubicación Geográfica */}
-                            <div className={activeTab === 'ubicacion' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación Geográfica</h3>
-                            <UbicacionSelector
-                                    errors={errors}
-                                    register={register}
-                                    setValue={setValue}
-                                    watch={watch}
-                                    showAddress={true}
-                                    required={false}
-                                />
-                            </div>
+
                         </div>
                     )}
 
