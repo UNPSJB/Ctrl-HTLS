@@ -43,7 +43,7 @@ function AdminSidebar({ onClose }) {
         { title: 'Hoteles', icon: Building2, path: '/admin/hoteles' },
         { title: 'Encargados', icon: Contact, path: '/admin/encargados' },
         { title: 'Clientes', icon: Users, path: '/admin/clientes' },
-        { title: 'Ubicaciones', icon: MapPin, path: '/admin/ubicacion/paises' },
+        { title: 'Ubicaciones', icon: MapPin, path: '/admin/ubicacion' },
       ]
     },
     {

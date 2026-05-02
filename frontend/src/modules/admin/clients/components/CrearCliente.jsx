@@ -9,12 +9,7 @@ import {
   TelInput 
 } from '@form';
 
-const tiposDocumento = [
-  { id: 'dni', nombre: 'DNI' },
-  { id: 'li', nombre: 'LI' },
-  { id: 'le', nombre: 'LE' },
-  { id: 'pasaporte', nombre: 'Pasaporte' },
-];
+import { TIPOS_DOCUMENTO } from '@/utils/constants';
 
 const CrearCliente = () => {
   const [formData, setFormData] = useState({
@@ -69,7 +64,6 @@ const CrearCliente = () => {
     setFormData((prev) => ({
       ...prev,
       tipoDocumento: value,
-      numeroDocumento: '', 
     }));
   };
 
@@ -168,7 +162,7 @@ const CrearCliente = () => {
                 value={formData.tipoDocumento}
                 onChange={handleTipoChange}
               >
-                {tiposDocumento.map((tipo) => (
+                {TIPOS_DOCUMENTO.map((tipo) => (
                   <option key={tipo.id} value={tipo.id}>
                     {tipo.nombre}
                   </option>

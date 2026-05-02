@@ -13,7 +13,6 @@ import {
 import { capitalizeWords } from '@/utils/stringUtils';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
-import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import HabitacionesTab from '@/modules/admin/hotels/dashboard/HabitacionesTab';
@@ -28,7 +27,6 @@ import AppButton from '@/components/ui/AppButton';
 export default function HotelDashboard() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setCrumbLabel } = useBreadcrumbs();
 
   const [activeTab, setActiveTab] = useState('general');
   const [hotel, setHotel] = useState(null);
@@ -43,9 +41,6 @@ export default function HotelDashboard() {
       setLoading(true);
       const response = await axiosInstance.get(`/hotel/${id}`);
       setHotel(response.data);
-      if (response.data.nombre) {
-        setCrumbLabel(id, `${response.data.nombre} - Dashboard`);
-      }
     } catch (error) {
       console.error(error);
       toast.error('Error al cargar datos del dashboard del hotel');

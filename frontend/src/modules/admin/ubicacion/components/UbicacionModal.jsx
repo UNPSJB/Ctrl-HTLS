@@ -1,60 +1,49 @@
-import { useState, useEffect } from 'react';
-import { Globe, Building, Map } from 'lucide-react';
+import { useEffect } from 'react';
+import { Globe, Building, Map, Plus, Save } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import Modal from '@ui/Modal';
 import { FormField, TextInput } from '@form';
-import { LIMITS } from '@/utils/validationRules';
+import { RULES, LIMITS } from '@/utils/validationRules';
 
+// Metadatos por tipo de entidad geográfica
 const TIPO_META = {
   pais:      { label: 'País',      icon: Globe,     variant: 'blue' },
   provincia: { label: 'Provincia', icon: Map,       variant: 'indigo' },
   ciudad:    { label: 'Ciudad',    icon: Building,  variant: 'blue' },
 };
 
+/**
+ * Modal para crear o editar una entidad geográfica (país, provincia o ciudad).
+ * Usa react-hook-form para validación controlada y consistente con el resto del sistema.
+ */
 function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }) {
   const isEditing = !!entidad;
   const meta = TIPO_META[tipo] ?? TIPO_META.pais;
 
-  const [nombre, setNombre] = useState('');
-  const [codigoPostal, setCodigoPostal] = useState('');
-  const [errors, setErrors] = useState({});
+  const { register, handleSubmit, reset, formState: { errors, isValid } } = useForm({
+    mode: 'onChange',
+  });
 
-  // Cargar datos si es edición
+  // Cargar o resetear datos al abrir/cambiar entidad
   useEffect(() => {
     if (entidad) {
-      setNombre(entidad.nombre || '');
-      setCodigoPostal(entidad.codigoPostal || '');
+      reset({
+        nombre: entidad.nombre || '',
+        codigoPostal: entidad.codigoPostal || '',
+      });
     } else {
-      setNombre('');
-      setCodigoPostal('');
+      reset({ nombre: '', codigoPostal: '' });
     }
-    setErrors({});
-  }, [entidad, tipo]);
+  }, [entidad, tipo, reset]);
 
-  const validate = () => {
-    const newErrors = {};
-    if (!nombre.trim()) newErrors.nombre = 'El nombre es requerido';
-    if (nombre.trim().length > LIMITS.nombreUbicacion)
-      newErrors.nombre = `El nombre no puede superar los ${LIMITS.nombreUbicacion} caracteres`;
-    if (tipo === 'ciudad') {
-      if (!codigoPostal.trim()) newErrors.codigoPostal = 'El código postal es requerido';
-      else if (codigoPostal.trim().length > LIMITS.codigoPostal)
-        newErrors.codigoPostal = `Máximo ${LIMITS.codigoPostal} caracteres`;
-    }
-    return newErrors;
-  };
+  const handleFormSubmit = async (data) => {
+    const datos = { nombre: data.nombre.trim() };
 
-  const handleConfirm = async () => {
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    const datos = { nombre: nombre.trim() };
+    // Agregar parentId según el tipo
     if (tipo === 'provincia' && parentId) datos.paisId = parentId;
     if (tipo === 'ciudad' && parentId) {
       datos.provinciaId = parentId;
-      datos.codigoPostal = codigoPostal.trim();
+      datos.codigoPostal = data.codigoPostal.trim();
     }
 
     try {
@@ -69,38 +58,38 @@ function UbicacionModal({ tipo, parentId, entidad, onSuccess, onClose, loading }
       isOpen
       onClose={onClose}
       title={isEditing ? `Editar ${meta.label}` : `Nuevo/a ${meta.label}`}
-      description={isEditing ? `Modificando: ${entidad?.nombre}` : `Completa los datos para crear un/a nuevo/a ${meta.label}`}
-      onConfirm={handleConfirm}
+      description={isEditing ? `Modificando: ${entidad?.nombre}` : `Complete los datos para crear un/a nuevo/a ${meta.label}`}
+      onConfirm={handleSubmit(handleFormSubmit)}
       confirmLabel={isEditing ? 'Guardar cambios' : 'Crear'}
+      confirmIcon={isEditing ? Save : Plus}
       cancelLabel="Cancelar"
       loading={loading}
+      confirmDisabled={!isValid || loading}
       variant={meta.variant}
       size="sm"
     >
-      {/* Nombre */}
       <div className="space-y-4">
+        {/* Campo: Nombre */}
         <FormField label="Nombre" required error={errors.nombre}>
           <TextInput
-            value={nombre}
-            onChange={(e) => {
-              setNombre(e.target.value);
-              setErrors((p) => ({ ...p, nombre: undefined }));
-            }}
+            {...register('nombre', {
+              required: `El nombre es obligatorio`,
+              ...RULES.nombreUbicacion,
+            })}
             maxLength={LIMITS.nombreUbicacion}
             placeholder={`Ej: ${tipo === 'pais' ? 'Argentina' : tipo === 'provincia' ? 'Buenos Aires' : 'La Plata'}`}
             autoFocus
           />
         </FormField>
 
-        {/* Código Postal solo para ciudades */}
+        {/* Campo: Código Postal (solo para ciudades) */}
         {tipo === 'ciudad' && (
           <FormField label="Código Postal" required error={errors.codigoPostal}>
             <TextInput
-              value={codigoPostal}
-              onChange={(e) => {
-                setCodigoPostal(e.target.value);
-                setErrors((p) => ({ ...p, codigoPostal: undefined }));
-              }}
+              {...register('codigoPostal', {
+                required: 'El código postal es obligatorio',
+                ...RULES.codigoPostal,
+              })}
               maxLength={LIMITS.codigoPostal}
               placeholder="Ej: 1900"
             />

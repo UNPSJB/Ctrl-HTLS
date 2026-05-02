@@ -15,12 +15,15 @@ const useLocalidad = () => {
   const [paises, setPaises] = useState([]);
   const [provincias, setProvincias] = useState([]);
   const [ciudades, setCiudades] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingPaises, setLoadingPaises] = useState(false);
+  const [loadingProvincias, setLoadingProvincias] = useState(false);
+  const [loadingCiudades, setLoadingCiudades] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
 
   // ── FETCH ──────────────────────────────────────────────────────────
 
   const fetchPaises = useCallback(async () => {
-    setLoading(true);
+    setLoadingPaises(true);
     try {
       const { data } = await axiosInstance.get('/paises');
       setPaises(capitalizeList(Array.isArray(data) ? data : []));
@@ -30,12 +33,12 @@ const useLocalidad = () => {
       }
       setPaises([]);
     } finally {
-      setLoading(false);
+      setLoadingPaises(false);
     }
   }, []);
 
   const fetchProvincias = useCallback(async (paisId) => {
-    setLoading(true);
+    setLoadingProvincias(true);
     try {
       const { data } = await axiosInstance.get(`/provincias/${paisId}`);
       setProvincias(capitalizeList(Array.isArray(data) ? data : []));
@@ -45,12 +48,12 @@ const useLocalidad = () => {
       }
       setProvincias([]);
     } finally {
-      setLoading(false);
+      setLoadingProvincias(false);
     }
   }, []);
 
   const fetchCiudades = useCallback(async (provinciaId) => {
-    setLoading(true);
+    setLoadingCiudades(true);
     try {
       const { data } = await axiosInstance.get(`/ciudades/${provinciaId}`);
       setCiudades(capitalizeList(Array.isArray(data) ? data : []));
@@ -60,14 +63,14 @@ const useLocalidad = () => {
       }
       setCiudades([]);
     } finally {
-      setLoading(false);
+      setLoadingCiudades(false);
     }
   }, []);
 
   // ── CREATE ─────────────────────────────────────────────────────────
 
   const crear = useCallback(async (tipo, datos) => {
-    setLoading(true);
+    setLoadingAction(true);
     try {
       const { data } = await axiosInstance.post('/localidad', { tipo, ...datos });
       toast.success(`${capitalize(tipo)} creado/a correctamente`);
@@ -77,14 +80,14 @@ const useLocalidad = () => {
       toast.error(msg);
       throw err;
     } finally {
-      setLoading(false);
+      setLoadingAction(false);
     }
   }, []);
 
   // ── UPDATE ─────────────────────────────────────────────────────────
 
   const editar = useCallback(async (id, tipo, datos) => {
-    setLoading(true);
+    setLoadingAction(true);
     try {
       const { data } = await axiosInstance.put(`/localidad/${id}`, { tipo, ...datos });
       toast.success(`${capitalize(tipo)} actualizado/a correctamente`);
@@ -94,14 +97,14 @@ const useLocalidad = () => {
       toast.error(msg);
       throw err;
     } finally {
-      setLoading(false);
+      setLoadingAction(false);
     }
   }, []);
 
   // ── DELETE ─────────────────────────────────────────────────────────
 
   const eliminar = useCallback(async (id, tipo) => {
-    setLoading(true);
+    setLoadingAction(true);
     try {
       await axiosInstance.delete(`/localidad/${id}`, { data: { tipo } });
       toast.success(`${capitalize(tipo)} eliminado/a correctamente`);
@@ -111,7 +114,7 @@ const useLocalidad = () => {
       toast.error(msg);
       return false;
     } finally {
-      setLoading(false);
+      setLoadingAction(false);
     }
   }, []);
 
@@ -119,7 +122,10 @@ const useLocalidad = () => {
     paises,
     provincias,
     ciudades,
-    loading,
+    loadingPaises,
+    loadingProvincias,
+    loadingCiudades,
+    loadingAction,
     fetchPaises,
     fetchProvincias,
     fetchCiudades,

@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, MapPin, User, Save, X, Phone } from 'lucide-react';
+import { Building2, MapPin, User, Save, Phone } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
 import useHotel from '@admin-hooks/useHotel';
-import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import { capitalizeFirst } from '@/utils/stringUtils';
 
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
-import EncargadosList from '@/modules/admin/shared/components/selectors/EncargadosList';
+import EncargadosSelector from '@/modules/admin/shared/components/selectors/EncargadosSelector';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { 
   FormField, 
@@ -28,7 +28,7 @@ import { RULES, LIMITS } from '@/utils/validationRules';
 export default function HotelesForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setCrumbLabel } = useBreadcrumbs();
+
   const isEditing = Boolean(id);
   const { categorias, loading: loadingResources } = useHotel();
 
@@ -81,9 +81,7 @@ export default function HotelesForm() {
       const response = await axiosInstance.get(`/hotel/${id}`);
       const hotel = response.data;
 
-      if (hotel.nombre) {
-        setCrumbLabel(id, capitalizeFirst(hotel.nombre));
-      }
+
 
       reset({
         nombre: capitalizeFirst(hotel.nombre) || '',
@@ -216,6 +214,7 @@ export default function HotelesForm() {
                     <FormField label="Nombre" required error={errors.nombre}>
                       <TextInput
                         id="nombre"
+                        maxLength={LIMITS.nombreHotel}
                         {...register('nombre', {
                           required: 'El nombre es obligatorio',
                           ...RULES.nombreHotel,
@@ -262,6 +261,7 @@ export default function HotelesForm() {
                     <FormField label="Email" required error={errors.email}>
                       <EmailInput
                         id="email"
+                        maxLength={LIMITS.email}
                         {...register('email', {
                           required: 'El email es obligatorio',
                           ...RULES.email,
@@ -272,6 +272,7 @@ export default function HotelesForm() {
                     <FormField label="Teléfono" error={errors.telefono}>
                       <TelInput
                         id="telefono"
+                        maxLength={LIMITS.telefono.max}
                         {...register('telefono', {
                           onChange: handleNumericChange,
                           ...RULES.telefono,
@@ -299,7 +300,7 @@ export default function HotelesForm() {
                 {/* Encargado */}
                 <div className={activeTab === 'encargado' ? 'animate-in fade-in duration-300 flex flex-col' : 'hidden'}>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Encargado del Hotel</h3>
-                  <EncargadosList
+                  <EncargadosSelector
                     value={selectedEncargadoId}
                     onChange={setSelectedEncargadoId}
                     exclude={initialEncargadoId}

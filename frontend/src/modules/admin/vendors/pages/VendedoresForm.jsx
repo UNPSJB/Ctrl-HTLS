@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
-import { User, Save, X, Lock, MapPin, Building2, Briefcase, Phone, Trash2 } from 'lucide-react';
+import { User, Save, Lock, MapPin, Building2, Briefcase, Phone, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { useBreadcrumbs } from '@admin-context/BreadcrumbContext';
+
 import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import { capitalizeFirst } from '@/utils/stringUtils';
@@ -19,18 +19,12 @@ import {
 } from '@form';
 import AppButton from '@/components/ui/AppButton';
 import { RULES, LIMITS } from '@/utils/validationRules';
-
-const tiposDocumento = [
-  { id: 'dni', nombre: 'DNI' },
-  { id: 'li', nombre: 'LI' },
-  { id: 'le', nombre: 'LE' },
-  { id: 'pasaporte', nombre: 'Pasaporte' },
-];
+import { TIPOS_DOCUMENTO } from '@/utils/constants';
 
 const VendedoresForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setCrumbLabel } = useBreadcrumbs();
+
   const isEditing = Boolean(id);
 
   const {
@@ -81,9 +75,7 @@ const VendedoresForm = () => {
       const response = await axiosInstance.get(`/vendedor/${id}`);
       const data = response.data;
 
-      if (data.nombre) {
-        setCrumbLabel(id, `${capitalizeFirst(data.nombre)} ${capitalizeFirst(data.apellido || '')}`.trim());
-      }
+
 
       const userHotels = data.hotelesPermitidos ? data.hotelesPermitidos : [];
 
@@ -133,20 +125,9 @@ const VendedoresForm = () => {
 
   const handleTipoChange = (e) => {
     setValue('tipoDocumento', e.target.value, { shouldValidate: true });
-    setValue('numeroDocumento', '', { shouldValidate: true });
   };
 
-  const handlePaisChange = (val) => {
-    // originalHandlePaisChange(val); // This function is not defined in the original code. Removing.
-  };
 
-  const handleProvinciaChange = (val) => {
-    // originalHandleProvinciaChange(val); // This function is not defined in the original code. Removing.
-  };
-
-  const handleCiudadChange = (val) => {
-    // originalHandleCiudadChange(val); // This function is not defined in the original code. Removing.
-  };
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -253,7 +234,7 @@ const VendedoresForm = () => {
                       id="tipoDocumento"
                       {...register('tipoDocumento', { onChange: handleTipoChange })}
                     >
-                      {tiposDocumento.map((t) => (
+                      {TIPOS_DOCUMENTO.map((t) => (
                         <option key={t.id} value={t.id}>{t.nombre}</option>
                       ))}
                     </SelectInput>
@@ -280,6 +261,7 @@ const VendedoresForm = () => {
                   <FormField label="Email" required error={errors.email}>
                     <EmailInput
                       id="email"
+                      maxLength={LIMITS.email}
                       {...register('email', {
                         required: 'El email es obligatorio',
                         ...RULES.email,
@@ -290,6 +272,7 @@ const VendedoresForm = () => {
                   <FormField label="Teléfono" error={errors.telefono}>
                     <TelInput
                       id="telefono"
+                      maxLength={LIMITS.telefono.max}
                       {...register('telefono', {
                         onChange: handleNumericChange,
                         ...RULES.telefono,

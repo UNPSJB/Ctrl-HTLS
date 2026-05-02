@@ -8,21 +8,18 @@ import {
   TelInput, 
   SelectInput 
 } from '@/components/ui/form';
+import AppButton from '@/components/ui/AppButton';
+import { RULES, LIMITS } from '@/utils/validationRules';
+import { TIPOS_DOCUMENTO } from '@/utils/constants';
 
-const tiposDocumento = [
-  { id: 'dni', nombre: 'DNI' },
-  { id: 'li', nombre: 'LI' },
-  { id: 'le', nombre: 'LE' },
-  { id: 'pasaporte', nombre: 'Pasaporte' },
-];
-
-// Formulario para la creación de un nuevo cliente refactorizado con componentes UI estandarizados
+// Formulario para la creación de un nuevo cliente (vista vendedor)
 function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     setValue,
+    watch,
   } = useForm({
     defaultValues: {
       numeroDocumento: initialDocumento,
@@ -32,10 +29,30 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
       email: '',
       telefono: '',
     },
+    mode: 'onChange',
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
+
+  const tipoDocumento = watch('tipoDocumento');
+
+  // Formateadores automáticos para controlar el ingreso de datos
+  const handleDocumentoChange = (e) => {
+    const { value } = e.target;
+    let procesado = value;
+    if (['dni', 'li', 'le'].includes(tipoDocumento)) {
+      procesado = value.replace(/\D/g, '');
+    } else {
+      procesado = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    }
+    setValue('numeroDocumento', procesado, { shouldValidate: true });
+  };
+
+  const handleNumericChange = (e) => {
+    const { value } = e.target;
+    setValue(e.target.name, value.replace(/\D/g, ''), { shouldValidate: true });
+  };
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -61,21 +78,29 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField label="Nombre" required error={errors.nombre}>
           <TextInput
-            {...register('nombre', { required: 'El nombre es obligatorio' })}
+            {...register('nombre', { 
+              required: 'El nombre es obligatorio',
+              ...RULES.nombre,
+            })}
+            maxLength={LIMITS.nombre}
             placeholder="Ej: Juan"
           />
         </FormField>
 
         <FormField label="Apellido" required error={errors.apellido}>
           <TextInput
-            {...register('apellido', { required: 'El apellido es obligatorio' })}
+            {...register('apellido', { 
+              required: 'El apellido es obligatorio',
+              ...RULES.apellido,
+            })}
+            maxLength={LIMITS.apellido}
             placeholder="Ej: Pérez"
           />
         </FormField>
 
         <FormField label="Tipo de Documento" required error={errors.tipoDocumento}>
           <SelectInput {...register('tipoDocumento', { required: 'Seleccione un tipo' })}>
-            {tiposDocumento.map((tipo) => (
+            {TIPOS_DOCUMENTO.map((tipo) => (
               <option key={tipo.id} value={tipo.id}>
                 {tipo.nombre}
               </option>
@@ -85,7 +110,12 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
 
         <FormField label="Número de Documento" required error={errors.numeroDocumento}>
           <TextInput
-            {...register('numeroDocumento', { required: 'El documento es obligatorio' })}
+            {...register('numeroDocumento', { 
+              required: 'El documento es obligatorio',
+              ...RULES.documento,
+              onChange: handleDocumentoChange,
+            })}
+            maxLength={LIMITS.documento.max}
             readOnly
             disabled
           />
@@ -95,21 +125,19 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
           <EmailInput
             {...register('email', { 
               required: 'El email es obligatorio',
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Email inválido"
-              }
+              ...RULES.email,
             })}
+            maxLength={LIMITS.email}
           />
         </FormField>
 
         <FormField label="Teléfono" error={errors.telefono}>
           <TelInput
-            {...register('telefono')}
-            onChange={(e) => {
-              const numericValue = e.target.value.replace(/\D/g, '');
-              setValue('telefono', numericValue, { shouldValidate: true });
-            }}
+            {...register('telefono', {
+              onChange: handleNumericChange,
+              ...RULES.telefono,
+            })}
+            maxLength={LIMITS.telefono.max}
           />
         </FormField>
       </div>
@@ -117,24 +145,23 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
       {apiError && <p className="mt-2 text-sm text-red-500 animate-in fade-in">{apiError}</p>}
 
       <div className="flex justify-end gap-3 pt-4">
-        <button
-          type="button"
+        <AppButton
+          variant="ghost"
           onClick={onCancel}
-          className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
+          disabled={isSubmitting}
         >
           Cancelar
-        </button>
-        <button
+        </AppButton>
+        <AppButton
           type="submit"
-          disabled={isSubmitting}
-          className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+          disabled={!isValid || isSubmitting}
+          loading={isSubmitting}
         >
-          {isSubmitting ? 'Guardando...' : 'Guardar Cliente'}
-        </button>
+          Guardar Cliente
+        </AppButton>
       </div>
     </form>
   );
 }
 
 export default ClienteForm;
-
