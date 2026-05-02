@@ -81,7 +81,6 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
   };
 
   const handleDesasignar = async (vendedorId) => {
-    if (!window.confirm('¿Confirma remover este vendedor de la lista?')) return;
     try {
       setLoadingAction(true);
       await axiosInstance.post('/hotel/desasignar-empleado', {

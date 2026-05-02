@@ -6,21 +6,22 @@ const TableButton = ({
   disabled = false,
   className = '',
   icon: Icon,
+  type = 'button',
   'aria-label': ariaLabel,
   ...props
 }) => {
   const getVariantClasses = () => {
     switch (variant) {
       case 'view':
-        return 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20';
+        return 'text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-blue-400';
       case 'edit':
-        return 'text-gray-600 hover:text-green-600 hover:bg-green-50 dark:text-gray-400 dark:hover:text-green-400 dark:hover:bg-green-900/20';
+        return 'text-gray-400 hover:bg-gray-100 hover:text-green-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-green-400';
       case 'delete':
-        return 'text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20';
+        return 'text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-red-400';
       case 'warning':
-        return 'text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 dark:text-gray-400 dark:hover:text-yellow-400 dark:hover:bg-yellow-900/20';
+        return 'text-gray-400 hover:bg-gray-100 hover:text-yellow-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-yellow-400';
       default:
-        return 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-700';
+        return 'text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-100';
     }
   };
 
@@ -51,7 +52,7 @@ const TableButton = ({
   };
 
   const baseClasses =
-    'rounded-md transition-colors inline-flex items-center justify-center';
+    'rounded-lg transition-colors inline-flex items-center justify-center';
   const disabledClasses = disabled
     ? 'opacity-50 cursor-not-allowed pointer-events-none'
     : 'cursor-pointer';
@@ -68,6 +69,7 @@ const TableButton = ({
 
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={finalClasses}

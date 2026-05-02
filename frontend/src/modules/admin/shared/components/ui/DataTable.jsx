@@ -29,41 +29,7 @@ export default function DataTable({
         </div>
       )}
 
-      {/* Encabezado fijo (thead separado para asegurar buen scrolling en algunos layouts o thead sticky) */}
-      <div className="flex-shrink-0 border-b border-gray-200 bg-gray-50/95 backdrop-blur dark:border-gray-700 dark:bg-gray-800/95">
-        <table className="w-full text-left text-sm">
-          <thead className="text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:text-gray-400">
-            <tr>
-              {columns.map((col, idx) => {
-                const alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
-                const widthClass = col.width ? col.width : ''; // se puede pasar 'w-[10%]' u otra clase de ancho
-
-                if (col.sortable !== false && onSort && col.key) {
-                  return (
-                    <SortableHeader
-                      key={col.key || idx}
-                      column={col.key}
-                      label={col.label}
-                      sortKey={sortKey}
-                      sortDir={sortDir}
-                      onSort={onSort}
-                      className={`${alignClass} ${widthClass}`}
-                    />
-                  );
-                }
-
-                return (
-                  <th key={col.key || idx} className={`px-6 py-4 ${alignClass} ${widthClass}`}>
-                    {col.label}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-        </table>
-      </div>
-
-      {/* Cuerpo desplazable */}
+      {/* Tabla Unificada con Thead Sticky para alinear perfectamente las columnas y el scroll */}
       <div className="flex-grow overflow-auto custom-scrollbar">
         {!loading && data.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-16 text-gray-400">
@@ -71,13 +37,39 @@ export default function DataTable({
             <p className="text-sm">{emptyMessage}</p>
           </div>
         ) : (
-          <table className="w-full border-collapse text-left text-sm">
-            {/* Ocultamos el thead aquí pero lo renderizamos invisible para mantener los anchos correctos si no usamos table-fixed */}
-            <thead className="invisible h-0">
+          <table className="w-full border-collapse text-left text-sm relative">
+            <thead className="sticky top-0 z-10 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm bg-gray-50/95 backdrop-blur dark:bg-gray-800/95 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                {columns.map((col, idx) => (
-                  <th key={col.key || idx} className={col.width ? col.width : ''}></th>
-                ))}
+                {columns.map((col, idx) => {
+                  const isFirst = idx === 0;
+                  const isLast = idx === columns.length - 1;
+                  let alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
+                  if (isFirst) alignClass = 'text-left';
+                  if (isLast) alignClass = 'text-right';
+                  
+                  const paddingClass = isFirst ? 'pl-6 pr-4' : isLast ? 'pr-6 pl-4' : 'px-4';
+                  const widthClass = col.width ? col.width : '';
+
+                  if (col.sortable !== false && onSort && col.key) {
+                    return (
+                      <SortableHeader
+                        key={col.key || idx}
+                        column={col.key}
+                        label={col.label}
+                        sortKey={sortKey}
+                        sortDir={sortDir}
+                        onSort={onSort}
+                        className={`${alignClass} ${paddingClass} ${widthClass}`}
+                      />
+                    );
+                  }
+
+                  return (
+                    <th key={col.key || idx} className={`py-4 ${alignClass} ${paddingClass} ${widthClass}`}>
+                      {col.label}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -92,11 +84,17 @@ export default function DataTable({
                     className={`group transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/20 ${onRowClick ? 'cursor-pointer' : ''} ${customClass}`}
                   >
                     {columns.map((col, colIndex) => {
-                      const alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
+                      const isFirst = colIndex === 0;
+                      const isLast = colIndex === columns.length - 1;
+                      let alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
+                      if (isFirst) alignClass = 'text-left';
+                      if (isLast) alignClass = 'text-right';
+                      
+                      const paddingClass = isFirst ? 'pl-6 pr-4' : isLast ? 'pr-6 pl-4' : 'px-4';
                       const cellContent = col.render ? col.render(row, rowIndex) : row[col.key];
 
                       return (
-                        <td key={col.key || colIndex} className={`px-6 py-3 ${alignClass}`}>
+                        <td key={col.key || colIndex} className={`py-3 ${alignClass} ${paddingClass}`}>
                           {cellContent}
                         </td>
                       );

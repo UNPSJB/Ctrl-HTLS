@@ -8,7 +8,7 @@ import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
-export default function TemporadasTable({ data = [], loading = false, onDelete }) {
+export default function TemporadasTable({ data = [], loading = false, onDelete, isDeleting = false }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [temporadaToDelete, setTemporadaToDelete] = useState(null);
 
@@ -19,9 +19,9 @@ export default function TemporadasTable({ data = [], loading = false, onDelete }
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!temporadaToDelete) return;
-    onDelete(temporadaToDelete.id);
+    await onDelete(temporadaToDelete.id);
     setTemporadaToDelete(null);
   };
 
@@ -115,8 +115,8 @@ export default function TemporadasTable({ data = [], loading = false, onDelete }
         onClose={() => setTemporadaToDelete(null)}
         title="Eliminar Temporada"
         onConfirm={handleConfirmDelete}
-        confirmLabel="Sí, eliminar"
-        confirmIcon={Trash2}
+        loading={isDeleting}
+        confirmLabel="Aceptar"
         variant="red"
         size="sm"
       >

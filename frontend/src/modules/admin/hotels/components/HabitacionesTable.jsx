@@ -20,6 +20,7 @@ export default function HabitacionesTable({
   tiposGlobales = [],
   loading = false,
   isCreating = false,
+  isTogglingRoom = false,
   onEdit,
   onDelete,
 }) {
@@ -32,9 +33,9 @@ export default function HabitacionesTable({
 
   const STATUS_CYCLE = ['activas', 'inactivas', 'todas'];
   const STATUS_META = {
-    activas:  { label: 'Activas',   color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
-    inactivas:{ label: 'Inactivas', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
-    todas:    { label: 'Todas',     color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    activas: { label: 'Activas', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    inactivas: { label: 'Inactivas', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    todas: { label: 'Todas', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
   };
 
   const cycleStatus = () => {
@@ -63,9 +64,9 @@ export default function HabitacionesTable({
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!habitacionToDelete) return;
-    onDelete(habitacionToDelete.id, habitacionToDelete.tempId);
+    await onDelete(habitacionToDelete.id, habitacionToDelete.tempId);
     setHabitacionToDelete(null);
   };
 
@@ -136,13 +137,10 @@ export default function HabitacionesTable({
           onClick={cycleStatus}
           disabled={loading}
           title={`Filtro actual: ${STATUS_META[statusFilter].label}. Click para cambiar.`}
-          className={`flex items-center gap-2 h-9 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${
-            STATUS_META[statusFilter].color
-          } ${
-            STATUS_META[statusFilter].bg
-          } ${
-            STATUS_META[statusFilter].border
-          }`}
+          className={`flex items-center gap-2 h-9 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${STATUS_META[statusFilter].color
+            } ${STATUS_META[statusFilter].bg
+            } ${STATUS_META[statusFilter].border
+            }`}
         >
           <Filter className="h-4 w-4 flex-shrink-0" />
           <span>{STATUS_META[statusFilter].label}</span>
@@ -176,8 +174,8 @@ export default function HabitacionesTable({
         onClose={() => setHabitacionToDelete(null)}
         title={habitacionToDelete?.eliminado ? "Activar Habitación" : "Desactivar Habitación"}
         onConfirm={handleConfirmDelete}
-        confirmLabel={habitacionToDelete?.eliminado ? "Sí, activar" : "Sí, desactivar"}
-        confirmIcon={habitacionToDelete?.eliminado ? CheckCircle2 : PowerOff}
+        loading={isTogglingRoom}
+        confirmLabel={"Aceptar"}
         variant={habitacionToDelete?.eliminado ? "indigo" : "red"}
         size="sm"
       >

@@ -10,6 +10,7 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
   const [descuentos, setDescuentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (isActive) {
@@ -47,6 +48,21 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
     }
   };
 
+  // Eliminar un descuento existente del hotel
+  const handleDelete = async (descuentoId) => {
+    try {
+      setIsDeleting(true);
+      await axiosInstance.delete(`/hotel/${hotelId}/descuento/${descuentoId}`);
+      toast.success('Descuento eliminado correctamente');
+      await fetchDescuentos();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.error || 'Error al eliminar descuento');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col animate-in fade-in duration-300">
       <div className="flex-shrink-0 flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -69,7 +85,7 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
-        <DescuentosTable data={descuentos} loading={loading} />
+        <DescuentosTable data={descuentos} loading={loading} onDelete={handleDelete} isDeleting={isDeleting} />
       </div>
 
       <DescuentoFormModal

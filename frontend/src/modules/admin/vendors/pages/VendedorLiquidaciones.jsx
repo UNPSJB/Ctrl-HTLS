@@ -12,8 +12,10 @@ import {
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { PageHeader } from '@admin-ui';
+import { PageHeader, Modal } from '@admin-ui';
 import { capitalizeFirst } from '@/utils/stringUtils';
+import { formatFecha } from '@/utils/dateUtils';
+import { formatCurrency } from '@/utils/pricingUtils';
 import AppButton from '@/components/ui/AppButton';
 
 // Detalle de ventas y liquidaciones de un vendedor
@@ -28,6 +30,7 @@ const VendedorLiquidaciones = () => {
 
   const [activeTab, setActiveTab] = useState('liquidacion');
   const [selectedVentas, setSelectedVentas] = useState([]);
+  const [showConfirmLiquidar, setShowConfirmLiquidar] = useState(false);
 
   // Cálculos derivados
   const pendingSales = ventas.filter((v) => !v.liquidacionId);
@@ -76,23 +79,18 @@ const VendedorLiquidaciones = () => {
 
   const handleLiquidarSeleccionadas = async () => {
     if (selectedVentas.length === 0) return;
-    
-    const montoComision = (selectedVentas.reduce((acc, vId) => {
-        const v = ventas.find(vent => vent.id === vId);
-        return acc + (v ? Number(v.subtotal) : 0);
-    }, 0) * 0.02).toFixed(2);
-
-    if (!window.confirm(`¿Desea liquidar las ${selectedVentas.length} ventas seleccionadas?\nTotal Comisión: $${montoComision}`)) {
-      return;
-    }
 
     try {
       setLoadingAction(true);
-      // PREPARADO PARA FUTURO ENDPOINT (POST /liquidaciones/liquidar-seleccion)
-      toast.success('Petición preparada (Esperando backend)');
+      await axiosInstance.post(`/liquidaciones/liquidar-detalles/${id}`, {
+        detalleIds: selectedVentas
+      });
+      toast.success(`Liquidación generada correctamente (${selectedVentas.length} ventas)`);
+      setShowConfirmLiquidar(false);
+      await fetchData();
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.error || 'Error al procesar la liquidación');
+      toast.error(error.response?.data?.error || error.response?.data?.message || 'Error al procesar la liquidación');
     } finally {
       setLoadingAction(false);
     }
@@ -209,7 +207,7 @@ const VendedorLiquidaciones = () => {
                     
                     <AppButton
                       variant="green"
-                      onClick={handleLiquidarSeleccionadas}
+                      onClick={() => setShowConfirmLiquidar(true)}
                       disabled={selectedVentas.length === 0}
                       loading={loadingAction}
                       icon={DollarSign}
@@ -269,6 +267,35 @@ const VendedorLiquidaciones = () => {
                     </table>
                   </div>
                 </div>
+
+                  {/* Modal de confirmación de liquidación */}
+                  <Modal
+                    isOpen={showConfirmLiquidar}
+                    onClose={() => setShowConfirmLiquidar(false)}
+                    title="Confirmar Liquidación"
+                    onConfirm={handleLiquidarSeleccionadas}
+                    loading={loadingAction}
+                    confirmLabel="Liquidar"
+                    variant="green"
+                    size="sm"
+                  >
+                    <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                      <p>
+                        ¿Desea liquidar las{' '}
+                        <strong className="text-gray-900 dark:text-white font-medium">{selectedVentas.length}</strong>{' '}
+                        ventas seleccionadas?
+                      </p>
+                      <p>
+                        Total Comisión:{' '}
+                        <strong className="text-gray-900 dark:text-white font-medium">
+                          {formatCurrency(selectedVentas.reduce((acc, vId) => {
+                            const v = ventas.find(vent => vent.id === vId);
+                            return acc + (v ? Number(v.subtotal) : 0);
+                          }, 0) * 0.02)}
+                        </strong>
+                      </p>
+                    </div>
+                  </Modal>
               </div>
             )}
 
@@ -285,26 +312,33 @@ const VendedorLiquidaciones = () => {
                     <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-800 dark:text-gray-400">
                       <tr>
                         <th className="px-6 py-3">Descripción</th>
+                        <th className="px-6 py-3 text-center">Fecha Liquidada</th>
                         <th className="px-6 py-3 text-right">Monto</th>
                         <th className="px-6 py-3 text-right">Comisión</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                       {liquidatedSales.length > 0 ? (
-                        liquidatedSales.map((v) => (
-                          <tr key={v.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{v.descripcion}</td>
-                            <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
-                              ${Number(v.subtotal).toFixed(2)}
-                            </td>
-                            <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
-                              ${(Number(v.subtotal) * 0.02).toFixed(2)}
-                            </td>
-                          </tr>
-                        ))
+                        liquidatedSales.map((v) => {
+                          const liq = liquidaciones.find(l => l.id === v.liquidacionId);
+                          return (
+                            <tr key={v.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                              <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{v.descripcion}</td>
+                              <td className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                {liq?.fechaPago ? formatFecha(liq.fechaPago) : liq?.fechaEmision ? formatFecha(liq.fechaEmision) : <span className="italic opacity-30">—</span>}
+                              </td>
+                              <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
+                                {formatCurrency(Number(v.subtotal))}
+                              </td>
+                              <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
+                                {formatCurrency(Number(v.subtotal) * 0.02)}
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
-                          <td colSpan="3" className="px-6 py-12 text-center text-gray-400 italic">
+                          <td colSpan="4" className="px-6 py-12 text-center text-gray-400 italic">
                             No hay registros de ventas liquidadas.
                           </td>
                         </tr>

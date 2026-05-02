@@ -17,10 +17,10 @@ export default function SortableHeader({ column, label, sortKey, sortDir, onSort
 
   return (
     <th
-      className={`px-6 py-4 cursor-pointer select-none group ${className}`}
+      className={`cursor-pointer select-none group py-4 ${className}`}
       onClick={() => onSort(column)}
     >
-      <div className="flex items-center gap-1.5">
+      <div className={`flex items-center gap-1.5 ${className.includes('text-right') ? 'justify-end' : className.includes('text-center') ? 'justify-center' : 'justify-start'}`}>
         <span>{label}</span>
         <span
           className={`flex-shrink-0 transition-opacity ${

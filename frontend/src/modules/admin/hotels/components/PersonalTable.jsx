@@ -24,9 +24,9 @@ export default function PersonalTable({
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleConfirmDesasignar = () => {
+  const handleConfirmDesasignar = async () => {
     if (!vendedorToRemove) return;
-    onDesasignar(vendedorToRemove.empleadoId);
+    await onDesasignar(vendedorToRemove.empleadoId);
     setVendedorToRemove(null);
   };
 

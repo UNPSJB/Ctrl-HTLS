@@ -13,7 +13,7 @@ const ITEMS_PER_PAGE = 100;
  * Lista de paquetes turísticos con acciones de editar y eliminar.
  * Recibe callbacks onEdit y onDelete desde PaquetesTab.
  */
-export default function PaquetesTable({ data = [], loading = false, onEdit, onDelete }) {
+export default function PaquetesTable({ data = [], loading = false, isDeleting = false, onEdit, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [paqueteToDelete, setPaqueteToDelete] = useState(null);
 
@@ -133,12 +133,12 @@ export default function PaquetesTable({ data = [], loading = false, onEdit, onDe
         isOpen={!!paqueteToDelete}
         onClose={() => setPaqueteToDelete(null)}
         title="Eliminar Paquete"
-        onConfirm={() => {
-          onDelete?.(paqueteToDelete.id);
+        loading={isDeleting}
+        onConfirm={async () => {
+          if (onDelete) await onDelete(paqueteToDelete.id);
           setPaqueteToDelete(null);
         }}
-        confirmLabel="Sí, eliminar"
-        confirmIcon={Trash2}
+        confirmLabel="Aceptar"
         variant="red"
         size="sm"
       >

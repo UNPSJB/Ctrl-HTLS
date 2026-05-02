@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Trash2, User, Key } from 'lucide-react';
-import { DataTable, DataTableToolbar, DataTablePagination } from '@admin-ui';
+import { Edit, Trash2, User, Key, PowerOff, CheckCircle2, Filter } from 'lucide-react';
+import { DataTable, DataTableToolbar, DataTablePagination, Modal } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import ChangePasswordModal from './ChangePasswordModal';
 import axiosInstance from '@api/axiosInstance';
@@ -23,6 +23,25 @@ const AdministradoresTable = () => {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [selectedAdminId, setSelectedAdminId] = useState(null);
 
+  const [statusFilter, setStatusFilter] = useState('activos');
+  const [adminToToggle, setAdminToToggle] = useState(null);
+  const [isToggling, setIsToggling] = useState(false);
+
+  const STATUS_CYCLE = ['activos', 'inactivos', 'todos'];
+  const STATUS_META = {
+    activos: { label: 'Activos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    inactivos: { label: 'Inactivos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    todos: { label: 'Todos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+  };
+
+  const cycleStatus = () => {
+    setStatusFilter(prev => {
+      const idx = STATUS_CYCLE.indexOf(prev);
+      return STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
+    });
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
     fetchAdmins();
   }, []);
@@ -42,14 +61,23 @@ const AdministradoresTable = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este administrador?')) {
-      try {
-        await axiosInstance.delete(`/empleado/${id}`);
-        setAdmins(prev => prev.filter((a) => a.id !== id));
-      } catch (err) {
-        alert('Error al eliminar administrador');
+  const confirmToggle = async () => {
+    if (!adminToToggle) return;
+    setIsToggling(true);
+    try {
+      if (adminToToggle.eliminado) {
+        await axiosInstance.patch(`/empleado/${adminToToggle.id}/reactivar`);
+        toast.success('Administrador reactivado correctamente');
+      } else {
+        await axiosInstance.delete(`/empleado/${adminToToggle.id}`);
+        toast.success('Administrador dado de baja');
       }
+      await fetchAdmins();
+    } catch (err) {
+      toast.error('Error al cambiar el estado del administrador');
+    } finally {
+      setIsToggling(false);
+      setAdminToToggle(null);
     }
   };
 
@@ -63,14 +91,19 @@ const AdministradoresTable = () => {
   };
 
   const filteredAdmins = useMemo(() => {
-    if (!searchTerm) return admins;
-    const lowerTerm = searchTerm.toLowerCase();
-    return admins.filter(a =>
-      a.nombre.toLowerCase().includes(lowerTerm) ||
-      a.apellido.toLowerCase().includes(lowerTerm) ||
-      a.numeroDocumento.includes(lowerTerm)
-    );
-  }, [admins, searchTerm]);
+    let result = admins;
+    if (searchTerm) {
+      const lowerTerm = searchTerm.toLowerCase();
+      result = result.filter(a =>
+        a.nombre.toLowerCase().includes(lowerTerm) ||
+        a.apellido.toLowerCase().includes(lowerTerm) ||
+        a.numeroDocumento.includes(lowerTerm)
+      );
+    }
+    if (statusFilter === 'activos') result = result.filter(a => !a.eliminado);
+    if (statusFilter === 'inactivos') result = result.filter(a => a.eliminado);
+    return result;
+  }, [admins, searchTerm, statusFilter]);
 
   const { sortedData: sortedAdmins, sortKey, sortDir, handleSort } = useSort(filteredAdmins, 'apellido');
 
@@ -89,12 +122,12 @@ const AdministradoresTable = () => {
       label: 'Nombre Completo',
       render: (admin) => (
         <div className="flex items-center truncate">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+          <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${admin.eliminado ? 'bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-400' : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'}`}>
             <User className="h-5 w-5" />
           </div>
           <div className="ml-4 truncate">
-            <div className="font-medium text-gray-900 dark:text-white transition-all max-w-[200px] truncate md:max-w-[300px]">
-              {capitalizeFirst(admin.nombre)} {capitalizeFirst(admin.apellido)}
+            <div className={`font-medium transition-all max-w-[200px] truncate md:max-w-[300px] ${admin.eliminado ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+              {admin.eliminado ? <del>{capitalizeFirst(admin.nombre)} {capitalizeFirst(admin.apellido)}</del> : `${capitalizeFirst(admin.nombre)} ${capitalizeFirst(admin.apellido)}`}
             </div>
           </div>
         </div>
@@ -135,9 +168,14 @@ const AdministradoresTable = () => {
       sortable: false,
       render: (admin) => (
         <div className="flex justify-end gap-2">
-          <TableButton variant="view" icon={Key} onClick={() => handlePasswordChange(admin.id)} title="Cambiar Contraseña" />
-          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(admin.id)} />
-          <TableButton variant="delete" icon={Trash2} onClick={() => handleDelete(admin.id)} />
+          <TableButton variant="view" icon={Key} onClick={() => handlePasswordChange(admin.id)} title="Cambiar Contraseña" disabled={admin.eliminado} />
+          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(admin.id)} disabled={admin.eliminado} />
+          <TableButton
+            variant={!admin.eliminado ? "delete" : "view"}
+            icon={!admin.eliminado ? PowerOff : CheckCircle2}
+            onClick={() => setAdminToToggle(admin)}
+            title={!admin.eliminado ? "Dar de baja" : "Activar Administrador"}
+          />
         </div>
       )
     }
@@ -147,14 +185,27 @@ const AdministradoresTable = () => {
     <div className="flex-grow flex flex-col h-full overflow-hidden">
       <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <DataTableToolbar>
-          <div className="w-full max-w-md">
-            <SearchInput
-              placeholder="Buscar por nombre o documento..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onClear={() => setSearchTerm('')}
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex-1 max-w-md">
+              <SearchInput
+                placeholder="Buscar por nombre o documento..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onClear={() => setSearchTerm('')}
+                disabled={loading}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={cycleStatus}
               disabled={loading}
-            />
+              title={`Filtro actual: ${STATUS_META[statusFilter].label}. Click para cambiar.`}
+              className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${STATUS_META[statusFilter].color} ${STATUS_META[statusFilter].bg} ${STATUS_META[statusFilter].border}`}
+            >
+              <Filter className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">{STATUS_META[statusFilter].label}</span>
+            </button>
           </div>
         </DataTableToolbar>
 
@@ -168,6 +219,7 @@ const AdministradoresTable = () => {
           sortKey={sortKey}
           sortDir={sortDir}
           onSort={handleSort}
+          rowClassName={(a) => a.eliminado ? 'opacity-50 grayscale' : ''}
         />
 
         <DataTablePagination
@@ -178,11 +230,33 @@ const AdministradoresTable = () => {
           disabled={loading}
         />
 
-        <ChangePasswordModal 
+        <ChangePasswordModal
           isOpen={passwordModalOpen}
           onClose={() => setPasswordModalOpen(false)}
           empleadoId={selectedAdminId}
         />
+
+        <Modal
+          isOpen={!!adminToToggle}
+          onClose={() => setAdminToToggle(null)}
+          title={adminToToggle?.eliminado ? "¿Reactivar Administrador?" : "¿Dar de baja Administrador?"}
+          onConfirm={confirmToggle}
+          loading={isToggling}
+          confirmLabel={"Aceptar"}
+          variant={adminToToggle?.eliminado ? "default" : "red"}
+        >
+          <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+            <p>
+              {adminToToggle?.eliminado ? 'Estás a punto de reactivar al administrador ' : 'Estás a punto de dar de baja temporalmente al administrador '}
+              <strong className="text-gray-900 dark:text-white font-medium">
+                {adminToToggle ? `${capitalizeFirst(adminToToggle.nombre)} ${capitalizeFirst(adminToToggle.apellido)}` : ''}
+              </strong>.
+              {adminToToggle?.eliminado
+                ? ' Volverá a tener acceso total al sistema de administración.'
+                : ' Su acceso al panel de administración será revocado.'}
+            </p>
+          </div>
+        </Modal>
       </div>
     </div>
   );

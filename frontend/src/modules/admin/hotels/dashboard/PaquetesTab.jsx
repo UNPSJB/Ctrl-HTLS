@@ -9,6 +9,7 @@ import AppButton from '@/components/ui/AppButton';
 export default function PaquetesTab({ hotelId, isActive = false }) {
   const [paquetes, setPaquetes] = useState([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Estados para el modal
   const [showForm, setShowForm] = useState(false);
@@ -44,15 +45,16 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
   };
 
   const handleDeletePaquete = async (idPaquete) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este paquete promocional?')) return;
-
     try {
+      setIsDeleting(true);
       await axiosInstance.delete(`/hotel/${hotelId}/paquete-promocional/${idPaquete}`);
       toast.success('Paquete eliminado');
-      fetchData();
+      await fetchData();
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.error || 'Error al eliminar el paquete');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -92,6 +94,7 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
         <PaquetesTable
           data={paquetes}
           loading={loadingInitial}
+          isDeleting={isDeleting}
           onEdit={handleOpenEdit}
           onDelete={handleDeletePaquete}
         />

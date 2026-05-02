@@ -25,6 +25,7 @@ export default function HabitacionesTab({
   const [isCreating, setIsCreating] = useState(false);
   const [editingHabitacion, setEditingHabitacion] = useState(null);
   const [tarifasCompletas, setTarifasCompletas] = useState([]);
+  const [isTogglingRoom, setIsTogglingRoom] = useState(false);
 
   const isLocalMode = !hotelId;
 
@@ -110,23 +111,23 @@ export default function HabitacionesTab({
   };
 
   const handleDelete = async (habitacionId, tempId) => {
-    if (!window.confirm('¿Está seguro de desactivar esta habitación física? Quedará invalidada para futuros alquileres.'))
-      return;
-
     if (isLocalMode) {
       const updated = habitaciones.filter((h) => h.tempId !== tempId);
       onLocalChange(updated);
       toast.success('Eliminado del borrador');
     } else {
       try {
+        setIsTogglingRoom(true);
         await axiosInstance.delete(
           `/hotel/${hotelId}/habitacion/${habitacionId}`
         );
-        toast.success('Habitación desactivada');
-        fetchHabitaciones();
+        toast.success('Estado de habitación actualizado');
+        await fetchHabitaciones();
       } catch (error) {
         console.error(error);
-        toast.error('Error al desactivar la habitación');
+        toast.error('Error al cambiar el estado de la habitación');
+      } finally {
+        setIsTogglingRoom(false);
       }
     }
   };
@@ -198,6 +199,7 @@ export default function HabitacionesTab({
           tiposGlobales={tiposGlobales}
           loading={loading}
           isCreating={isCreating}
+          isTogglingRoom={isTogglingRoom}
           onEdit={startEdit}
           onDelete={handleDelete}
         />

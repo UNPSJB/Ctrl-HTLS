@@ -7,7 +7,7 @@ import { useSort } from '@/hooks/useSort';
 
 const ITEMS_PER_PAGE = 100;
 
-export default function DescuentosTable({ data = [], loading = false, onDelete }) {
+export default function DescuentosTable({ data = [], loading = false, onDelete, isDeleting = false }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [descuentoToDelete, setDescuentoToDelete] = useState(null);
 
@@ -18,9 +18,9 @@ export default function DescuentosTable({ data = [], loading = false, onDelete }
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!descuentoToDelete) return;
-    onDelete?.(descuentoToDelete.id);
+    await onDelete?.(descuentoToDelete.id);
     setDescuentoToDelete(null);
   };
 
@@ -88,8 +88,8 @@ export default function DescuentosTable({ data = [], loading = false, onDelete }
         onClose={() => setDescuentoToDelete(null)}
         title="Eliminar Descuento"
         onConfirm={handleConfirmDelete}
-        confirmLabel="Sí, eliminar"
-        confirmIcon={Trash2}
+        loading={isDeleting}
+        confirmLabel="Aceptar"
         variant="red"
         size="sm"
       >

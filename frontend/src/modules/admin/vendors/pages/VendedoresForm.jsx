@@ -6,7 +6,8 @@ import { User, Save, Lock, MapPin, Building2, Briefcase, Phone, Trash2 } from 'l
 import { useNavigate, useParams } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 
-import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
+import { PageHeader, SidebarLayout, PageSidebar, PageContentCard, DataTable, Modal } from '@admin-ui';
+import TableButton from '@admin-ui/TableButton';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import {
@@ -33,7 +34,7 @@ const VendedoresForm = () => {
     reset,
     setValue,
     watch,
-    formState: { errors, isValid, isSubmitting }
+    formState: { errors, isValid, isSubmitting, isDirty }
   } = useForm({
     defaultValues: {
       nombre: '',
@@ -59,6 +60,7 @@ const VendedoresForm = () => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
+  const [hotelToRemove, setHotelToRemove] = useState(null);
 
   const tipoDocumento = watch('tipoDocumento');
   const rol = watch('rol');
@@ -105,11 +107,13 @@ const VendedoresForm = () => {
     }
   };
 
-  const handleRemoveHotel = (hotelId) => {
-    if (window.confirm('¿Seguro que desea quitar el acceso a este hotel? Esta acción se aplicará al guardar.')) {
-      setAssignedHotels(prev => prev.filter(h => h.id !== hotelId));
-    }
+  const handleRemoveHotel = () => {
+    if (!hotelToRemove) return;
+    setAssignedHotels(prev => prev.filter(h => h.id !== hotelToRemove.id));
+    setHotelToRemove(null);
   };
+
+  const hasHotelsChanged = JSON.stringify(initialHotels.map(h => h.id)) !== JSON.stringify(assignedHotels.map(h => h.id));
 
   const handleDocumentoChange = (e) => {
     const { value } = e.target;
@@ -324,58 +328,61 @@ const VendedoresForm = () => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Acceso a Hoteles</h3>
                   
                   <div className="relative flex flex-col min-h-[300px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div className="overflow-x-auto flex-1">
-                      <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-                          <tr>
-                            <th scope="col" className="px-6 py-4">
-                              Hotel
-                            </th>
-                            <th scope="col" className="px-6 py-4 text-right">
-                              Acciones
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                          {assignedHotels.length > 0 ? (
-                            assignedHotels.map((hotel) => (
-                              <tr key={hotel.id} className="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                                <td className="whitespace-nowrap px-6 py-3">
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                                      <Building2 className="h-5 w-5" />
-                                    </div>
-                                    <span className="font-medium text-gray-900 dark:text-white">
-                                      {capitalizeFirst(hotel.nombre)}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="whitespace-nowrap px-6 py-3 text-right">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveHotel(hotel.id)}
-                                    className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                                    title="Quitar acceso"
-                                  >
-                                    <Trash2 className="h-5 w-5" />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan="2" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                <div className="flex flex-col items-center gap-2 italic">
-                                  <Building2 className="h-8 w-8 opacity-20" />
-                                  <p>Este vendedor no tiene hoteles asignados.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
+                    <DataTable
+                      columns={[
+                        {
+                          key: 'nombre',
+                          label: 'Hotel',
+                          render: (hotel) => (
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                <Building2 className="h-5 w-5" />
+                              </div>
+                              <span className="font-medium text-gray-900 dark:text-white">
+                                {capitalizeFirst(hotel.nombre)}
+                              </span>
+                            </div>
+                          )
+                        },
+                        {
+                          key: 'acciones',
+                          label: 'Acciones',
+                          align: 'right',
+                          sortable: false,
+                          render: (hotel) => (
+                            <TableButton
+                              variant="delete"
+                              icon={Trash2}
+                              onClick={() => setHotelToRemove(hotel)}
+                              title="Quitar acceso"
+                            />
+                          )
+                        }
+                      ]}
+                      data={assignedHotels}
+                      emptyIcon={Building2}
+                      emptyMessage="Este vendedor no tiene hoteles asignados."
+                      rowKey={(row) => row.id}
+                    />
                   </div>
+
+                  <Modal
+                    isOpen={!!hotelToRemove}
+                    onClose={() => setHotelToRemove(null)}
+                    title="Revocar Acceso"
+                    onConfirm={handleRemoveHotel}
+                    confirmLabel="Confirmar"
+                    variant="red"
+                    size="sm"
+                  >
+                    {hotelToRemove && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        ¿Confirma revocar el acceso al hotel{' '}
+                        <span className="font-semibold text-gray-900 dark:text-white">{capitalizeFirst(hotelToRemove.nombre)}</span>?
+                        Este cambio se aplicará al guardar el formulario.
+                      </p>
+                    )}
+                  </Modal>
                 </div>
               )}
             </div>
@@ -391,7 +398,7 @@ const VendedoresForm = () => {
             </AppButton>
             <AppButton
               type="submit"
-              disabled={!isValid || isSubmitting}
+              disabled={isSubmitting || Object.keys(errors).length > 0 || (!isDirty && !hasHotelsChanged)}
               loading={isSubmitting}
               icon={Save}
             >

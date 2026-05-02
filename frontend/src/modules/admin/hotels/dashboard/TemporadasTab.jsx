@@ -10,6 +10,7 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
   const [temporadas, setTemporadas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (isActive) {
@@ -48,15 +49,15 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Confirma eliminar esta temporada?')) return;
     try {
-      setLoading(true);
+      setIsDeleting(true);
       await axiosInstance.delete(`/hotel/${hotelId}/temporada/${id}`);
       toast.success('Temporada eliminada');
       await fetchTemporadas();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error al eliminar');
-      setLoading(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -82,7 +83,7 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
       </div>
 
       <div className="flex-grow flex flex-col mt-6 overflow-hidden relative">
-        <TemporadasTable data={temporadas} loading={loading} onDelete={handleDelete} />
+        <TemporadasTable data={temporadas} loading={loading} onDelete={handleDelete} isDeleting={isDeleting} />
       </div>
 
       <TemporadaFormModal

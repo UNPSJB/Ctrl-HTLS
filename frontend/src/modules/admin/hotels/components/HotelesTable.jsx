@@ -26,9 +26,9 @@ const HotelesTable = () => {
 
   const STATUS_CYCLE = ['activos', 'inactivos', 'todos'];
   const STATUS_META = {
-    activos:  { label: 'Activos',   color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
-    inactivos:{ label: 'Inactivos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
-    todos:    { label: 'Todos',     color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    activos: { label: 'Activos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    inactivos: { label: 'Inactivos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    todos: { label: 'Todos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
   };
   const cycleStatus = () => {
     setStatusFilter(prev => {
@@ -71,13 +71,13 @@ const HotelesTable = () => {
     const lowerTerm = searchTerm.toLowerCase();
     let result = searchTerm
       ? hoteles.filter(h =>
-          h.nombre.toLowerCase().includes(lowerTerm) ||
-          h.ubicacion?.nombreCiudad?.toLowerCase().includes(lowerTerm) ||
-          h.ubicacion?.nombreProvincia?.toLowerCase().includes(lowerTerm)
-        )
+        h.nombre.toLowerCase().includes(lowerTerm) ||
+        h.ubicacion?.nombreCiudad?.toLowerCase().includes(lowerTerm) ||
+        h.ubicacion?.nombreProvincia?.toLowerCase().includes(lowerTerm)
+      )
       : hoteles;
-    if (statusFilter === 'activos')   result = result.filter(h => !h.eliminado);
-    if (statusFilter === 'inactivos') result = result.filter(h =>  h.eliminado);
+    if (statusFilter === 'activos') result = result.filter(h => !h.eliminado);
+    if (statusFilter === 'inactivos') result = result.filter(h => h.eliminado);
     return result;
   }, [hoteles, searchTerm, statusFilter]);
 
@@ -204,13 +204,10 @@ const HotelesTable = () => {
               onClick={cycleStatus}
               disabled={loading}
               title={`Filtro actual: ${STATUS_META[statusFilter].label}. Click para cambiar.`}
-              className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${
-                STATUS_META[statusFilter].color
-              } ${
-                STATUS_META[statusFilter].bg
-              } ${
-                STATUS_META[statusFilter].border
-              }`}
+              className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${STATUS_META[statusFilter].color
+                } ${STATUS_META[statusFilter].bg
+                } ${STATUS_META[statusFilter].border
+                }`}
             >
               <Filter className="h-4 w-4 flex-shrink-0" />
               <span className="hidden sm:inline">{STATUS_META[statusFilter].label}</span>
@@ -250,8 +247,8 @@ const HotelesTable = () => {
         onConfirm={confirmToggle}
         loading={isToggling}
         confirmDisabled={hotelToToggle?.eliminado && !selectedEncargadoId}
-        confirmLabel={hotelToToggle?.eliminado ? "Asignar y Reactivar" : "Confirmar y Dar de Baja"}
-        confirmIcon={hotelToToggle?.eliminado ? CheckCircle2 : PowerOff}
+        confirmLabel={"Aceptar"}
+        variant={hotelToToggle?.eliminado ? "indigo" : "red"}
         size={hotelToToggle?.eliminado ? "lg" : "md"}
       >
         <div className="space-y-4 text-sm text-gray-600 dark:text-gray-300">

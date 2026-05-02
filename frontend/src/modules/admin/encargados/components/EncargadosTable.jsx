@@ -4,7 +4,6 @@ import { Trash2, Users, User, Edit, Filter } from 'lucide-react';
 import { DataTable, DataTableToolbar, DataTablePagination } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@/api/axiosInstance';
-import { InnerLoading } from '@/components/ui/InnerLoading';
 import { toast } from 'react-hot-toast';
 import { SearchInput } from '@form';
 import { capitalizeFirst } from '@/utils/stringUtils';
@@ -25,9 +24,9 @@ const EncargadosTable = () => {
 
   const ASSIGN_CYCLE = ['asignados', 'libres', 'todos'];
   const ASSIGN_META = {
-    asignados:{ label: 'Con hotel',   color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
-    libres:   { label: 'Sin hotel',   color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
-    todos:    { label: 'Todos',       color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    asignados: { label: 'Con hotel', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    libres: { label: 'Sin hotel', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    todos: { label: 'Todos', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-white dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
   };
   const cycleAssign = () => {
     setAssignFilter(prev => {
@@ -80,8 +79,8 @@ const EncargadosTable = () => {
       e.apellido?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.dni?.includes(searchTerm)
     );
-    if (assignFilter === 'asignados') result = result.filter(e =>  !!e.hotel);
-    if (assignFilter === 'libres')    result = result.filter(e => !e.hotel);
+    if (assignFilter === 'asignados') result = result.filter(e => !!e.hotel);
+    if (assignFilter === 'libres') result = result.filter(e => !e.hotel);
     return result;
   }, [encargados, searchTerm, assignFilter]);
 
@@ -186,13 +185,10 @@ const EncargadosTable = () => {
               onClick={cycleAssign}
               disabled={loading}
               title={`Filtro: ${ASSIGN_META[assignFilter].label}. Click para cambiar.`}
-              className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${
-                ASSIGN_META[assignFilter].color
-              } ${
-                ASSIGN_META[assignFilter].bg
-              } ${
-                ASSIGN_META[assignFilter].border
-              }`}
+              className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50 ${ASSIGN_META[assignFilter].color
+                } ${ASSIGN_META[assignFilter].bg
+                } ${ASSIGN_META[assignFilter].border
+                }`}
             >
               <Filter className="h-4 w-4 flex-shrink-0" />
               <span className="hidden sm:inline">{ASSIGN_META[assignFilter].label}</span>
@@ -227,8 +223,7 @@ const EncargadosTable = () => {
         title={encargadoToDelete?.hotel ? "Acción no permitida" : "Eliminar Encargado"}
         onConfirm={encargadoToDelete?.hotel ? () => setEncargadoToDelete(null) : confirmDelete}
         loading={isDeleting}
-        confirmLabel={encargadoToDelete?.hotel ? "Entendido" : "Sí, eliminar"}
-        confirmIcon={encargadoToDelete?.hotel ? null : Trash2}
+        confirmLabel={"Aceptar"}
         variant={encargadoToDelete?.hotel ? "default" : "red"}
       >
         <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
