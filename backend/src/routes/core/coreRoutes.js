@@ -13,6 +13,9 @@ const {
   getPaises,
   updateLocalidad,
   deleteLocalidad,
+  deletePais,
+  deleteProvincia,
+  deleteCiudad,
   getProvincias,
   getCiudades,
   getPaisById,
@@ -48,10 +51,13 @@ router.put('/localidad/:id', validateId, validateLocalidad, updateLocalidad); //
 router.delete('/localidad/:id', validateId, deleteLocalidad); //Ruta para eliminar paises, provincias y ciudades
 router.get('/paises', getPaises); //Ruta para obtener todos los paises
 router.get('/paises/:id', validateId, getPaisById); //Ruta para obtener un país por su ID
+router.delete('/paises/:id', validateId, deletePais); //Ruta para eliminar un país (verifica que no tenga provincias)
 router.get('/provincias/:paisId', getProvincias); //Ruta para obtener todas las provincias de un pais
 router.get('/provincias/:id', validateId, getProvinciaById); //Ruta para obtener una provincia por su ID
+router.delete('/provincias/:id', validateId, deleteProvincia); //Ruta para eliminar una provincia (verifica que no tenga ciudades)
 router.get('/ciudades/:provinciaId', getCiudades); //Ruta para obtener todas las ciudades de una provincia
 router.get('/ciudades/:id', validateId, getCiudadById); //Ruta para obtener una ciudad por su ID
+router.delete('/ciudades/:id', validateId, deleteCiudad); //Ruta para eliminar una ciudad (verifica que no tenga hoteles ni empleados)
 
 //#endregion
 

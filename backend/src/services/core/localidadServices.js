@@ -1,6 +1,8 @@
 const Pais = require('../../models/core/Pais');
 const Provincia = require('../../models/core/Provincia');
 const Ciudad = require('../../models/core/Ciudad');
+const Hotel = require('../../models/hotel/Hotel');
+const Empleado = require('../../models/core/Empleado');
 const CustomError = require('../../utils/CustomError');
 
 const createPais = async (nombre) => {
@@ -85,27 +87,60 @@ const updateCiudad = async (id, nombre, provinciaId, codigoPostal) => {
 };
 
 const deletePais = async (id) => {
-  const pais = await Pais.findByPk(id);
+  const pais = await Pais.findByPk(id, {
+    include: [{ model: Provincia, as: 'provincias' }],
+  });
   if (!pais) {
     throw new CustomError('El país no existe', 404); // Not Found
+  }
+  if (pais.provincias && pais.provincias.length > 0) {
+    throw new CustomError(
+      'No se puede eliminar el país porque tiene provincias asociadas',
+      409,
+    ); // Conflict
   }
   await pais.destroy();
   return pais;
 };
 
 const deleteProvincia = async (id) => {
-  const provincia = await Provincia.findByPk(id);
+  const provincia = await Provincia.findByPk(id, {
+    include: [{ model: Ciudad, as: 'ciudades' }],
+  });
   if (!provincia) {
     throw new CustomError('La provincia no existe', 404); // Not Found
+  }
+  if (provincia.ciudades && provincia.ciudades.length > 0) {
+    throw new CustomError(
+      'No se puede eliminar la provincia porque tiene ciudades asociadas',
+      409,
+    ); // Conflict
   }
   await provincia.destroy();
   return provincia;
 };
 
 const deleteCiudad = async (id) => {
-  const ciudad = await Ciudad.findByPk(id);
+  const ciudad = await Ciudad.findByPk(id, {
+    include: [
+      { model: Hotel, as: 'hoteles' },
+      { model: Empleado, as: 'empleados' },
+    ],
+  });
   if (!ciudad) {
     throw new CustomError('La ciudad no existe', 404); // Not Found
+  }
+  const hasHoteles = ciudad.hoteles && ciudad.hoteles.length > 0;
+  const hasEmpleados = ciudad.empleados && ciudad.empleados.length > 0;
+
+  if (hasHoteles || hasEmpleados) {
+    const associatedEntities = [];
+    if (hasHoteles) associatedEntities.push('hoteles');
+    if (hasEmpleados) associatedEntities.push('empleados');
+    throw new CustomError(
+      `No se puede eliminar la ciudad porque tiene ${associatedEntities.join(' y ')} asociados`,
+      409,
+    ); // Conflict
   }
   await ciudad.destroy();
   return ciudad;

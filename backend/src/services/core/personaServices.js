@@ -100,6 +100,7 @@ const formatearVendedor = (vendedor) => ({
   telefono: vendedor.telefono,
   direccion: vendedor.direccion,
   ciudadId: vendedor.ciudadId,
+  eliminado: vendedor.eliminado,
   // Datos de ubicación extendidos para el frontend
   ubicacion: mapUbicacion(vendedor),
   hotelesPermitidos: (vendedor.hoteles || []).map((hotel) => ({
@@ -134,6 +135,7 @@ const formatearAdministrador = (administrador) => ({
   direccion: administrador.direccion,
   ciudadId: administrador.ciudadId,
   rol: administrador.rol,
+  eliminado: administrador.eliminado,
   ubicacion: mapUbicacion(administrador),
 });
 
@@ -435,7 +437,7 @@ const eliminarEmpleado = async (id) => {
     );
   }
 
-  await empleado.destroy();
+  await empleado.update({ eliminado: true });
 };
 
 const obtenerVendedores = async () => {
@@ -549,7 +551,7 @@ const eliminarCliente = async (id) => {
     throw new CustomError('Cliente no encontrado', 404);
   }
 
-  await cliente.destroy();
+  await cliente.update({ eliminado: true });
 };
 
 const obtenerClientes = async () => {

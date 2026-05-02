@@ -36,6 +36,11 @@ const Cliente = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0, // Inicializamos con 0 puntos
     },
+    eliminado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: 'clientes',
