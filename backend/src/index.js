@@ -10,6 +10,7 @@ const hotelRoutes = require('./routes/hotel/hotelRoutes');
 const alquilerRoutes = require('./routes/ventas/alquilerRoutes');
 const facturaRoutes = require('./routes/ventas/facturasRoutes');
 const liquidacionesRoutes = require('./routes/ventas/liquidacionesRoutes');
+const historialVentasRoutes = require('./routes/ventas/historialVentasRoutes');
 
 // Importar todos los modelos y asociaciones
 require('./models/associations');
@@ -28,6 +29,7 @@ app.use('/api', hotelRoutes);
 app.use('/api', alquilerRoutes);
 app.use('/api', facturaRoutes);
 app.use('/api', liquidacionesRoutes);
+app.use('/api', historialVentasRoutes);
 
 // Sincronizar la base de datos
 sequelize
