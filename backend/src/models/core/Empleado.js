@@ -42,6 +42,11 @@ const Empleado = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    eliminado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: 'empleados',
