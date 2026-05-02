@@ -132,6 +132,42 @@ const deleteLocalidad = async (req, res) => {
   }
 };
 
+const deletePais = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await localidadService.deletePais(id);
+    res.status(200).json({ message: 'País eliminado correctamente' });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const deleteProvincia = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await localidadService.deleteProvincia(id);
+    res.status(200).json({ message: 'Provincia eliminada correctamente' });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const deleteCiudad = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await localidadService.deleteCiudad(id);
+    res.status(200).json({ message: 'Ciudad eliminada correctamente' });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getPaises = async (req, res) => {
   try {
     const paises = await localidadService.obtenerPaises();
@@ -225,6 +261,9 @@ module.exports = {
   createLocalidad,
   updateLocalidad,
   deleteLocalidad,
+  deletePais,
+  deleteProvincia,
+  deleteCiudad,
   getPaises,
   getProvincias,
   getCiudades,
