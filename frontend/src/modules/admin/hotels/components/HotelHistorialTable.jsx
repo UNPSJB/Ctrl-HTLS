@@ -2,17 +2,21 @@ import { useState } from 'react';
 import {
   Users,
   Receipt,
-  ShoppingBag
+  ShoppingBag,
+  CreditCard,
+  Building2,
+  CalendarDays
 } from 'lucide-react';
 import { DataTable, DataTablePagination } from '@admin-ui';
+import { capitalizeFirst, capitalizeWords } from '@/utils/stringUtils';
 
 const ITEMS_PER_PAGE = 10;
 
 /**
- * Componente de Lista para el historial de alquileres de un cliente.
- * Separa fechas, pasajeros e información de facturación en columnas independientes.
+ * Componente de Lista para el historial de ventas de un hotel.
+ * Muestra información sobre la fecha, vendedor, cliente, montos y facturación.
  */
-export default function HistorialTable({
+export default function HotelHistorialTable({
   data = [],
   loading = false
 }) {
@@ -25,42 +29,34 @@ export default function HistorialTable({
 
   const columns = [
     {
-      key: 'alquilerId',
-      label: 'ID',
-      render: (venta) => (
-        <span className="font-mono text-xs text-gray-400 dark:text-gray-500">
-          #{venta.alquilerId}
-        </span>
-      )
-    },
-    {
-      key: 'fechaInicio',
-      label: 'F. Inicio',
+      key: 'fechaVenta',
+      label: 'Fecha Venta',
       align: 'center',
       render: (venta) => (
         <div className="font-medium text-gray-900 dark:text-white">
-          {new Date(venta.fechaInicio).toLocaleDateString()}
+          {venta.fechaVenta ? new Date(venta.fechaVenta).toLocaleDateString() : <span className="italic opacity-30">—</span>}
         </div>
       )
     },
     {
-      key: 'fechaFin',
-      label: 'F. Fin',
-      align: 'center',
+      key: 'vendedor',
+      label: 'Vendedor',
       render: (venta) => (
         <div className="font-medium text-gray-900 dark:text-white">
-          {new Date(venta.fechaFin).toLocaleDateString()}
+          {venta.vendedor
+            ? capitalizeWords(venta.vendedor)
+            : <span className="italic text-gray-400">Desconocido</span>}
         </div>
       )
     },
     {
-      key: 'pasajeros',
-      label: 'Pasajeros',
-      align: 'center',
+      key: 'cliente',
+      label: 'Cliente',
       render: (venta) => (
-        <div className="flex items-center justify-center gap-1.5 text-gray-600 dark:text-gray-300">
-          <Users className="h-3.5 w-3.5 opacity-50" />
-          {venta.pasajeros}
+        <div className="font-medium text-gray-900 dark:text-white">
+          {venta.cliente
+            ? capitalizeWords(venta.cliente)
+            : <span className="italic text-gray-400">Desconocido</span>}
         </div>
       )
     },
@@ -70,23 +66,17 @@ export default function HistorialTable({
       align: 'right',
       render: (venta) => (
         <span className="font-bold text-gray-900 dark:text-white">
-          ${venta.importeTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          ${venta.monto ? Number(venta.monto).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
         </span>
       )
     },
     {
-      key: 'factura.fecha',
-      label: 'Fecha Factura',
+      key: 'metodoPago',
+      label: 'Método de Pago',
       align: 'center',
       render: (venta) => (
-        <span className="text-gray-500 dark:text-gray-400">
-          {venta.detalle?.factura?.fecha ? (
-            <div className="flex items-center justify-center gap-1.5">
-              {new Date(venta.detalle.factura.fecha).toLocaleDateString()}
-            </div>
-          ) : (
-            <span className="italic opacity-30">—</span>
-          )}
+        <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300">
+          {venta.metodoPago ? capitalizeFirst(venta.metodoPago) : <span className="italic text-gray-400">—</span>}
         </span>
       )
     },
@@ -95,10 +85,11 @@ export default function HistorialTable({
       label: 'Facturación',
       render: (venta) => (
         <span>
-          {venta.detalle?.factura ? (
+          {venta.tipoFactura ? (
             <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
               <Receipt className="h-3.5 w-3.5" />
-              Factura {venta.detalle.factura.tipoFactura}
+              Factura {venta.tipoFactura}
+              {venta.numeroFactura ? ` - Nº ${venta.numeroFactura}` : ''}
             </span>
           ) : (
             <span className="text-xs italic text-gray-400 dark:text-gray-500">Sin comprobante</span>
@@ -114,10 +105,10 @@ export default function HistorialTable({
         columns={columns}
         data={currentItems}
         loading={loading}
-        loadingMessage="Cargando historial..."
-        emptyIcon={ShoppingBag}
-        emptyMessage="No hay actividad registrada para este cliente."
-        rowKey={(row) => row.alquilerId}
+        loadingMessage="Cargando historial del hotel..."
+        emptyIcon={Building2}
+        emptyMessage="No hay actividad registrada para este hotel."
+        rowKey={(row, index) => index}
       />
 
       <DataTablePagination

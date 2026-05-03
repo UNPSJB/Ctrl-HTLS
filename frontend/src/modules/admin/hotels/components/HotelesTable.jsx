@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Eye, Building2, PowerOff, CheckCircle2, Filter } from 'lucide-react';
+import { Eye, Building2, PowerOff, CheckCircle2, Filter, History } from 'lucide-react';
 import { DataTable, DataTableToolbar, DataTablePagination } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
-import { capitalizeFirst } from '@/utils/stringUtils';
+import { capitalizeFirst, capitalizeWords } from '@/utils/stringUtils';
 import { useHotelsData } from '@admin-hooks/useHotelsData';
 import { useNavigate } from 'react-router-dom';
 import { SearchInput } from '@/components/ui/form';
@@ -105,6 +105,10 @@ const HotelesTable = () => {
     navigate(`/admin/hoteles/${id}/dashboard`);
   };
 
+  const handleHistory = (id) => {
+    navigate(`/admin/hoteles/${id}/historial`);
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
@@ -120,7 +124,7 @@ const HotelesTable = () => {
           </div>
           <div className="ml-4 truncate">
             <div className={`font-medium transition-all max-w-[200px] truncate md:max-w-[300px] ${hotel.eliminado ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-              {hotel.eliminado ? <del>{capitalizeFirst(hotel.nombre)}</del> : capitalizeFirst(hotel.nombre)}
+              {hotel.eliminado ? <del>{capitalizeWords(hotel.nombre)}</del> : capitalizeWords(hotel.nombre)}
             </div>
           </div>
         </div>
@@ -131,7 +135,7 @@ const HotelesTable = () => {
       label: 'Encargado',
       render: (hotel) => (
         <span className="text-sm text-gray-600 dark:text-gray-300 max-w-[150px] truncate block">
-          {hotel.encargadoNombre ? capitalizeFirst(hotel.encargadoNombre) : <span className="italic text-gray-400">—</span>}
+          {hotel.encargadoNombre ? capitalizeWords(hotel.encargadoNombre) : <span className="italic text-gray-400">—</span>}
         </span>
       )
     },
@@ -166,6 +170,14 @@ const HotelesTable = () => {
         <div className="flex justify-end gap-2">
           <TableButton
             variant="view"
+            icon={History}
+            onClick={() => handleHistory(hotel.hotelId)}
+            aria-label="Ver historial"
+            title="Ver Historial"
+            disabled={hotel.eliminado}
+          />
+          <TableButton
+            variant="view"
             icon={Eye}
             onClick={() => handleView(hotel.hotelId)}
             aria-label="Ver detalles"
@@ -177,7 +189,7 @@ const HotelesTable = () => {
             icon={!hotel.eliminado ? PowerOff : CheckCircle2}
             onClick={() => handleToggleStatus(hotel)}
             aria-label={!hotel.eliminado ? "Dar de baja" : "Activar"}
-            title={!hotel.eliminado ? "Dar de baja temporalmente" : "Activar Hotel"}
+            title={!hotel.eliminado ? "Dar de baja" : "Activar Hotel"}
           />
         </div>
       )
