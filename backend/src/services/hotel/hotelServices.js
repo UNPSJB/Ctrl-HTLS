@@ -185,6 +185,11 @@ const eliminarHotel = async (id) => {
     { where: { hotelId: id, eliminado: false } },
   );
 
+  // Eliminar todas las asignaciones de vendedores al hotel
+  await HotelEmpleado.destroy({
+    where: { hotelId: id },
+  });
+
   return hotel;
 };
 
