@@ -9,6 +9,7 @@ import Dashboard from '@/modules/admin/dashboard/pages/Dashboard';
 import PagoPage from '@/modules/vendor/pages/PagoPage';
 import PagoExitoPage from '@/modules/vendor/pages/PagoExitoPage';
 import HotelDashboard from '@/modules/admin/hotels/pages/HotelDashboard';
+import HotelHistorial from '@/modules/admin/hotels/pages/HotelHistorial';
 import ScrollToTop from '@/components/ScrollToTop';
 import LoginPage from '@/pages/LoginPage';
 import ClientesForm from '@/modules/admin/clients/pages/ClientesForm';
@@ -68,6 +69,7 @@ function AppRouter() {
                 <Route path="hoteles" element={<Hoteles />} />
                 <Route path="hoteles/nuevo" element={<HotelesForm />} />
                 <Route path="hoteles/:id/dashboard" element={<HotelDashboard />} />
+                <Route path="hoteles/:id/historial" element={<HotelHistorial />} />
 
                 {/* Rutas de Clientes */}
                 <Route path="clientes" element={<Clientes />} />
