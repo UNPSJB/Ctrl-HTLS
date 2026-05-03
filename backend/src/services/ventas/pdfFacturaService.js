@@ -1,6 +1,19 @@
 const PDFDocument = require('pdfkit');
+const path = require('path');
+const sharp = require('sharp');
 
-const generarPDFFactura = (factura, pago, detalles, cliente) => {
+const generarPDFFactura = async (factura, pago, detalles, cliente) => {
+  let logoBuffer = null;
+  const logoPath = path.join(__dirname, '..', '..', 'assets', 'logo.svg');
+  try {
+    logoBuffer = await sharp(logoPath)
+      .resize({ width: 100, height: 20, fit: 'inside' })
+      .png()
+      .toBuffer();
+  } catch (e) {
+    // Si no se puede cargar el logo, continuar sin él
+  }
+
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ margin: 50 });
@@ -9,6 +22,11 @@ const generarPDFFactura = (factura, pago, detalles, cliente) => {
       doc.on('data', (chunk) => buffers.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
       doc.on('error', reject);
+
+      // Logo arriba a la derecha
+      if (logoBuffer) {
+        doc.image(logoBuffer, 470, 25, { width: 80 });
+      }
 
       // Encabezado
       doc
@@ -38,18 +56,12 @@ const generarPDFFactura = (factura, pago, detalles, cliente) => {
       doc.moveDown(1);
 
       // Línea separadora
-      doc
-        .moveTo(50, doc.y)
-        .lineTo(550, doc.y)
-        .stroke();
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
       doc.moveDown(0.5);
 
       // Datos del cliente
-      doc
-        .fontSize(12)
-        .font('Helvetica-Bold')
-        .text('DATOS DEL CLIENTE');
+      doc.fontSize(12).font('Helvetica-Bold').text('DATOS DEL CLIENTE');
 
       doc.moveDown(0.3);
 
@@ -72,18 +84,12 @@ const generarPDFFactura = (factura, pago, detalles, cliente) => {
       doc.moveDown(1);
 
       // Línea separadora
-      doc
-        .moveTo(50, doc.y)
-        .lineTo(550, doc.y)
-        .stroke();
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
       doc.moveDown(0.5);
 
       // Encabezado de detalles
-      doc
-        .fontSize(12)
-        .font('Helvetica-Bold')
-        .text('DETALLE DE FACTURA');
+      doc.fontSize(12).font('Helvetica-Bold').text('DETALLE DE FACTURA');
 
       doc.moveDown(0.5);
 
@@ -104,10 +110,7 @@ const generarPDFFactura = (factura, pago, detalles, cliente) => {
       doc.moveDown(0.5);
 
       // Línea debajo de encabezados
-      doc
-        .moveTo(50, doc.y)
-        .lineTo(550, doc.y)
-        .stroke();
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
       doc.moveDown(0.3);
 
@@ -119,22 +122,22 @@ const generarPDFFactura = (factura, pago, detalles, cliente) => {
         const precioUnitario = Number(detalle.precio_unitario).toFixed(2);
         const subtotal = Number(detalle.subtotal).toFixed(2);
 
-        doc
-          .text(detalle.descripcion, col1, yPosition, { width: 240 })
-          .text(`$${precioUnitario}`, col2, yPosition)
-          .text(`$${subtotal}`, col3, yPosition);
+        const rowHeight = doc.heightOfString(detalle.descripcion, {
+          width: 240,
+        });
 
-        yPosition = doc.y + 5;
+        doc.text(detalle.descripcion, col1, yPosition, { width: 240 });
+        doc.text(`$${precioUnitario}`, col2, yPosition);
+        doc.text(`$${subtotal}`, col3, yPosition);
+
+        yPosition += rowHeight + 10;
         doc.y = yPosition;
       });
 
       doc.moveDown(1);
 
       // Línea separadora
-      doc
-        .moveTo(50, doc.y)
-        .lineTo(550, doc.y)
-        .stroke();
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
       doc.moveDown(0.5);
 
@@ -142,18 +145,14 @@ const generarPDFFactura = (factura, pago, detalles, cliente) => {
       doc
         .fontSize(12)
         .font('Helvetica-Bold')
-        .text(
-          `TOTAL: $${Number(factura.importe_total).toFixed(2)}`,
-          { align: 'right' },
-        );
+        .text(`TOTAL: $${Number(factura.importe_total).toFixed(2)}`, {
+          align: 'right',
+        });
 
       doc.moveDown(1);
 
       // Información del pago
-      doc
-        .fontSize(12)
-        .font('Helvetica-Bold')
-        .text('INFORMACIÓN DE PAGO');
+      doc.fontSize(12).font('Helvetica-Bold').text('INFORMACIÓN DE PAGO');
 
       doc.moveDown(0.3);
 
@@ -172,17 +171,17 @@ const generarPDFFactura = (factura, pago, detalles, cliente) => {
 
       doc.text(`Importe total: $${Number(pago.importe).toFixed(2)}`);
 
-      doc.moveDown(2);
-
-      // Pie de página
+      // Pie de página - posicionado en la parte inferior sin causar salto de página
       doc
         .fontSize(8)
         .font('Helvetica')
         .text(
           'Gracias por su compra',
           50,
-          doc.page.height - 50,
-          { align: 'center' },
+          doc.page.height - doc.page.margins.bottom - 15,
+          {
+            align: 'center',
+          },
         );
 
       doc.end();

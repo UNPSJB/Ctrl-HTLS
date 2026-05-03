@@ -5,6 +5,10 @@ const Factura = require('../../models/ventas/Factura');
 const DetalleFactura = require('../../models/ventas/DetalleFactura');
 const Pago = require('../../models/ventas/Pago');
 const Alquiler = require('../../models/ventas/Alquiler');
+const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
+const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
+const Habitacion = require('../../models/hotel/Habitacion');
+const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const Cliente = require('../../models/core/Cliente');
 const { generarPDFFactura } = require('./pdfFacturaService');
 
@@ -243,6 +247,60 @@ const confirmarPago = async (
         (alquilerDb) => alquilerDb.id === detalle.alquilerId,
       );
 
+      const [habitacionesRel, cantPaquetes] = await Promise.all([
+        AlquilerHabitacion.findAll({
+          where: { alquilerId: alquilerRelacionado.id },
+          attributes: ['habitacionId'],
+          transaction,
+        }),
+        AlquilerPaquetePromocional.count({
+          where: { alquilerId: alquilerRelacionado.id },
+          transaction,
+        }),
+      ]);
+
+      const partesDescripcion = [];
+
+      if (habitacionesRel.length > 0) {
+        const habitacionIds = habitacionesRel.map((hr) => hr.habitacionId);
+        const habitaciones = await Habitacion.findAll({
+          where: { id: habitacionIds },
+          include: [
+            {
+              model: TipoHabitacion,
+              as: 'tipoHabitacion',
+              attributes: ['nombre'],
+            },
+          ],
+          transaction,
+        });
+
+        const conteoTipos = {};
+        habitaciones.forEach((h) => {
+          const tipoNombre = h.tipoHabitacion?.nombre || 'estándar';
+          conteoTipos[tipoNombre] = (conteoTipos[tipoNombre] || 0) + 1;
+        });
+
+        Object.entries(conteoTipos).forEach(([tipo, cant]) => {
+          const tipoLower = tipo.toLowerCase();
+          const tipoPlural =
+            cant > 1 && !tipoLower.endsWith('s') ? tipoLower + 's' : tipoLower;
+          partesDescripcion.push(
+            `${cant} habitaci${cant === 1 ? 'ón' : 'ones'} ${tipoPlural}`,
+          );
+        });
+      }
+
+      if (cantPaquetes > 0) {
+        partesDescripcion.push(
+          `${cantPaquetes} paquete${cantPaquetes === 1 ? '' : 's'}`,
+        );
+      }
+
+      const descripcionGenerada = partesDescripcion.length
+        ? partesDescripcion.join(', ')
+        : `Alquiler #${alquilerRelacionado.id}`;
+
       const detalleFactura = await DetalleFactura.create(
         {
           facturaId: factura.id,
@@ -250,8 +308,7 @@ const confirmarPago = async (
           empleadoId: vendedorId,
           subtotal: detalle.subTotal,
           precio_unitario: detalle.subTotal,
-          descripcion:
-            detalle.descripcion || `Alquiler #${alquilerRelacionado.id}`,
+          descripcion: detalle.descripcion || descripcionGenerada,
         },
         { transaction },
       );
