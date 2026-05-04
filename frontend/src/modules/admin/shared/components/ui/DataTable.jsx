@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import SortableHeader from './SortableHeader';
 import { capitalizeFirst } from '@/utils/stringUtils';
@@ -20,6 +21,8 @@ export default function DataTable({
   rowKey = (row) => row.id,
   rowClassName = () => '',
   onRowClick,
+  expandedRowIds = [],
+  expandedRowRender,
 }) {
   return (
     <div className="relative flex flex-col flex-grow overflow-hidden">
@@ -76,30 +79,39 @@ export default function DataTable({
               {data.map((row, rowIndex) => {
                 const key = typeof rowKey === 'function' ? rowKey(row, rowIndex) : row[rowKey];
                 const customClass = typeof rowClassName === 'function' ? rowClassName(row, rowIndex) : rowClassName;
+                const isExpanded = expandedRowIds.includes(key);
 
                 return (
-                  <tr
-                    key={key}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    className={`group transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/20 ${onRowClick ? 'cursor-pointer' : ''} ${customClass}`}
-                  >
-                    {columns.map((col, colIndex) => {
-                      const isFirst = colIndex === 0;
-                      const isLast = colIndex === columns.length - 1;
-                      let alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
-                      if (isFirst) alignClass = 'text-left';
-                      if (isLast) alignClass = 'text-right';
-                      
-                      const paddingClass = isFirst ? 'pl-6 pr-4' : isLast ? 'pr-6 pl-4' : 'px-4';
-                      const cellContent = col.render ? col.render(row, rowIndex) : row[col.key];
+                  <Fragment key={key}>
+                    <tr
+                      onClick={onRowClick ? () => onRowClick(row) : undefined}
+                      className={`group transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/20 ${onRowClick ? 'cursor-pointer' : ''} ${customClass} ${isExpanded ? 'bg-gray-50/60 dark:bg-gray-700/20' : ''}`}
+                    >
+                      {columns.map((col, colIndex) => {
+                        const isFirst = colIndex === 0;
+                        const isLast = colIndex === columns.length - 1;
+                        let alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
+                        if (isFirst) alignClass = 'text-left';
+                        if (isLast) alignClass = 'text-right';
+                        
+                        const paddingClass = isFirst ? 'pl-6 pr-4' : isLast ? 'pr-6 pl-4' : 'px-4';
+                        const cellContent = col.render ? col.render(row, rowIndex) : row[col.key];
 
-                      return (
-                        <td key={col.key || colIndex} className={`py-3 ${alignClass} ${paddingClass}`}>
-                          {cellContent}
+                        return (
+                          <td key={col.key || colIndex} className={`py-3 ${alignClass} ${paddingClass}`}>
+                            {cellContent}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    {isExpanded && expandedRowRender && (
+                      <tr>
+                        <td colSpan={columns.length} className="p-0 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/30 dark:bg-gray-800/30">
+                          {expandedRowRender(row, rowIndex)}
                         </td>
-                      );
-                    })}
-                  </tr>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>

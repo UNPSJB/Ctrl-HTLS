@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Globe, Map, Building } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { ListHeader, Modal } from '@admin-ui';
 import { capitalizeFirst } from '@/utils/stringUtils';
 import useLocalidad from '../hooks/useLocalidad';
-import UbicacionPanel from '../components/UbicacionPanel';
+import UbicacionesTable from '../components/UbicacionesTable';
 import UbicacionModal from '../components/UbicacionModal';
+import axiosInstance from '@/api/axiosInstance';
 
 /**
  * Página unificada de gestión de ubicaciones geográficas.
- * Muestra 3 paneles interconectados: Países, Provincias y Ciudades.
- * Al seleccionar un país se cargan sus provincias, al seleccionar una provincia se cargan sus ciudades.
+ * Utiliza una tabla jerárquica: Países -> Provincias -> Ciudades.
  */
 export default function UbicacionPage() {
   const {
@@ -19,67 +19,58 @@ export default function UbicacionPage() {
     crear, editar, eliminar,
   } = useLocalidad();
 
-  // Panel activo para el botón de crear contextual
-  const [activePanel, setActivePanel] = useState('pais');
+  // Estado de expansión
+  const [expandedPais, setExpandedPais] = useState(null);
+  const [expandedProvincia, setExpandedProvincia] = useState(null);
 
-  // Estado de selección jerárquica
-  const [selectedPais, setSelectedPais] = useState(null);
-  const [selectedProvincia, setSelectedProvincia] = useState(null);
-
-  // Modal CRUD (crear/editar)
+  // Modales
   const [modalConfig, setModalConfig] = useState(null); // { tipo, parentId, entidad }
-  // Modal de confirmación de borrado
-  const [deleteTarget, setDeleteTarget] = useState(null); // { item, tipo, label }
+  const [deleteTarget, setDeleteTarget] = useState(null); // { item, tipo, label, restricted, childrenType }
+  const [isVerifyingDelete, setIsVerifyingDelete] = useState(false);
 
   // ─── Carga de datos ─────────────────────────────────────────────────────────
   useEffect(() => {
     fetchPaises();
   }, [fetchPaises]);
 
-  useEffect(() => {
-    if (selectedPais) {
-      fetchProvincias(selectedPais.id);
+  const handleExpandPais = useCallback((pais) => {
+    if (expandedPais?.id === pais.id) {
+      setExpandedPais(null);
+      setExpandedProvincia(null);
+    } else {
+      setExpandedPais(pais);
+      setExpandedProvincia(null);
+      fetchProvincias(pais.id);
     }
-  }, [selectedPais, fetchProvincias]);
+  }, [expandedPais, fetchProvincias]);
 
-  useEffect(() => {
-    if (selectedProvincia) {
-      fetchCiudades(selectedProvincia.id);
+  const handleExpandProvincia = useCallback((provincia) => {
+    if (expandedProvincia?.id === provincia.id) {
+      setExpandedProvincia(null);
+    } else {
+      setExpandedProvincia(provincia);
+      fetchCiudades(provincia.id);
     }
-  }, [selectedProvincia, fetchCiudades]);
-
-  // ─── Selección con limpieza de hijos ────────────────────────────────────────
-  const handleSelectPais = useCallback((pais) => {
-    // Si se selecciona el mismo, deseleccionar
-    if (selectedPais?.id === pais.id) {
-      setSelectedPais(null);
-      setSelectedProvincia(null);
-      return;
-    }
-    setSelectedPais(pais);
-    setSelectedProvincia(null); // Limpiar provincia y ciudades
-    setActivePanel('provincia'); // Al seleccionar un país, el foco pasa a provincias
-  }, [selectedPais]);
-
-  const handleSelectProvincia = useCallback((provincia) => {
-    if (selectedProvincia?.id === provincia.id) {
-      setSelectedProvincia(null);
-      return;
-    }
-    setSelectedProvincia(provincia);
-    setActivePanel('ciudad'); // Al seleccionar provincia, el foco pasa a ciudades
-  }, [selectedProvincia]);
+  }, [expandedProvincia, fetchCiudades]);
 
   // ─── CRUD: Abrir modales ───────────────────────────────────────────────────
-  const openCreatePais = () => setModalConfig({ tipo: 'pais', parentId: null, entidad: null });
-  const openCreateProvincia = () => setModalConfig({ tipo: 'provincia', parentId: selectedPais?.id, entidad: null });
-  const openCreateCiudad = () => setModalConfig({ tipo: 'ciudad', parentId: selectedProvincia?.id, entidad: null });
+  const openCreate = () => {
+    if (expandedProvincia) {
+      setModalConfig({ tipo: 'ciudad', parentId: expandedProvincia.id, entidad: null });
+    } else if (expandedPais) {
+      setModalConfig({ tipo: 'provincia', parentId: expandedPais.id, entidad: null });
+    } else {
+      setModalConfig({ tipo: 'pais', parentId: null, entidad: null });
+    }
+  };
 
-  const openEditPais = (item) => setModalConfig({ tipo: 'pais', parentId: null, entidad: item });
-  const openEditProvincia = (item) => setModalConfig({ tipo: 'provincia', parentId: selectedPais?.id, entidad: item });
-  const openEditCiudad = (item) => setModalConfig({ tipo: 'ciudad', parentId: selectedProvincia?.id, entidad: item });
+  const openEdit = (item, tipo) => {
+    let parentId = null;
+    if (tipo === 'provincia') parentId = expandedPais?.id;
+    if (tipo === 'ciudad') parentId = expandedProvincia?.id;
+    setModalConfig({ tipo, parentId, entidad: item });
+  };
 
-  // ─── CRUD: Handlers ────────────────────────────────────────────────────────
   const handleModalSuccess = async (datos) => {
     const { tipo, entidad } = modalConfig;
     if (entidad) {
@@ -89,133 +80,129 @@ export default function UbicacionPage() {
     }
     setModalConfig(null);
 
-    // Refrescar datos del nivel correspondiente
+    // Refrescar
     if (tipo === 'pais') fetchPaises();
-    else if (tipo === 'provincia' && selectedPais) fetchProvincias(selectedPais.id);
-    else if (tipo === 'ciudad' && selectedProvincia) fetchCiudades(selectedProvincia.id);
+    else if (tipo === 'provincia' && expandedPais) fetchProvincias(expandedPais.id);
+    else if (tipo === 'ciudad' && expandedProvincia) fetchCiudades(expandedProvincia.id);
   };
 
   // ─── Delete ────────────────────────────────────────────────────────────────
-  const openDeletePais = (item) => setDeleteTarget({ item, tipo: 'pais', label: 'País' });
-  const openDeleteProvincia = (item) => setDeleteTarget({ item, tipo: 'provincia', label: 'Provincia' });
-  const openDeleteCiudad = (item) => setDeleteTarget({ item, tipo: 'ciudad', label: 'Ciudad' });
+  const requestDelete = async (item, tipo) => {
+    setIsVerifyingDelete(true);
+    let hasChildren = false;
+    let childrenType = '';
+    
+    try {
+      if (tipo === 'pais') {
+        const { data } = await axiosInstance.get(`/provincias/${item.id}`);
+        if (data && data.length > 0) {
+          hasChildren = true;
+          childrenType = 'provincias';
+        }
+      } else if (tipo === 'provincia') {
+        const { data } = await axiosInstance.get(`/ciudades/${item.id}`);
+        if (data && data.length > 0) {
+          hasChildren = true;
+          childrenType = 'ciudades';
+        }
+      }
+    } catch (err) {
+      // 404 significa que no hay hijos, por ende se puede eliminar
+    } finally {
+      setIsVerifyingDelete(false);
+    }
+
+    if (hasChildren) {
+      setDeleteTarget({ item, tipo, restricted: true, childrenType });
+    } else {
+      setDeleteTarget({ item, tipo, restricted: false, label: tipo === 'pais' ? 'País' : tipo === 'provincia' ? 'Provincia' : 'Ciudad' });
+    }
+  };
 
   const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     const { item, tipo } = deleteTarget;
     const ok = await eliminar(item.id, tipo);
     if (ok) {
       setDeleteTarget(null);
 
-      // Refrescar y limpiar selección si se eliminó el seleccionado
+      // Refrescar
       if (tipo === 'pais') {
         fetchPaises();
-        if (selectedPais?.id === item.id) {
-          setSelectedPais(null);
-          setSelectedProvincia(null);
+        if (expandedPais?.id === item.id) {
+          setExpandedPais(null);
+          setExpandedProvincia(null);
         }
       } else if (tipo === 'provincia') {
-        if (selectedPais) fetchProvincias(selectedPais.id);
-        if (selectedProvincia?.id === item.id) {
-          setSelectedProvincia(null);
+        if (expandedPais) fetchProvincias(expandedPais.id);
+        if (expandedProvincia?.id === item.id) {
+          setExpandedProvincia(null);
         }
       } else if (tipo === 'ciudad') {
-        if (selectedProvincia) fetchCiudades(selectedProvincia.id);
+        if (expandedProvincia) fetchCiudades(expandedProvincia.id);
       }
     }
   };
 
-  // ─── Texto dinámico para el modal de borrado ───────────────────────────────
-  const getDeleteDescription = () => {
-    if (!deleteTarget) return '';
-    const { item, tipo } = deleteTarget;
+  const renderDeleteDescription = () => {
+    if (!deleteTarget) return null;
+    const { item, tipo, restricted, childrenType } = deleteTarget;
     const name = capitalizeFirst(item.nombre);
-    if (tipo === 'pais') return `Esta acción no se puede deshacer. Se eliminarán también todas las provincias y ciudades de "${name}".`;
-    if (tipo === 'provincia') return `Esta acción no se puede deshacer. Se eliminarán también todas las ciudades de "${name}".`;
-    return `Esta acción no se puede deshacer. Se eliminará la ciudad "${name}".`;
+    
+    if (restricted) {
+      return (
+        <p>
+          La entidad <strong className="text-gray-900 dark:text-white font-medium">{name}</strong> no puede ser eliminada porque tiene {childrenType} asociadas. Debe eliminar primero todas sus {childrenType} para poder proceder.
+        </p>
+      );
+    }
+    return (
+      <p>
+        Esta acción no se puede deshacer. Se eliminará {tipo === 'ciudad' ? 'la' : 'el'} {tipo} <strong className="text-gray-900 dark:text-white font-medium">{name}</strong>.
+      </p>
+    );
   };
 
   // ─── Botón Crear Dinámico (ListHeader) ─────────────────────────────────────
-  const getHeaderAction = () => {
-    if (activePanel === 'ciudad') {
-      return { label: 'Nueva Ciudad', action: openCreateCiudad, disabled: !selectedProvincia };
-    }
-    if (activePanel === 'provincia') {
-      return { label: 'Nueva Provincia', action: openCreateProvincia, disabled: !selectedPais };
-    }
-    return { label: 'Nuevo País', action: openCreatePais, disabled: false };
-  };
-
-  const headerAction = getHeaderAction();
+  const headerActionLabel = expandedProvincia ? 'Registrar Ciudad' : expandedPais ? 'Registrar Provincia' : 'Registrar País';
 
   return (
-    <div className="h-full flex flex-col gap-6 overflow-hidden">
+    <div className="h-full flex flex-col gap-6 overflow-hidden relative">
+      {/* Capa de bloqueo durante validación */}
+      {isVerifyingDelete && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+             <span className="text-sm font-medium">Verificando dependencias...</span>
+          </div>
+        </div>
+      )}
+
       {/* Header principal */}
       <ListHeader
         title="Gestión de Ubicaciones"
         description="Administra los países, provincias y ciudades del sistema"
         icon={Globe}
-        actionLabel={headerAction.label}
-        onAction={headerAction.action}
-        actionDisabled={headerAction.disabled}
+        actionLabel={headerActionLabel}
+        onAction={openCreate}
       />
 
-      {/* Paneles de contenido */}
-      <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-        {/* Fila superior: Países (50%) + Provincias (50%) */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
-          {/* Panel de Países */}
-          <UbicacionPanel
-            title="Países"
-            icon={Globe}
-            colorClass="blue"
-            items={paises}
-            loading={loadingPaises}
-            selectedId={selectedPais?.id}
-            onSelect={handleSelectPais}
-            onEdit={openEditPais}
-            onDelete={openDeletePais}
-            onPanelClick={() => setActivePanel('pais')}
-            searchPlaceholder="Buscar país..."
-            emptyMessage="No hay países registrados"
-          />
-
-          {/* Panel de Provincias */}
-          <UbicacionPanel
-            title="Provincias"
-            icon={Map}
-            colorClass="indigo"
-            items={selectedPais ? provincias : []}
-            loading={loadingProvincias}
-            selectedId={selectedProvincia?.id}
-            onSelect={handleSelectProvincia}
-            onEdit={openEditProvincia}
-            onDelete={openDeleteProvincia}
-            onPanelClick={() => { if (selectedPais) setActivePanel('provincia'); }}
-            searchPlaceholder="Buscar provincia..."
-            emptyMessage="No hay provincias registradas"
-            parentLabel={selectedPais ? capitalizeFirst(selectedPais.nombre) : null}
-            disabled={!selectedPais}
-          />
-        </div>
-
-        {/* Fila inferior: Ciudades (100%) */}
-        <div className="flex-1 min-h-0">
-          <UbicacionPanel
-            title="Ciudades"
-            icon={Building}
-            colorClass="violet"
-            items={selectedProvincia ? ciudades : []}
-            loading={loadingCiudades}
-            onEdit={openEditCiudad}
-            onDelete={openDeleteCiudad}
-            onPanelClick={() => { if (selectedProvincia) setActivePanel('ciudad'); }}
-            searchPlaceholder="Buscar ciudad o código postal..."
-            emptyMessage="No hay ciudades registradas"
-            showCodigoPostal
-            parentLabel={selectedProvincia ? `${capitalizeFirst(selectedPais?.nombre || '')} → ${capitalizeFirst(selectedProvincia.nombre)}` : null}
-            disabled={!selectedProvincia}
-          />
-        </div>
+      {/* Tabla */}
+      <div className="flex-1 min-h-0">
+        <UbicacionesTable
+          paises={paises}
+          provincias={provincias}
+          ciudades={ciudades}
+          loadingPaises={loadingPaises}
+          loadingProvincias={loadingProvincias}
+          loadingCiudades={loadingCiudades}
+          expandedPais={expandedPais}
+          expandedProvincia={expandedProvincia}
+          onExpandPais={handleExpandPais}
+          onExpandProvincia={handleExpandProvincia}
+          onEdit={openEdit}
+          onDelete={requestDelete}
+        />
       </div>
 
       {/* Modal crear/editar */}
@@ -230,19 +217,27 @@ export default function UbicacionPage() {
         />
       )}
 
-      {/* Modal confirmación de borrado */}
+      {/* Modal confirmación / rechazo de borrado */}
       <Modal
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title={`¿Eliminar ${deleteTarget?.label}?`}
-        description={getDeleteDescription()}
-        onConfirm={handleConfirmDelete}
-        confirmLabel="Eliminar"
-        cancelLabel="Cancelar"
-        variant="red"
+        title={deleteTarget?.restricted ? 'Acción no permitida' : `¿Eliminar ${deleteTarget?.label}?`}
+        onConfirm={deleteTarget?.restricted ? () => setDeleteTarget(null) : handleConfirmDelete}
+        confirmLabel={deleteTarget?.restricted ? 'Entendido' : 'Eliminar'}
+        cancelLabel={deleteTarget?.restricted ? null : 'Cancelar'}
+        variant={deleteTarget?.restricted ? 'default' : 'red'}
         loading={loadingAction}
         size="sm"
-      />
+      >
+        <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+          {renderDeleteDescription()}
+        </div>
+        {!deleteTarget?.restricted && deleteTarget?.tipo !== 'ciudad' && (
+           <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded text-sm border border-red-100 dark:border-red-900/50">
+             <strong>Advertencia:</strong> Esta acción eliminará permanentemente este {deleteTarget?.tipo}.
+           </div>
+        )}
+      </Modal>
     </div>
   );
 }
