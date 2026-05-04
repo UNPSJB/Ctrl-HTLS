@@ -100,7 +100,7 @@ const VendedoresTable = () => {
           nombre: vendedorToToggle.nombre,
           apellido: vendedorToToggle.apellido,
           email: vendedorToToggle.email,
-          rol: vendedorToToggle.rol,
+          rol: 'vendedor',
           telefono: vendedorToToggle.telefono,
           tipoDocumento: vendedorToToggle.tipoDocumento,
           numeroDocumento: vendedorToToggle.numeroDocumento,
