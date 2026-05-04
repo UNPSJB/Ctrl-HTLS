@@ -1115,6 +1115,7 @@ const crearEncargado = async (
   try {
     await verificarDocumento(numeroDocumento);
     await verificarTipoDocumento(tipoDocumento);
+    await verificarTelefono(telefono);
     nuevoEncargado = await Encargado.create({
       nombre,
       apellido,
