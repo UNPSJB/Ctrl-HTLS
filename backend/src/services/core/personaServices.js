@@ -208,6 +208,7 @@ const actualizarEmpleado = async (id, empleado) => {
     numeroDocumento,
     direccion,
     ciudadId,
+    eliminado,
   } = empleado;
 
   // Verificar si el empleado existe
@@ -231,6 +232,7 @@ const actualizarEmpleado = async (id, empleado) => {
     numeroDocumento,
     direccion,
     ciudadId,
+    eliminado,
   });
 
   return empleadoExistente;
@@ -246,6 +248,7 @@ const actualizarAdministrador = async (id, datosAdministrador) => {
     numeroDocumento,
     direccion,
     ciudadId,
+    eliminado,
   } = datosAdministrador;
 
   // Verificar si el empleado existe
@@ -273,6 +276,7 @@ const actualizarAdministrador = async (id, datosAdministrador) => {
     numeroDocumento,
     direccion,
     ciudadId,
+    eliminado,
   });
 
   const administradorActualizado = await Empleado.findByPk(id, {
@@ -520,6 +524,7 @@ const actualizarCliente = async (id, cliente) => {
     tipoDocumento,
     numeroDocumento,
     puntos,
+    eliminado,
   } = cliente;
 
   // Verificar si el cliente existe
@@ -540,6 +545,7 @@ const actualizarCliente = async (id, cliente) => {
     tipoDocumento,
     numeroDocumento,
     puntos,
+    eliminado,
   });
 
   return clienteExistente;
