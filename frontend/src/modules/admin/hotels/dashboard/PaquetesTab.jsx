@@ -27,7 +27,6 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
       const resPaquetes = await axiosInstance.get(`/hotel/${hotelId}/paquetes`);
       setPaquetes(resPaquetes.data || []);
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar datos de paquetes');
     } finally {
       setLoadingInitial(false);
@@ -51,7 +50,6 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
       toast.success('Paquete eliminado');
       await fetchData();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || 'Error al eliminar el paquete');
     } finally {
       setIsDeleting(false);

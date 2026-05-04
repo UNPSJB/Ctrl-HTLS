@@ -21,7 +21,6 @@ const useHotel = () => {
         setTiposHabitacion(resTipos.data || []);
         setCategorias(resCategorias.data || []);
       } catch (error) {
-        console.error('Error al cargar datos del formulario:', error.message);
         setError(error.message);
         // Fallback a arrays vacíos en caso de error
         setTiposHabitacion([]);

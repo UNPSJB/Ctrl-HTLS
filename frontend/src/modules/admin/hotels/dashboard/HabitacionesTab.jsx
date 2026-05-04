@@ -50,7 +50,13 @@ export default function HabitacionesTab({
       const res = await axiosInstance.get('/obtener-tiposHabitaciones');
       setTiposGlobales(res.data);
     } catch (error) {
-      console.error('Error fetching room types', error);
+      // Solo notificar si no es 404 (sin tipos configurados es un estado v·lido)
+      if (error.response?.status !== 404) {
+        toast.error(
+          error.response?.data?.error || 'Error al cargar los tipos de habitaciÛn',
+          { id: 'fetch-tipos-hab' }
+        );
+      }
     }
   };
 
@@ -64,7 +70,6 @@ export default function HabitacionesTab({
       setHabitaciones(resHab.data);
       setTarifasCompletas(resTar.data);
     } catch (error) {
-      console.error('Failed to fetch data', error);
       toast.error('Error al cargar datos de habitaciones');
     } finally {
       setLoading(false);
@@ -102,7 +107,6 @@ export default function HabitacionesTab({
       setIsCreating(false);
       setEditingHabitacion(null);
     } catch (error) {
-      console.error(error);
       toast.error(
         error.response?.data?.error || 'Error al procesar habitaci√≥n'
       );
@@ -124,7 +128,6 @@ export default function HabitacionesTab({
         toast.success('Estado de habitaci√≥n actualizado');
         await fetchHabitaciones();
       } catch (error) {
-        console.error(error);
         toast.error('Error al cambiar el estado de la habitaci√≥n');
       } finally {
         setIsTogglingRoom(false);

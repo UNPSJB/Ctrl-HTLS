@@ -51,7 +51,6 @@ export default function TarifasTab({ hotelId, isActive = false }) {
       });
       reset({ precios: initialPrecios, activos: initialActivos });
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar las tarifas del hotel');
     } finally {
       setLoading(false);
@@ -72,7 +71,6 @@ export default function TarifasTab({ hotelId, isActive = false }) {
       // Actualizamos estado de UI para que refleje lo guardado
       fetchTarifas();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || 'Error al guardar las tarifas');
     } finally {
       setIsSubmitting(false);
@@ -284,7 +282,6 @@ export default function TarifasTab({ hotelId, isActive = false }) {
             
             await executeSave(confirmData.formData);
           } catch (error) {
-            console.error(error);
             toast.error("Error al procesar la eliminación en cascada");
             setIsSubmitting(false);
           }

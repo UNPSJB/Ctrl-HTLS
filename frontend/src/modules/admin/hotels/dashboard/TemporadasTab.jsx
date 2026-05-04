@@ -24,7 +24,6 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
       const { data } = await axiosInstance.get(`/hotel/${hotelId}/temporadas`);
       setTemporadas(data);
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar temporadas del hotel');
     } finally {
       setLoading(false);
@@ -42,7 +41,6 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
       setShowForm(false);
       await fetchTemporadas();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || 'Error al agregar temporada');
       throw error;
     }

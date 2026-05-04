@@ -15,7 +15,6 @@ const ITEMS_PER_PAGE = 100;
 const VendedoresTable = () => {
   const [vendedores, setVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,10 +50,8 @@ const VendedoresTable = () => {
       setLoading(true);
       const response = await axiosInstance.get('/vendedores');
       setVendedores(response.data);
-      setError(null);
     } catch (err) {
       const errorMsg = err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
-      setError(errorMsg);
       toast.error(errorMsg, { id: 'fetch-error' });
     } finally {
       setLoading(false);
@@ -98,7 +95,19 @@ const VendedoresTable = () => {
     setIsToggling(true);
     try {
       if (vendedorToToggle.eliminado) {
-        await axiosInstance.patch(`/empleado/${vendedorToToggle.id}/reactivar`);
+        // Reactivar: PUT con eliminado: false (compatible con nueva versión del backend)
+        await axiosInstance.put(`/empleado/${vendedorToToggle.id}`, {
+          nombre: vendedorToToggle.nombre,
+          apellido: vendedorToToggle.apellido,
+          email: vendedorToToggle.email,
+          rol: vendedorToToggle.rol,
+          telefono: vendedorToToggle.telefono,
+          tipoDocumento: vendedorToToggle.tipoDocumento,
+          numeroDocumento: vendedorToToggle.numeroDocumento,
+          direccion: vendedorToToggle.direccion,
+          ciudadId: vendedorToToggle.ubicacion?.ciudadId,
+          eliminado: false,
+        });
         toast.success('Vendedor reactivado correctamente');
       } else {
         await axiosInstance.delete(`/empleado/${vendedorToToggle.id}`);
@@ -106,7 +115,7 @@ const VendedoresTable = () => {
       }
       await fetchVendedores();
     } catch (err) {
-      toast.error('Error al cambiar el estado del vendedor');
+      toast.error(err.response?.data?.error || 'Error al cambiar el estado del vendedor');
     } finally {
       setIsToggling(false);
       setVendedorToToggle(null);

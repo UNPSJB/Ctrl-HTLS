@@ -91,6 +91,7 @@ export default function UbicacionPage() {
     setIsVerifyingDelete(true);
     let hasChildren = false;
     let childrenType = '';
+    let verificationError = false;
     
     try {
       if (tipo === 'pais') {
@@ -107,10 +108,22 @@ export default function UbicacionPage() {
         }
       }
     } catch (err) {
-      // 404 significa que no hay hijos, por ende se puede eliminar
+      if (err.response?.status === 404) {
+        // 404 = no hay hijos registrados, se puede eliminar con seguridad
+      } else {
+        // Error inesperado (red, 500, timeout): abortar y notificar al usuario
+        toast.error(
+          err.response?.data?.error || 'Error al verificar dependencias. Intente nuevamente.',
+          { id: 'verify-delete-err' }
+        );
+        verificationError = true;
+      }
     } finally {
       setIsVerifyingDelete(false);
     }
+
+    // Si hubo un error de verificación, no avanzar al modal
+    if (verificationError) return;
 
     if (hasChildren) {
       setDeleteTarget({ item, tipo, restricted: true, childrenType });

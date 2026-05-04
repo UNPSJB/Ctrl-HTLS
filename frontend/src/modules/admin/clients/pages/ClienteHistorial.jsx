@@ -30,7 +30,6 @@ const ClienteHistorial = () => {
       const response = await axiosInstance.get(`/cliente/${id}/ventas`);
       setData(response.data);
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar el historial del cliente');
       navigate('/admin/clientes');
     } finally {

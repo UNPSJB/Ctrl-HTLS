@@ -21,8 +21,6 @@ export function useHotelsData() {
       setData(response.data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching hoteles:', err);
-
         const errorMsg = err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
         setError(errorMsg);
         toast.error(errorMsg, { id: 'fetch-error-hotels' });

@@ -37,7 +37,6 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
       const { data } = await axiosInstance.get(`/hotel/${hotelId}`);
       setAsignados(data.vendedores || []);
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar el personal asignado');
     } finally {
       setLoading(false);
@@ -49,7 +48,6 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
       const res = await axiosInstance.get('/vendedores');
       setTodosVendedores(res.data);
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar la lista de vendedores');
     }
   };
@@ -73,7 +71,6 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
       setIsAssigning(false);
       await fetchAsignados();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || 'Error al asignar vendedor(es)');
     } finally {
       setLoadingAction(false);
@@ -90,7 +87,6 @@ export default function PersonalAsignadoTab({ hotelId, isActive = false }) {
       toast.success('Acceso revocado correctamente');
       await fetchAsignados();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || 'Error al remover vendedor');
     } finally {
       setLoadingAction(false);

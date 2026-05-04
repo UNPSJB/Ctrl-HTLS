@@ -103,7 +103,6 @@ export default function PaqueteFormModal({
       }
       setAvailableRooms(data);
     } catch (error) {
-      console.error(error);
       toast.error('Error al buscar disponibilidad');
       setAvailableRooms([]);
     } finally {
@@ -139,7 +138,6 @@ export default function PaqueteFormModal({
 
       onSuccess();
     } catch (error) {
-      console.error(error);
       const errorMsg = error.response?.data?.error || (paquete ? 'Error al actualizar el paquete' : 'Error al crear el paquete promocional');
       toast.error(errorMsg);
     } finally {

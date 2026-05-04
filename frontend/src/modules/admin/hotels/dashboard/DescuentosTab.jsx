@@ -24,7 +24,6 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
       const { data } = await axiosInstance.get(`/hotel/${hotelId}/descuentos`);
       setDescuentos(data);
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar descuentos del hotel');
     } finally {
       setLoading(false);
@@ -42,7 +41,6 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
       setShowForm(false);
       await fetchDescuentos();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || 'Error al agregar descuento');
       throw error;
     }
@@ -56,7 +54,6 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
       toast.success('Descuento eliminado correctamente');
       await fetchDescuentos();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || 'Error al eliminar descuento');
     } finally {
       setIsDeleting(false);

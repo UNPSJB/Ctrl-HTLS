@@ -73,7 +73,6 @@ const ClientesForm = () => {
                 numeroDocumento: data.numeroDocumento || '',
             });
         } catch (error) {
-            console.error(error);
             toast.error('Error al cargar datos del cliente');
             navigate('/admin/clientes');
         } finally {
@@ -120,7 +119,6 @@ const ClientesForm = () => {
             }
             navigate('/admin/clientes');
         } catch (error) {
-            console.error(error);
             const mensaje = error.response?.data?.error || (isEditing ? 'Error al actualizar cliente' : 'Error al crear cliente');
             toast.error(mensaje);
         } finally {

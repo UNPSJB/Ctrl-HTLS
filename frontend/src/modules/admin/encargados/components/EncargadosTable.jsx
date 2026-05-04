@@ -46,7 +46,6 @@ const EncargadosTable = () => {
       const response = await axiosInstance.get('/hotel/encargados');
       setEncargados(response.data);
     } catch (error) {
-      console.error(error);
       const errorMsg = error.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
       toast.error(errorMsg, { id: 'fetch-error-enc' });
     } finally {

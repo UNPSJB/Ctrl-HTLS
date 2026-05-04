@@ -15,7 +15,6 @@ const ITEMS_PER_PAGE = 100;
 const AdministradoresTable = () => {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,10 +50,8 @@ const AdministradoresTable = () => {
       setLoading(true);
       const response = await axiosInstance.get('/administradores');
       setAdmins(response.data);
-      setError(null);
     } catch (err) {
       const errorMsg = err.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
-      setError(errorMsg);
       toast.error(errorMsg, { id: 'fetch-error' });
     } finally {
       setLoading(false);
@@ -66,7 +63,19 @@ const AdministradoresTable = () => {
     setIsToggling(true);
     try {
       if (adminToToggle.eliminado) {
-        await axiosInstance.patch(`/empleado/${adminToToggle.id}/reactivar`);
+        // Reactivar: PUT con eliminado: false (compatible con nueva versión del backend)
+        await axiosInstance.put(`/administrador/${adminToToggle.id}`, {
+          nombre: adminToToggle.nombre,
+          apellido: adminToToggle.apellido,
+          email: adminToToggle.email,
+          rol: 'administrador',
+          telefono: adminToToggle.telefono,
+          tipoDocumento: adminToToggle.tipoDocumento,
+          numeroDocumento: adminToToggle.numeroDocumento,
+          direccion: adminToToggle.direccion,
+          ciudadId: adminToToggle.ubicacion?.ciudadId,
+          eliminado: false,
+        });
         toast.success('Administrador reactivado correctamente');
       } else {
         await axiosInstance.delete(`/empleado/${adminToToggle.id}`);
@@ -74,7 +83,7 @@ const AdministradoresTable = () => {
       }
       await fetchAdmins();
     } catch (err) {
-      toast.error('Error al cambiar el estado del administrador');
+      toast.error(err.response?.data?.error || 'Error al cambiar el estado del administrador');
     } finally {
       setIsToggling(false);
       setAdminToToggle(null);

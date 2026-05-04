@@ -37,7 +37,6 @@ const HotelHistorial = () => {
           hotelNombre = hotelRes.data.nombre;
         }
       } catch (e) {
-        console.error('No se pudo obtener el nombre del hotel', e);
       }
 
       const totalVentas = ventas.length;
@@ -50,7 +49,6 @@ const HotelHistorial = () => {
         ventas
       });
     } catch (error) {
-      console.error('El endpoint falló:', error);
       setData({
         hotelNombre: 'Hotel Desconocido',
         totalVentas: 0,

@@ -94,7 +94,6 @@ const CrearCliente = () => {
         numeroDocumento: '',
       });
     } catch (error) {
-      console.error(error);
       const mensaje =
         error.response?.data?.error || 'Ocurrió un error al crear el cliente';
       toast.error(mensaje);

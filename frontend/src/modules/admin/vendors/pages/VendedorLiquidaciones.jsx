@@ -53,7 +53,6 @@ const VendedorLiquidaciones = () => {
       setLiquidaciones(response.data.liquidaciones || []);
       setSelectedVentas([]); // Limpiar selección al recargar
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar datos del vendedor');
       navigate('/admin/vendedores');
     } finally {
@@ -89,7 +88,6 @@ const VendedorLiquidaciones = () => {
       setShowConfirmLiquidar(false);
       await fetchData();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || error.response?.data?.message || 'Error al procesar la liquidación');
     } finally {
       setLoadingAction(false);

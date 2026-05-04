@@ -110,7 +110,6 @@ export default function HotelesForm() {
         setInitialEncargadoId(hotel.encargado.id);
       }
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar datos del hotel');
       navigate('/admin/hoteles');
     } finally {
@@ -161,7 +160,6 @@ export default function HotelesForm() {
       }
 
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.error || 'Error al guardar el hotel');
     }
   };

@@ -47,7 +47,6 @@ const ClientesTable = () => {
       const response = await axiosInstance.get('/clientes');
       setClientes(response.data);
     } catch (error) {
-      console.error(error);
       const errorMsg = error.response?.data?.error || 'Error de red: No se pudo conectar con el servidor';
       toast.error(errorMsg, { id: 'fetch-error-cli' });
     } finally {
@@ -60,7 +59,17 @@ const ClientesTable = () => {
     setIsToggling(true);
     try {
       if (clienteToToggle.eliminado) {
-        await axiosInstance.patch(`/cliente/${clienteToToggle.id}/reactivar`);
+        // Reactivar: PUT con eliminado: false (compatible con nueva versión del backend)
+        await axiosInstance.put(`/cliente/${clienteToToggle.id}`, {
+          nombre: clienteToToggle.nombre,
+          apellido: clienteToToggle.apellido,
+          email: clienteToToggle.email,
+          telefono: clienteToToggle.telefono,
+          tipoDocumento: clienteToToggle.tipoDocumento,
+          numeroDocumento: clienteToToggle.numeroDocumento,
+          puntos: clienteToToggle.puntos,
+          eliminado: false,
+        });
         toast.success('Cliente reactivado correctamente');
       } else {
         await axiosInstance.delete(`/cliente/${clienteToToggle.id}`);
@@ -68,7 +77,7 @@ const ClientesTable = () => {
       }
       await fetchClientes();
     } catch (error) {
-      toast.error('Error al cambiar el estado del cliente');
+      toast.error(error.response?.data?.error || 'Error al cambiar el estado del cliente');
     } finally {
       setIsToggling(false);
       setClienteToToggle(null);

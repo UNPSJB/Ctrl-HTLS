@@ -89,7 +89,6 @@ const AdministradoresForm = () => {
                 ciudadId: data.ubicacion?.ciudadId || '',
             });
         } catch (error) {
-            console.error(error);
             toast.error('Error al cargar datos del administrador');
             navigate('/admin/administradores');
         } finally {
@@ -129,7 +128,6 @@ const AdministradoresForm = () => {
             }
             navigate('/admin/administradores');
         } catch (error) {
-            console.error(error);
             const mensaje = error.response?.data?.error || (isEditing ? 'Error al actualizar administrador' : 'Error al crear administrador');
             toast.error(mensaje);
         }

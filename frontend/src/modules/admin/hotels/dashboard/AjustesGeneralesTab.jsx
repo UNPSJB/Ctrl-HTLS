@@ -118,7 +118,6 @@ export default function AjustesGeneralesTab({
 
       reset({}, { keepValues: true });
     } catch (error) {
-      console.error(error);
       toast.error(
         error.response?.data?.error || 'Error al actualizar el hotel'
       );

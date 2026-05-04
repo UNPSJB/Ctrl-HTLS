@@ -42,7 +42,6 @@ export default function HotelDashboard() {
       const response = await axiosInstance.get(`/hotel/${id}`);
       setHotel(response.data);
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar datos del dashboard del hotel');
       navigate('/admin/hoteles');
     } finally {

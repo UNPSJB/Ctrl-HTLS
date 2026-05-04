@@ -44,7 +44,6 @@ export default function ChangePasswordModal({ isOpen, onClose, empleadoId }) {
       reset();
       onClose(true); // éxito
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.message || error.response?.data?.error || 'Error al cambiar la contraseña');
     } finally {
       setLoading(false);

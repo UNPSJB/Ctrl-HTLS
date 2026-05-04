@@ -60,7 +60,6 @@ const EncargadosForm = () => {
                 numeroDocumento: data.dni || '', // El backend devuelve 'dni' para el número
             });
         } catch (error) {
-            console.error(error);
             toast.error('No se pudieron cargar los datos del encargado');
             navigate('/admin/encargados');
         } finally {
@@ -104,7 +103,6 @@ const EncargadosForm = () => {
             }
             navigate('/admin/encargados');
         } catch (error) {
-            console.error(error);
             const action = isEditing ? 'actualizar' : 'crear';
             const mensaje = error.response?.data?.error || `Error al ${action} encargado.`;
             toast.error(mensaje);

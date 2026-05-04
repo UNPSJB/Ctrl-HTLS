@@ -99,7 +99,6 @@ const VendedoresForm = () => {
       setAssignedHotels(userHotels);
       setInitialHotels(userHotels);
     } catch (error) {
-      console.error(error);
       toast.error('Error al cargar datos del vendedor');
       navigate('/admin/vendedores');
     } finally {
@@ -162,7 +161,6 @@ const VendedoresForm = () => {
 
       navigate('/admin/vendedores');
     } catch (error) {
-      console.error(error);
       const mensaje = error.response?.data?.error || 'Error al guardar los datos';
       toast.error(mensaje);
     } finally {
