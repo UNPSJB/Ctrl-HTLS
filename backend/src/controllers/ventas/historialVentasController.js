@@ -13,6 +13,19 @@ const getHistorialVentas = async (req, res) => {
   }
 };
 
+const getVentasPorFecha = async (req, res) => {
+  const { fecha } = req.query;
+
+  try {
+    const ventas = await historialVentasServices.obtenerVentasPorFecha(fecha);
+    res.status(200).json(ventas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getHistorialVentas,
+  getVentasPorFecha,
 };
