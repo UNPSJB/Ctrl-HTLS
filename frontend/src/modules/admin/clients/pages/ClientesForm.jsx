@@ -30,7 +30,7 @@ const ClientesForm = () => {
         reset,
         watch,
         setValue,
-        formState: { errors, isValid },
+        formState: { errors, isValid, isDirty },
     } = useForm({
         defaultValues: {
             nombre: '',
@@ -253,7 +253,7 @@ const ClientesForm = () => {
 
                         <AppButton
                             type="submit"
-                            disabled={!isValid || loading}
+                            disabled={!isValid || !isDirty || loading}
                             loading={loading}
                             icon={Save}
                         >

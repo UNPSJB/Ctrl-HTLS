@@ -1,18 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TextInput } from '@ui/form';
-
-function simpleValidate(card) {
-  const num = String(card.number || '').replace(/\s+/g, '');
-  const name = String(card.name || '').trim();
-  const expiry = String(card.expiry || '').trim();
-  const cvc = String(card.cvc || '').trim();
-
-  if (num.length < 12) return false;
-  if (name.length < 2) return false;
-  if (!/^\d{2}\/\d{2}$/.test(expiry)) return false;
-  if (!/^\d{3,4}$/.test(cvc)) return false;
-  return true;
-}
+import { FormField, TextInput } from '@ui/form';
 
 function onlyDigits(value = '') {
   return String(value).replace(/\D+/g, '');
@@ -29,7 +16,65 @@ function formatExpiry(value = '') {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}`;
 }
 
-// Formulario para ingresar datos de tarjeta de crédito/débito
+function validateCard(card) {
+  const errors = {};
+  const num = String(card.number || '').replace(/\s+/g, '');
+  const name = String(card.name || '').trim();
+  const expiry = String(card.expiry || '').trim();
+  const cvc = String(card.cvc || '').trim();
+
+  // Validate Number
+  if (num && num.length < 12) {
+    errors.number = { message: 'El número de tarjeta es muy corto' };
+  } else if (!num) {
+    errors.number = { message: 'Requerido' };
+  }
+
+  // Validate Name
+  if (name && name.length < 2) {
+    errors.name = { message: 'Nombre muy corto' };
+  } else if (!name) {
+    errors.name = { message: 'Requerido' };
+  }
+
+  // Validate Expiry
+  if (expiry) {
+    if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+      errors.expiry = { message: 'Formato inválido (MM/YY)' };
+    } else {
+      const [monthStr, yearStr] = expiry.split('/');
+      const month = parseInt(monthStr, 10);
+      const year = parseInt(yearStr, 10) + 2000;
+
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+
+      if (month < 1 || month > 12) {
+        errors.expiry = { message: 'Mes inválido' };
+      } else if (year < currentYear) {
+        errors.expiry = { message: 'Tarjeta vencida' };
+      } else if (year === currentYear && month <= currentMonth) {
+        errors.expiry = { message: 'Tarjeta vencida' };
+      }
+    }
+  } else {
+    errors.expiry = { message: 'Requerido' };
+  }
+
+  // Validate CVC
+  if (cvc) {
+    if (!/^\d{3,4}$/.test(cvc) || cvc.length < 3) {
+      errors.cvc = { message: 'Mínimo 3 dígitos' };
+    }
+  } else {
+    errors.cvc = { message: 'Requerido' };
+  }
+
+  return errors;
+}
+
+// Formulario para ingresar datos de tarjeta de credito
 function TarjetaForm({ onChange, className = '' }) {
   const [cardData, setCardData] = useState({
     number: '',
@@ -38,13 +83,25 @@ function TarjetaForm({ onChange, className = '' }) {
     cvc: '',
   });
 
-  const valid = useMemo(() => simpleValidate(cardData), [cardData]);
+  const [touched, setTouched] = useState({
+    number: false,
+    name: false,
+    expiry: false,
+    cvc: false,
+  });
+
+  const errors = useMemo(() => validateCard(cardData), [cardData]);
+  const valid = Object.keys(errors).length === 0;
 
   useEffect(() => {
     if (typeof onChange === 'function') {
       onChange({ cardData, valid });
     }
   }, [cardData, valid, onChange]);
+
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
 
   const handleNumber = useCallback((e) => {
     const raw = e.target.value;
@@ -67,69 +124,74 @@ function TarjetaForm({ onChange, className = '' }) {
   }, []);
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      <label className="block">
-        <span className="text-sm text-gray-700 dark:text-gray-300">Número de tarjeta</span>
-        <div className="mt-1">
+    <div className={`space-y-4 ${className}`}>
+      <FormField
+        label="Numero de tarjeta"
+        required
+        error={touched.number ? errors.number : null}
+      >
+        <TextInput
+          id="card-number"
+          placeholder="1234 5678 9012 3456"
+          value={cardData.number}
+          onChange={handleNumber}
+          onBlur={() => handleBlur('number')}
+          inputMode="numeric"
+          aria-label="Numero de tarjeta"
+          autoComplete="cc-number"
+        />
+      </FormField>
+
+      <FormField
+        label="Nombre en la tarjeta"
+        required
+        error={touched.name ? errors.name : null}
+      >
+        <TextInput
+          id="card-name"
+          placeholder="Nombre completo"
+          value={cardData.name}
+          onChange={handleName}
+          onBlur={() => handleBlur('name')}
+          aria-label="Nombre en la tarjeta"
+          autoComplete="cc-name"
+        />
+      </FormField>
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          label="MM/YY"
+          required
+          error={touched.expiry ? errors.expiry : null}
+        >
           <TextInput
-            id="card-number"
-            placeholder="1234 5678 9012 3456"
-            value={cardData.number}
-            onChange={handleNumber}
+            id="card-expiry"
+            placeholder="MM/YY"
+            value={cardData.expiry}
+            onChange={handleExpiry}
+            onBlur={() => handleBlur('expiry')}
+            aria-label="Fecha de expiración"
             inputMode="numeric"
-            aria-label="Número de tarjeta"
-            autoComplete="cc-number"
+            autoComplete="cc-exp"
           />
-        </div>
-      </label>
+        </FormField>
 
-      <label className="block">
-        <span className="text-sm text-gray-700 dark:text-gray-300">Nombre en la tarjeta</span>
-        <div className="mt-1">
+        <FormField
+          label="CVC"
+          required
+          error={touched.cvc ? errors.cvc : null}
+        >
           <TextInput
-            id="card-name"
-            placeholder="Nombre completo"
-            value={cardData.name}
-            onChange={handleName}
-            aria-label="Nombre en la tarjeta"
-            autoComplete="cc-name"
+            id="card-cvc"
+            placeholder="123"
+            value={cardData.cvc}
+            onChange={handleCvc}
+            onBlur={() => handleBlur('cvc')}
+            inputMode="numeric"
+            aria-label="CVC"
+            autoComplete="cc-csc"
           />
-        </div>
-      </label>
-
-      <div className="grid grid-cols-2 gap-2">
-        <label className="block">
-          <span className="text-sm text-gray-700 dark:text-gray-300">MM/YY</span>
-          <div className="mt-1">
-            <TextInput
-              id="card-expiry"
-              placeholder="MM/YY"
-              value={cardData.expiry}
-              onChange={handleExpiry}
-              aria-label="Fecha de expiración"
-              inputMode="numeric"
-              autoComplete="cc-exp"
-            />
-          </div>
-        </label>
-        <label className="block">
-          <span className="text-sm text-gray-700 dark:text-gray-300">CVC</span>
-          <div className="mt-1">
-            <TextInput
-              id="card-cvc"
-              placeholder="123"
-              value={cardData.cvc}
-              onChange={handleCvc}
-              inputMode="numeric"
-              aria-label="CVC"
-              autoComplete="cc-csc"
-            />
-          </div>
-        </label>
-      </div>
-
-      <div className="text-xs text-gray-500 dark:text-gray-400">
-        Validación simple local: {valid ? 'OK' : 'Incompleto/Inválido'}
+        </FormField>
       </div>
     </div>
   );

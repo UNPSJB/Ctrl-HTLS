@@ -31,7 +31,7 @@ function MetodoPago({
     () => [
       { id: 'Efectivo', label: 'Efectivo', disabled: false },
       { id: 'Puntos', label: 'Puntos', disabled: !puntoEnabled },
-      { id: 'Tarjeta', label: 'Tarjeta', disabled: false },
+      { id: 'Tarjeta', label: 'Tarjeta de Credito', disabled: false },
       { id: 'Mixto', label: 'Mixto (Efectivo y Tarjeta)', disabled: false },
     ],
     [puntoEnabled]
@@ -98,6 +98,9 @@ function MetodoPago({
 
       {showCardForm && (
         <div className="mt-4">
+          <p className="mb-4 text-sm font-medium text-blue-600 dark:text-blue-400">
+            * El pago con tarjeta de crédito se procesará en 1 (una) sola cuota.
+          </p>
           <TarjetaForm onChange={onChangeCardData} />
         </div>
       )}

@@ -123,8 +123,8 @@ export function usePagar() {
           let puntosGanados = 0;
           let puntosGastados = 0;
 
-          if (metodoPago === 'Efectivo') {
-            puntosGanados = Math.floor(totalAEnviar / 5);
+          if (metodoPago === 'Efectivo' || metodoPago === 'Mixto') {
+            puntosGanados = Math.floor(pagoEfectivoFinal / 5);
           } else if (metodoPago === 'Puntos') {
             puntosGastados = Math.ceil(totalAEnviar);
           }

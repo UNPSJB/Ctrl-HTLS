@@ -11,23 +11,25 @@ import {
 import AppButton from '@/components/ui/AppButton';
 import { RULES, LIMITS } from '@/utils/validationRules';
 import { TIPOS_DOCUMENTO } from '@/utils/constants';
+import { toast } from 'react-hot-toast';
 
 // Formulario para la creación de un nuevo cliente (vista vendedor)
-function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
+function ClienteForm({ initialDocumento = '', cliente = null, onCancel, onSuccess }) {
+  const isEditing = !!cliente;
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
     setValue,
     watch,
   } = useForm({
     defaultValues: {
-      numeroDocumento: initialDocumento,
-      tipoDocumento: 'dni',
-      nombre: '',
-      apellido: '',
-      email: '',
-      telefono: '',
+      numeroDocumento: cliente?.numeroDocumento || cliente?.documento || initialDocumento,
+      tipoDocumento: cliente?.tipoDocumento || 'dni',
+      nombre: cliente?.nombreOriginal || cliente?.nombre || '',
+      apellido: cliente?.apellido || '',
+      email: cliente?.email || '',
+      telefono: cliente?.telefono || '',
     },
     mode: 'onChange',
   });
@@ -58,11 +60,18 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
     setIsSubmitting(true);
     setApiError(null);
     try {
-      const response = await axiosInstance.post('/cliente', data);
-      onClienteCreado(response.data);
+      let response;
+      if (isEditing) {
+        response = await axiosInstance.put(`/cliente/${cliente.id}`, data);
+        toast.success('Cliente actualizado correctamente');
+      } else {
+        response = await axiosInstance.post('/cliente', data);
+        toast.success('Cliente registrado correctamente');
+      }
+      onSuccess(response.data);
     } catch (err) {
       setApiError(
-        err.response?.data?.error || 'Ocurrió un error al crear el cliente.'
+        err.response?.data?.error || `Ocurrió un error al ${isEditing ? 'editar' : 'crear'} el cliente.`
       );
     } finally {
       setIsSubmitting(false);
@@ -72,7 +81,7 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-        Crear Nuevo Cliente
+        {isEditing ? 'Editar Cliente' : 'Crear Nuevo Cliente'}
       </h3>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -154,10 +163,10 @@ function ClienteForm({ initialDocumento = '', onCancel, onClienteCreado }) {
         </AppButton>
         <AppButton
           type="submit"
-          disabled={!isValid || isSubmitting}
+          disabled={!isValid || !isDirty || isSubmitting}
           loading={isSubmitting}
         >
-          Guardar Cliente
+          {isEditing ? 'Guardar Cambios' : 'Guardar Cliente'}
         </AppButton>
       </div>
     </form>

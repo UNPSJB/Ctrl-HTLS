@@ -28,6 +28,7 @@ export const useClienteSearch = (initialDocumento = null) => {
 
       const formattedClient = {
         ...foundClient,
+        nombreOriginal: foundClient.nombre,
         nombre: `${foundClient.nombre} ${foundClient.apellido}`,
         documento: foundClient.numeroDocumento,
       };

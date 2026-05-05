@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, User, UserPlus } from 'lucide-react';
+import { Search, User, UserPlus, Edit } from 'lucide-react';
 import Modal from '@ui/Modal';
 import { useClienteSearch } from '@vendor-hooks/useClienteSearch';
 import ClienteForm from './ClienteForm';
@@ -48,8 +48,21 @@ function ClienteModal({ onClose, onClienteSelected }) {
   const handleClienteCreado = (nuevoCliente) => {
     const formattedClient = {
       ...nuevoCliente,
+      nombreOriginal: nuevoCliente.nombre,
       nombre: `${nuevoCliente.nombre} ${nuevoCliente.apellido}`,
       documento: nuevoCliente.numeroDocumento,
+    };
+    setSearchResult(formattedClient);
+    selectClient(formattedClient);
+    setView('search');
+  };
+
+  const handleClienteEditado = (clienteEditado) => {
+    const formattedClient = {
+      ...clienteEditado,
+      nombreOriginal: clienteEditado.nombre,
+      nombre: `${clienteEditado.nombre} ${clienteEditado.apellido}`,
+      documento: clienteEditado.numeroDocumento,
     };
     setSearchResult(formattedClient);
     selectClient(formattedClient);
@@ -114,7 +127,7 @@ function ClienteModal({ onClose, onClienteSelected }) {
                       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
                         <User className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                           {capitalizeWords(searchResult.nombre)}
                         </h3>
@@ -122,6 +135,14 @@ function ClienteModal({ onClose, onClienteSelected }) {
                           {capitalizeWords(searchResult.tipoDocumento || 'DNI')}: {searchResult.numeroDocumento || searchResult.documento}
                         </p>
                       </div>
+                      <button 
+                        onClick={() => setView('edit')}
+                        className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-4 py-2 rounded-lg transition-colors"
+                        title="Editar datos del cliente"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Editar
+                      </button>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-4 text-sm">
@@ -167,8 +188,9 @@ function ClienteModal({ onClose, onClienteSelected }) {
           ) : (
             <ClienteForm
               initialDocumento={documentNumber}
+              cliente={view === 'edit' ? searchResult : null}
               onCancel={() => setView('search')}
-              onClienteCreado={handleClienteCreado}
+              onSuccess={view === 'edit' ? handleClienteEditado : handleClienteCreado}
             />
           )}
         </div>

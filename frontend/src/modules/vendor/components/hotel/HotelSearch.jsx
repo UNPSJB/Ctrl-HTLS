@@ -304,7 +304,7 @@ function HotelSearch({
             size="lg"
             className="uppercase tracking-wider"
           >
-            Consultar Disponibilidad
+            Buscar Disponibilidad
           </AppButton>
         </div>
       </div>
