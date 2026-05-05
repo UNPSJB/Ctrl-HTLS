@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import axiosInstance from '@/api/axiosInstance';
 import { InnerLoading } from '@/components/ui/InnerLoading';
@@ -8,7 +8,8 @@ import { toast } from 'react-hot-toast';
 import {
   Building2, Mail, Phone, Hash, MapPin,
   DollarSign, CheckCircle2,
-  Receipt, History, CalendarDays, Clock
+  Receipt, History, CalendarDays, Clock, 
+  BarChart3, Activity, Wallet
 } from 'lucide-react';
 import { formatFecha } from '@/utils/dateUtils';
 import VentasTable from '@/modules/vendor/components/VentasTable';
@@ -24,8 +25,6 @@ const getLunesDeSemana = () => {
   lunes.setHours(0, 0, 0, 0);
   return lunes;
 };
-
-
 
 // Página de Perfil para Vendedores - Solo Visualización
 function PerfilPage() {
@@ -70,24 +69,44 @@ function PerfilPage() {
       return new Date(v.fechaVenta) >= lunes;
     });
 
-    const ventasPendientes = ventas.filter(v => !v.liquidacionId);
-    const totalFacturado = ventas.reduce((acc, v) => acc + Number(v.subtotal), 0);
-    const comisionPorCobrar = ventasPendientes.reduce((acc, v) => acc + Number(v.subtotal), 0) * 0.02;
+    const ventasPendientesGlobal = ventas.filter(v => !v.liquidacionId);
+
+    // KPIs Semana Actual
+    const ventasSemanaPendientes = ventasSemana.filter(v => !v.liquidacionId);
+    const facturacionSemanal = ventasSemana.reduce((acc, v) => acc + Number(v.subtotal), 0);
+    const pendienteSemanaMonto = ventasSemanaPendientes.reduce((acc, v) => acc + Number(v.subtotal), 0);
+    const comisionSemanal = facturacionSemanal * 0.02; // 2% 
+
+    // KPIs Historial
+    const totalFacturadoGlobal = ventas.reduce((acc, v) => acc + Number(v.subtotal), 0);
+    const comisionPendienteGlobal = ventasPendientesGlobal.reduce((acc, v) => acc + Number(v.subtotal), 0) * 0.02;
+
+    // KPIs Liquidaciones
     const totalPercibido = liquidaciones.reduce((acc, l) => acc + Number(l.total), 0);
-    const montoPendienteSemana = ventasSemana
-      .filter(v => !v.liquidacionId)
-      .reduce((acc, v) => acc + Number(v.subtotal), 0);
+    const ventasLiquidadasCount = ventas.length - ventasPendientesGlobal.length;
 
     return {
       ventasSemana,
       ventasHistorial: [...ventas].sort((a, b) => new Date(b.fechaVenta) - new Date(a.fechaVenta)),
       kpis: {
-        totalFacturado,
-        ventasPendientesCount: ventasPendientes.length,
-        comisionPorCobrar,
-        totalPercibido,
-        ventasSemanaCount: ventasSemana.length,
-        montoPendienteSemana,
+        semana: {
+          ventasCount: ventasSemana.length,
+          facturacion: facturacionSemanal,
+          pendienteMonto: pendienteSemanaMonto,
+          comision: comisionSemanal,
+        },
+        historial: {
+          ventasCount: ventas.length,
+          facturacion: totalFacturadoGlobal,
+          pendientesCount: ventasPendientesGlobal.length,
+          comisionPendiente: comisionPendienteGlobal,
+        },
+        liquidaciones: {
+          emitidasCount: liquidaciones.length,
+          totalPercibido,
+          ventasLiquidadasCount,
+          comisionPendiente: comisionPendienteGlobal, // Usamos la misma como recordatorio
+        }
       }
     };
   }, [ventas, liquidaciones]);
@@ -106,6 +125,41 @@ function PerfilPage() {
     );
   }
 
+  // --- Renderizador de Tarjetas Dinámico ---
+  const renderCards = () => {
+    switch (activeTab) {
+      case 'semana':
+        return (
+          <>
+            <KpiCard icon={CalendarDays} title="Ventas de la Semana" value={kpis.semana.ventasCount} color="purple" />
+            <KpiCard icon={BarChart3} title="Facturación Semanal" value={formatCurrency(kpis.semana.facturacion)} color="blue" />
+            <KpiCard icon={Clock} title="Pendiente Semana" value={formatCurrency(kpis.semana.pendienteMonto)} color="amber" />
+            <KpiCard icon={DollarSign} title="Comisión Semanal" value={formatCurrency(kpis.semana.comision)} color="orange" />
+          </>
+        );
+      case 'historial':
+        return (
+          <>
+            <KpiCard icon={Activity} title="Total Histórico" value={kpis.historial.ventasCount} color="indigo" />
+            <KpiCard icon={Receipt} title="Total Facturado" value={formatCurrency(kpis.historial.facturacion)} color="emerald" />
+            <KpiCard icon={Clock} title="Total Pendientes" value={kpis.historial.pendientesCount} color="amber" />
+            <KpiCard icon={DollarSign} title="Comisión Pendiente" value={formatCurrency(kpis.historial.comisionPendiente)} color="orange" />
+          </>
+        );
+      case 'liquidaciones':
+        return (
+          <>
+            <KpiCard icon={Receipt} title="Liquidaciones Emitidas" value={kpis.liquidaciones.emitidasCount} color="cyan" />
+            <KpiCard icon={Wallet} title="Total Percibido" value={formatCurrency(kpis.liquidaciones.totalPercibido)} color="green" />
+            <KpiCard icon={CheckCircle2} title="Ventas Liquidadas" value={kpis.liquidaciones.ventasLiquidadasCount} color="blue" />
+            <KpiCard icon={DollarSign} title="Próxima Comisión" value={formatCurrency(kpis.liquidaciones.comisionPendiente)} color="orange" />
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="animate-in fade-in duration-500 space-y-6 h-full flex flex-col overflow-hidden">
       {loading ? (
@@ -114,7 +168,7 @@ function PerfilPage() {
         </div>
       ) : (
         <>
-          {/* Encabezado de Datos Personales */}
+          {/* Fila 1: Encabezado de Datos Personales */}
           {vendedorData && (
             <div className="flex-shrink-0 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <div className="flex flex-col gap-4 border-b border-gray-100 pb-5 dark:border-gray-700 flex-between">
@@ -174,108 +228,107 @@ function PerfilPage() {
             </div>
           )}
 
-          {/* KPI Cards */}
-          <div className="flex-shrink-0 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {/* Semana Actual */}
-            <div className="col-span-2 lg:col-span-1 rounded-xl border border-purple-100 bg-white p-4 shadow-sm dark:border-purple-900/20 dark:bg-gray-800">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/20">
-                  <CalendarDays className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Ventas Esta Semana</p>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{kpis.ventasSemanaCount}</h3>
-                </div>
-              </div>
-            </div>
-
-            {/* Total Facturado */}
-            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/20">
-                  <Receipt className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Total Facturado</p>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(kpis.totalFacturado)}</h3>
-                </div>
-              </div>
-            </div>
-
-            {/* Sin Liquidar */}
-            <div className="rounded-xl border border-amber-50 bg-white p-4 shadow-sm dark:border-amber-900/10 dark:bg-gray-800">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/20">
-                  <Clock className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Sin Liquidar</p>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{kpis.ventasPendientesCount} ventas</h3>
-                </div>
-              </div>
-            </div>
-
-            {/* Comisión por Cobrar */}
-            <div className="rounded-xl border border-orange-50 bg-white p-4 shadow-sm dark:border-orange-900/10 dark:bg-gray-800">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/20">
-                  <DollarSign className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Comisión por Cobrar</p>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(kpis.comisionPorCobrar)}</h3>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Área de Tablas */}
-          <div className="flex-grow flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 min-h-[280px]">
-            {/* Tabs */}
-            <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 px-6 bg-gray-50/50 dark:bg-gray-900/20">
-              <nav className="-mb-px flex space-x-6">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${activeTab === tab.id
+          {/* Fila 2: Navegación de Tabs (Fuera de la tabla) */}
+          <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
+            <nav className="-mb-px flex space-x-8">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium transition-colors ${
+                    activeTab === tab.id
                       ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                       : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                      }`}
-                  >
-                    <tab.icon className="h-4 w-4" />
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
+                  }`}
+                >
+                  <tab.icon className="h-5 w-5" />
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
 
-            <div className="flex-grow overflow-hidden flex flex-col pt-4">
-              {/* Tab: Semana Actual */}
-              {activeTab === 'semana' && (
-                <VentasTable 
-                  data={ventasSemana} 
-                  emptyMessage="No hay ventas registradas en la semana actual (lunes a hoy)." 
-                />
-              )}
+          {/* Fila 3: KPI Cards Reactivas */}
+          <div className="flex-shrink-0 grid grid-cols-2 gap-3 lg:grid-cols-4 animate-in fade-in slide-in-from-top-2 duration-300" key={activeTab}>
+            {renderCards()}
+          </div>
 
-              {/* Tab: Historial de Ventas */}
-              {activeTab === 'historial' && (
-                <VentasTable 
-                  data={ventasHistorial} 
-                  emptyMessage="No se encontraron ventas." 
-                />
-              )}
+          {/* Fila 4: Área de Tablas */}
+          <div className="flex-grow flex flex-col min-h-[280px]">
+            {activeTab === 'semana' && (
+              <VentasTable 
+                data={ventasSemana} 
+                emptyMessage="No hay ventas registradas en la semana actual (lunes a hoy)." 
+              />
+            )}
 
-              {/* Tab: Liquidaciones */}
-              {activeTab === 'liquidaciones' && (
-                <LiquidacionesTable data={liquidaciones} />
-              )}
-            </div>
+            {activeTab === 'historial' && (
+              <VentasTable 
+                data={ventasHistorial} 
+                emptyMessage="No se encontraron ventas en el historial." 
+              />
+            )}
+
+            {activeTab === 'liquidaciones' && (
+              <LiquidacionesTable data={liquidaciones} />
+            )}
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+// Componente Auxiliar para las Tarjetas
+function KpiCard({ icon: Icon, title, value, color }) {
+  const styles = {
+    purple: {
+      container: "border-purple-100 dark:border-purple-900/20",
+      icon: "bg-purple-50 text-purple-600 dark:bg-purple-900/20"
+    },
+    blue: {
+      container: "border-blue-100 dark:border-blue-900/20",
+      icon: "bg-blue-50 text-blue-600 dark:bg-blue-900/20"
+    },
+    amber: {
+      container: "border-amber-100 dark:border-amber-900/20",
+      icon: "bg-amber-50 text-amber-600 dark:bg-amber-900/20"
+    },
+    orange: {
+      container: "border-orange-100 dark:border-orange-900/20",
+      icon: "bg-orange-50 text-orange-600 dark:bg-orange-900/20"
+    },
+    indigo: {
+      container: "border-indigo-100 dark:border-indigo-900/20",
+      icon: "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20"
+    },
+    emerald: {
+      container: "border-emerald-100 dark:border-emerald-900/20",
+      icon: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
+    },
+    cyan: {
+      container: "border-cyan-100 dark:border-cyan-900/20",
+      icon: "bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20"
+    },
+    green: {
+      container: "border-green-100 dark:border-green-900/20",
+      icon: "bg-green-50 text-green-600 dark:bg-green-900/20"
+    }
+  };
+
+  const currentStyle = styles[color] || styles.blue;
+
+  return (
+    <div className={`col-span-2 lg:col-span-1 rounded-xl border bg-white p-4 shadow-sm dark:bg-gray-800 transition-colors duration-300 ${currentStyle.container}`}>
+      <div className="flex items-center gap-3">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${currentStyle.icon}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-xs font-medium text-gray-500 line-clamp-1">{title}</p>
+          <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white line-clamp-1">{value}</h3>
+        </div>
+      </div>
     </div>
   );
 }

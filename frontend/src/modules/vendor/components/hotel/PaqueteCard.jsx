@@ -37,7 +37,7 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
               className="flex items-center gap-1.5 rounded-full bg-blue-50/50 px-3 py-1 text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-900/10 dark:text-blue-400"
             >
               <BedDouble className="h-4 w-4" />
-              <span>{paquete.habitaciones?.length || 1} Habitaciones</span>
+              <span>{paquete.habitaciones?.length || 1} Habitacion/es</span>
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
           </div>

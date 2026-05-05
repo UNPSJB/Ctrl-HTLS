@@ -67,7 +67,7 @@ export default function TarifasTab({ hotelId, isActive = false }) {
 
       await axiosInstance.put(`/hotel/${hotelId}/tarifas`, { tarifas: payload });
       toast.success('Tarifas actualizadas correctamente');
-      
+
       // Actualizamos estado de UI para que refleje lo guardado
       fetchTarifas();
     } catch (error) {
@@ -91,7 +91,7 @@ export default function TarifasTab({ hotelId, isActive = false }) {
 
         if (affectedRooms.length > 0) {
           const names = deactivatedTypes.map(dt => `"${dt.nombre}"`).join(', ');
-          
+
           setConfirmData({
             affectedRooms,
             names,
@@ -116,17 +116,13 @@ export default function TarifasTab({ hotelId, isActive = false }) {
     <div className="h-full flex flex-col animate-in fade-in duration-300">
       {/* Encabezado */}
       <div className="flex-shrink-0 flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-6">
-        <div className="max-w-2xl space-y-1">
+        <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
             Tarifas y Disponibilidad
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Habilite las categorías que su hotel ofrece estableciendo su precio base. Desactive categorías para inhabilitarlas del inventario.
           </p>
-        </div>
-        <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
-          <Info className="h-5 w-5 shrink-0" />
-          <p className="text-xs font-medium">Los precios son por noche. Las categorías inactivas ocultan sus habitaciones.</p>
         </div>
       </div>
 
@@ -141,110 +137,110 @@ export default function TarifasTab({ hotelId, isActive = false }) {
           <div className="flex-grow overflow-auto custom-scrollbar">
             <table className="w-full text-left text-sm">
               <thead className="sticky top-0 z-10 bg-gray-50 text-xs uppercase text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-300">
-              <tr>
-                <th className="px-6 py-4 font-semibold w-1/3">Tipo de Habitación</th>
-                <th className="px-6 py-4 font-semibold text-center w-1/4">Capacidad</th>
-                <th className="px-6 py-4 font-semibold text-center w-32">Estado</th>
-                <th className="px-6 py-4 font-semibold text-right">Precio Base ($)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {tarifas.map((tipo) => {
-                const isActiveToggled = watchActivos?.[tipo.id];
-                const hasError = !!errors.precios?.[tipo.id];
-                
-                return (
-                  <tr
-                    key={tipo.id}
-                    className={`transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30 ${!isActiveToggled ? 'opacity-60 bg-gray-50/30 dark:bg-gray-800/30 grayscale-[20%]' : ''}`}
-                  >
-                    {/* Nombre del tipo */}
-                    <td className="whitespace-nowrap px-6 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${isActiveToggled ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
-                          <Bed className="h-4 w-4" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className={`font-semibold text-sm transition-colors ${isActiveToggled ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}>
-                            {tipo.nombre}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
+                <tr>
+                  <th className="px-6 py-4 font-semibold w-1/3">Tipo de Habitación</th>
+                  <th className="px-6 py-4 font-semibold text-center w-1/4">Capacidad</th>
+                  <th className="px-6 py-4 font-semibold text-center w-32">Estado</th>
+                  <th className="px-6 py-4 font-semibold text-right">Precio Base ($)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                {tarifas.map((tipo) => {
+                  const isActiveToggled = watchActivos?.[tipo.id];
+                  const hasError = !!errors.precios?.[tipo.id];
 
-                    {/* Capacidad */}
-                    <td className="px-6 py-3 text-center">
-                      <span className={`text-sm transition-colors ${isActiveToggled ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}`}>
-                        {tipo.capacidad} {tipo.capacidad === 1 ? 'persona' : 'personas'}
-                      </span>
-                    </td>
-
-                    {/* Switch de Estado */}
-                    <td className="px-6 py-3 text-center">
-                      <label className="relative inline-flex cursor-pointer items-center">
-                        <input
-                          type="checkbox"
-                          className="peer sr-only"
-                          {...register(`activos.${tipo.id}`, {
-                            onChange: () => trigger(`precios.${tipo.id}`) // revalidar el precio al apagar/encender
-                          })}
-                        />
-                        <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"></div>
-                      </label>
-                    </td>
-
-                    {/* Input de precio */}
-                    <td className="px-6 py-3 text-right">
-                      <div className="ml-auto max-w-[180px]">
-                        {isActiveToggled ? (
-                          <>
-                            <NumberInput
-                              step="0.01"
-                              min="0.01"
-                              max="9999999"
-                              {...register(`precios.${tipo.id}`, {
-                                validate: (val) => {
-                                  if (!val) return 'Se requiere precio';
-                                  const num = parseFloat(val);
-                                  if (isNaN(num)) return 'No es un número';
-                                  if (num <= 0) return 'Debe ser mayor a 0';
-                                  if (num > 9999999) return 'Máximo $9.999.999';
-                                  return true;
-                                },
-                              })}
-                              placeholder="Ej: 15000"
-                              icon={true}
-                              className="text-right font-medium text-lg h-11"
-                              error={hasError}
-                            />
-                            {hasError && (
-                              <p className="mt-1.5 flex items-center justify-end gap-1 text-[11px] font-semibold text-red-500 animate-in fade-in slide-in-from-top-1">
-                                <AlertTriangle className="h-3 w-3" />
-                                {errors.precios[tipo.id]?.message}
-                              </p>
-                            )}
-                          </>
-                        ) : (
-                          <div className="flex h-11 items-center justify-end px-3 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-700 dark:bg-gray-800">
-                            No disponible
+                  return (
+                    <tr
+                      key={tipo.id}
+                      className={`transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/30 ${!isActiveToggled ? 'opacity-60 bg-gray-50/30 dark:bg-gray-800/30 grayscale-[20%]' : ''}`}
+                    >
+                      {/* Nombre del tipo */}
+                      <td className="whitespace-nowrap px-6 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${isActiveToggled ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
+                            <Bed className="h-4 w-4" />
                           </div>
-                        )}
-                      </div>
+                          <div className="flex flex-col">
+                            <span className={`font-semibold text-sm transition-colors ${isActiveToggled ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}>
+                              {tipo.nombre}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Capacidad */}
+                      <td className="px-6 py-3 text-center">
+                        <span className={`text-sm transition-colors ${isActiveToggled ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}`}>
+                          {tipo.capacidad} {tipo.capacidad === 1 ? 'persona' : 'personas'}
+                        </span>
+                      </td>
+
+                      {/* Switch de Estado */}
+                      <td className="px-6 py-3 text-center">
+                        <label className="relative inline-flex cursor-pointer items-center">
+                          <input
+                            type="checkbox"
+                            className="peer sr-only"
+                            {...register(`activos.${tipo.id}`, {
+                              onChange: () => trigger(`precios.${tipo.id}`) // revalidar el precio al apagar/encender
+                            })}
+                          />
+                          <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"></div>
+                        </label>
+                      </td>
+
+                      {/* Input de precio */}
+                      <td className="px-6 py-3 text-right">
+                        <div className="ml-auto max-w-[180px]">
+                          {isActiveToggled ? (
+                            <>
+                              <NumberInput
+                                step="0.01"
+                                min="0.01"
+                                max="9999999"
+                                {...register(`precios.${tipo.id}`, {
+                                  validate: (val) => {
+                                    if (!val) return 'Se requiere precio';
+                                    const num = parseFloat(val);
+                                    if (isNaN(num)) return 'No es un número';
+                                    if (num <= 0) return 'Debe ser mayor a 0';
+                                    if (num > 9999999) return 'Máximo $9.999.999';
+                                    return true;
+                                  },
+                                })}
+                                placeholder="Ej: 15000"
+                                icon={true}
+                                className="text-right font-medium text-lg h-11"
+                                error={hasError}
+                              />
+                              {hasError && (
+                                <p className="mt-1.5 flex items-center justify-end gap-1 text-[11px] font-semibold text-red-500 animate-in fade-in slide-in-from-top-1">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  {errors.precios[tipo.id]?.message}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <div className="flex h-11 items-center justify-end px-3 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-700 dark:bg-gray-800">
+                              No disponible
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {/* Estado vacío */}
+                {!loading && tarifas.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-16 text-center text-sm text-gray-400">
+                      No hay tipos de habitación configurados a nivel sistema.
                     </td>
                   </tr>
-                );
-              })}
-
-              {/* Estado vacío */}
-              {!loading && tarifas.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-16 text-center text-sm text-gray-400">
-                    No hay tipos de habitación configurados a nivel sistema.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -274,12 +270,12 @@ export default function TarifasTab({ hotelId, isActive = false }) {
           try {
             setIsSubmitting(true);
             setConfirmData(null); // cerramos modal
-            
-            await Promise.all(confirmData.affectedRooms.map(room => 
+
+            await Promise.all(confirmData.affectedRooms.map(room =>
               axiosInstance.delete(`/hotel/${hotelId}/habitacion/${room.id}`)
             ));
             toast.success(`Se desactivaron ${confirmData.affectedRooms.length} habitaciones en cascada.`);
-            
+
             await executeSave(confirmData.formData);
           } catch (error) {
             toast.error("Error al procesar la eliminación en cascada");
