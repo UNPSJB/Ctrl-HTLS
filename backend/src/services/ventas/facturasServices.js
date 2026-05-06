@@ -455,8 +455,60 @@ const obtenerVentasResumen = async () => {
   };
 };
 
+const obtenerPDFFactura = async (facturaId) => {
+  const idNumerico = Number(facturaId);
+  if (Number.isNaN(idNumerico) || idNumerico <= 0) {
+    throw new CustomError('El id de la factura no es válido', 400);
+  }
+
+  const factura = await Factura.findByPk(idNumerico, {
+    include: [
+      {
+        model: Pago,
+        as: 'pago',
+      },
+    ],
+  });
+
+  if (!factura) {
+    throw new CustomError('Factura no encontrada', 404);
+  }
+
+  const detalles = await DetalleFactura.findAll({
+    where: { facturaId: idNumerico },
+  });
+
+  if (detalles.length === 0) {
+    throw new CustomError('La factura no tiene detalles', 404);
+  }
+
+  const alquilerId = detalles[0].alquilerId;
+  const alquiler = await Alquiler.findByPk(alquilerId, {
+    include: [
+      {
+        model: Cliente,
+        as: 'cliente',
+      },
+    ],
+  });
+
+  if (!alquiler || !alquiler.cliente) {
+    throw new CustomError('No se encontró el cliente de la factura', 404);
+  }
+
+  const pdfBuffer = await generarPDFFactura(
+    factura,
+    factura.pago,
+    detalles,
+    alquiler.cliente,
+  );
+
+  return pdfBuffer;
+};
+
 module.exports = {
   generarFactura,
   confirmarPago,
   obtenerVentasResumen,
+  obtenerPDFFactura,
 };
