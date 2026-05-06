@@ -81,9 +81,29 @@ const getVentasResumen = async (req, res) => {
   }
 };
 
+const buscarVentas = async (req, res) => {
+  const { fechaInicio, fechaFin, dniCliente, dniVendedor, nombreHotel } =
+    req.query;
+
+  try {
+    const ventas = await facturaServices.buscarVentas({
+      fechaInicio,
+      fechaFin,
+      dniCliente,
+      dniVendedor,
+      nombreHotel,
+    });
+    res.status(200).json(ventas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   setFactura,
   confirmarPago,
   getVentasResumen,
   getFacturaPDF,
+  buscarVentas,
 };
