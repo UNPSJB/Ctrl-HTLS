@@ -5,71 +5,68 @@ import NumberInput from '@/components/ui/form/NumberInput';
 import VentasGlobalTable from '../components/VentasGlobalTable';
 import AppButton from '@/components/ui/AppButton';
 import ListHeader from '@/modules/admin/shared/components/ui/ListHeader';
+import { buscarVentas } from '@/api/ventas/ventasService';
 
-// Datos de prueba simulados (Mock Data) para probar visualmente la tabla
-const MOCK_DATA = [
-  {
-    id: 1,
-    hotel: "Hotel Paraíso Central",
-    fechaVenta: "2023-11-15T14:30:00Z",
-    vendedor: "Carlos Martínez",
-    cliente: "Ana López",
-    monto: 1500.50,
-    metodoPago: "tarjeta",
-    tipoFactura: "A",
-    numeroFactura: "0001-0000456"
-  },
-  {
-    id: 2,
-    hotel: "Resort Vista del Mar",
-    fechaVenta: "2023-11-16T10:15:00Z",
-    vendedor: "Lucía Gómez",
-    cliente: "Marcos Ruiz",
-    monto: 850.00,
-    metodoPago: "efectivo",
-    tipoFactura: "B",
-    numeroFactura: "0002-0000123"
-  },
-  {
-    id: 3,
-    hotel: "Cabañas El Bosque",
-    fechaVenta: "2023-11-16T16:45:00Z",
-    vendedor: "Carlos Martínez",
-    cliente: "Sofía Herrero",
-    monto: 450.00,
-    metodoPago: "mixto",
-    tipoFactura: null,
-    numeroFactura: null
-  }
-];
+// Límites globales del selector de fechas
+const FECHA_MIN = '2000-01-01';
+const FECHA_MAX = '2100-12-31';
+
+/**
+ * Calcula el día siguiente a una fecha en formato YYYY-MM-DD.
+ * Se usa como mínimo para fechaFin, garantizando que sea siempre
+ * estrictamente mayor que fechaInicio.
+ */
+const diaSiguiente = (fechaStr) => {
+  if (!fechaStr) return FECHA_MIN;
+  const siguiente = new Date(`${fechaStr}T00:00:00`);
+  siguiente.setDate(siguiente.getDate() + 1);
+  return siguiente.toISOString().split('T')[0];
+};
 
 export default function VentasGlobales() {
   const [loading, setLoading] = useState(false);
-  const [ventas, setVentas] = useState([]); // Inicialmente vacío
+  const [ventas, setVentas] = useState([]);
+  const [error, setError] = useState(null);
 
-  // Estados del formulario
+  // Estados del formulario con los mismos nombres que espera el backend
   const [filtros, setFiltros] = useState({
     fechaInicio: '',
     fechaFin: '',
-    hotel: '',
-    clienteDoc: '',
-    vendedorDoc: ''
+    nombreHotel: '',
+    dniCliente: '',
+    dniVendedor: ''
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFiltros(prev => ({ ...prev, [name]: value }));
+
+    setFiltros(prev => {
+      const siguiente = { ...prev, [name]: value };
+
+      // Si se cambió fechaInicio y fechaFin ya no es válida (≤ fechaInicio), se resetea
+      if (name === 'fechaInicio' && prev.fechaFin && value >= prev.fechaFin) {
+        siguiente.fechaFin = '';
+      }
+
+      return siguiente;
+    });
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    // Simular un retardo de red de 1 segundo y luego cargar el mock data
-    setTimeout(() => {
-      setVentas(MOCK_DATA);
+    try {
+      const resultado = await buscarVentas(filtros);
+      setVentas(resultado);
+    } catch (err) {
+      const mensaje = err.response?.data?.error || 'Error al buscar ventas. Intente nuevamente.';
+      setError(mensaje);
+      setVentas([]);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -90,6 +87,8 @@ export default function VentasGlobales() {
                 name="fechaInicio"
                 value={filtros.fechaInicio}
                 onChange={handleChange}
+                min={FECHA_MIN}
+                max={FECHA_MAX}
                 required
               />
             </FormField>
@@ -100,37 +99,44 @@ export default function VentasGlobales() {
                 name="fechaFin"
                 value={filtros.fechaFin}
                 onChange={handleChange}
+                min={diaSiguiente(filtros.fechaInicio)}
+                max={FECHA_MAX}
                 required
               />
             </FormField>
 
             <FormField label="Hotel (Nombre)">
               <TextInput
-                name="hotel"
+                name="nombreHotel"
                 placeholder="Ej. Paraíso..."
-                value={filtros.hotel}
+                value={filtros.nombreHotel}
                 onChange={handleChange}
               />
             </FormField>
 
             <FormField label="Doc. Cliente">
               <NumberInput
-                name="clienteDoc"
+                name="dniCliente"
                 placeholder="Ej. 12345678"
-                value={filtros.clienteDoc}
+                value={filtros.dniCliente}
                 onChange={handleChange}
               />
             </FormField>
 
             <FormField label="Doc. Vendedor">
               <NumberInput
-                name="vendedorDoc"
+                name="dniVendedor"
                 placeholder="Ej. 87654321"
-                value={filtros.vendedorDoc}
+                value={filtros.dniVendedor}
                 onChange={handleChange}
               />
             </FormField>
           </div>
+
+          {/* Mensaje de error */}
+          {error && (
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          )}
 
           <div className="flex justify-end pt-2 border-t border-gray-100 dark:border-gray-700 mt-2">
             <AppButton
