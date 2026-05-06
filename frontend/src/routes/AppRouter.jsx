@@ -6,6 +6,8 @@ import HomePage from '@/modules/vendor/pages/HomePage';
 import Hoteles from '@/modules/admin/hotels/pages/Hoteles';
 import HotelesForm from '@/modules/admin/hotels/pages/HotelesForm';
 import Dashboard from '@/modules/admin/dashboard/pages/Dashboard';
+import VentasGlobales from '@/modules/admin/ventas/pages/VentasGlobales';
+import VentaDetalle from '@/modules/admin/ventas/pages/VentaDetalle';
 import PagoPage from '@/modules/vendor/pages/PagoPage';
 import PagoExitoPage from '@/modules/vendor/pages/PagoExitoPage';
 import HotelDashboard from '@/modules/admin/hotels/pages/HotelDashboard';
@@ -53,6 +55,8 @@ function AppRouter() {
             {user.rol === 'administrador' && (
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Dashboard />} />
+                <Route path="ventas" element={<VentasGlobales />} />
+                <Route path="ventas/:id" element={<VentaDetalle />} />
 
                 {/* Rutas de Vendedores */}
                 <Route path="vendedores" element={<Vendedores />} />
@@ -77,7 +81,7 @@ function AppRouter() {
                 <Route path="clientes/editar/:id" element={<ClientesForm />} />
                 <Route path="clientes/:id/historial" element={<ClienteHistorial />} />
 
-                {/* Rutas de Ubicación */}
+                {/* Rutas de UbicaciÃ³n */}
                 <Route path="ubicacion" element={<UbicacionPage />} />
 
                 {/* Rutas de Encargados */}
@@ -90,7 +94,7 @@ function AppRouter() {
               </Route>
             )}
 
-            {/* Redirección para admins que entran a la raíz */}
+            {/* RedirecciÃ³n para admins que entran a la raÃ­z */}
             {user.rol === 'administrador' && (
               <Route path="/" element={<Navigate to="/admin" replace />} />
             )}

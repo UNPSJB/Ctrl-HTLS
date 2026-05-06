@@ -16,10 +16,10 @@ import { capitalizeFirst, capitalizeWords } from '@/utils/stringUtils';
 const ITEMS_PER_PAGE = 10;
 
 /**
- * Componente de Lista para el historial de ventas de un hotel.
- * Muestra información sobre la fecha, vendedor, cliente, montos y facturación.
+ * Componente de Lista para las ventas globales de la empresa.
+ * Muestra información sobre el hotel, fecha, vendedor, cliente, montos y facturación.
  */
-export default function HotelHistorialTable({
+export default function VentasGlobalTable({
   data = [],
   loading = false
 }) {
@@ -38,6 +38,22 @@ export default function HotelHistorialTable({
   };
 
   const columns = [
+    {
+      key: 'hotel',
+      label: 'Hotel',
+      render: (venta) => (
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+            <Building2 className="h-4 w-4" />
+          </div>
+          <div className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
+            {venta.hotel
+              ? capitalizeWords(venta.hotel)
+              : <span className="italic text-gray-400">Desconocido</span>}
+          </div>
+        </div>
+      )
+    },
     {
       key: 'fechaVenta',
       label: 'Fecha Venta',
@@ -132,10 +148,10 @@ export default function HotelHistorialTable({
         columns={columns}
         data={currentItems}
         loading={loading}
-        loadingMessage="Cargando historial del hotel..."
-        emptyIcon={Building2}
-        emptyMessage="No hay actividad registrada para este hotel."
-        rowKey={(row, index) => index}
+        loadingMessage="Buscando ventas globales..."
+        emptyIcon={Receipt}
+        emptyMessage="No se encontraron ventas con los criterios especificados."
+        rowKey={(row, index) => row.id || index}
       />
 
       <DataTablePagination
