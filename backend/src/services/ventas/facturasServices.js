@@ -9,7 +9,10 @@ const AlquilerHabitacion = require('../../models/ventas/AlquilerHabitacion');
 const AlquilerPaquetePromocional = require('../../models/ventas/AlquilerPaquetePromocional');
 const Habitacion = require('../../models/hotel/Habitacion');
 const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
+const Hotel = require('../../models/hotel/Hotel');
+const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
 const Cliente = require('../../models/core/Cliente');
+const Empleado = require('../../models/core/Empleado');
 const { generarPDFFactura } = require('./pdfFacturaService');
 
 const generarFactura = async (alquilerIds, vendedorId) => {};
@@ -506,9 +509,300 @@ const obtenerPDFFactura = async (facturaId) => {
   return pdfBuffer;
 };
 
+const buscarVentas = async (filtros) => {
+  const { fechaInicio, fechaFin, dniCliente, dniVendedor, nombreHotel } =
+    filtros;
+
+  const tieneAlgunFiltro =
+    fechaInicio || fechaFin || dniCliente || dniVendedor || nombreHotel;
+
+  if (!tieneAlgunFiltro) {
+    throw new CustomError(
+      'Debe ingresar al menos un filtro de búsqueda (fechaInicio, fechaFin, dniCliente, dniVendedor o nombreHotel)',
+      400,
+    );
+  }
+
+  // Construir condiciones de fecha sobre Factura
+  const whereFactura = {};
+  if (fechaInicio && fechaFin) {
+    whereFactura.fecha = {
+      [Op.gte]: new Date(`${fechaInicio}T00:00:00.000Z`),
+      [Op.lte]: new Date(`${fechaFin}T23:59:59.999Z`),
+    };
+  } else if (fechaInicio) {
+    whereFactura.fecha = {
+      [Op.gte]: new Date(`${fechaInicio}T00:00:00.000Z`),
+    };
+  } else if (fechaFin) {
+    whereFactura.fecha = {
+      [Op.lte]: new Date(`${fechaFin}T23:59:59.999Z`),
+    };
+  }
+
+  // Filtrar por vendedor (DNI)
+  let empleadoIds = null;
+  if (dniVendedor) {
+    const empleados = await Empleado.findAll({
+      where: { numeroDocumento: dniVendedor },
+      attributes: ['id'],
+      raw: true,
+    });
+    if (empleados.length === 0) {
+      return [];
+    }
+    empleadoIds = empleados.map((e) => e.id);
+  }
+
+  // Filtrar por cliente (DNI)
+  let clienteIds = null;
+  if (dniCliente) {
+    const clientes = await Cliente.findAll({
+      where: { numeroDocumento: dniCliente },
+      attributes: ['id'],
+      raw: true,
+    });
+    if (clientes.length === 0) {
+      return [];
+    }
+    clienteIds = clientes.map((c) => c.id);
+  }
+
+  // Filtrar por hotel (nombre)
+  let alquilerIdsPorHotel = null;
+  if (nombreHotel) {
+    const hoteles = await Hotel.findAll({
+      where: { nombre: { [Op.like]: `%${nombreHotel}%` } },
+      attributes: ['id'],
+      raw: true,
+    });
+
+    if (hoteles.length === 0) {
+      return [];
+    }
+
+    const hotelIds = hoteles.map((h) => h.id);
+
+    // Buscar habitaciones de esos hoteles
+    const habitaciones = await Habitacion.findAll({
+      where: { hotelId: { [Op.in]: hotelIds } },
+      attributes: ['id'],
+      raw: true,
+    });
+    const habitacionIds = habitaciones.map((h) => h.id);
+
+    // Buscar paquetes de esos hoteles
+    const paquetes = await PaquetePromocional.findAll({
+      where: { hotelId: { [Op.in]: hotelIds } },
+      attributes: ['id'],
+      raw: true,
+    });
+    const paqueteIds = paquetes.map((p) => p.id);
+
+    // Obtener alquileres relacionados
+    const alquileresHab =
+      habitacionIds.length > 0
+        ? await AlquilerHabitacion.findAll({
+            where: { habitacionId: { [Op.in]: habitacionIds } },
+            attributes: ['alquilerId'],
+            raw: true,
+          })
+        : [];
+
+    const alquileresPaq =
+      paqueteIds.length > 0
+        ? await AlquilerPaquetePromocional.findAll({
+            where: { paquetePromocionalId: { [Op.in]: paqueteIds } },
+            attributes: ['alquilerId'],
+            raw: true,
+          })
+        : [];
+
+    alquilerIdsPorHotel = [
+      ...new Set([
+        ...alquileresHab.map((a) => a.alquilerId),
+        ...alquileresPaq.map((a) => a.alquilerId),
+      ]),
+    ];
+
+    if (alquilerIdsPorHotel.length === 0) {
+      return [];
+    }
+  }
+
+  // Construir condiciones para DetalleFactura
+  const whereDetalle = {};
+  if (empleadoIds) {
+    whereDetalle.empleadoId = { [Op.in]: empleadoIds };
+  }
+
+  // Si hay filtro por cliente, obtener alquileres de esos clientes
+  let alquilerIdsPorCliente = null;
+  if (clienteIds) {
+    const alquileresCliente = await Alquiler.findAll({
+      where: { clienteId: { [Op.in]: clienteIds } },
+      attributes: ['id'],
+      raw: true,
+    });
+    if (alquileresCliente.length === 0) {
+      return [];
+    }
+    alquilerIdsPorCliente = alquileresCliente.map((a) => a.id);
+  }
+
+  // Combinar filtros de alquilerId (hotel + cliente)
+  if (alquilerIdsPorHotel && alquilerIdsPorCliente) {
+    const interseccion = alquilerIdsPorHotel.filter((id) =>
+      alquilerIdsPorCliente.includes(id),
+    );
+    if (interseccion.length === 0) {
+      return [];
+    }
+    whereDetalle.alquilerId = { [Op.in]: interseccion };
+  } else if (alquilerIdsPorHotel) {
+    whereDetalle.alquilerId = { [Op.in]: alquilerIdsPorHotel };
+  } else if (alquilerIdsPorCliente) {
+    whereDetalle.alquilerId = { [Op.in]: alquilerIdsPorCliente };
+  }
+
+  // Buscar detalles con las relaciones necesarias
+  const detalles = await DetalleFactura.findAll({
+    where: whereDetalle,
+    include: [
+      {
+        model: Factura,
+        as: 'factura',
+        where: Object.keys(whereFactura).length > 0 ? whereFactura : undefined,
+        include: [
+          {
+            model: Pago,
+            as: 'pago',
+            attributes: ['tipo_pago'],
+          },
+        ],
+        attributes: ['id', 'numero', 'tipo_factura', 'importe_total'],
+      },
+      {
+        model: Empleado,
+        as: 'empleado',
+        attributes: ['nombre', 'apellido'],
+      },
+      {
+        model: Alquiler,
+        as: 'alquiler',
+        include: [
+          {
+            model: Cliente,
+            as: 'cliente',
+            attributes: ['nombre', 'apellido'],
+          },
+        ],
+        attributes: ['id'],
+      },
+    ],
+    order: [[{ model: Factura, as: 'factura' }, 'numero', 'DESC']],
+  });
+
+  // Obtener alquilerIds de los detalles para resolver hotel
+  const alquilerIdsDetalles = [
+    ...new Set(detalles.map((d) => d.alquilerId).filter(Boolean)),
+  ];
+
+  // Resolver hotel por habitaciones
+  const alquileresHabInfo =
+    alquilerIdsDetalles.length > 0
+      ? await AlquilerHabitacion.findAll({
+          where: { alquilerId: { [Op.in]: alquilerIdsDetalles } },
+          attributes: ['alquilerId', 'habitacionId'],
+          raw: true,
+        })
+      : [];
+  const habIds = [...new Set(alquileresHabInfo.map((ah) => ah.habitacionId))];
+  const habsConHotel =
+    habIds.length > 0
+      ? await Habitacion.findAll({
+          where: { id: { [Op.in]: habIds } },
+          include: [{ model: Hotel, as: 'hotel', attributes: ['nombre'] }],
+          attributes: ['id'],
+        })
+      : [];
+  const hotelPorHab = {};
+  habsConHotel.forEach((h) => {
+    hotelPorHab[h.id] = h.hotel?.nombre || null;
+  });
+  const hotelPorAlqHab = {};
+  alquileresHabInfo.forEach((ah) => {
+    if (hotelPorHab[ah.habitacionId]) {
+      hotelPorAlqHab[ah.alquilerId] = hotelPorHab[ah.habitacionId];
+    }
+  });
+
+  // Resolver hotel por paquetes promocionales
+  const alqPaqInfo =
+    alquilerIdsDetalles.length > 0
+      ? await AlquilerPaquetePromocional.findAll({
+          where: { alquilerId: { [Op.in]: alquilerIdsDetalles } },
+          attributes: ['alquilerId', 'paquetePromocionalId'],
+          raw: true,
+        })
+      : [];
+  const paqIds = [...new Set(alqPaqInfo.map((ap) => ap.paquetePromocionalId))];
+  const paqsConHotel =
+    paqIds.length > 0
+      ? await PaquetePromocional.findAll({
+          where: { id: { [Op.in]: paqIds } },
+          include: [{ model: Hotel, as: 'hotel', attributes: ['nombre'] }],
+          attributes: ['id'],
+        })
+      : [];
+  const hotelPorPaq = {};
+  paqsConHotel.forEach((p) => {
+    hotelPorPaq[p.id] = p.hotel?.nombre || null;
+  });
+  const hotelPorAlqPaq = {};
+  alqPaqInfo.forEach((ap) => {
+    if (hotelPorPaq[ap.paquetePromocionalId]) {
+      hotelPorAlqPaq[ap.alquilerId] = hotelPorPaq[ap.paquetePromocionalId];
+    }
+  });
+
+  // Agrupar por factura para evitar duplicados
+  const ventasPorFactura = {};
+  for (const detalle of detalles) {
+    const factura = detalle.factura;
+    if (!factura) continue;
+
+    const fId = factura.id;
+    if (!ventasPorFactura[fId]) {
+      const empleado = detalle.empleado;
+      const cliente = detalle.alquiler ? detalle.alquiler.cliente : null;
+      const alqId = detalle.alquilerId;
+      const hotel = hotelPorAlqHab[alqId] || hotelPorAlqPaq[alqId] || null;
+
+      ventasPorFactura[fId] = {
+        facturaId: factura.id,
+        numeroFactura: factura.numero,
+        tipoFactura: factura.tipo_factura,
+        vendedor: empleado
+          ? { nombre: empleado.nombre, apellido: empleado.apellido }
+          : null,
+        cliente: cliente
+          ? { nombre: cliente.nombre, apellido: cliente.apellido }
+          : null,
+        hotel,
+        montoTotal: Number(factura.importe_total),
+        metodoDePago: factura.pago ? factura.pago.tipo_pago : null,
+      };
+    }
+  }
+
+  return Object.values(ventasPorFactura);
+};
+
 module.exports = {
   generarFactura,
   confirmarPago,
   obtenerVentasResumen,
   obtenerPDFFactura,
+  buscarVentas,
 };
