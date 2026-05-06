@@ -680,7 +680,7 @@ const buscarVentas = async (filtros) => {
             attributes: ['tipo_pago'],
           },
         ],
-        attributes: ['id', 'numero', 'tipo_factura', 'importe_total'],
+        attributes: ['id', 'fecha', 'numero', 'tipo_factura', 'importe_total'],
       },
       {
         model: Empleado,
@@ -783,6 +783,9 @@ const buscarVentas = async (filtros) => {
         facturaId: factura.id,
         numeroFactura: factura.numero,
         tipoFactura: factura.tipo_factura,
+        fecha: factura.fecha
+          ? new Date(factura.fecha).toISOString().split('T')[0]
+          : null,
         vendedor: empleado
           ? { nombre: empleado.nombre, apellido: empleado.apellido }
           : null,
