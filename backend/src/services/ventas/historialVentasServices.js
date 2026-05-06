@@ -105,23 +105,30 @@ const obtenerHistorialVentasPorHotel = async (hotelId) => {
     order: [[{ model: Factura, as: 'factura' }, 'fecha', 'DESC']],
   });
 
-  // Mapear a objetos de historial de venta
-  return detalles.map((detalle) => {
-    const factura = detalle.factura;
-    const empleado = detalle.empleado;
-    const alquiler = detalle.alquiler;
-    const cliente = alquiler ? alquiler.cliente : null;
+  // Agrupar detalles por facturaId
+  const ventasPorFactura = detalles.reduce((acc, detalle) => {
+    const fId = detalle.facturaId;
+    if (!acc[fId]) {
+      const factura = detalle.factura;
+      const empleado = detalle.empleado;
+      const alquiler = detalle.alquiler;
+      const cliente = alquiler ? alquiler.cliente : null;
 
-    return {
-      fechaVenta: factura ? factura.fecha : null,
-      monto: Number(detalle.subtotal),
-      vendedor: empleado ? `${empleado.nombre} ${empleado.apellido}` : null,
-      cliente: cliente ? `${cliente.nombre} ${cliente.apellido}` : null,
-      numeroFactura: factura ? factura.numero : null,
-      tipoFactura: factura ? factura.tipo_factura : null,
-      metodoPago: factura && factura.pago ? factura.pago.tipo_pago : null,
-    };
-  });
+      acc[fId] = {
+        fechaVenta: factura ? factura.fecha : null,
+        monto: 0,
+        vendedor: empleado ? `${empleado.nombre} ${empleado.apellido}` : null,
+        cliente: cliente ? `${cliente.nombre} ${cliente.apellido}` : null,
+        numeroFactura: factura ? factura.numero : null,
+        tipoFactura: factura ? factura.tipo_factura : null,
+        metodoPago: factura && factura.pago ? factura.pago.tipo_pago : null,
+      };
+    }
+    acc[fId].monto += Number(detalle.subtotal);
+    return acc;
+  }, {});
+
+  return Object.values(ventasPorFactura);
 };
 
 const obtenerVentasPorFecha = async (fechaStr) => {

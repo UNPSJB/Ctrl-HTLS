@@ -501,10 +501,41 @@ const obtenerHabitacionesDisponiblesPorTipo = async (
     fechaFin,
   );
 
-  // Filtrar las habitaciones que no están alquiladas y cuya capacidad sea menor o igual a "pasajeros"
+  // Verificar cuáles habitaciones están ocupadas por paquetes promocionales
+  const habitacionesEnPaquetes = await PaquetePromocionalHabitacion.findAll({
+    where: {
+      habitacionId: { [Op.in]: idsHabitaciones },
+      [Op.or]: [
+        {
+          fechaInicio: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          fechaFin: {
+            [Op.between]: [fechaInicio, fechaFin],
+          },
+        },
+        {
+          [Op.and]: [
+            { fechaInicio: { [Op.lte]: fechaInicio } },
+            { fechaFin: { [Op.gte]: fechaFin } },
+          ],
+        },
+      ],
+    },
+    attributes: ['habitacionId'],
+  });
+
+  const idsHabitacionesEnPaquetes = habitacionesEnPaquetes.map(
+    (ph) => ph.habitacionId,
+  );
+
+  // Filtrar las habitaciones que no están alquiladas, no están en paquetes, y cuya capacidad sea menor o igual a "pasajeros"
   const habitacionesDisponibles = habitaciones.filter(
     (habitacion) =>
       habitacionesNoAlquiladas.includes(habitacion.id) &&
+      !idsHabitacionesEnPaquetes.includes(habitacion.id) &&
       habitacion.tipoHabitacion.capacidad <= pasajeros,
   );
 

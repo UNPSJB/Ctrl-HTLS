@@ -107,13 +107,28 @@ const formatearVendedor = (vendedor) => ({
     id: hotel.id,
     nombre: hotel.nombre,
   })),
-  ventas: (vendedor.detallesFactura || []).map((detalle) => ({
-    id: detalle.id,
-    descripcion: detalle.descripcion,
-    subtotal: Number(detalle.subtotal),
-    facturaId: detalle.facturaId,
-    liquidacionId: detalle.liquidacionId,
-    fechaVenta: detalle.factura ? detalle.factura.fecha : null,
+  ventas: Object.values(
+    (vendedor.detallesFactura || []).reduce((acc, detalle) => {
+      const fId = detalle.facturaId;
+      if (!acc[fId]) {
+        acc[fId] = {
+          id: fId,
+          descripciones: [],
+          subtotal: 0,
+          liquidacionId: detalle.liquidacionId,
+          fechaVenta: detalle.factura ? detalle.factura.fecha : null,
+        };
+      }
+      acc[fId].descripciones.push(detalle.descripcion);
+      acc[fId].subtotal += Number(detalle.subtotal);
+      return acc;
+    }, {}),
+  ).map((venta) => ({
+    id: venta.id,
+    descripcion: venta.descripciones.join(', '),
+    subtotal: venta.subtotal,
+    liquidacionId: venta.liquidacionId,
+    fechaVenta: venta.fechaVenta,
   })),
   liquidaciones: (vendedor.liquidaciones || []).map((liquidacion) => ({
     id: liquidacion.id,
@@ -318,13 +333,32 @@ const obtenerVentasVendedor = async (id) => {
     throw new CustomError('El empleado no es un vendedor', 403);
   }
 
-  const ventas = (vendedor.detallesFactura || []).map((detalle) => ({
-    id: detalle.id,
-    descripcion: detalle.descripcion,
-    subtotal: Number(detalle.subtotal),
-    facturaId: detalle.facturaId,
-    liquidacionId: detalle.liquidacionId,
-    fechaVenta: detalle.factura ? detalle.factura.fecha : null,
+  // Agrupar detalles por facturaId
+  const ventasPorFactura = (vendedor.detallesFactura || []).reduce(
+    (acc, detalle) => {
+      const fId = detalle.facturaId;
+      if (!acc[fId]) {
+        acc[fId] = {
+          id: fId,
+          descripciones: [],
+          subtotal: 0,
+          liquidacionId: detalle.liquidacionId,
+          fechaVenta: detalle.factura ? detalle.factura.fecha : null,
+        };
+      }
+      acc[fId].descripciones.push(detalle.descripcion);
+      acc[fId].subtotal += Number(detalle.subtotal);
+      return acc;
+    },
+    {},
+  );
+
+  const ventas = Object.values(ventasPorFactura).map((venta) => ({
+    id: venta.id,
+    descripcion: venta.descripciones.join(', '),
+    subtotal: venta.subtotal,
+    liquidacionId: venta.liquidacionId,
+    fechaVenta: venta.fechaVenta,
   }));
 
   return {

@@ -946,14 +946,7 @@ const getDisponibilidadPorHotel = async (
       vendedorId,
     );
 
-    console.log(hotelesCiudad[0].categoria);
-
-    if (!hotelesCiudad) {
-      throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
-    }
-    // Obtener los hoteles en la ubicación especificada
-
-    if (hotelesCiudad.length === 0) {
+    if (!hotelesCiudad || hotelesCiudad.length === 0) {
       throw new CustomError('No hay hoteles en la ciudad especificada', 404); // Not Found
     }
     for (const hotel of hotelesCiudad) {

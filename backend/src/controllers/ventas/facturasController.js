@@ -56,6 +56,21 @@ const confirmarPago = async (req, res) => {
   }
 };
 
+const getFacturaPDF = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const pdfBuffer = await facturaServices.obtenerPDFFactura(id);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename=factura_${id}.pdf`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const getVentasResumen = async (req, res) => {
   try {
     const resumen = await facturaServices.obtenerVentasResumen();
@@ -70,4 +85,5 @@ module.exports = {
   setFactura,
   confirmarPago,
   getVentasResumen,
+  getFacturaPDF,
 };
