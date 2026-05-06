@@ -69,7 +69,7 @@ export default function DescuentosTab({ hotelId, isActive = false }) {
             Descuentos por Cantidad
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Configure beneficios para clientes que reservan múltiples habitaciones simultáneamente.
+            Administre los beneficios para clientes que reservan múltiples habitaciones.
           </p>
         </div>
         <AppButton

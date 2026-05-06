@@ -118,10 +118,10 @@ export default function TarifasTab({ hotelId, isActive = false }) {
       <div className="flex-shrink-0 flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-6">
         <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-            Tarifas y Disponibilidad
+            Tarifas
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Habilite las categorías que su hotel ofrece estableciendo su precio base. Desactive categorías para inhabilitarlas del inventario.
+            Modificar tipo de habitacion y tarifas.
           </p>
         </div>
       </div>
@@ -130,7 +130,7 @@ export default function TarifasTab({ hotelId, isActive = false }) {
         <div className="h-full relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
           {loading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/50 backdrop-blur-[2px] dark:bg-gray-800/50">
-              <InnerLoading message="Verificando tarifas y disponibilidad..." />
+              <InnerLoading message="Cargando..." />
             </div>
           )}
 
@@ -251,7 +251,7 @@ export default function TarifasTab({ hotelId, isActive = false }) {
             loading={isSubmitting}
             icon={Save}
           >
-            Guardar Tarifario y Disp.
+            Guardar
           </AppButton>
         </div>
       </form>

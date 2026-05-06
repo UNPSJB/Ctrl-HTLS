@@ -35,7 +35,7 @@ const VendedorLiquidaciones = () => {
   // Cálculos derivados
   const pendingSales = ventas.filter((v) => !v.liquidacionId);
   const liquidatedSales = ventas.filter((v) => !!v.liquidacionId);
-  
+
   const totalSalesAmount = ventas.reduce((acc, curr) => acc + Number(curr.subtotal), 0);
   const pendingAmount = pendingSales.reduce((acc, curr) => acc + Number(curr.subtotal), 0) * 0.02;
   const totalPaid = liquidaciones.reduce((acc, curr) => acc + Number(curr.total), 0);
@@ -105,7 +105,7 @@ const VendedorLiquidaciones = () => {
       <div className="flex-shrink-0">
         <PageHeader
           title={vendedor ? `Vendedor: ${capitalizeFirst(vendedor.nombre)} ${capitalizeFirst(vendedor.apellido)}` : 'Cargando...'}
-          description="Gestión integral de ventas comerciales y comisiones"
+          description="Historial de ventas y liquidaciones."
           backTo="/admin/vendedores"
           icon={TrendingUp}
           loading={loading && !vendedor}
@@ -121,8 +121,8 @@ const VendedorLiquidaciones = () => {
               onClick={() => setActiveTab(tab.id)}
               disabled={loading && !vendedor}
               className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors disabled:opacity-50 ${activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                 }`}
             >
               <tab.icon className="h-4 w-4" />
@@ -200,9 +200,9 @@ const VendedorLiquidaciones = () => {
                   <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Ventas por Liquidar</h2>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Seleccione los elementos para procesar la liquidación</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Seleccione las facturas para liquidar</p>
                     </div>
-                    
+
                     <AppButton
                       variant="green"
                       onClick={() => setShowConfirmLiquidar(true)}
@@ -213,7 +213,7 @@ const VendedorLiquidaciones = () => {
                       Liquidar ({selectedVentas.length})
                     </AppButton>
                   </div>
-                  
+
                   <div className="flex-grow overflow-auto custom-scrollbar">
                     <table className="w-full text-left text-sm relative">
                       <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
@@ -266,34 +266,34 @@ const VendedorLiquidaciones = () => {
                   </div>
                 </div>
 
-                  {/* Modal de confirmación de liquidación */}
-                  <Modal
-                    isOpen={showConfirmLiquidar}
-                    onClose={() => setShowConfirmLiquidar(false)}
-                    title="Confirmar Liquidación"
-                    onConfirm={handleLiquidarSeleccionadas}
-                    loading={loadingAction}
-                    confirmLabel="Liquidar"
-                    variant="green"
-                    size="sm"
-                  >
-                    <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                      <p>
-                        ¿Desea liquidar las{' '}
-                        <strong className="text-gray-900 dark:text-white font-medium">{selectedVentas.length}</strong>{' '}
-                        ventas seleccionadas?
-                      </p>
-                      <p>
-                        Total Comisión:{' '}
-                        <strong className="text-gray-900 dark:text-white font-medium">
-                          {formatCurrency(selectedVentas.reduce((acc, vId) => {
-                            const v = ventas.find(vent => vent.id === vId);
-                            return acc + (v ? Number(v.subtotal) : 0);
-                          }, 0) * 0.02)}
-                        </strong>
-                      </p>
-                    </div>
-                  </Modal>
+                {/* Modal de confirmación de liquidación */}
+                <Modal
+                  isOpen={showConfirmLiquidar}
+                  onClose={() => setShowConfirmLiquidar(false)}
+                  title="Confirmar Liquidación"
+                  onConfirm={handleLiquidarSeleccionadas}
+                  loading={loadingAction}
+                  confirmLabel="Liquidar"
+                  variant="green"
+                  size="sm"
+                >
+                  <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                    <p>
+                      ¿Desea liquidar las{' '}
+                      <strong className="text-gray-900 dark:text-white font-medium">{selectedVentas.length}</strong>{' '}
+                      ventas seleccionadas?
+                    </p>
+                    <p>
+                      Total Comisión:{' '}
+                      <strong className="text-gray-900 dark:text-white font-medium">
+                        {formatCurrency(selectedVentas.reduce((acc, vId) => {
+                          const v = ventas.find(vent => vent.id === vId);
+                          return acc + (v ? Number(v.subtotal) : 0);
+                        }, 0) * 0.02)}
+                      </strong>
+                    </p>
+                  </div>
+                </Modal>
               </div>
             )}
 
@@ -301,10 +301,10 @@ const VendedorLiquidaciones = () => {
             {activeTab === 'historial-ventas' && (
               <div className="h-full flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
                 <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Historial de Ventas</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Ventas que ya han sido procesadas</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Historial de Ventas</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Ventas ya liquidadas.</p>
                 </div>
-                
+
                 <div className="flex-grow overflow-auto custom-scrollbar">
                   <table className="w-full text-left text-sm relative">
                     <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-800 dark:text-gray-400">

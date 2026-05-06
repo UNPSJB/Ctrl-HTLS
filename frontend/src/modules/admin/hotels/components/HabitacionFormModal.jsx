@@ -12,7 +12,7 @@ export default function HabitacionFormModal({
   onSave
 }) {
   const [submitting, setSubmitting] = useState(false);
-  
+
   const { register, handleSubmit, reset, formState: { errors, isValid } } = useForm({
     mode: 'onChange'
   });
@@ -52,7 +52,7 @@ export default function HabitacionFormModal({
       isOpen={isOpen}
       onClose={onClose}
       title={habitacion ? 'Editar Habitación' : 'Nueva Habitación'}
-      description={habitacion ? 'Modifique los datos de la habitación física' : 'Complete los datos para registrar una nueva unidad'}
+      description={habitacion ? 'Modifique los datos de la habitación' : 'Complete los datos para registrar una nueva habitación'}
       onConfirm={handleSubmit(handleFormSubmit)}
       loading={submitting}
       confirmDisabled={!isValid || submitting}

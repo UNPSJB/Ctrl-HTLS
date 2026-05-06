@@ -68,7 +68,7 @@ export default function TemporadasTab({ hotelId, isActive = false }) {
             Temporadas del Hotel
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Gestione periodos de alta y baja demanda con ajustes porcentuales automáticos.
+            Asigne fechas para temporadas altas (aumento de precios) y bajas (descuento de precios)
           </p>
         </div>
         <AppButton

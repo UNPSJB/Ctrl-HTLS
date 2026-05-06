@@ -50,10 +50,10 @@ export default function HabitacionesTab({
       const res = await axiosInstance.get('/obtener-tiposHabitaciones');
       setTiposGlobales(res.data);
     } catch (error) {
-      // Solo notificar si no es 404 (sin tipos configurados es un estado válido)
+      // Solo notificar si no es 404 (sin tipos configurados es un estado vï¿½lido)
       if (error.response?.status !== 404) {
         toast.error(
-          error.response?.data?.error || 'Error al cargar los tipos de habitación',
+          error.response?.data?.error || 'Error al cargar los tipos de habitaciï¿½n',
           { id: 'fetch-tipos-hab' }
         );
       }
@@ -169,10 +169,10 @@ export default function HabitacionesTab({
         <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
             <DoorOpen className="h-5 w-5 text-blue-500" />
-            Control de Habitaciones FÃ­sicas
+            Gestion de Habitaciones
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Administre las unidades reales del hotel, asignando su ubicaciÃ³n y tipo.
+            Agregue, edite o elimine habitaciones del hotel.
           </p>
         </div>
 

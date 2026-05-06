@@ -41,7 +41,6 @@ export default function DescuentoFormModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Configurar Descuento"
-      description="Premie a clientes que reservan múltiples habitaciones simultáneamente."
       onConfirm={handleSubmit(handleFormSubmit)}
       loading={submitting}
       confirmDisabled={!isValid || submitting}

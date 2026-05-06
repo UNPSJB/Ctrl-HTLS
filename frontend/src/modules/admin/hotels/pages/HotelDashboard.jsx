@@ -54,9 +54,9 @@ export default function HotelDashboard() {
     { id: 'tarifas', icon: Bed, label: 'Tarifas y Tipos' },
     { id: 'habitaciones', icon: DoorOpen, label: 'Habitaciones Físicas' },
     { id: 'personal', icon: Users, label: 'Personal Asignado' },
-    { id: 'temporadas', icon: Calendar, label: 'Temporadas' },
-    { id: 'descuentos', icon: Tag, label: 'Descuentos por Cantidad' },
-    { id: 'paquetes', icon: Box, label: 'Paquetes Turísticos' },
+    { id: 'temporadas', icon: Calendar, label: 'Temporadas (Opc)' },
+    { id: 'descuentos', icon: Tag, label: 'Descuentos por Cantidad (Opc)' },
+    { id: 'paquetes', icon: Box, label: 'Paquetes Turísticos (Opc)' },
   ];
 
   return (

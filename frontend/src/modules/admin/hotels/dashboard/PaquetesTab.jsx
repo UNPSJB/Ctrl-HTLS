@@ -10,7 +10,7 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
   const [paquetes, setPaquetes] = useState([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   // Estados para el modal
   const [showForm, setShowForm] = useState(false);
   const [editingPaquete, setEditingPaquete] = useState(null); // null = modo crear
@@ -76,7 +76,7 @@ export default function PaquetesTab({ hotelId, isActive = false }) {
             Paquetes Turísticos
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Cree ofertas combinando múltiples habitaciones por un precio especial.
+            Cree paquetes promocionales para determinadas fechas.
           </p>
         </div>
         <AppButton
