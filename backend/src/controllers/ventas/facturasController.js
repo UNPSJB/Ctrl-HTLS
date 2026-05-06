@@ -100,10 +100,23 @@ const buscarVentas = async (req, res) => {
   }
 };
 
+const getDetalleFactura = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const detalle = await facturaServices.obtenerDetalleFactura(id);
+    res.status(200).json(detalle);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   setFactura,
   confirmarPago,
   getVentasResumen,
   getFacturaPDF,
   buscarVentas,
+  getDetalleFactura,
 };

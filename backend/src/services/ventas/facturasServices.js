@@ -11,8 +11,10 @@ const Habitacion = require('../../models/hotel/Habitacion');
 const TipoHabitacion = require('../../models/hotel/TipoHabitacion');
 const Hotel = require('../../models/hotel/Hotel');
 const PaquetePromocional = require('../../models/hotel/PaquetePromocional');
+const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocionalHabitacion');
 const Cliente = require('../../models/core/Cliente');
 const Empleado = require('../../models/core/Empleado');
+const Ciudad = require('../../models/core/Ciudad');
 const { generarPDFFactura } = require('./pdfFacturaService');
 
 const generarFactura = async (alquilerIds, vendedorId) => {};
@@ -802,10 +804,213 @@ const buscarVentas = async (filtros) => {
   return Object.values(ventasPorFactura);
 };
 
+const obtenerDetalleFactura = async (facturaId) => {
+  const idNumerico = Number(facturaId);
+  if (Number.isNaN(idNumerico) || idNumerico <= 0) {
+    throw new CustomError('El id de la factura no es válido', 400);
+  }
+
+  const factura = await Factura.findByPk(idNumerico, {
+    include: [
+      {
+        model: Pago,
+        as: 'pago',
+        attributes: ['tipo_pago'],
+      },
+    ],
+  });
+
+  if (!factura) {
+    throw new CustomError('Factura no encontrada', 404);
+  }
+
+  // Obtener detalles de la factura
+  const detalles = await DetalleFactura.findAll({
+    where: { facturaId: idNumerico },
+    include: [
+      {
+        model: Empleado,
+        as: 'empleado',
+        attributes: ['nombre', 'apellido'],
+      },
+      {
+        model: Alquiler,
+        as: 'alquiler',
+        include: [
+          {
+            model: Cliente,
+            as: 'cliente',
+            attributes: ['nombre', 'apellido'],
+          },
+          {
+            model: Habitacion,
+            as: 'habitaciones',
+            include: [
+              {
+                model: TipoHabitacion,
+                as: 'tipoHabitacion',
+                attributes: ['nombre'],
+              },
+              {
+                model: Hotel,
+                as: 'hotel',
+                include: [
+                  {
+                    model: Ciudad,
+                    as: 'ciudad',
+                    attributes: ['nombre'],
+                  },
+                ],
+                attributes: ['id', 'nombre'],
+              },
+            ],
+            attributes: ['id', 'numero'],
+          },
+          {
+            model: PaquetePromocional,
+            as: 'paquetesPromocionales',
+            include: [
+              {
+                model: Habitacion,
+                as: 'habitaciones',
+                attributes: ['id', 'numero', 'tipoHabitacionId', 'hotelId'],
+                include: [
+                  {
+                    model: TipoHabitacion,
+                    as: 'tipoHabitacion',
+                  },
+                ],
+              },
+              {
+                model: Hotel,
+                as: 'hotel',
+                include: [
+                  {
+                    model: Ciudad,
+                    as: 'ciudad',
+                    attributes: ['nombre'],
+                  },
+                ],
+                attributes: ['id', 'nombre'],
+              },
+            ],
+            attributes: ['id', 'nombre', 'fecha_inicio', 'fecha_fin'],
+          },
+        ],
+        attributes: ['id', 'fecha_inicio', 'fecha_fin', 'pasajeros'],
+      },
+    ],
+  });
+
+  if (detalles.length === 0) {
+    throw new CustomError('La factura no tiene detalles', 404);
+  }
+
+  // Resolver vendedor y cliente del primer detalle
+  const primerDetalle = detalles[0];
+  const empleado = primerDetalle.empleado;
+  const primerAlquiler = primerDetalle.alquiler;
+  const cliente = primerAlquiler ? primerAlquiler.cliente : null;
+
+  // Iterar todos los detalles para agregar habitaciones, paquetes y resolver hotel
+  let hotelInfo = null;
+  const habitaciones = [];
+  const paquetes = [];
+  let alquilerInfo = null;
+
+  for (const detalle of detalles) {
+    const alquiler = detalle.alquiler;
+    if (!alquiler) continue;
+
+    // Tomar datos del alquiler con mayor rango (o el primero encontrado)
+    if (!alquilerInfo) {
+      alquilerInfo = {
+        fechaInicio: alquiler.fecha_inicio,
+        fechaFin: alquiler.fecha_fin,
+        pasajeros: alquiler.pasajeros,
+      };
+    }
+
+    // Agregar habitaciones de este alquiler
+    if (alquiler.habitaciones && alquiler.habitaciones.length > 0) {
+      for (const h of alquiler.habitaciones) {
+        habitaciones.push({
+          numero: h.numero,
+          tipoHabitacion: h.tipoHabitacion ? h.tipoHabitacion.nombre : null,
+        });
+
+        // Resolver hotel desde la habitación
+        if (!hotelInfo && h.hotel) {
+          hotelInfo = {
+            id: h.hotel.id,
+            nombre: h.hotel.nombre,
+            localidad: h.hotel.ciudad ? h.hotel.ciudad.nombre : null,
+          };
+        }
+      }
+    }
+
+    // Agregar paquetes de este alquiler
+    if (
+      alquiler.paquetesPromocionales &&
+      alquiler.paquetesPromocionales.length > 0
+    ) {
+      for (const paq of alquiler.paquetesPromocionales) {
+        paquetes.push({
+          nombre: paq.nombre,
+          fechaInicio: paq.fecha_inicio,
+          fechaFin: paq.fecha_fin,
+          habitaciones: paq.habitaciones
+            ? paq.habitaciones.map((h) => {
+                const tipo = h.dataValues.tipoHabitacion;
+                console.log();
+
+                return {
+                  numero: h.numero,
+                  tipoHabitacion: tipo ? tipo.dataValues.nomb : null,
+                };
+              })
+            : [],
+        });
+
+        // Resolver hotel desde el paquete
+        if (!hotelInfo && paq.hotel) {
+          hotelInfo = {
+            id: paq.hotel.id,
+            nombre: paq.hotel.nombre,
+            localidad: paq.hotel.ciudad ? paq.hotel.ciudad.nombre : null,
+          };
+        }
+      }
+    }
+  }
+
+  return {
+    hotel: hotelInfo,
+    cliente: cliente
+      ? { nombre: cliente.nombre, apellido: cliente.apellido }
+      : null,
+    vendedor: empleado
+      ? { nombre: empleado.nombre, apellido: empleado.apellido }
+      : null,
+    factura: {
+      numero: factura.numero,
+      fecha: factura.fecha,
+      tipo: factura.tipo_factura,
+      montoTotal: Number(factura.importe_total),
+      metodoDePago: factura.pago ? factura.pago.tipo_pago : null,
+    },
+    alquiler: alquilerInfo,
+    habitaciones,
+    paquetes,
+  };
+};
+
 module.exports = {
   generarFactura,
   confirmarPago,
   obtenerVentasResumen,
   obtenerPDFFactura,
   buscarVentas,
+  obtenerDetalleFactura,
 };
