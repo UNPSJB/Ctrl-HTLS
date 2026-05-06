@@ -2,7 +2,7 @@ import { useContext, useMemo } from 'react';
 import {
   Home,
   Building2,
-  Users,
+  Users, Receipt,
   UserCheck,
   LogOut,
   Moon,
@@ -19,7 +19,7 @@ import logoDark from '@/assets/logo-dark.svg';
 import { NavLink } from 'react-router-dom';
 import { capitalizeWords } from '@/utils/stringUtils';
 
-// Barra lateral de navegación para el módulo Admin
+// Barra lateral de navegaciÃ³n para el mÃ³dulo Admin
 function AdminSidebar({ onClose }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { user, logout } = useAuth();
@@ -35,6 +35,7 @@ function AdminSidebar({ onClose }) {
       label: 'PRINCIPAL',
       items: [
         { title: 'Dashboard', icon: Home, path: '/admin' },
+        { title: 'Ventas', icon: Receipt, path: '/admin/ventas' },
       ]
     },
     {
@@ -63,7 +64,7 @@ function AdminSidebar({ onClose }) {
         <img src={logo} alt="Logo" className="h-11 w-auto" />
       </div>
 
-      {/* Menú de Navegación Principal */}
+      {/* MenÃº de NavegaciÃ³n Principal */}
       <nav className="flex-1 space-y-6 overflow-y-auto px-4 py-6 custom-scrollbar">
         {menuGroups.map((group, groupIdx) => (
           <div key={groupIdx} className="space-y-1">
@@ -92,7 +93,7 @@ function AdminSidebar({ onClose }) {
         ))}
       </nav>
 
-      {/* Sección inferior con usuario y configuración de tema */}
+      {/* SecciÃ³n inferior con usuario y configuraciÃ³n de tema */}
       <div className="border-t border-gray-100 px-4 py-6 dark:border-gray-800/50">
         <div className="flex items-center justify-between gap-3 px-1">
           <div className="flex items-center gap-3 overflow-hidden">
@@ -118,7 +119,7 @@ function AdminSidebar({ onClose }) {
             <button
               onClick={logout}
               className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-red-400 transition-colors"
-              title="Cerrar Sesión"
+              title="Cerrar SesiÃ³n"
             >
               <LogOut className="h-5 w-5" />
             </button>
