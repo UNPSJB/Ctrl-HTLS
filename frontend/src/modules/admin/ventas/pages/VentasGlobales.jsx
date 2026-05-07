@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { FormField, Input, TextInput } from '@/components/ui/form';
 import NumberInput from '@/components/ui/form/NumberInput';
@@ -24,18 +25,46 @@ const diaSiguiente = (fechaStr) => {
 };
 
 export default function VentasGlobales() {
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [ventas, setVentas] = useState([]);
   const [error, setError] = useState(null);
 
   // Estados del formulario con los mismos nombres que espera el backend
   const [filtros, setFiltros] = useState({
-    fechaInicio: '',
-    fechaFin: '',
+    fechaInicio: searchParams.get('fechaInicio') || '',
+    fechaFin: searchParams.get('fechaFin') || '',
     nombreHotel: '',
     dniCliente: '',
     dniVendedor: ''
   });
+
+  useEffect(() => {
+    if (filtros.fechaInicio && filtros.fechaFin) {
+      performSearch();
+    }
+  }, []); // Solo en el montaje
+
+  const performSearch = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const resultado = await buscarVentas(filtros);
+      setVentas(resultado);
+    } catch (err) {
+      const mensaje = err.response?.data?.error || 'Error al buscar ventas. Intente nuevamente.';
+      setError(mensaje);
+      setVentas([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    await performSearch();
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,22 +81,11 @@ export default function VentasGlobales() {
     });
   };
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const resultado = await buscarVentas(filtros);
-      setVentas(resultado);
-    } catch (err) {
-      const mensaje = err.response?.data?.error || 'Error al buscar ventas. Intente nuevamente.';
-      setError(mensaje);
-      setVentas([]);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (filtros.fechaInicio && filtros.fechaFin) {
+      performSearch();
     }
-  };
+  }, []); // Solo en el montaje
 
   return (
     <div className="h-full flex flex-col gap-6 overflow-hidden animate-in fade-in duration-500">

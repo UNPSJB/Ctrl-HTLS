@@ -27,6 +27,26 @@ const FECHA_HOY = new Date().toISOString().split('T')[0];
 // fecha para debug siempre un dia demas al que se busca
 // const FECHA_HOY = '2026-05-06';
 
+// Calcula el día siguiente para fechaFin
+const tomorrow = new Date(`${FECHA_HOY}T00:00:00`);
+tomorrow.setDate(tomorrow.getDate() + 1);
+const FECHA_MANANA = tomorrow.toISOString().split('T')[0];
+
+// Calcula fechas para la semana (lunes a domingo)
+const today = new Date(`${FECHA_HOY}T00:00:00`);
+const startOfWeek = new Date(today);
+startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Lunes
+const endOfWeek = new Date(startOfWeek);
+endOfWeek.setDate(startOfWeek.getDate() + 7); // Lunes siguiente
+const FECHA_INICIO_SEMANA = startOfWeek.toISOString().split('T')[0];
+const FECHA_FIN_SEMANA = endOfWeek.toISOString().split('T')[0];
+
+// Calcula fechas para el mes (1 del mes a fin del mes)
+const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1); // Primer día del mes siguiente
+const FECHA_INICIO_MES = startOfMonth.toISOString().split('T')[0];
+const FECHA_FIN_MES = endOfMonth.toISOString().split('T')[0];
+
 function Dashboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -113,7 +133,7 @@ function Dashboard() {
               </div>
 
               {/* Card 2: Ventas de Hoy */}
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-green-200 dark:hover:border-green-800">
+              <Link to={`/admin/ventas?fechaInicio=${FECHA_HOY}&fechaFin=${FECHA_MANANA}`} className="block bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-green-200 dark:hover:border-green-800">
                 <div className="flex items-center justify-between mb-2">
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -126,10 +146,10 @@ function Dashboard() {
                 <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
                   {formatCurrency(resumenVentas?.dia?.total)}
                 </p>
-              </div>
+              </Link>
 
               {/* Card 3: Ventas de la Semana */}
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-teal-200 dark:hover:border-teal-800">
+              <Link to={`/admin/ventas?fechaInicio=${FECHA_INICIO_SEMANA}&fechaFin=${FECHA_FIN_SEMANA}`} className="block bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-teal-200 dark:hover:border-teal-800">
                 <div className="flex items-center justify-between mb-2">
                   <div className="p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg">
                     <CalendarDays className="w-6 h-6 text-teal-600 dark:text-teal-400" />
@@ -142,10 +162,10 @@ function Dashboard() {
                 <p className="text-xs text-teal-600 dark:text-teal-400 font-medium mt-1">
                   {formatCurrency(resumenVentas?.semana?.total)}
                 </p>
-              </div>
+              </Link>
 
               {/* Card 4: Ventas del Mes */}
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-emerald-200 dark:hover:border-emerald-800">
+              <Link to={`/admin/ventas?fechaInicio=${FECHA_INICIO_MES}&fechaFin=${FECHA_FIN_MES}`} className="block bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md hover:border-emerald-200 dark:hover:border-emerald-800">
                 <div className="flex items-center justify-between mb-2">
                   <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
                     <DollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
@@ -158,7 +178,7 @@ function Dashboard() {
                 <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">
                   {formatCurrency(resumenVentas?.mes?.total)}
                 </p>
-              </div>
+              </Link>
             </div>
 
             {/* Sección Secundaria: Ventas de Hoy y Accesos Directos */}
