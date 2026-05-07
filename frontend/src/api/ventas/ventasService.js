@@ -36,3 +36,23 @@ export const getDetalleFactura = async (facturaId) => {
   const response = await axiosInstance.get(`/factura/${facturaId}/detalle`);
   return response.data;
 };
+
+/**
+ * Obtiene el resumen de ventas agrupado por día, semana y mes.
+ * @returns {Promise<{dia: {cantidad, total}, semana: {cantidad, total}, mes: {cantidad, total}}>}
+ */
+export const getResumenVentas = async () => {
+  const response = await axiosInstance.get('/ventas');
+  return response.data;
+};
+
+/**
+ * Obtiene todas las ventas realizadas en una fecha específica.
+ * @param {string} fecha - Fecha en formato YYYY-MM-DD.
+ * @returns {Promise<Array<{hotel, vendedor, cliente, monto}>>}
+ */
+export const getVentasPorFecha = async (fecha) => {
+  const response = await axiosInstance.get('/ventas-por-fecha', { params: { fecha } });
+  return response.data;
+};
+
