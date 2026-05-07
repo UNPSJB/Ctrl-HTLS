@@ -77,7 +77,7 @@ function Dashboard() {
               Panel de Control
             </h2>
             <p className="text-gray-500 dark:text-gray-400">
-              Bienvenido,{' '}
+              Bienvenido/a,{' '}
               <span className="font-semibold text-blue-600 dark:text-blue-400">
                 {capitalizeWords(user?.nombre) || 'Administrador'}
               </span>

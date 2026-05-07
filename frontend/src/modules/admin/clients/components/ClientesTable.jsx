@@ -216,7 +216,7 @@ const ClientesTable = () => {
           columns={columns}
           data={currentItems}
           loading={loading}
-          loadingMessage="Hidratando base de clientes..."
+          loadingMessage="Cargando base de clientes..."
           emptyIcon={Users}
           emptyMessage="No se encontraron clientes que coincidan con la búsqueda."
           sortKey={sortKey}

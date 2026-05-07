@@ -52,7 +52,7 @@ const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="login-username" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                Usuario / Email
+                Email
               </label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3">
