@@ -62,7 +62,32 @@ const liquidarVendedorPorDetallesController = async (req, res) => {
       vendedorId,
       detalleIds,
     );
-    res.status(201).json(resultado);
+
+    const liquidacionId = resultado.liquidacion.liquidacion.id;
+    const pdfBuffer =
+      await liquidacionesServices.obtenerPDFRecibo(liquidacionId);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename=recibo_${liquidacionId}.pdf`,
+    );
+    res.send(pdfBuffer);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const getReciboPDF = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const pdfBuffer = await liquidacionesServices.obtenerPDFRecibo(id);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename=recibo_${id}.pdf`);
+    res.send(pdfBuffer);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
@@ -74,4 +99,5 @@ module.exports = {
   liquidarVendedor,
   listarLiquidaciones,
   liquidarVendedorPorDetalles: liquidarVendedorPorDetallesController,
+  getReciboPDF,
 };

@@ -6,6 +6,8 @@ const Liquidacion = require('../../models/ventas/Liquidacion');
 const Factura = require('../../models/ventas/Factura');
 const Empleado = require('../../models/core/Empleado');
 
+const { generarPDFRecibo } = require('./pdfReciboService');
+
 const PARCIAL_COMISION = 0.02;
 
 const parsearFecha = (valor, nombre) => {
@@ -322,7 +324,9 @@ const liquidarVendedorPorDetalles = async (vendedorId, detalleIds) => {
     throw new CustomError('El id del vendedor no es válido', 400);
   }
 
-  if (!Array.isArray(detalleIds) || detalleIds.length === 0) {
+  const facturaIds = detalleIds;
+
+  if (!Array.isArray(facturaIds) || facturaIds.length === 0) {
     throw new CustomError('Debe proporcionar al menos un id de venta', 400);
   }
 
@@ -336,23 +340,26 @@ const liquidarVendedorPorDetalles = async (vendedorId, detalleIds) => {
   try {
     const detallesPendientes = await DetalleFactura.findAll({
       where: {
-        id: detalleIds,
+        facturaId: { [Op.in]: facturaIds },
         liquidacionId: null,
         empleadoId: idNumerico,
       },
-      attributes: ['id', 'subtotal'],
+      attributes: ['id', 'subtotal', 'facturaId'],
       transaction,
       lock: transaction.LOCK.UPDATE,
     });
 
-    if (detallesPendientes.length !== detalleIds.length) {
+    const facturasEncontradas = [
+      ...new Set(detallesPendientes.map((d) => d.facturaId)),
+    ];
+    const facturasNoEncontradas = facturaIds.filter(
+      (id) => !facturasEncontradas.includes(id),
+    );
+
+    if (facturasNoEncontradas.length > 0) {
       await transaction.rollback();
-      const encontrados = detallesPendientes.map((d) => d.id);
-      const noEncontrados = detalleIds.filter(
-        (id) => !encontrados.includes(id),
-      );
       throw new CustomError(
-        `Algunos detalles no existen, ya están liquidados o no pertenecen al vendedor: ${noEncontrados.join(', ')}`,
+        `Algunas facturas no existen, ya están liquidadas o no pertenecen al vendedor: ${facturasNoEncontradas.join(', ')}`,
         400,
       );
     }
@@ -419,9 +426,77 @@ const liquidarVendedorPorDetalles = async (vendedorId, detalleIds) => {
   }
 };
 
+const obtenerPDFRecibo = async (liquidacionId) => {
+  const idNumerico = Number(liquidacionId);
+  if (Number.isNaN(idNumerico) || idNumerico <= 0) {
+    throw new CustomError('El id de la liquidación no es válido', 400);
+  }
+
+  const liquidacion = await Liquidacion.findByPk(idNumerico, {
+    include: [
+      {
+        model: Empleado,
+        as: 'empleado',
+        attributes: ['id', 'nombre', 'apellido'],
+      },
+      {
+        model: DetalleFactura,
+        as: 'detallesFactura',
+        attributes: ['id', 'descripcion', 'subtotal', 'facturaId'],
+        include: [
+          {
+            model: Factura,
+            as: 'factura',
+            attributes: ['id', 'numero', 'fecha'],
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!liquidacion) {
+    throw new CustomError('Liquidación no encontrada', 404);
+  }
+
+  if (!liquidacion.empleado) {
+    throw new CustomError('No se encontró el vendedor de la liquidación', 404);
+  }
+
+  // Agrupar detalles por factura
+  const ventasPorFactura = (liquidacion.detallesFactura || []).reduce(
+    (acc, detalle) => {
+      const fId = detalle.facturaId;
+      if (!acc[fId]) {
+        acc[fId] = {
+          numero: detalle.factura ? detalle.factura.numero : null,
+          fecha: detalle.factura ? detalle.factura.fecha : null,
+          monto: 0,
+        };
+      }
+      acc[fId].monto += Number(detalle.subtotal);
+      return acc;
+    },
+    {},
+  );
+
+  const ventas = Object.values(ventasPorFactura).map((v) => ({
+    descripcion: `Factura N° ${String(v.numero).padStart(8, '0')} - ${new Date(v.fecha).toLocaleDateString('es-AR')}`,
+    subtotal: v.monto,
+  }));
+
+  const pdfBuffer = await generarPDFRecibo(
+    liquidacion,
+    liquidacion.empleado,
+    ventas,
+  );
+
+  return pdfBuffer;
+};
+
 module.exports = {
   liquidarComisiones,
   liquidarVendedorPorId,
   obtenerLiquidaciones,
   liquidarVendedorPorDetalles,
+  obtenerPDFRecibo,
 };
