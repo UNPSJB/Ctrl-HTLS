@@ -23,7 +23,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
       isOpen={true}
       onClose={onClose}
       title={capitalizeWords(habitacion?.nombre)}
-      description="Desglose técnico y económico de la unidad habitacional."
+      description="Detalle de la habitación."
       onConfirm={onReserve}
       confirmLabel="Seleccionar Habitación"
     >
