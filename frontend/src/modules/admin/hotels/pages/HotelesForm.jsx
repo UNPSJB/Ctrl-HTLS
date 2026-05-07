@@ -12,10 +12,10 @@ import { capitalizeFirst } from '@/utils/stringUtils';
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import EncargadosSelector from '@/modules/admin/shared/components/selectors/EncargadosSelector';
 import { InnerLoading } from '@/components/ui/InnerLoading';
-import { 
-  FormField, 
-  TextInput, 
-  EmailInput, 
+import {
+  FormField,
+  TextInput,
+  EmailInput,
   TelInput,
   SelectInput,
   RedirectLink,
@@ -207,111 +207,116 @@ export default function HotelesForm() {
             <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
               {/* Información General */}
               <div className={activeTab === 'general' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información General</h3>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <FormField label="Nombre" required error={errors.nombre}>
-                      <TextInput
-                        id="nombre"
-                        maxLength={LIMITS.nombreHotel}
-                        {...register('nombre', {
-                          required: 'El nombre es obligatorio',
-                          ...RULES.nombreHotel,
-                        })}
-                        placeholder="Ej: Hotel Paradise Resort"
-                      />
-                    </FormField>
-
-                    <FormField label="Categoría" required error={errors.categoriaId}>
-                      <SelectInput
-                        id="categoriaId"
-                        {...register('categoriaId', { required: 'Seleccione una categoría' })}
-                      >
-                        <option value="">Seleccionar...</option>
-                        {categorias?.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.nombre}
-                          </option>
-                        ))}
-                      </SelectInput>
-                    </FormField>
-                  </div>
-
-                  <div className="mt-6">
-                    <FormField label="Descripción del Hotel" error={errors.descripcion}>
-                      <TextAreaInput
-                        id="descripcion"
-                        {...register('descripcion', {
-                          ...RULES.descripcion,
-                        })}
-                        placeholder="Escriba una descripción comercial que los clientes verán..."
-                        rows={4}
-                        showCount
-                        maxLength={LIMITS.descripcion}
-                      />
-                    </FormField>
-                  </div>
-                </div>
-
-                {/* Medios de Contacto */}
-                <div className={activeTab === 'contacto' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Medios de Contacto</h3>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <FormField label="Email" required error={errors.email}>
-                      <EmailInput
-                        id="email"
-                        maxLength={LIMITS.email}
-                        {...register('email', {
-                          required: 'El email es obligatorio',
-                          ...RULES.email,
-                        })}
-                        placeholder="contacto@hotel.com"
-                      />
-                    </FormField>
-                    <FormField label="Teléfono" error={errors.telefono}>
-                      <TelInput
-                        id="telefono"
-                        maxLength={LIMITS.telefono.max}
-                        {...register('telefono', {
-                          onChange: handleNumericChange,
-                          ...RULES.telefono,
-                        })}
-                        placeholder="Ej: 3764556677"
-                      />
-                    </FormField>
-                  </div>
-                </div>
-
-                {/* Ubicación Geográfica */}
-                <div className={activeTab === 'ubicacion' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación Geográfica</h3>
-                  <div className="">
-                    <UbicacionSelector
-                      errors={errors}
-                      register={register}
-                      setValue={setValue}
-                      watch={watch}
-                      showAddress={true}
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información General</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <FormField label="Nombre" required error={errors.nombre}>
+                    <TextInput
+                      id="nombre"
+                      maxLength={LIMITS.nombreHotel}
+                      {...register('nombre', {
+                        required: 'El nombre es obligatorio',
+                        ...RULES.nombreHotel,
+                      })}
+                      placeholder="Ej: Hotel Paradise Resort"
                     />
-                  </div>
+                  </FormField>
+
+                  <FormField label="Categoría" required error={errors.categoriaId}>
+                    <SelectInput
+                      id="categoriaId"
+                      {...register('categoriaId', { required: 'Seleccione una categoría' })}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {[...(categorias ?? [])].sort((a, b) => {
+                        const ord = { A: -3, B: -2, C: -1 };
+                        const va = ord[a.nombre] ?? parseFloat(a.nombre);
+                        const vb = ord[b.nombre] ?? parseFloat(b.nombre);
+                        return va - vb;
+                      }).map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.descripcion}
+                        </option>
+                      ))}
+                    </SelectInput>
+                  </FormField>
                 </div>
 
-                {/* Encargado */}
-                <div className={activeTab === 'encargado' ? 'animate-in fade-in duration-300 flex flex-col' : 'hidden'}>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Encargado del Hotel</h3>
-                  <EncargadosSelector
-                    value={selectedEncargadoId}
-                    onChange={setSelectedEncargadoId}
-                    exclude={initialEncargadoId}
-                  />
-                  <RedirectLink
-                    to="/admin/encargados/nuevo"
-                    text="¿El encargado que buscas no aparece o no está registrado?"
-                    label="Hacé clic acá para gestionarlos."
-                    newTab
-                    className="mt-4"
+                <div className="mt-6">
+                  <FormField label="Descripción del Hotel" error={errors.descripcion}>
+                    <TextAreaInput
+                      id="descripcion"
+                      {...register('descripcion', {
+                        ...RULES.descripcion,
+                      })}
+                      placeholder="Escriba una descripción comercial que los clientes verán..."
+                      rows={4}
+                      showCount
+                      maxLength={LIMITS.descripcion}
+                    />
+                  </FormField>
+                </div>
+              </div>
+
+              {/* Medios de Contacto */}
+              <div className={activeTab === 'contacto' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Medios de Contacto</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <FormField label="Email" required error={errors.email}>
+                    <EmailInput
+                      id="email"
+                      maxLength={LIMITS.email}
+                      {...register('email', {
+                        required: 'El email es obligatorio',
+                        ...RULES.email,
+                      })}
+                      placeholder="contacto@hotel.com"
+                    />
+                  </FormField>
+                  <FormField label="Teléfono" error={errors.telefono}>
+                    <TelInput
+                      id="telefono"
+                      maxLength={LIMITS.telefono.max}
+                      {...register('telefono', {
+                        onChange: handleNumericChange,
+                        ...RULES.telefono,
+                      })}
+                      placeholder="Ej: 3764556677"
+                    />
+                  </FormField>
+                </div>
+              </div>
+
+              {/* Ubicación Geográfica */}
+              <div className={activeTab === 'ubicacion' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ubicación Geográfica</h3>
+                <div className="">
+                  <UbicacionSelector
+                    errors={errors}
+                    register={register}
+                    setValue={setValue}
+                    watch={watch}
+                    showAddress={true}
                   />
                 </div>
               </div>
+
+              {/* Encargado */}
+              <div className={activeTab === 'encargado' ? 'animate-in fade-in duration-300 flex flex-col' : 'hidden'}>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Encargado del Hotel</h3>
+                <EncargadosSelector
+                  value={selectedEncargadoId}
+                  onChange={setSelectedEncargadoId}
+                  exclude={initialEncargadoId}
+                />
+                <RedirectLink
+                  to="/admin/encargados/nuevo"
+                  text="¿El encargado que buscas no aparece o no está registrado?"
+                  label="Hacé clic acá para gestionarlos."
+                  newTab
+                  className="mt-4"
+                />
+              </div>
+            </div>
           )}
 
           {/* Footer Estático */}

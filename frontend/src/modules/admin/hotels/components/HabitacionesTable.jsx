@@ -114,7 +114,7 @@ export default function HabitacionesTable({
             variant="edit"
             icon={Edit2}
             onClick={() => onEdit(hab)}
-            disabled={loading || hab.eliminado}
+            disabled={loading}
           />
           <TableButton
             variant={hab.eliminado ? "view" : "delete"}
@@ -158,7 +158,10 @@ export default function HabitacionesTable({
         sortDir={sortDir}
         onSort={handleSort}
         rowKey={(row) => row.id || row.tempId}
-        rowClassName={(row) => row.eliminado ? 'opacity-50 grayscale' : ''}
+        rowClassName={(row) => row.eliminado
+          ? '[&>td:not(:last-child)]:opacity-50 [&>td:not(:last-child)]:grayscale'
+          : ''
+        }
       />
 
       <DataTablePagination

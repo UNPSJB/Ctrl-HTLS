@@ -1,6 +1,7 @@
 import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { CheckCircle2, Download, Home, Award, Sparkles } from 'lucide-react';
 import { formatCurrency } from '@utils/pricingUtils';
+import { formatNumeroFactura } from '@utils/numberUtils';
 import { toast } from 'react-hot-toast';
 
 export default function PagoExitoPage() {
@@ -88,7 +89,7 @@ export default function PagoExitoPage() {
                 <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-700/50">
                   <span className="text-gray-500 dark:text-gray-400">Número de Comprobante:</span>
                   <span className="font-semibold text-gray-900 dark:text-gray-200">
-                    {nroFactura !== 'Pendiente' ? `#${nroFactura}` : nroFactura}
+                    N° {formatNumeroFactura(nroFactura)}
                   </span>
                 </div>
                 <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-700/50">

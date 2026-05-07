@@ -186,7 +186,7 @@ const VendedoresTable = () => {
             title="Actividad y Liquidaciones"
             disabled={vendedor.eliminado}
           />
-          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} disabled={vendedor.eliminado} />
+          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(vendedor.id)} />
           <TableButton
             variant={!vendedor.eliminado ? "delete" : "view"}
             icon={!vendedor.eliminado ? PowerOff : CheckCircle2}
@@ -236,7 +236,10 @@ const VendedoresTable = () => {
           sortKey={sortKey}
           sortDir={sortDir}
           onSort={handleSort}
-          rowClassName={(v) => v.eliminado ? 'opacity-50 grayscale' : ''}
+          rowClassName={(v) => v.eliminado
+            ? '[&>td:not(:last-child)]:opacity-50 [&>td:not(:last-child)]:grayscale'
+            : ''
+          }
         />
 
         <DataTablePagination

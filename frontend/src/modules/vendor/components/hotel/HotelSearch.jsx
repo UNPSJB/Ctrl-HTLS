@@ -71,7 +71,7 @@ function HotelSearch({
   const getToday = useCallback(() => toISODate(new Date()), []);
 
   const getTomorrow = (dateStr) => {
-    const d = new Date(dateStr);
+    const d = new Date(`${dateStr}T00:00:00`);  // hora local, evita desfase UTC
     d.setDate(d.getDate() + 1);
     return toISODate(d);
   };
@@ -112,10 +112,14 @@ function HotelSearch({
   };
 
   const handleChange = (field, value) => {
-    setLocalFilters((prev) => ({
-      ...prev,
-      [field]: value
-    }));
+    setLocalFilters((prev) => {
+      const next = { ...prev, [field]: value };
+      // Si cambia fechaInicio y fechaFin ya no es válida (igual o anterior), limpiarla
+      if (field === 'fechaInicio' && next.fechaFin && next.fechaFin <= value) {
+        next.fechaFin = '';
+      }
+      return next;
+    });
   };
 
   const isDateRangeValid = localFilters.fechaInicio && localFilters.fechaFin && new Date(localFilters.fechaFin) > new Date(localFilters.fechaInicio);
@@ -171,7 +175,7 @@ function HotelSearch({
           <Input
             type="date"
             value={localFilters.fechaFin}
-            min={localFilters.fechaInicio || getToday()}
+            min={localFilters.fechaInicio ? getTomorrow(localFilters.fechaInicio) : getTomorrow(getToday())}
             onChange={(e) => handleChange('fechaFin', e.target.value)}
             className="h-10 px-2 text-xs border-gray-200 dark:border-gray-700 shadow-none"
           />
@@ -274,7 +278,7 @@ function HotelSearch({
             <Input
               type="date"
               value={localFilters.fechaFin}
-              min={localFilters.fechaInicio || getToday()}
+              min={localFilters.fechaInicio ? getTomorrow(localFilters.fechaInicio) : getTomorrow(getToday())}
               onChange={(e) => handleChange('fechaFin', e.target.value)}
               className="rounded-md"
             />

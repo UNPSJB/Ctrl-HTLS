@@ -196,9 +196,14 @@ export default function AjustesGeneralesTab({
                   })}
                 >
                   <option value="">Seleccionar...</option>
-                  {categorias?.map((c) => (
+                  {[...(categorias ?? [])].sort((a, b) => {
+                    const ord = { A: -3, B: -2, C: -1 };
+                    const va = ord[a.nombre] ?? parseFloat(a.nombre);
+                    const vb = ord[b.nombre] ?? parseFloat(b.nombre);
+                    return va - vb;
+                  }).map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.nombre}
+                      {c.descripcion}
                     </option>
                   ))}
                 </SelectInput>
@@ -227,19 +232,19 @@ export default function AjustesGeneralesTab({
                 />
               </FormField>
             </div>
-            
+
             <div className="mt-6">
-               <FormField label="Descripción Básica" error={errors.descripcion}>
-                 <TextAreaInput
-                   {...register('descripcion', {
-                     ...RULES.descripcion,
-                   })}
-                   placeholder="Escriba una descripción o información general del hotel..."
-                   rows={4}
-                   showCount
-                   maxLength={LIMITS.descripcion}
-                 />
-               </FormField>
+              <FormField label="Descripción Básica" error={errors.descripcion}>
+                <TextAreaInput
+                  {...register('descripcion', {
+                    ...RULES.descripcion,
+                  })}
+                  placeholder="Escriba una descripción o información general del hotel..."
+                  rows={4}
+                  showCount
+                  maxLength={LIMITS.descripcion}
+                />
+              </FormField>
             </div>
           </div>
 

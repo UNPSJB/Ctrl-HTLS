@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, BedDouble, Search, Layers } from 'lucide-react';
+import { Plus, BedDouble, Search } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '@/api/axiosInstance';
@@ -298,8 +298,7 @@ export default function PaqueteFormModal({
                           </td>
                           <td className="px-6 py-3">
                             <div className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
-                              <span className="text-blue-600">#</span>
-                              {hab.numero}
+                              N° {hab.numero}
                               {isUnselected && (
                                 <span className="ml-2 inline-flex items-center rounded bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-900/30 dark:text-red-400">
                                   ¿Quitar?
@@ -309,7 +308,6 @@ export default function PaqueteFormModal({
                           </td>
                           <td className="px-6 py-3">
                             <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                              <Layers className="h-3 w-3" />
                               Piso {hab.piso}
                             </div>
                           </td>

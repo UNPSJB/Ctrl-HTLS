@@ -14,11 +14,11 @@ const HotelList = ({ hoteles, isLoading, error, hasSearched = false }) => {
 
   const parseCategoriaIndex = (catStr) => {
     if (!catStr) return 0;
-    
+
     const str = String(catStr).trim().toUpperCase();
 
     // 1. Letras A, B, C
-    const letterMatch = str.match(/\b([ABC])\b/); 
+    const letterMatch = str.match(/\b([ABC])\b/);
     if (letterMatch) {
       const letter = letterMatch[1];
       if (letter === 'A') return 0;
@@ -29,7 +29,7 @@ const HotelList = ({ hoteles, isLoading, error, hasSearched = false }) => {
     // 2. Números (1 a 5)
     const numberStr = str.split(' ')[0];
     const val = parseFloat(numberStr);
-    
+
     if (!isNaN(val)) {
       // Mapear el número al índice: 1 -> 3, 1.5 -> 4, ..., 5 -> 11
       const idx = (val - 1) * 2 + 3;
@@ -50,8 +50,8 @@ const HotelList = ({ hoteles, isLoading, error, hasSearched = false }) => {
   const sortedHotels = [...filteredHotels].sort((a, b) => {
     const indexA = parseCategoriaIndex(a.categoria?.estrellas || a.estrellas || '');
     const indexB = parseCategoriaIndex(b.categoria?.estrellas || b.estrellas || '');
-    
-    return filters.ordenDescendente 
+
+    return filters.ordenDescendente
       ? indexB - indexA // Mejor a peor
       : indexA - indexB; // Peor a mejor
   });
@@ -94,15 +94,15 @@ const HotelList = ({ hoteles, isLoading, error, hasSearched = false }) => {
               variant="info"
               title={hasSearched ? 'Sin disponibilidad' : 'Buscador de Disponibilidad'}
               subtitle={hasSearched ? 'Búsqueda finalizada' : 'Listo para buscar'}
-              description={hasSearched 
-                ? 'Lo sentimos, no hemos encontrado habitaciones disponibles para los criterios seleccionados. Intente ajustar las fechas de estancia o seleccionar una ciudad cercana para ampliar los resultados.' 
+              description={hasSearched
+                ? 'Lo sentimos, no hemos encontrado habitaciones disponibles para los criterios seleccionados. Intente ajustar las fechas de estancia o seleccionar una ciudad cercana para ampliar los resultados.'
                 : 'Utilice el buscador superior para encontrar las mejores opciones de alojamiento para sus clientes. Los resultados aparecerán detallados en esta sección.'}
             />
           ) : sortedHotels.length === 0 ? (
             <StateMessage
               variant="warning"
               title="Sin resultados"
-              description="No hay hoteles que coincidan con los filtros aplicados (categoría/estrellas)."
+              description="No hay hoteles que coincidan con los filtros aplicados."
             />
           ) : (
             <ul className="flex flex-col gap-4">

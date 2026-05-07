@@ -167,9 +167,8 @@ const ClientesTable = () => {
             icon={History}
             onClick={() => handleHistory(cliente.id)}
             title="Ver historial de alquileres"
-            disabled={cliente.eliminado}
           />
-          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(cliente.id)} disabled={cliente.eliminado} />
+          <TableButton variant="edit" icon={Edit} onClick={() => handleEdit(cliente.id)} />
           <TableButton
             variant={!cliente.eliminado ? "delete" : "view"}
             icon={!cliente.eliminado ? PowerOff : CheckCircle2}
@@ -222,7 +221,10 @@ const ClientesTable = () => {
           sortKey={sortKey}
           sortDir={sortDir}
           onSort={handleSort}
-          rowClassName={(c) => c.eliminado ? 'opacity-50 grayscale' : ''}
+          rowClassName={(c) => c.eliminado
+            ? '[&>td:not(:last-child)]:opacity-50 [&>td:not(:last-child)]:grayscale'
+            : ''
+          }
         />
 
         <DataTablePagination

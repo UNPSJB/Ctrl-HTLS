@@ -54,10 +54,6 @@ function RoomCartItem({ room, hotel, onRemove = null, isLocked = false }) {
                 <Users className="h-4 w-4" />
                 <span>{capacidad ?? '-'}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Hash className="h-4 w-4" />
-                <span>{numero ?? '-'}</span>
-              </div>
             </div>
           </div>
           <PriceTag precio={finalTotal} original={originalTotal} />

@@ -174,7 +174,6 @@ const HotelesTable = () => {
             onClick={() => handleHistory(hotel.hotelId)}
             aria-label="Ver historial"
             title="Ver Historial"
-            disabled={hotel.eliminado}
           />
           <TableButton
             variant="view"
@@ -237,7 +236,10 @@ const HotelesTable = () => {
           sortKey={sortKey}
           sortDir={sortDir}
           onSort={handleSort}
-          rowClassName={(hotel) => hotel.eliminado ? 'opacity-50 grayscale' : ''}
+          rowClassName={(hotel) => hotel.eliminado
+            ? '[&>td:not(:last-child)]:opacity-50 [&>td:not(:last-child)]:grayscale'
+            : ''
+          }
         />
 
         <DataTablePagination

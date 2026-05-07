@@ -54,7 +54,7 @@ function validateCard(card) {
         errors.expiry = { message: 'Mes inválido' };
       } else if (year < currentYear) {
         errors.expiry = { message: 'Tarjeta vencida' };
-      } else if (year === currentYear && month <= currentMonth) {
+      } else if (year === currentYear && month < currentMonth) {
         errors.expiry = { message: 'Tarjeta vencida' };
       }
     }
