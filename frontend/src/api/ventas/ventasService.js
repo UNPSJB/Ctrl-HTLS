@@ -26,3 +26,13 @@ export const buscarVentas = async (filtros = {}) => {
   const response = await axiosInstance.get('/buscar-ventas', { params });
   return response.data;
 };
+
+/**
+ * Obtiene el detalle completo de una factura/venta por su ID.
+ * @param {number|string} facturaId - ID de la factura.
+ * @returns {Promise<object>} Detalle de la venta con hotel, cliente, vendedor, alquiler, habitaciones y paquetes.
+ */
+export const getDetalleFactura = async (facturaId) => {
+  const response = await axiosInstance.get(`/factura/${facturaId}/detalle`);
+  return response.data;
+};

@@ -9,6 +9,7 @@ import { DataTable, DataTablePagination } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import { capitalizeFirst, capitalizeWords } from '@/utils/stringUtils';
 import { formatNumeroFactura } from '@/utils/numberUtils';
+import { formatFecha } from '@/utils/dateUtils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -60,7 +61,7 @@ export default function VentasGlobalTable({
       render: (venta) => (
         <div className="font-medium text-gray-900 dark:text-white">
           {venta.fecha
-            ? new Date(venta.fecha).toLocaleDateString()
+            ? formatFecha(venta.fecha)
             : <span className="italic opacity-30">—</span>}
         </div>
       )
