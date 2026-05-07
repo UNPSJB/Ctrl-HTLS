@@ -86,7 +86,7 @@ export default function HotelDashboard() {
 
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
-              <InnerLoading message="Hidratando dashboard..." />
+              <InnerLoading message="Cargando dashboard..." />
             </div>
           ) : !hotel ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-12">

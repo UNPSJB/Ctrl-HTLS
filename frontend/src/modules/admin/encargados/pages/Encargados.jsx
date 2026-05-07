@@ -10,7 +10,7 @@ const Encargados = () => {
         <div className="h-full flex flex-col gap-6 overflow-hidden">
             <ListHeader
                 title="Gestión de Encargados"
-                description="Administra la base de datos de encargados disponibles o asignados"
+                description="Administra la información de encargados disponibles y asignados."
                 actionLabel="Nuevo Encargado"
                 onAction={() => navigate('/admin/encargados/nuevo')}
                 icon={UserCog}

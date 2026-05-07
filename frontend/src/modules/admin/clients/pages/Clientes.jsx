@@ -10,7 +10,7 @@ const Clientes = () => {
         <div className="h-full flex flex-col gap-6 overflow-hidden">
             <ListHeader
                 title="Gestión de Clientes"
-                description="Administra la base de datos de clientes y sus perfiles"
+                description="Administra la información y perfiles de tus clientes."
                 actionLabel="Nuevo Cliente"
                 onAction={() => navigate('/admin/clientes/nuevo')}
                 icon={Users}
