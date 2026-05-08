@@ -234,9 +234,20 @@ const confirmarPago = async (
 
     const numeroFactura = await obtenerSiguienteNumeroFactura(transaction);
 
+    // Crear fecha local al inicio del día para evitar conversión a UTC
+    const now = new Date();
+    const fechaLocal = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0,
+    );
+
     const factura = await Factura.create(
       {
-        fecha: new Date(),
+        fecha: fechaLocal,
         numero: numeroFactura,
         tipo_factura: tipoFacturaNormalizado,
         importe_total: montoTotal,
@@ -358,9 +369,10 @@ const confirmarPago = async (
 };
 
 const obtenerVentasResumen = async () => {
-  const ahora = new Date();
+  const ahora = new Date(); // Fecha y hora local
 
-  const inicioDia = new Date(
+  // Rangos en zona horaria local
+  const inicioDiaLocal = new Date(
     ahora.getFullYear(),
     ahora.getMonth(),
     ahora.getDate(),
@@ -369,7 +381,7 @@ const obtenerVentasResumen = async () => {
     0,
     0,
   );
-  const finDia = new Date(
+  const finDiaLocal = new Date(
     ahora.getFullYear(),
     ahora.getMonth(),
     ahora.getDate(),
@@ -379,8 +391,16 @@ const obtenerVentasResumen = async () => {
     999,
   );
 
+  // Convertir rangos locales a UTC para comparar con la base de datos
+  const inicioDia = new Date(
+    inicioDiaLocal.getTime() - inicioDiaLocal.getTimezoneOffset() * 60000,
+  );
+  const finDia = new Date(
+    finDiaLocal.getTime() - finDiaLocal.getTimezoneOffset() * 60000,
+  );
+
   const distanciaLunes = (ahora.getDay() + 6) % 7;
-  const inicioSemana = new Date(
+  const inicioSemanaLocal = new Date(
     ahora.getFullYear(),
     ahora.getMonth(),
     ahora.getDate() - distanciaLunes,
@@ -389,17 +409,24 @@ const obtenerVentasResumen = async () => {
     0,
     0,
   );
-  const finSemana = new Date(
-    inicioSemana.getFullYear(),
-    inicioSemana.getMonth(),
-    inicioSemana.getDate() + 6,
+  const finSemanaLocal = new Date(
+    inicioSemanaLocal.getFullYear(),
+    inicioSemanaLocal.getMonth(),
+    inicioSemanaLocal.getDate() + 6,
     23,
     59,
     59,
     999,
   );
 
-  const inicioMes = new Date(
+  const inicioSemana = new Date(
+    inicioSemanaLocal.getTime() - inicioSemanaLocal.getTimezoneOffset() * 60000,
+  );
+  const finSemana = new Date(
+    finSemanaLocal.getTime() - finSemanaLocal.getTimezoneOffset() * 60000,
+  );
+
+  const inicioMesLocal = new Date(
     ahora.getFullYear(),
     ahora.getMonth(),
     1,
@@ -408,7 +435,7 @@ const obtenerVentasResumen = async () => {
     0,
     0,
   );
-  const finMes = new Date(
+  const finMesLocal = new Date(
     ahora.getFullYear(),
     ahora.getMonth() + 1,
     0,
@@ -416,6 +443,13 @@ const obtenerVentasResumen = async () => {
     59,
     59,
     999,
+  );
+
+  const inicioMes = new Date(
+    inicioMesLocal.getTime() - inicioMesLocal.getTimezoneOffset() * 60000,
+  );
+  const finMes = new Date(
+    finMesLocal.getTime() - finMesLocal.getTimezoneOffset() * 60000,
   );
 
   const [facturasDia, facturasSemana, facturasMes] = await Promise.all([
@@ -528,17 +562,23 @@ const buscarVentas = async (filtros) => {
   // Construir condiciones de fecha sobre Factura
   const whereFactura = {};
   if (fechaInicio && fechaFin) {
+    const [startYear, startMonth, startDay] = fechaInicio
+      .split('-')
+      .map(Number);
+    const [endYear, endMonth, endDay] = fechaFin.split('-').map(Number);
     whereFactura.fecha = {
-      [Op.gte]: new Date(`${fechaInicio}T00:00:00.000Z`),
-      [Op.lte]: new Date(`${fechaFin}T23:59:59.999Z`),
+      [Op.gte]: new Date(startYear, startMonth - 1, startDay, 0, 0, 0),
+      [Op.lte]: new Date(endYear, endMonth - 1, endDay, 23, 59, 59, 999),
     };
   } else if (fechaInicio) {
+    const [year, month, day] = fechaInicio.split('-').map(Number);
     whereFactura.fecha = {
-      [Op.gte]: new Date(`${fechaInicio}T00:00:00.000Z`),
+      [Op.gte]: new Date(year, month - 1, day, 0, 0, 0),
     };
   } else if (fechaFin) {
+    const [year, month, day] = fechaFin.split('-').map(Number);
     whereFactura.fecha = {
-      [Op.lte]: new Date(`${fechaFin}T23:59:59.999Z`),
+      [Op.lte]: new Date(year, month - 1, day, 23, 59, 59, 999),
     };
   }
 
