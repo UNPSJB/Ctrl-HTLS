@@ -136,8 +136,10 @@ const obtenerVentasPorFecha = async (fechaStr) => {
     throw new CustomError('La fecha es requerida (formato YYYY-MM-DD)', 400);
   }
 
-  const inicio = new Date(`${fechaStr}T00:00:00.000Z`);
-  const fin = new Date(`${fechaStr}T23:59:59.999Z`);
+  // Parsear fecha sin forzar UTC (eliminar el sufijo Z)
+  const [year, month, day] = fechaStr.split('-').map(Number);
+  const inicio = new Date(year, month - 1, day, 0, 0, 0);
+  const fin = new Date(year, month - 1, day, 23, 59, 59, 999);
 
   if (Number.isNaN(inicio.getTime()) || Number.isNaN(fin.getTime())) {
     throw new CustomError(

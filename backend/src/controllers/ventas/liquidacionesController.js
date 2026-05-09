@@ -67,12 +67,10 @@ const liquidarVendedorPorDetallesController = async (req, res) => {
     const pdfBuffer =
       await liquidacionesServices.obtenerPDFRecibo(liquidacionId);
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader(
-      'Content-Disposition',
-      `inline; filename=recibo_${liquidacionId}.pdf`,
-    );
-    res.send(pdfBuffer);
+    res.status(201).json({
+      ...resultado,
+      pdfBase64: pdfBuffer.toString('base64'),
+    });
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
