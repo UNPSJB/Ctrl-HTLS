@@ -91,13 +91,17 @@ function HabitacionCard({ habitacion, hotel, onRemove }) {
           {priceInfo.hasSeasonalAdjustment && (
             <div className="flex items-center gap-2">
               <span>Ajuste por temporada ({ajusteTemporadaMonto > 0 ? '+' : '-'}{Math.round(hotel?.temporada?.porcentaje * 100)}%):</span>
-              <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(totalTemporada)}</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">
+                {ajusteTemporadaMonto > 0 ? '+' : '-'}{formatCurrency(Math.abs(ajusteTemporadaMonto))}
+              </span>
             </div>
           )}
           {porcentajeDescCantidad > 0 && (
             <div className="flex items-center gap-2">
               <span>Por habitaciones (-{Math.round(porcentajeDescCantidad * 100)}%):</span>
-              <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(totalFinalHabitacion)}</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">
+                -{formatCurrency(descuentoCantidadMonto)}
+              </span>
             </div>
           )}
         </div>

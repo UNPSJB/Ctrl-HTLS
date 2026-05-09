@@ -8,7 +8,7 @@ import { useHabitacionSelection } from '@vendor-hooks/useHabitacionSelection';
 import { capitalizeWords } from '@/utils/stringUtils';
 
 // Elemento de lista para una habitación dentro del detalle del hotel
-function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
+function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove, disabled }) {
   const {
     tipo,
     capacidad,
@@ -61,6 +61,7 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
             onIncrement={handleIncrement}
             onDecrement={handleDecrement}
             max={maxAvailable}
+            disabled={disabled}
           />
         </div>
 
@@ -81,6 +82,7 @@ function HabitacionItem({ hotelData, habitacionTipo, onAdd, onRemove }) {
             temporada={hotelData?.temporada ?? null}
             onClose={handleCloseModal}
             onReserve={handleReserveFromModal}
+            disabled={disabled}
           />,
           document.body
         )}

@@ -255,6 +255,10 @@ export function CarritoProvider({ children }) {
         toast.error('Hay una reserva pendiente. Cancela la actual primero.');
         return;
       }
+      if (estado.hoteles.length > 0 && estado.hoteles[0].hotelId !== hotelInfo.hotelId) {
+        toast.error('Solo puedes seleccionar habitaciones/paquetes de un hotel a la vez.');
+        return;
+      }
       agregarElemento(
         dispatch,
         TIPOS.AGREGAR_HABITACION,
@@ -263,13 +267,17 @@ export function CarritoProvider({ children }) {
         fechas
       );
     },
-    [dispatch, estado.reservaConfirmada]
+    [dispatch, estado.reservaConfirmada, estado.hoteles]
   );
 
   const agregarPaquete = useCallback(
     (hotelInfo, paquete, fechas) => {
       if (estado.reservaConfirmada) {
         toast.error('Hay una reserva pendiente. Cancela la actual primero.');
+        return;
+      }
+      if (estado.hoteles.length > 0 && estado.hoteles[0].hotelId !== hotelInfo.hotelId) {
+        toast.error('Solo puedes seleccionar habitaciones/paquetes de un hotel a la vez.');
         return;
       }
       agregarElemento(
@@ -280,7 +288,7 @@ export function CarritoProvider({ children }) {
         fechas
       );
     },
-    [dispatch, estado.reservaConfirmada]
+    [dispatch, estado.reservaConfirmada, estado.hoteles]
   );
 
   const removerHabitacion = useCallback(

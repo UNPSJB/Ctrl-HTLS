@@ -81,9 +81,40 @@ const VendedorLiquidaciones = () => {
 
     try {
       setLoadingAction(true);
-      await axiosInstance.post(`/liquidaciones/liquidar-detalles/${id}`, {
+      const response = await axiosInstance.post(`/liquidaciones/liquidar-detalles/${id}`, {
         detalleIds: selectedVentas
       });
+
+      // Capturar y procesar el PDF devuelto
+      const { pdfBase64 } = response.data;
+      if (pdfBase64) {
+        const byteCharacters = atob(pdfBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+
+        const fechaStr = new Date().toISOString().split('T')[0];
+        const fileName = `Recibo_Liquidacion_Vendedor_${id}_${fechaStr}.pdf`;
+
+        // 1. Forzar descarga automática
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // 2. Abrir en una nueva pestaña del navegador
+        window.open(url, '_blank');
+
+        // Limpiar la URL de memoria después de procesarlo
+        setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+      }
+
       toast.success(`Liquidación generada correctamente (${selectedVentas.length} ventas)`);
       setShowConfirmLiquidar(false);
       await fetchData();

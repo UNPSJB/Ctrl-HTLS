@@ -3,7 +3,7 @@ import Modal from '@ui/Modal';
 import { calcSeasonalPrice, toNumber, formatCurrency } from '@utils/pricingUtils';
 import { capitalizeWords } from '@/utils/stringUtils';
 
-function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
+function RoomDetailsModal({ habitacion, temporada, onClose, onReserve, disabled }) {
   const precioBase = habitacion?.precio ?? 100;
 
   // Calcular precio ajustado según temporada (alta sube, baja baja)
@@ -26,6 +26,7 @@ function RoomDetailsModal({ habitacion, temporada, onClose, onReserve }) {
       description="Detalle de la habitación."
       onConfirm={onReserve}
       confirmLabel="Seleccionar Habitación"
+      confirmDisabled={disabled}
     >
       <div className="flex flex-col gap-6">
         {tieneDescuentoVisible && (

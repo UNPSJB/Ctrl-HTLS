@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Bed, Package } from 'lucide-react';
 import useHotelSelection from '@vendor-hooks/useHotelSelection';
+import { useCarrito } from '@vendor-context/CarritoContext';
 import HabitacionItem from './HabitacionItem';
 import PaqueteItem from './PaqueteItem';
 import HotelHeader from './HotelHeader';
@@ -9,7 +10,7 @@ import { transformHotel } from '@admin-hooks/hotelTransformer';
 
 // Tarjeta interactiva de hotel con selección de habitaciones y paquetes
 function HotelCard({ hotel: rawHotel }) {
-
+  const { carrito } = useCarrito();
   const hotel = useMemo(() => transformHotel(rawHotel), [rawHotel]);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -18,8 +19,11 @@ function HotelCard({ hotel: rawHotel }) {
 
   if (!hotel) return null;
 
+  const activeHotelId = carrito.hoteles.length > 0 ? carrito.hoteles[0].hotelId : null;
+  const isHotelDisabled = activeHotelId !== null && activeHotelId !== hotel.hotelId;
+
   return (
-    <article className="overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200 dark:border-gray-700 dark:bg-gray-800">
+    <article className={`overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200 dark:border-gray-700 dark:bg-gray-800 ${isHotelDisabled ? 'opacity-60 grayscale-[0.8]' : ''}`}>
       <HotelHeader
         hotel={hotel}
         isExpanded={isExpanded}
@@ -56,6 +60,7 @@ function HotelCard({ hotel: rawHotel }) {
                     habitacionTipo={habitacionTipo}
                     onAdd={addRoom}
                     onRemove={removeRoom}
+                    disabled={isHotelDisabled}
                   />
                 </li>
               ))}
@@ -83,6 +88,7 @@ function HotelCard({ hotel: rawHotel }) {
                       paqueteGroup={paqueteGroup}
                       onAdd={addPackage}
                       onRemove={removePackage}
+                      disabled={isHotelDisabled}
                     />
                   </li>
                 ))

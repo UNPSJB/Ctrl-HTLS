@@ -27,6 +27,7 @@ export function useCarritoPrecios() {
     let globalTemporadaAlta = 0;
     let globalTemporadaBaja = 0;
     let globalDescuentoCantidad = 0;
+    let globalDescuentoPaquetes = 0;
 
     (carrito.hoteles || []).forEach((hotel) => {
       const temporada = hotel?.temporada ?? null;
@@ -64,6 +65,7 @@ export function useCarritoPrecios() {
       // --- Paquetes ---
       let subtotalPaquetesOriginal = 0;
       let paquetesFinal = 0;
+      let descuentoPaquetesMonto = 0;
 
       (hotel.paquetes || []).forEach((pack) => {
         const calc = calcPackageTotal({
@@ -71,6 +73,7 @@ export function useCarritoPrecios() {
         });
         subtotalPaquetesOriginal += calc.original;
         paquetesFinal += calc.final;
+        descuentoPaquetesMonto += calc.descuentoPaqueteMonto;
       });
 
       // --- Subtotal del hotel ---
@@ -84,6 +87,7 @@ export function useCarritoPrecios() {
         porcentajeDescCantidad: descInfo.porcentajeAplicado,
         cantidadHabs,
         subtotalPaquetesOriginal: Math.round(subtotalPaquetesOriginal),
+        descuentoPaquetes: Math.round(descuentoPaquetesMonto),
         ajusteTemporadaPaquetes: 0,
         subtotalHotel,
       };
@@ -100,6 +104,7 @@ export function useCarritoPrecios() {
         globalTemporadaBaja += Math.abs(ajusteTemporadaTotal);
       }
       globalDescuentoCantidad += descInfo.montoDescuento;
+      globalDescuentoPaquetes += descuentoPaquetesMonto;
     });
 
     return {
@@ -110,6 +115,7 @@ export function useCarritoPrecios() {
       globalTemporadaAlta: Math.round(globalTemporadaAlta),
       globalTemporadaBaja: Math.round(globalTemporadaBaja),
       globalDescuentoCantidad: Math.round(globalDescuentoCantidad),
+      globalDescuentoPaquetes: Math.round(globalDescuentoPaquetes),
     };
   }, [carrito.hoteles]);
 

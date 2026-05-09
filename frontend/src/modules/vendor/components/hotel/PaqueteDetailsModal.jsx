@@ -6,7 +6,7 @@ import dateUtils from '@/utils/dateUtils';
 
 const { formatFecha } = dateUtils;
 
-function PaqueteDetailsModal({ paquete, onClose, onReserve }) {
+function PaqueteDetailsModal({ paquete, onClose, onReserve, disabled }) {
   if (!paquete) return null;
 
   const habitaciones = Array.isArray(paquete.habitaciones)
@@ -31,6 +31,7 @@ function PaqueteDetailsModal({ paquete, onClose, onReserve }) {
         if (typeof onReserve === 'function') onReserve();
       }}
       confirmLabel="Seleccionar Paquete"
+      confirmDisabled={disabled}
     >
       <div className="flex flex-col gap-6">
 

@@ -110,7 +110,9 @@ function PaqueteCard({ paquete, hotel, onRemove }) {
           {priceInfo.descuentoPaquetePorcentaje > 0 && (
             <div className="flex items-center gap-2">
               <span>Descuento de paquete (-{Math.round(priceInfo.descuentoPaquetePorcentaje * 100)}%):</span>
-              <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(priceInfo.final)}</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">
+                -{formatCurrency(priceInfo.descuentoPaqueteMonto)}
+              </span>
             </div>
           )}
         </div>
