@@ -19,33 +19,29 @@ import { formatFecha } from '@/utils/dateUtils';
 import { formatCurrency } from '@/utils/pricingUtils';
 import { getResumenVentas, getVentasPorFecha } from '@/api/ventas/ventasService';
 
-// Se usa la fecha en UTC para que coincida con cómo el backend almacena
-// y filtra las facturas (new Date() en Node.js = UTC puro).
-// Si se enviara la fecha local (UTC-3), el rango de búsqueda del backend
-// quedaría desplazado 3 horas, mostrando ventas del día anterior.
-const FECHA_HOY = new Date().toISOString().split('T')[0];
-// fecha para debug siempre un dia demas al que se busca
-// const FECHA_HOY = '2026-05-06';
+// Obtenemos la fecha actual local
+const hoyLocal = new Date();
+const FECHA_HOY = `${hoyLocal.getFullYear()}-${String(hoyLocal.getMonth() + 1).padStart(2, '0')}-${String(hoyLocal.getDate()).padStart(2, '0')}`;
 
-// Calcula el día siguiente para fechaFin
-const tomorrow = new Date(`${FECHA_HOY}T00:00:00`);
-tomorrow.setDate(tomorrow.getDate() + 1);
-const FECHA_MANANA = tomorrow.toISOString().split('T')[0];
+// Calcula el día siguiente para fechaFin asegurando que el backend abarque hasta las 23:59 locales
+const mananaLocal = new Date(hoyLocal);
+mananaLocal.setDate(mananaLocal.getDate() + 1);
+const FECHA_MANANA = `${mananaLocal.getFullYear()}-${String(mananaLocal.getMonth() + 1).padStart(2, '0')}-${String(mananaLocal.getDate()).padStart(2, '0')}`;
 
-// Calcula fechas para la semana (lunes a domingo)
-const today = new Date(`${FECHA_HOY}T00:00:00`);
-const startOfWeek = new Date(today);
-startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Lunes
+// Calcula fechas para la semana (lunes a domingo) local
+const startOfWeek = new Date(hoyLocal);
+startOfWeek.setDate(hoyLocal.getDate() - hoyLocal.getDay() + 1); // Lunes
+const FECHA_INICIO_SEMANA = `${startOfWeek.getFullYear()}-${String(startOfWeek.getMonth() + 1).padStart(2, '0')}-${String(startOfWeek.getDate()).padStart(2, '0')}`;
+
 const endOfWeek = new Date(startOfWeek);
 endOfWeek.setDate(startOfWeek.getDate() + 7); // Lunes siguiente
-const FECHA_INICIO_SEMANA = startOfWeek.toISOString().split('T')[0];
-const FECHA_FIN_SEMANA = endOfWeek.toISOString().split('T')[0];
+const FECHA_FIN_SEMANA = `${endOfWeek.getFullYear()}-${String(endOfWeek.getMonth() + 1).padStart(2, '0')}-${String(endOfWeek.getDate()).padStart(2, '0')}`;
 
-// Calcula fechas para el mes (1 del mes a fin del mes)
-const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1); // Primer día del mes siguiente
-const FECHA_INICIO_MES = startOfMonth.toISOString().split('T')[0];
-const FECHA_FIN_MES = endOfMonth.toISOString().split('T')[0];
+// Calcula fechas para el mes (1 del mes a fin del mes) local
+const startOfMonth = new Date(hoyLocal.getFullYear(), hoyLocal.getMonth(), 1);
+const endOfMonth = new Date(hoyLocal.getFullYear(), hoyLocal.getMonth() + 1, 1); // Primer día del mes siguiente
+const FECHA_INICIO_MES = `${startOfMonth.getFullYear()}-${String(startOfMonth.getMonth() + 1).padStart(2, '0')}-${String(startOfMonth.getDate()).padStart(2, '0')}`;
+const FECHA_FIN_MES = `${endOfMonth.getFullYear()}-${String(endOfMonth.getMonth() + 1).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
 
 function Dashboard() {
   const { user } = useAuth();
