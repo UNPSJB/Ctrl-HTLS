@@ -196,8 +196,6 @@ const getClienteById = async (req, res) => {
 
 const getClienteByDocumento = async (req, res) => {
   const { documento } = req.params;
-  console.log(documento);
-
   try {
     const cliente = await personaServices.obtenerClientePorDocumento(documento);
     return res.status(200).json(cliente);

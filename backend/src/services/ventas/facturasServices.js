@@ -1001,7 +1001,6 @@ const obtenerDetalleFactura = async (facturaId) => {
           habitaciones: paq.habitaciones
             ? paq.habitaciones.map((h) => {
                 const tipo = h.dataValues.tipoHabitacion;
-                console.log();
 
                 return {
                   numero: h.numero,

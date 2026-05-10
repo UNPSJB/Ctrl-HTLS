@@ -172,8 +172,6 @@ const verificarIdHotel = async (hotelId) => {
 
 const convertirFechas = (fecha) => {
   const fechaFormateada = new Date(fecha);
-  console.log(new Date(fecha));
-
   return fechaFormateada;
 };
 

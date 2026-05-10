@@ -482,8 +482,6 @@ const createEncargado = async (req, res) => {
   } catch (error) {
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
-  } finally {
-    console.log('createEncargado executed');
   }
 };
 

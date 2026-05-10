@@ -689,8 +689,6 @@ const verificarHotel = async (hotelData, hotelId = null) => {
     ); // Conflict
   }
 
-  console.log('ENCARGADO ID:', encargadoId);
-
   const encargadoExistente = await Encargado.findByPk(encargadoId);
   if (!encargadoExistente) {
     throw new CustomError('El encargado no existe', 404); // Not Found
@@ -888,8 +886,6 @@ const getDisponibilidadPorHotel = async (
   const disponibilidad = [];
 
   if (nombreHotel !== 'null') {
-    console.log(nombreHotel.length);
-
     const hotel = await verificarHotelUbicacion(nombreHotel, ubicacion);
     if (!hotel) {
       throw new CustomError(

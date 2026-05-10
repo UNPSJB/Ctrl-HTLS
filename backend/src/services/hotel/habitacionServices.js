@@ -301,8 +301,6 @@ const verificarLimitesHabitaciones = async (idHotel, habitaciones) => {
 
 // Verificar si la habitación está alquilada en las fechas dadas
 const verificarAlquilada = async (habitaciones, fechaInicio, fechaFin) => {
-  console.log('habitaciones: ', habitaciones);
-
   // Obtener todas las habitaciones alquiladas en el rango de fechas
   const alquileres = await AlquilerHabitacion.findAll({
     where: {
