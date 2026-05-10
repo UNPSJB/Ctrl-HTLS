@@ -645,6 +645,24 @@ const obtenerCategorias = async () => {
   return categorias;
 };
 
+const obtenerServiciosPorCategoria = async (categoriaId) => {
+  const categoria = await Categoria.findByPk(categoriaId, {
+    include: [
+      {
+        model: Servicio,
+        as: 'servicios',
+        through: { attributes: [] },
+      },
+    ],
+  });
+
+  if (!categoria) {
+    throw new CustomError('La categoría no existe', 404);
+  }
+
+  return categoria.servicios;
+};
+
 const verificarHotel = async (hotelData, hotelId = null) => {
   const {
     nombre,
@@ -1460,6 +1478,7 @@ module.exports = {
   getHotelById,
   obtenerTodosLosHoteles,
   obtenerCategorias,
+  obtenerServiciosPorCategoria,
   agregarPaquetePromocional,
   eliminarPaqueteDeHotel,
   actualizarPaqueteDeHotel,

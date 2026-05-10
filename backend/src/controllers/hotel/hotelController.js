@@ -162,6 +162,17 @@ const getCategorias = async (req, res) => {
   }
 };
 
+const getServiciosPorCategoria = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const servicios = await hotelServices.obtenerServiciosPorCategoria(id);
+    res.json(servicios);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 const setHabitaciones = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -594,6 +605,7 @@ module.exports = {
   getAllHoteles,
   getHotelById,
   getCategorias,
+  getServiciosPorCategoria,
   getHabitaciones,
   getPaquetes,
   getTarifas,

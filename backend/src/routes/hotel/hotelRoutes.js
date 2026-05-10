@@ -19,6 +19,7 @@ const {
   getTemporadas,
   deleteTemporada,
   getCategorias,
+  getServiciosPorCategoria,
   getHabitaciones,
   getPaquetes,
   getTarifas,
@@ -71,6 +72,7 @@ router.put(
   updateTarifas,
 ); //Ruta para actualizar tarifas del hotel
 router.get('/categorias', getCategorias); //Ruta para obtener las categorias de los hoteles
+router.get('/categoria/:id/servicios', validateId, getServiciosPorCategoria); //Ruta para obtener los servicios de una categoria
 router.post('/hotel/:id/habitacion', validateId, setHabitaciones); //Ruta para crear una habitacion en un hotel
 router.put('/hotel/:id/habitacion/:idHabitacion', validateId, updateHabitacion); //Ruta para crear una habitacion en un hotel
 router.delete(
