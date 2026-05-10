@@ -553,10 +553,7 @@ const buscarVentas = async (filtros) => {
     fechaInicio || fechaFin || dniCliente || dniVendedor || nombreHotel;
 
   if (!tieneAlgunFiltro) {
-    throw new CustomError(
-      'Debe ingresar al menos un filtro de búsqueda (fechaInicio, fechaFin, dniCliente, dniVendedor o nombreHotel)',
-      400,
-    );
+    throw new CustomError('Debe ingresar al menos un filtro de búsqueda', 400);
   }
 
   // Construir condiciones de fecha sobre Factura
@@ -613,8 +610,9 @@ const buscarVentas = async (filtros) => {
   // Filtrar por hotel (nombre)
   let alquilerIdsPorHotel = null;
   if (nombreHotel) {
+    const nombreNormalizado = nombreHotel.trim().toLowerCase();
     const hoteles = await Hotel.findAll({
-      where: { nombre: { [Op.like]: `%${nombreHotel}%` } },
+      where: { nombre: { [Op.like]: `%${nombreNormalizado}%` } },
       attributes: ['id'],
       raw: true,
     });

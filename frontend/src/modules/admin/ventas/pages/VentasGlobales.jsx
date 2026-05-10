@@ -36,7 +36,7 @@ export default function VentasGlobales() {
     fechaFin: searchParams.get('fechaFin') || '',
     nombreHotel: '',
     dniCliente: '',
-    dniVendedor: ''
+    dniVendedor: '',
   });
 
   useEffect(() => {
@@ -53,7 +53,9 @@ export default function VentasGlobales() {
       const resultado = await buscarVentas(filtros);
       setVentas(resultado);
     } catch (err) {
-      const mensaje = err.response?.data?.error || 'Error al buscar ventas. Intente nuevamente.';
+      const mensaje =
+        err.response?.data?.error ||
+        'Error al buscar ventas. Intente nuevamente.';
       setError(mensaje);
       setVentas([]);
     } finally {
@@ -69,7 +71,7 @@ export default function VentasGlobales() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFiltros(prev => {
+    setFiltros((prev) => {
       const siguiente = { ...prev, [name]: value };
 
       // Si se cambió fechaInicio y fechaFin ya no es válida (≤ fechaInicio), se resetea
@@ -88,7 +90,7 @@ export default function VentasGlobales() {
   }, []); // Solo en el montaje
 
   return (
-    <div className="h-full flex flex-col gap-6 overflow-hidden animate-in fade-in duration-500">
+    <div className="animate-in fade-in flex h-full flex-col gap-6 overflow-hidden duration-500">
       {/* Encabezado de la página */}
       <ListHeader
         title="Ventas"
@@ -98,8 +100,8 @@ export default function VentasGlobales() {
       {/* Formulario de Búsqueda */}
       <div className="flex-shrink-0 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <form onSubmit={handleSearch} className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <FormField label="Fecha Inicio" required>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <FormField label="Fecha Inicio">
               <Input
                 type="date"
                 name="fechaInicio"
@@ -107,11 +109,10 @@ export default function VentasGlobales() {
                 onChange={handleChange}
                 min={FECHA_MIN}
                 max={FECHA_MAX}
-                required
               />
             </FormField>
 
-            <FormField label="Fecha Fin" required>
+            <FormField label="Fecha Fin">
               <Input
                 type="date"
                 name="fechaFin"
@@ -119,7 +120,6 @@ export default function VentasGlobales() {
                 onChange={handleChange}
                 min={diaSiguiente(filtros.fechaInicio)}
                 max={FECHA_MAX}
-                required
               />
             </FormField>
 
@@ -156,7 +156,7 @@ export default function VentasGlobales() {
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           )}
 
-          <div className="flex justify-end pt-2 border-t border-gray-100 dark:border-gray-700 mt-2">
+          <div className="mt-2 flex justify-end border-t border-gray-100 pt-2 dark:border-gray-700">
             <AppButton
               type="submit"
               icon={Search}
@@ -170,7 +170,7 @@ export default function VentasGlobales() {
       </div>
 
       {/* Contenedor de la Tabla */}
-      <div className="flex-grow flex flex-col min-h-0">
+      <div className="flex min-h-0 flex-grow flex-col">
         <VentasGlobalTable data={ventas} loading={loading} />
       </div>
     </div>
