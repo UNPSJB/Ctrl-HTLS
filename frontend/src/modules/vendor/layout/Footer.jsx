@@ -5,6 +5,7 @@ import {
   Facebook,
   Instagram,
   Twitter,
+  FileText,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
@@ -19,56 +20,61 @@ const Footer = () => {
   const logo = theme === 'dark' ? logoDark : logoLight;
 
   return (
-    <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Logo y Descripción */}
           <div className="col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-3">
+            <Link to="/" className="mb-3 flex items-center gap-2">
               <img src={logo} alt="Logo" className="w-40" />
             </Link>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Mejores experiencias hoteleras con ofertas exclusivas y paquetes personalizados.
+              Mejores experiencias hoteleras con ofertas exclusivas y paquetes
+              personalizados.
             </p>
           </div>
 
           {/* Información de Contacto */}
           <div className="col-span-1">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800 dark:text-gray-100 mb-4">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-800 dark:text-gray-100">
               Contacto
             </h3>
             <div className="space-y-2 text-sm">
               <a
-                href="tel:+1234567890"
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                href="tel:2804123456"
+                className="flex items-center gap-2 text-gray-600 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
               >
-                <Phone className="w-4 h-4" />
-                <span>+1 (234) 567-890</span>
+                <Phone className="h-4 w-4" />
+                <span>2804-123456</span>
               </a>
               <a
-                href="mailto:info@hotelapp.com"
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                href="mailto:info@ctrl-hoteles.com"
+                className="flex items-center gap-2 text-gray-600 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
               >
-                <Mail className="w-4 h-4" />
-                <span>info@hotelapp.com</span>
+                <Mail className="h-4 w-4" />
+                <span>info@ctrl-hoteles.com</span>
               </a>
               <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <MapPin className="w-4 h-4" />
-                <span>City, Country</span>
+                <MapPin className="h-4 w-4" />
+                <span>San Martín 987 - Trelew, Chubut</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <FileText className="h-4 w-4" />
+                <span>CUIT: 30-12345678-9</span>
               </div>
             </div>
           </div>
 
           {/* Enlaces Rápidos */}
           <div className="col-span-1">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800 dark:text-gray-100 mb-4">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-800 dark:text-gray-100">
               Enlaces
             </h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
                   to="/"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-600 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                 >
                   Inicio
                 </Link>
@@ -76,7 +82,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/terms"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-600 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                 >
                   Términos
                 </Link>
@@ -84,7 +90,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/privacy"
-                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-gray-600 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                 >
                   Privacidad
                 </Link>
@@ -94,7 +100,7 @@ const Footer = () => {
 
           {/* Redes Sociales */}
           <div className="col-span-1">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800 dark:text-gray-100 mb-4">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-800 dark:text-gray-100">
               Síguenos
             </h3>
             <div className="flex gap-3">
@@ -102,33 +108,34 @@ const Footer = () => {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-blue-100 dark:hover:border-blue-900/30"
+                className="rounded-lg border border-transparent bg-gray-50 p-1.5 text-gray-500 transition-all hover:border-blue-100 hover:bg-white hover:text-blue-600 dark:bg-gray-700/50 dark:text-gray-400 dark:hover:border-blue-900/30 dark:hover:bg-gray-700 dark:hover:text-blue-400"
               >
-                <Facebook className="w-4 h-4" />
+                <Facebook className="h-4 w-4" />
               </a>
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-all hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-pink-100 dark:hover:border-pink-900/30"
+                className="rounded-lg border border-transparent bg-gray-50 p-1.5 text-gray-500 transition-all hover:border-pink-100 hover:bg-white hover:text-pink-600 dark:bg-gray-700/50 dark:text-gray-400 dark:hover:border-pink-900/30 dark:hover:bg-gray-700 dark:hover:text-pink-400"
               >
-                <Instagram className="w-4 h-4" />
+                <Instagram className="h-4 w-4" />
               </a>
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-500 dark:text-gray-400 hover:text-sky-500 dark:hover:text-sky-400 transition-all hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-sky-100 dark:hover:border-sky-900/30"
+                className="rounded-lg border border-transparent bg-gray-50 p-1.5 text-gray-500 transition-all hover:border-sky-100 hover:bg-white hover:text-sky-500 dark:bg-gray-700/50 dark:text-gray-400 dark:hover:border-sky-900/30 dark:hover:bg-gray-700 dark:hover:text-sky-400"
               >
-                <Twitter className="w-4 h-4" />
+                <Twitter className="h-4 w-4" />
               </a>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700/50">
+        <div className="mt-6 border-t border-gray-100 pt-6 dark:border-gray-700/50">
           <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-            © {new Date().getFullYear()} HotelApp. Todos los derechos reservados.
+            © {new Date().getFullYear()} HotelApp. Todos los derechos
+            reservados.
           </p>
         </div>
       </div>

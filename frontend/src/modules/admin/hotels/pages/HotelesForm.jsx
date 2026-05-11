@@ -11,6 +11,7 @@ import { capitalizeFirst } from '@/utils/stringUtils';
 
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import EncargadosSelector from '@/modules/admin/shared/components/selectors/EncargadosSelector';
+import ServiciosCategoriaViewer from '@/modules/admin/hotels/components/ServiciosCategoriaViewer';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import {
   FormField,
@@ -66,6 +67,8 @@ export default function HotelesForm() {
     reset,
     formState: { errors, isValid, isSubmitting },
   } = form;
+
+  const categoriaIdSeleccionada = watch('categoriaId');
 
   // Carga inicial de datos para edición
   useEffect(() => {
@@ -240,6 +243,8 @@ export default function HotelesForm() {
                     </SelectInput>
                   </FormField>
                 </div>
+
+                <ServiciosCategoriaViewer categoriaId={categoriaIdSeleccionada} />
 
                 <div className="mt-6">
                   <FormField label="Descripción del Hotel" error={errors.descripcion}>

@@ -80,10 +80,6 @@ function ClienteForm({ initialDocumento = '', cliente = null, onCancel, onSucces
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-        {isEditing ? 'Editar Cliente' : 'Crear Nuevo Cliente'}
-      </h3>
-
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField label="Nombre" required error={errors.nombre}>
           <TextInput
@@ -125,8 +121,6 @@ function ClienteForm({ initialDocumento = '', cliente = null, onCancel, onSucces
               onChange: handleDocumentoChange,
             })}
             maxLength={LIMITS.documento.max}
-            readOnly
-            disabled
           />
         </FormField>
 

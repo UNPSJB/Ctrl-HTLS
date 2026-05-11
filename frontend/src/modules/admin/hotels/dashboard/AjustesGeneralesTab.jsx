@@ -8,6 +8,7 @@ import { capitalizeFirst } from '@/utils/stringUtils';
 
 import UbicacionSelector from '@/modules/admin/shared/components/selectors/UbicacionSelector';
 import EncargadosSelector from '@/modules/admin/shared/components/selectors/EncargadosSelector';
+import ServiciosCategoriaViewer from '@/modules/admin/hotels/components/ServiciosCategoriaViewer';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import AppButton from '@/components/ui/AppButton';
 import {
@@ -61,6 +62,8 @@ export default function AjustesGeneralesTab({
     reset,
     formState: { errors, isDirty },
   } = form;
+
+  const categoriaIdSeleccionada = watch('categoriaId');
 
   useEffect(() => {
     if (initialData) {
@@ -232,6 +235,8 @@ export default function AjustesGeneralesTab({
                 />
               </FormField>
             </div>
+
+            <ServiciosCategoriaViewer categoriaId={categoriaIdSeleccionada} />
 
             <div className="mt-6">
               <FormField label="Descripción Básica" error={errors.descripcion}>
