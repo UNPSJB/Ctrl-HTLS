@@ -1043,6 +1043,78 @@ const obtenerDetalleFactura = async (facturaId) => {
   };
 };
 
+const obtenerVentasVendedor = async (vendedorId, fechaInicio, fechaFin) => {
+  const idNumerico = Number(vendedorId);
+  if (Number.isNaN(idNumerico) || idNumerico <= 0) {
+    throw new CustomError('El id del vendedor no es válido', 400);
+  }
+
+  const vendedor = await Empleado.findByPk(idNumerico);
+  if (!vendedor || vendedor.rol !== 'vendedor') {
+    throw new CustomError('Vendedor no encontrado', 404);
+  }
+
+  if (!fechaInicio || !fechaFin) {
+    throw new CustomError('Debe indicar fecha de inicio y fin', 400);
+  }
+
+  const [startYear, startMonth, startDay] = fechaInicio.split('-').map(Number);
+  const [endYear, endMonth, endDay] = fechaFin.split('-').map(Number);
+
+  const desde = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
+  const hastaFinDeDia = new Date(
+    endYear,
+    endMonth - 1,
+    endDay,
+    23,
+    59,
+    59,
+    999,
+  );
+
+  if (Number.isNaN(desde.getTime())) {
+    throw new CustomError('La fecha de inicio no es válida', 400);
+  }
+  if (Number.isNaN(hastaFinDeDia.getTime())) {
+    throw new CustomError('La fecha de fin no es válida', 400);
+  }
+
+  if (desde > hastaFinDeDia) {
+    throw new CustomError(
+      'La fecha de inicio debe ser anterior a la fecha fin',
+      400,
+    );
+  }
+
+  const detalles = await DetalleFactura.findAll({
+    where: {
+      empleadoId: idNumerico,
+    },
+    include: [
+      {
+        model: Factura,
+        as: 'factura',
+        attributes: ['fecha'],
+        where: {
+          fecha: {
+            [Op.between]: [desde, hastaFinDeDia],
+          },
+        },
+      },
+    ],
+    attributes: ['id', 'descripcion', 'subtotal', 'liquidacionId'],
+    order: [[{ model: Factura, as: 'factura' }, 'fecha', 'ASC']],
+  });
+
+  return detalles.map((d) => ({
+    id: d.id,
+    descripcion: d.descripcion,
+    subtotal: Number(d.subtotal),
+    liquidacionId: d.liquidacionId,
+    fechaVenta: d.factura.fecha,
+  }));
+};
+
 module.exports = {
   generarFactura,
   confirmarPago,
@@ -1050,4 +1122,5 @@ module.exports = {
   obtenerPDFFactura,
   buscarVentas,
   obtenerDetalleFactura,
+  obtenerVentasVendedor,
 };

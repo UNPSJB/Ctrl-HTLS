@@ -92,10 +92,29 @@ const getReciboPDF = async (req, res) => {
   }
 };
 
+const getLiquidacionesVendedor = async (req, res) => {
+  const { vendedorId } = req.params;
+  const { fechaInicio, fechaFin } = req.query;
+
+  try {
+    const liquidaciones =
+      await liquidacionesServices.obtenerLiquidacionesVendedor(
+        vendedorId,
+        fechaInicio,
+        fechaFin,
+      );
+    res.status(200).json(liquidaciones);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   liquidarComisiones,
   liquidarVendedor,
   listarLiquidaciones,
   liquidarVendedorPorDetalles: liquidarVendedorPorDetallesController,
   getReciboPDF,
+  getLiquidacionesVendedor,
 };

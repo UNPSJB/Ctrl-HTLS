@@ -112,6 +112,23 @@ const getDetalleFactura = async (req, res) => {
   }
 };
 
+const getVentasVendedor = async (req, res) => {
+  const { vendedorId } = req.params;
+  const { fechaInicio, fechaFin } = req.query;
+
+  try {
+    const ventas = await facturaServices.obtenerVentasVendedor(
+      vendedorId,
+      fechaInicio,
+      fechaFin,
+    );
+    res.status(200).json(ventas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   setFactura,
   confirmarPago,
@@ -119,4 +136,5 @@ module.exports = {
   getFacturaPDF,
   buscarVentas,
   getDetalleFactura,
+  getVentasVendedor,
 };

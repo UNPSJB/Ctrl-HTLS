@@ -5,6 +5,7 @@ const {
   listarLiquidaciones,
   liquidarVendedorPorDetalles,
   getReciboPDF,
+  getLiquidacionesVendedor,
 } = require('../../controllers/ventas/liquidacionesController');
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.post(
 );
 router.get('/liquidaciones', listarLiquidaciones);
 router.get('/liquidaciones/:id/ver-recibo', getReciboPDF);
+router.get('/liquidaciones/vendedor/:vendedorId', getLiquidacionesVendedor);
 
 module.exports = router;

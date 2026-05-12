@@ -5,6 +5,7 @@ const {
   getFacturaPDF,
   buscarVentas,
   getDetalleFactura,
+  getVentasVendedor,
 } = require('../../controllers/ventas/facturasController');
 const router = express.Router();
 
@@ -19,5 +20,7 @@ router.get('/factura/:id/ver-factura', getFacturaPDF); // Previsualizar PDF de u
 router.get('/buscar-ventas', buscarVentas); // Buscar ventas por filtros
 
 router.get('/factura/:id/detalle', getDetalleFactura); // Detalle completo de una factura
+
+router.get('/ventas/:vendedorId', getVentasVendedor); // Ventas de un vendedor por rango de fechas
 
 module.exports = router;
