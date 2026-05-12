@@ -1,8 +1,12 @@
 import { useState } from 'react';
-import { CheckCircle2, Clock, Receipt } from 'lucide-react';
+import { CheckCircle2, Clock, Receipt, Download } from 'lucide-react';
 import { formatFecha } from '@/utils/dateUtils';
 import { formatCurrency } from '@/utils/pricingUtils';
 import { DataTable, DataTablePagination } from '@admin-ui';
+import TableButton from '@admin-ui/TableButton';
+import axiosInstance from '@/api/axiosInstance';
+import { toast } from 'react-hot-toast';
+import { downloadBase64PDF } from '@/utils/pdfUtils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -11,6 +15,27 @@ const ITEMS_PER_PAGE = 10;
  */
 export default function LiquidacionesTable({ data = [] }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownloadRecibo = async (liquidacionId) => {
+    try {
+      setDownloadingId(liquidacionId);
+      const response = await axiosInstance.get(`/liquidaciones/${liquidacionId}/ver-recibo`, {
+        responseType: 'blob'
+      });
+      const pdfData = response.data;
+      
+      if (!pdfData) throw new Error('Documento no disponible');
+      
+      downloadBase64PDF(pdfData, `Recibo_Liquidacion_${liquidacionId}.pdf`);
+      toast.success('Recibo descargado');
+    } catch (error) {
+      toast.error('Error al descargar el recibo');
+      console.error(error);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   // Ordenar por fecha de emisión descendente
   const sortedData = [...data].sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision));
@@ -56,6 +81,23 @@ export default function LiquidacionesTable({ data = [] }) {
             <Clock className="h-3 w-3" /> Por Cobrar
           </span>
         )
+      )
+    },
+    {
+      key: 'acciones',
+      label: 'Acciones',
+      align: 'right',
+      sortable: false,
+      render: (l) => (
+        <div className="flex justify-end gap-2">
+          <TableButton
+            variant="view"
+            icon={Download}
+            onClick={() => handleDownloadRecibo(l.id)}
+            title="Descargar Recibo de Liquidación"
+            disabled={downloadingId === l.id}
+          />
+        </div>
       )
     }
   ];

@@ -3,6 +3,7 @@ import { CheckCircle2, Download, Home, Award, Sparkles } from 'lucide-react';
 import { formatCurrency } from '@utils/pricingUtils';
 import { formatNumeroFactura } from '@utils/numberUtils';
 import { toast } from 'react-hot-toast';
+import { downloadBase64PDF } from '@utils/pdfUtils';
 
 export default function PagoExitoPage() {
   const location = useLocation();
@@ -30,26 +31,9 @@ export default function PagoExitoPage() {
     }
 
     try {
-      const byteCharacters = atob(pdfBase64);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
-
       const nroFactura = facturacionInfo?.numero || facturacionInfo?.nroFactura || Date.now();
-      const nombreArchivo = `Factura_${nroFactura}.pdf`;
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = nombreArchivo;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
+      const fileName = `Factura_${nroFactura}.pdf`;
+      downloadBase64PDF(pdfBase64, fileName);
       toast.success('Factura descargada correctamente.');
     } catch (error) {
       console.error('Error al procesar el PDF:', error);

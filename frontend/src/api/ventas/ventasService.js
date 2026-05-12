@@ -56,3 +56,17 @@ export const getVentasPorFecha = async (fecha) => {
   return response.data;
 };
 
+/**
+ * Obtiene las ventas de un vendedor específico, opcionalmente filtradas por fecha.
+ * @param {number|string} vendedorId - ID del vendedor.
+ * @param {object} [params] - Parámetros de la petición (fechaInicio, fechaFin).
+ * @param {object} [config] - Configuración extra para Axios (ej. signal para AbortController).
+ * @returns {Promise<Array>} Lista de ventas del vendedor en el periodo.
+ */
+export const getVentasVendedor = async (vendedorId, params = {}, config = {}) => {
+  // Limpiar params nulos o vacíos
+  const query = Object.fromEntries(Object.entries(params).filter(([_, v]) => v));
+  const response = await axiosInstance.get(`/ventas/${vendedorId}`, { params: query, ...config });
+  return response.data;
+};
+

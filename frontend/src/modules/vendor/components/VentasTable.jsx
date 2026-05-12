@@ -1,8 +1,12 @@
 import { useState } from 'react';
-import { CheckCircle2, Clock, History } from 'lucide-react';
+import { CheckCircle2, Clock, History, FileText } from 'lucide-react';
 import { formatFecha } from '@/utils/dateUtils';
 import { formatCurrency } from '@/utils/pricingUtils';
 import { DataTable, DataTablePagination } from '@admin-ui';
+import TableButton from '@admin-ui/TableButton';
+import axiosInstance from '@/api/axiosInstance';
+import { toast } from 'react-hot-toast';
+import { downloadBase64PDF } from '@/utils/pdfUtils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -11,6 +15,28 @@ const ITEMS_PER_PAGE = 10;
  */
 export default function VentasTable({ data = [], emptyMessage = "No se encontraron ventas." }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownloadFactura = async (ventaId) => {
+    try {
+      setDownloadingId(ventaId);
+      // Las rutas GET de visualización devuelven binario (Blob)
+      const response = await axiosInstance.get(`/factura/${ventaId}/ver-factura`, {
+        responseType: 'blob'
+      });
+      
+      const pdfData = response.data;
+      if (!pdfData) throw new Error('Documento no disponible');
+      
+      downloadBase64PDF(pdfData, `Factura_${ventaId}.pdf`);
+      toast.success('Factura descargada');
+    } catch (error) {
+      toast.error('Error al descargar la factura');
+      console.error(error);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const currentItems = data.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -54,6 +80,23 @@ export default function VentasTable({ data = [], emptyMessage = "No se encontrar
             <Clock className="h-3 w-3" /> Pendiente
           </span>
         )
+      )
+    },
+    {
+      key: 'acciones',
+      label: 'Acciones',
+      align: 'right',
+      sortable: false,
+      render: (v) => (
+        <div className="flex justify-end gap-2">
+          <TableButton
+            variant="view"
+            icon={FileText}
+            onClick={() => handleDownloadFactura(v.id)}
+            title="Descargar Factura"
+            disabled={downloadingId === v.id}
+          />
+        </div>
       )
     }
   ];
