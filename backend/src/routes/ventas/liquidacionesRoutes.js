@@ -16,6 +16,6 @@ router.post(
   liquidarVendedorPorDetalles,
 );
 router.get('/liquidaciones', listarLiquidaciones);
-router.get('/liquidaciones/:id/recibo', getReciboPDF);
+router.get('/liquidaciones/:id/ver-recibo', getReciboPDF);
 
 module.exports = router;
