@@ -140,6 +140,32 @@ export function dateRangesOverlap(range1, range2) {
   return start1 <= end2 && start2 <= end1;
 }
 
+/**
+ * Retorna el día siguiente a una fecha en formato YYYY-MM-DD.
+ * Si no se provee fecha, retorna fallback (por defecto null).
+ */
+export const getNextDay = (fechaStr, fallback = null) => {
+  if (!fechaStr) return fallback;
+  const siguiente = new Date(`${fechaStr}T00:00:00`);
+  siguiente.setDate(siguiente.getDate() + 1);
+  return toISODate(siguiente);
+};
+
+/**
+ * Obtiene el lunes de la semana actual a las 00:00:00 (hora local).
+ * Útil para filtros de rendimiento semanal.
+ * @returns {Date} - El objeto Date del lunes a las 00:00:00.
+ */
+export const getStartOfWeek = () => {
+  const hoy = new Date();
+  const dia = hoy.getDay(); // 0=dom, 1=lun...
+  const diff = dia === 0 ? -6 : 1 - dia;
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() + diff);
+  lunes.setHours(0, 0, 0, 0);
+  return lunes;
+};
+
 const DEFAULT = {
   parseDate,
   isValidDate,
@@ -150,5 +176,7 @@ const DEFAULT = {
   calculateOverlapNights,
   normalizeDateValue,
   dateRangesOverlap,
+  getNextDay,
+  getStartOfWeek,
 };
 export default DEFAULT;

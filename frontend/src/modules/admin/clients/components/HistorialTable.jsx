@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatFecha } from '@/utils/dateUtils';
 import {
   Users,
   Receipt,
@@ -39,7 +40,7 @@ export default function HistorialTable({
       align: 'center',
       render: (venta) => (
         <div className="font-medium text-gray-900 dark:text-white">
-          {new Date(venta.fechaInicio).toLocaleDateString()}
+          {formatFecha(venta.fechaInicio)}
         </div>
       )
     },
@@ -49,7 +50,7 @@ export default function HistorialTable({
       align: 'center',
       render: (venta) => (
         <div className="font-medium text-gray-900 dark:text-white">
-          {new Date(venta.fechaFin).toLocaleDateString()}
+          {formatFecha(venta.fechaFin)}
         </div>
       )
     },
@@ -82,7 +83,7 @@ export default function HistorialTable({
         <span className="text-gray-500 dark:text-gray-400">
           {venta.detalle?.factura?.fecha ? (
             <div className="flex items-center justify-center gap-1.5">
-              {new Date(venta.detalle.factura.fecha).toLocaleDateString()}
+              {formatFecha(venta.detalle.factura.fecha)}
             </div>
           ) : (
             <span className="italic opacity-30">—</span>

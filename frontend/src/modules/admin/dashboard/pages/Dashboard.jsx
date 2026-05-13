@@ -14,7 +14,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { Link } from 'react-router-dom';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { capitalizeWords } from '@/utils/stringUtils';
-import { formatFecha } from '@/utils/dateUtils';
+import { formatFecha, toISODate } from '@/utils/dateUtils';
 import { formatCurrency } from '@/utils/pricingUtils';
 import {
   getResumenVentas,
@@ -23,27 +23,27 @@ import {
 
 // Obtenemos la fecha actual local
 const hoyLocal = new Date();
-const FECHA_HOY = `${hoyLocal.getFullYear()}-${String(hoyLocal.getMonth() + 1).padStart(2, '0')}-${String(hoyLocal.getDate()).padStart(2, '0')}`;
+const FECHA_HOY = toISODate(hoyLocal);
 
 // Calcula el día siguiente para fechaFin asegurando que el backend abarque hasta las 23:59 locales
 const mananaLocal = new Date(hoyLocal);
 mananaLocal.setDate(mananaLocal.getDate() + 1);
-const FECHA_MANANA = `${mananaLocal.getFullYear()}-${String(mananaLocal.getMonth() + 1).padStart(2, '0')}-${String(mananaLocal.getDate()).padStart(2, '0')}`;
+const FECHA_MANANA = toISODate(mananaLocal);
 
 // Calcula fechas para la semana (lunes a domingo) local
 const startOfWeek = new Date(hoyLocal);
 startOfWeek.setDate(hoyLocal.getDate() - hoyLocal.getDay() + 1); // Lunes
-const FECHA_INICIO_SEMANA = `${startOfWeek.getFullYear()}-${String(startOfWeek.getMonth() + 1).padStart(2, '0')}-${String(startOfWeek.getDate()).padStart(2, '0')}`;
+const FECHA_INICIO_SEMANA = toISODate(startOfWeek);
 
 const endOfWeek = new Date(startOfWeek);
 endOfWeek.setDate(startOfWeek.getDate() + 7); // Lunes siguiente
-const FECHA_FIN_SEMANA = `${endOfWeek.getFullYear()}-${String(endOfWeek.getMonth() + 1).padStart(2, '0')}-${String(endOfWeek.getDate()).padStart(2, '0')}`;
+const FECHA_FIN_SEMANA = toISODate(endOfWeek);
 
 // Calcula fechas para el mes (1 del mes a fin del mes) local
 const startOfMonth = new Date(hoyLocal.getFullYear(), hoyLocal.getMonth(), 1);
 const endOfMonth = new Date(hoyLocal.getFullYear(), hoyLocal.getMonth() + 1, 1); // Primer día del mes siguiente
-const FECHA_INICIO_MES = `${startOfMonth.getFullYear()}-${String(startOfMonth.getMonth() + 1).padStart(2, '0')}-${String(startOfMonth.getDate()).padStart(2, '0')}`;
-const FECHA_FIN_MES = `${endOfMonth.getFullYear()}-${String(endOfMonth.getMonth() + 1).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
+const FECHA_INICIO_MES = toISODate(startOfMonth);
+const FECHA_FIN_MES = toISODate(endOfMonth);
 
 function Dashboard() {
   const { user } = useAuth();

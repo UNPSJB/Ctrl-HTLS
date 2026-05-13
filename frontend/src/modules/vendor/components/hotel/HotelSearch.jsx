@@ -99,8 +99,8 @@ function HotelSearch({
 
     const params = {
       ubicacion: ciudadId,
-      fechaInicio: new Date(localFilters.fechaInicio).toISOString(),
-      fechaFin: new Date(localFilters.fechaFin).toISOString(),
+      fechaInicio: toISODate(localFilters.fechaInicio),
+      fechaFin: toISODate(localFilters.fechaFin),
       pasajeros: localFilters.capacidad,
       nombreHotel: localFilters.nombre || 'null',
       vendedorId: user?.id,

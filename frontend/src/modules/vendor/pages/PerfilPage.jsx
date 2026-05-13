@@ -21,7 +21,7 @@ import {
   Activity,
   Wallet,
 } from 'lucide-react';
-import { parseDate, startOfDay } from '@/utils/dateUtils';
+import { parseDate, startOfDay, getStartOfWeek } from '@/utils/dateUtils';
 import { getDateRangeByPreset } from '@/utils/dateRangeUtils';
 import { getVentasVendedor } from '@/api/ventas/ventasService';
 import { getLiquidacionesVendedor } from '@/api/liquidaciones/liquidacionesService';
@@ -29,16 +29,6 @@ import VentasTable from '@/modules/vendor/components/VentasTable';
 import LiquidacionesTable from '@/modules/vendor/components/LiquidacionesTable';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 
-// Obtiene el lunes de la semana actual a las 00:00:00
-const getLunesDeSemana = () => {
-  const hoy = new Date();
-  const dia = hoy.getDay(); // 0=dom, 1=lun...
-  const diff = dia === 0 ? -6 : 1 - dia;
-  const lunes = new Date(hoy);
-  lunes.setDate(hoy.getDate() + diff);
-  lunes.setHours(0, 0, 0, 0);
-  return lunes;
-};
 
 // Página de Perfil para Vendedores - Solo Visualización
 function PerfilPage() {
@@ -118,12 +108,12 @@ function PerfilPage() {
   // --- Cálculos derivados ---
   const { ventasSemana, kpis } =
     useMemo(() => {
-      const lunes = getLunesDeSemana();
+      const lunes = getStartOfWeek();
 
       // 1. Semana actual (Cálculo fijo basado en la carga inicial completa)
       const ventasSemana = (vendedorData?.ventas || []).filter((v) => {
         if (!v.fechaVenta) return false;
-        return new Date(v.fechaVenta) >= lunes;
+        return parseDate(v.fechaVenta) >= lunes;
       });
 
       const ventasSemanaPendientes = ventasSemana.filter(
@@ -140,10 +130,10 @@ function PerfilPage() {
       const comisionSemanal = facturacionSemanal * 0.02;
 
       // 2. Historial Filtrado (Usa el estado 'ventas' directamente que viene del backend)
-      const ventasHistorialFiltradas = [...ventas].sort((a, b) => new Date(b.fechaVenta) - new Date(a.fechaVenta));
+      const ventasHistorialFiltradas = [...ventas].sort((a, b) => parseDate(b.fechaVenta) - parseDate(a.fechaVenta));
       const liquidacionesFiltradasArr = [...liquidaciones].sort((a, b) => {
-        const dateA = new Date(a.fechaEmision || a.fecha || a.fechaCreacion);
-        const dateB = new Date(b.fechaEmision || b.fecha || b.fechaCreacion);
+        const dateA = parseDate(a.fechaEmision || a.fecha || a.fechaCreacion);
+        const dateB = parseDate(b.fechaEmision || b.fecha || b.fechaCreacion);
         return dateB - dateA;
       });
 

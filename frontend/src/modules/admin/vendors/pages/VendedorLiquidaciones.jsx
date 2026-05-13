@@ -17,7 +17,7 @@ import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader, Modal } from '@admin-ui';
 import { capitalizeFirst } from '@/utils/stringUtils';
-import { parseDate, startOfDay } from '@/utils/dateUtils';
+import { parseDate, startOfDay, toISODate } from '@/utils/dateUtils';
 import { getDateRangeByPreset } from '@/utils/dateRangeUtils';
 import { getVentasVendedor } from '@/api/ventas/ventasService';
 import { getLiquidacionesVendedor } from '@/api/liquidaciones/liquidacionesService';
@@ -108,7 +108,7 @@ const VendedorLiquidaciones = () => {
   // --- Cálculos derivados ---
   const { pendingSales, liquidatedSales, allSales, kpis } = useMemo(() => {
     // 1. Uso directo del backend para las listas filtradas
-    const filteredAllSales = [...ventas].sort((a, b) => new Date(b.fechaVenta) - new Date(a.fechaVenta));
+    const filteredAllSales = [...ventas].sort((a, b) => parseDate(b.fechaVenta) - parseDate(a.fechaVenta));
 
     const filteredPendingSales = filteredAllSales.filter(v => !v.liquidacionId);
     const filteredLiquidatedSales = filteredAllSales.filter(v => !!v.liquidacionId);
@@ -179,7 +179,7 @@ const VendedorLiquidaciones = () => {
 
       const { pdfBase64 } = response.data;
       if (pdfBase64) {
-        const fechaStr = new Date().toISOString().split('T')[0];
+        const fechaStr = toISODate(new Date());
         const fileName = `Recibo_Liquidacion_Vendedor_${id}_${fechaStr}.pdf`;
         downloadBase64PDF(pdfBase64, fileName);
       }

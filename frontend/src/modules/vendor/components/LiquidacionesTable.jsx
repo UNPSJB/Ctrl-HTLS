@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle2, Clock, Receipt, Download } from 'lucide-react';
-import { formatFecha } from '@/utils/dateUtils';
+import { formatFecha, parseDate } from '@/utils/dateUtils';
 import { formatCurrency } from '@/utils/pricingUtils';
 import { DataTable, DataTablePagination } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
@@ -38,7 +38,7 @@ export default function LiquidacionesTable({ data = [] }) {
   };
 
   // Ordenar por fecha de emisión descendente
-  const sortedData = [...data].sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision));
+  const sortedData = [...data].sort((a, b) => parseDate(b.fechaEmision) - parseDate(a.fechaEmision));
 
   const currentItems = sortedData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,

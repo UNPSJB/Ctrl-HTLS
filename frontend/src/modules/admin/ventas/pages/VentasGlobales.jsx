@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toISODate, getNextDay } from '@/utils/dateUtils';
 import { useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { FormField, Input, TextInput } from '@/components/ui/form';
@@ -12,17 +13,6 @@ import { buscarVentas } from '@/api/ventas/ventasService';
 const FECHA_MIN = '2000-01-01';
 const FECHA_MAX = '2100-12-31';
 
-/**
- * Calcula el día siguiente a una fecha en formato YYYY-MM-DD.
- * Se usa como mínimo para fechaFin, garantizando que sea siempre
- * estrictamente mayor que fechaInicio.
- */
-const diaSiguiente = (fechaStr) => {
-  if (!fechaStr) return FECHA_MIN;
-  const siguiente = new Date(`${fechaStr}T00:00:00`);
-  siguiente.setDate(siguiente.getDate() + 1);
-  return siguiente.toISOString().split('T')[0];
-};
 
 export default function VentasGlobales() {
   const [searchParams] = useSearchParams();
@@ -83,12 +73,6 @@ export default function VentasGlobales() {
     });
   };
 
-  useEffect(() => {
-    if (filtros.fechaInicio && filtros.fechaFin) {
-      performSearch();
-    }
-  }, []); // Solo en el montaje
-
   return (
     <div className="animate-in fade-in flex h-full flex-col gap-6 overflow-hidden duration-500">
       {/* Encabezado de la página */}
@@ -118,7 +102,7 @@ export default function VentasGlobales() {
                 name="fechaFin"
                 value={filtros.fechaFin}
                 onChange={handleChange}
-                min={diaSiguiente(filtros.fechaInicio)}
+                min={getNextDay(filtros.fechaInicio, FECHA_MIN)}
                 max={FECHA_MAX}
               />
             </FormField>

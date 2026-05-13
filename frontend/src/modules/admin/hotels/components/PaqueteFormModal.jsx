@@ -33,9 +33,8 @@ export default function PaqueteFormModal({
     if (isOpen) {
       if (paquete) {
         // Modo edición
-        const formatDate = (iso) => iso ? iso.split('T')[0] : '';
-        const fInicio = formatDate(paquete.fecha_inicio);
-        const fFin = formatDate(paquete.fecha_fin);
+        const fInicio = toISODate(paquete.fecha_inicio);
+        const fFin = toISODate(paquete.fecha_fin);
         const habitacionIds = (paquete.habitaciones || []).map(h => String(h.id));
 
         reset({
