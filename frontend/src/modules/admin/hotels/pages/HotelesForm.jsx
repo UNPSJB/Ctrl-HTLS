@@ -277,11 +277,12 @@ export default function HotelesForm() {
                       placeholder="contacto@hotel.com"
                     />
                   </FormField>
-                  <FormField label="Teléfono" error={errors.telefono}>
+                  <FormField label="Teléfono" required error={errors.telefono}>
                     <TelInput
                       id="telefono"
                       maxLength={LIMITS.telefono.max}
                       {...register('telefono', {
+                        required: 'El teléfono es obligatorio',
                         onChange: handleNumericChange,
                         ...RULES.telefono,
                       })}

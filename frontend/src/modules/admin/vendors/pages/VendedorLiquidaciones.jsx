@@ -10,19 +10,21 @@ import {
   CheckCircle2,
   Clock,
   Activity,
-  BarChart3
+  BarChart3,
+  Download
 } from 'lucide-react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader, Modal } from '@admin-ui';
 import { capitalizeFirst } from '@/utils/stringUtils';
-import { parseDate, startOfDay, toISODate } from '@/utils/dateUtils';
+import { parseDate, startOfDay, toISODate, formatFecha } from '@/utils/dateUtils';
 import { getDateRangeByPreset } from '@/utils/dateRangeUtils';
 import { getVentasVendedor } from '@/api/ventas/ventasService';
 import { getLiquidacionesVendedor } from '@/api/liquidaciones/liquidacionesService';
 import { formatCurrency } from '@/utils/pricingUtils';
 import { downloadBase64PDF } from '@/utils/pdfUtils';
+import { exportToExcel } from '@/utils/exportUtils';
 import AppButton from '@/components/ui/AppButton';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import VentasTable from '@/modules/vendor/components/VentasTable';
@@ -296,15 +298,42 @@ const VendedorLiquidaciones = () => {
                       <p className="text-xs text-gray-500 dark:text-gray-400">Seleccione las facturas para procesar el pago.</p>
                     </div>
 
-                    <AppButton
-                      variant="green"
-                      onClick={() => setShowConfirmLiquidar(true)}
-                      disabled={selectedVentas.length === 0}
-                      loading={loadingAction}
-                      icon={DollarSign}
-                    >
-                      Liquidar ({selectedVentas.length})
-                    </AppButton>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const exportColumns = [
+                            { key: 'descripcion', label: 'Descripción' },
+                            { key: '_monto', label: 'Monto' },
+                            { key: '_comision', label: 'Comisión (2%)' },
+                            { key: '_fecha', label: 'Fecha' },
+                          ];
+                          const exportData = pendingSales.map((v) => ({
+                            descripcion: v.descripcion,
+                            _monto: formatCurrency(Number(v.subtotal)),
+                            _comision: formatCurrency(Number(v.subtotal) * 0.02),
+                            _fecha: formatFecha(v.fechaVenta),
+                          }));
+                          exportToExcel(exportData, exportColumns, 'ventas_pendientes');
+                        }}
+                        disabled={pendingSales.length === 0}
+                        title="Exportar a Excel"
+                        className="flex items-center gap-2 h-9 px-3 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span className="hidden sm:inline">Exportar</span>
+                      </button>
+
+                      <AppButton
+                        variant="green"
+                        onClick={() => setShowConfirmLiquidar(true)}
+                        disabled={selectedVentas.length === 0}
+                        loading={loadingAction}
+                        icon={DollarSign}
+                      >
+                        Liquidar ({selectedVentas.length})
+                      </AppButton>
+                    </div>
                   </div>
 
                   <div className="flex-grow overflow-auto custom-scrollbar">

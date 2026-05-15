@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { CheckCircle2, Clock, Receipt, Download } from 'lucide-react';
 import { formatFecha, parseDate } from '@/utils/dateUtils';
 import { formatCurrency } from '@/utils/pricingUtils';
-import { DataTable, DataTablePagination } from '@admin-ui';
+import { DataTable, DataTablePagination, DataTableToolbar } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@/api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { downloadBase64PDF } from '@/utils/pdfUtils';
+import { exportToExcel } from '@/utils/exportUtils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -102,8 +103,45 @@ export default function LiquidacionesTable({ data = [] }) {
     }
   ];
 
+  // Datos planos formateados para exportar (excluye columna de Acciones)
+  const handleExport = () => {
+    const exportColumns = [
+      { key: '_numero', label: 'Referencia' },
+      { key: '_fechaEmision', label: 'Fecha Emisión' },
+      { key: '_fechaPago', label: 'Fecha Pago' },
+      { key: '_total', label: 'Total Comisión' },
+      { key: '_estado', label: 'Estado' },
+    ];
+    const exportData = sortedData.map((l) => ({
+      _numero: `#${l.numero}`,
+      _fechaEmision: formatFecha(l.fechaEmision),
+      _fechaPago: formatFecha(l.fechaPago),
+      _total: formatCurrency(l.total),
+      _estado: l.fechaPago ? 'Cobrada' : 'Por Cobrar',
+    }));
+    exportToExcel(exportData, exportColumns, 'liquidaciones');
+  };
+
   return (
     <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <DataTableToolbar>
+        <div className="flex items-center justify-between w-full">
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            {sortedData.length} {sortedData.length === 1 ? 'registro' : 'registros'}
+          </span>
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={sortedData.length === 0}
+            title="Exportar a Excel"
+            className="flex items-center gap-2 h-9 px-3 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Exportar</span>
+          </button>
+        </div>
+      </DataTableToolbar>
+
       <DataTable
         columns={columns}
         data={currentItems}

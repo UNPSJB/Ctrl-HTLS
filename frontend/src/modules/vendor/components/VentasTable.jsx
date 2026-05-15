@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { CheckCircle2, Clock, History, FileText } from 'lucide-react';
+import { CheckCircle2, Clock, History, FileText, Download } from 'lucide-react';
 import { formatFecha } from '@/utils/dateUtils';
 import { formatCurrency } from '@/utils/pricingUtils';
-import { DataTable, DataTablePagination } from '@admin-ui';
+import { DataTable, DataTablePagination, DataTableToolbar } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import axiosInstance from '@/api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { downloadBase64PDF } from '@/utils/pdfUtils';
+import { exportToExcel } from '@/utils/exportUtils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -101,8 +102,45 @@ export default function VentasTable({ data = [], emptyMessage = "No se encontrar
     }
   ];
 
+  // Datos planos formateados para exportar (excluye columna de Acciones)
+  const handleExport = () => {
+    const exportColumns = [
+      { key: 'descripcion', label: 'Descripción' },
+      { key: '_fechaFormateada', label: 'Fecha' },
+      { key: '_monto', label: 'Monto' },
+      { key: '_comision', label: 'Comisión (2%)' },
+      { key: '_estado', label: 'Estado' },
+    ];
+    const exportData = data.map((v) => ({
+      descripcion: v.descripcion,
+      _fechaFormateada: formatFecha(v.fechaVenta),
+      _monto: formatCurrency(v.subtotal),
+      _comision: formatCurrency(Number(v.subtotal) * 0.02),
+      _estado: v.liquidacionId ? 'Liquidada' : 'Pendiente',
+    }));
+    exportToExcel(exportData, exportColumns, 'ventas');
+  };
+
   return (
     <div className="flex-grow flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <DataTableToolbar>
+        <div className="flex items-center justify-between w-full">
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            {data.length} {data.length === 1 ? 'registro' : 'registros'}
+          </span>
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={data.length === 0}
+            title="Exportar a Excel"
+            className="flex items-center gap-2 h-9 px-3 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Exportar</span>
+          </button>
+        </div>
+      </DataTableToolbar>
+
       <DataTable
         columns={columns}
         data={currentItems}
