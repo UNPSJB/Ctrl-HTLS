@@ -3,6 +3,7 @@ import SelectInput from '@/components/ui/form/SelectInput';
 import Input from '@/components/ui/form/Input';
 import AppButton from '@/components/ui/AppButton';
 import { Search, ChevronRight } from 'lucide-react';
+import { getNextDay } from '@/utils/dateUtils';
 
 /**
  * Componente de filtrado por rango de fechas con botón de búsqueda.
@@ -27,7 +28,15 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
   };
 
   const handleDateChange = (field, e) => {
-    setLocalValue({ ...localValue, [field]: e.target.value });
+    const val = e.target.value;
+    setLocalValue((prev) => {
+      const next = { ...prev, [field]: val };
+      // Si cambia inicio y fin ya no es válida (igual o anterior), limpiarla
+      if (field === 'inicio' && next.fin && next.fin <= val) {
+        next.fin = '';
+      }
+      return next;
+    });
   };
 
   const handleSearch = () => {
@@ -36,7 +45,7 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <div className="w-44">
+      <div className="w-40">
         <SelectInput
           value={localValue.tipo}
           onChange={handleTypeChange}
@@ -47,7 +56,7 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
           <option value="lastWeek">Última semana</option>
           <option value="lastMonth">Último mes</option>
           <option value="last3Months">Últimos 3 meses</option>
-          <option value="custom">Rango personalizado</option>
+          <option value="custom">Personalizado</option>
         </SelectInput>
       </div>
 
@@ -57,16 +66,18 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
             type="date"
             value={localValue.inicio}
             disabled={loading}
+            min="2010-01-01"
             onChange={(e) => handleDateChange('inicio', e)}
-            className="h-10 w-36 py-1.5 text-sm"
+            className="h-10 w-32 py-1.5 text-sm"
           />
           <ChevronRight className="w-4 text-gray-500" />
           <Input
             type="date"
             value={localValue.fin}
             disabled={loading}
+            min={getNextDay(localValue.inicio)}
             onChange={(e) => handleDateChange('fin', e)}
-            className="h-10 w-36 py-1.5 text-sm"
+            className="h-10 w-32 py-1.5 text-sm"
           />
         </div>
       )}
@@ -76,6 +87,7 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
         size="sm"
         onClick={handleSearch}
         loading={loading}
+        disabled={loading || (localValue.tipo === 'custom' && (!localValue.inicio || !localValue.fin))}
         icon={Search}
         className="h-10"
       >

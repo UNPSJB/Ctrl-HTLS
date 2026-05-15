@@ -11,8 +11,15 @@ import { parseDate, toISODate } from './dateUtils';
  * @returns {{fechaInicio: string|null, fechaFin: string|null}}
  */
 export const getDateRangeByPreset = (filter) => {
-  if (!filter || filter.tipo === 'all') {
+  if (!filter) {
     return { fechaInicio: null, fechaFin: null };
+  }
+
+  if (filter.tipo === 'all') {
+    return {
+      fechaInicio: '2010-01-01',
+      fechaFin: toISODate(new Date()),
+    };
   }
 
   const hoy = new Date();
