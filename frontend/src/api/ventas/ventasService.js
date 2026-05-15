@@ -70,3 +70,12 @@ export const getVentasVendedor = async (vendedorId, params = {}, config = {}) =>
   return response.data;
 };
 
+export const getVentasAnuales = async () => {
+  const response = await axiosInstance.get('/ventas-anuales');
+  return response.data;
+};
+
+export const getTopVentas = async () => {
+  const response = await axiosInstance.get('/top-ventas');
+  return response.data;
+};

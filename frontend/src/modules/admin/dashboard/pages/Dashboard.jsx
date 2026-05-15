@@ -25,12 +25,9 @@ import { formatCurrency } from '@/utils/pricingUtils';
 import {
   getResumenVentas,
   getVentasPorFecha,
+  getVentasAnuales,
+  getTopVentas,
 } from '@/api/ventas/ventasService';
-import {
-  MOCK_TOP_VENDEDORES,
-  MOCK_TOP_HOTELES,
-  getMockVentasAnuales,
-} from '@/api/dashboard/dashboardMocks';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { ListHeader } from '@admin-ui';
 
@@ -118,17 +115,17 @@ function KpiCard({ resumenVentas }) {
 }
 
 // ─── Subcomponente: Top 5 con toggle monto/cantidad ────────────────────────
-function TopRankingCard({ title, icon: Icon, data, nameKey, colorClass }) {
+function TopRankingCard({
+  title,
+  icon: Icon,
+  dataMonto,
+  dataCantidad,
+  nameKey,
+  colorClass,
+}) {
   const [modo, setModo] = useState('monto');
 
-  const sorted = useMemo(() => {
-    if (!data) return [];
-    return [...data].sort((a, b) =>
-      modo === 'monto'
-        ? b.montoTotal - a.montoTotal
-        : b.cantidadVentas - a.cantidadVentas
-    );
-  }, [data, modo]);
+  const listToRender = modo === 'monto' ? dataMonto || [] : dataCantidad || [];
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -168,7 +165,7 @@ function TopRankingCard({ title, icon: Icon, data, nameKey, colorClass }) {
 
       {/* Lista */}
       <ol className="flex flex-col gap-2">
-        {sorted.map((item, idx) => (
+        {listToRender.map((item, idx) => (
           <li
             key={idx}
             className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
@@ -191,6 +188,13 @@ function TopRankingCard({ title, icon: Icon, data, nameKey, colorClass }) {
           </li>
         ))}
       </ol>
+
+      {/* Pie de card */}
+      <div className="mt-2 border-t border-gray-200 pt-3 dark:border-gray-700">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Datos del mes actual
+        </p>
+      </div>
     </div>
   );
 }
@@ -325,17 +329,20 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [resumenVentas, setResumenVentas] = useState(null);
   const [ventasHoy, setVentasHoy] = useState([]);
+  const [ventasAnuales, setVentasAnuales] = useState([]);
+  const [topVentas, setTopVentas] = useState(null);
 
   // Las fechas se calculan DENTRO del componente para evitar valores
   // "rances" cuando el usuario deja la pestaña abierta al cambiar de día.
   const fechaHoy = toISODate(new Date());
-  const ventasAnuales = useMemo(() => getMockVentasAnuales(), []);
 
   useEffect(() => {
     const fetchData = async () => {
       const results = await Promise.allSettled([
         getResumenVentas(),
         getVentasPorFecha(fechaHoy),
+        getVentasAnuales(),
+        getTopVentas(),
       ]);
 
       if (results[0].status === 'fulfilled') {
@@ -351,6 +358,14 @@ export default function Dashboard() {
         setVentasHoy(results[1].value);
       } else {
         toast.error('No se pudieron cargar las ventas de hoy.');
+      }
+
+      if (results[2].status === 'fulfilled') {
+        setVentasAnuales(results[2].value);
+      }
+
+      if (results[3].status === 'fulfilled') {
+        setTopVentas(results[3].value);
       }
 
       setLoading(false);
@@ -391,9 +406,10 @@ export default function Dashboard() {
               <KpiCard resumenVentas={resumenVentas} />
 
               <TopRankingCard
-                title="Top Vendedores"
+                title="Top 5 Vendedores"
                 icon={UserCheck}
-                data={MOCK_TOP_VENDEDORES}
+                dataMonto={topVentas?.topVendedoresPorMonto}
+                dataCantidad={topVentas?.topVendedoresPorCantidad}
                 nameKey={(v) => `${v.nombre} ${v.apellido}`}
                 colorClass={{
                   bg: 'bg-purple-50 dark:bg-purple-900/20',
@@ -403,9 +419,10 @@ export default function Dashboard() {
               />
 
               <TopRankingCard
-                title="Top Hoteles"
+                title="Top 5 Hoteles"
                 icon={Building2}
-                data={MOCK_TOP_HOTELES}
+                dataMonto={topVentas?.topHotelesPorMonto}
+                dataCantidad={topVentas?.topHotelesPorCantidad}
                 nameKey={(h) => h.nombre}
                 colorClass={{
                   bg: 'bg-teal-50 dark:bg-teal-900/20',

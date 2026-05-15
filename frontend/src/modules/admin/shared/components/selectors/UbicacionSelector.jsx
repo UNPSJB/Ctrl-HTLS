@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import useUbicacion from '@/hooks/useUbicacion';
-import { FormField, SelectInput, TextInput, RedirectLink } from '@form';
+import { FormField, TextInput, RedirectLink } from '@form';
+import ComboboxInput from '@/components/ui/ComboboxInput';
 
 // Selector cascada de ubicación: País -> Provincia -> Ciudad refactorizado con suite @form
 const UbicacionSelector = ({ 
@@ -79,69 +80,36 @@ const UbicacionSelector = ({
   return (
     <div className="grid grid-cols-1 gap-x-6 gap-y-6 md:grid-cols-2">
       <FormField label="País" required={required} error={errors.paisId}>
-        <SelectInput
-          {...register('paisId', { required: required ? 'Debe seleccionar un país' : false })}
-          value={paisId}
-          onChange={(e) => handlePaisChangeInternal(e.target.value)}
+        <ComboboxInput
+          options={(paises || []).map((p) => ({ value: p.id.toString(), label: p.nombre }))}
+          value={paisId ? paisId.toString() : ''}
+          onChange={(val) => handlePaisChangeInternal(val)}
+          placeholder={loadingPaises ? 'Cargando países...' : 'Seleccionar país'}
           disabled={loadingPaises}
-        >
-          <option value="">
-            {loadingPaises ? 'Cargando países...' : 'Seleccionar país'}
-          </option>
-          {(paises || []).map((pais) => (
-            <option key={pais.id} value={pais.id.toString()}>
-              {pais.nombre}
-            </option>
-          ))}
-        </SelectInput>
+          error={errors.paisId}
+        />
       </FormField>
 
       <FormField label="Provincia/Estado" required={required} error={errors.provinciaId}>
-        <SelectInput
-          {...register('provinciaId', {
-            required: required ? 'Debe seleccionar una provincia' : false,
-          })}
-          value={provinciaId}
-          onChange={(e) => handleProvinciaChangeInternal(e.target.value)}
+        <ComboboxInput
+          options={(provincias || []).map((p) => ({ value: p.id.toString(), label: p.nombre }))}
+          value={provinciaId ? provinciaId.toString() : ''}
+          onChange={(val) => handleProvinciaChangeInternal(val)}
+          placeholder={loadingProvincias ? 'Cargando provincias...' : paisId ? 'Seleccionar provincia' : 'Primero seleccione un país'}
           disabled={isProvinciasDisabled || loadingProvincias}
-        >
-          <option value="">
-            {loadingProvincias
-              ? 'Cargando provincias...'
-              : paisId
-                ? 'Seleccionar provincia'
-                : 'Primero seleccione un país'}
-          </option>
-          {(provincias || []).map((provincia) => (
-            <option key={provincia.id} value={provincia.id.toString()}>
-              {provincia.nombre}
-            </option>
-          ))}
-        </SelectInput>
+          error={errors.provinciaId}
+        />
       </FormField>
 
       <FormField label="Ciudad" required={required} error={errors.ciudadId}>
-        <SelectInput
-          {...register('ciudadId', {
-            required: required ? 'Debe seleccionar una ciudad' : false,
-          })}
-          value={ciudadId}
-          onChange={(e) => handleCiudadChangeInternal(e.target.value)}
+        <ComboboxInput
+          options={(ciudades || []).map((c) => ({ value: c.id.toString(), label: c.nombre }))}
+          value={ciudadId ? ciudadId.toString() : ''}
+          onChange={(val) => handleCiudadChangeInternal(val)}
+          placeholder={loadingCiudades ? 'Cargando ciudades...' : provinciaId ? 'Seleccionar ciudad' : 'Primero seleccione una provincia'}
           disabled={isCiudadesDisabled || loadingCiudades}
-        >
-          <option value="">
-            {loadingCiudades
-              ? 'Cargando ciudades...'
-              : provinciaId
-                ? 'Seleccionar ciudad'
-                : 'Primero seleccione una provincia'}
-          </option>
-          {(ciudades || []).map((ciudad) => (
-            <option key={ciudad.id} value={ciudad.id.toString()}>
-              {ciudad.nombre}
-            </option>
-          ))}
-        </SelectInput>
+          error={errors.ciudadId}
+        />
       </FormField>
 
       {showAddress && (

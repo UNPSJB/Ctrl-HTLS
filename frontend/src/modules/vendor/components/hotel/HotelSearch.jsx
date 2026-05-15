@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import { FormField, Input, SelectInput, SearchInput } from '@ui/form';
 import Counter from '@ui/Counter';
 import AppButton from '@/components/ui/AppButton';
+import ComboboxInput from '@/components/ui/ComboboxInput';
 
 const { toISODate } = dateUtils;
 
@@ -148,16 +149,15 @@ function HotelSearch({
       </div>
 
       <div className="w-44">
-        <SelectInput
-          icon={MapPin}
+        <ComboboxInput
+          options={ciudades.map((c) => ({ value: c.id, label: c.nombre }))}
           value={ciudadId}
-          onChange={(e) => handleCiudadChange(e.target.value)}
+          onChange={(val) => handleCiudadChange(val)}
+          placeholder={loadingCiudades ? 'Cargando...' : 'Ciudad...'}
           disabled={isCiudadesDisabled || loadingCiudades}
+          icon={MapPin}
           className="h-10 !py-0 text-sm border-gray-200 dark:border-gray-700 shadow-none"
-        >
-          <option value="">Ciudad...</option>
-          {ciudades.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-        </SelectInput>
+        />
       </div>
 
       <div className="flex items-center gap-2">
@@ -223,39 +223,36 @@ function HotelSearch({
       {/* Fila 2: Ubicación Geográfica (Horizontal) */}
       <div className="grid grid-cols-1 gap-4 py-2 md:grid-cols-3">
         <FormField label="País" icon={Globe}>
-          <SelectInput
+          <ComboboxInput
+            options={paises.map((p) => ({ value: p.id, label: p.nombre }))}
             value={paisId}
-            onChange={(e) => handlePaisChange(e.target.value)}
+            onChange={(val) => handlePaisChange(val)}
+            placeholder={loadingPaises ? 'Cargando...' : 'Seleccionar país'}
             disabled={loadingPaises}
             className="rounded-md border-gray-200 dark:border-gray-700"
-          >
-            <option value="">{loadingPaises ? 'Cargando...' : 'Seleccionar país'}</option>
-            {paises.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-          </SelectInput>
+          />
         </FormField>
 
         <FormField label="Provincia" icon={Building}>
-          <SelectInput
+          <ComboboxInput
+            options={provincias.map((p) => ({ value: p.id, label: p.nombre }))}
             value={provinciaId}
-            onChange={(e) => handleProvinciaChange(e.target.value)}
+            onChange={(val) => handleProvinciaChange(val)}
+            placeholder={loadingProvincias ? 'Cargando...' : 'Elegir provincia'}
             disabled={isProvinciasDisabled || loadingProvincias}
             className="rounded-md border-gray-200 dark:border-gray-700"
-          >
-            <option value="">{loadingProvincias ? 'Cargando...' : 'Elegir provincia'}</option>
-            {provincias.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-          </SelectInput>
+          />
         </FormField>
 
         <FormField label="Ciudad de Destino" icon={MapPin} required>
-          <SelectInput
+          <ComboboxInput
+            options={ciudades.map((c) => ({ value: c.id, label: c.nombre }))}
             value={ciudadId}
-            onChange={(e) => handleCiudadChange(e.target.value)}
+            onChange={(val) => handleCiudadChange(val)}
+            placeholder={loadingCiudades ? 'Cargando...' : 'Seleccionar ciudad'}
             disabled={isCiudadesDisabled || loadingCiudades}
             className="rounded-md border-gray-200 dark:border-gray-700"
-          >
-            <option value="">{loadingCiudades ? 'Cargando...' : 'Seleccionar ciudad'}</option>
-            {ciudades.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-          </SelectInput>
+          />
         </FormField>
       </div>
 
