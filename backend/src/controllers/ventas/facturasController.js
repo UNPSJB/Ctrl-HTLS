@@ -129,6 +129,26 @@ const getVentasVendedor = async (req, res) => {
   }
 };
 
+const getVentasAnuales = async (req, res) => {
+  try {
+    const ventas = await facturaServices.obtenerVentasAnuales();
+    res.status(200).json(ventas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const getRegistroMensual = async (req, res) => {
+  try {
+    const registro = await facturaServices.obtenerRegistroMensual();
+    res.status(200).json(registro);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   setFactura,
   confirmarPago,
@@ -137,4 +157,6 @@ module.exports = {
   buscarVentas,
   getDetalleFactura,
   getVentasVendedor,
+  getVentasAnuales,
+  getRegistroMensual,
 };
