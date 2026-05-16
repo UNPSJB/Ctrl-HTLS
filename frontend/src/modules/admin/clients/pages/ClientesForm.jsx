@@ -84,7 +84,7 @@ const ClientesForm = () => {
     const handleDocumentoChange = (e) => {
         const { value } = e.target;
         let procesado = value;
-        if (['dni', 'li', 'le'].includes(tipoDocumento)) {
+        if (tipoDocumento !== 'pasaporte') {
             procesado = value.replace(/\D/g, '');
         } else {
             procesado = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
@@ -213,11 +213,11 @@ const ClientesForm = () => {
                             <div className={activeTab === 'contacto' ? 'space-y-6 animate-in fade-in duration-300' : 'hidden'}>
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Medios de Contacto</h3>
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                    <FormField label="Email" required error={errors.email}>
+                                    <FormField label="Email" error={errors.email}>
                                         <EmailInput
                                             id="email"
+                                            maxLength={LIMITS.email}
                                             {...register('email', {
-                                                required: 'El email es obligatorio',
                                                 ...RULES.email,
                                             })}
                                             placeholder="cliente@empresa.com"

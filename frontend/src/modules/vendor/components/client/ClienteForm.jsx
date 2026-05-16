@@ -43,7 +43,7 @@ function ClienteForm({ initialDocumento = '', cliente = null, onCancel, onSucces
   const handleDocumentoChange = (e) => {
     const { value } = e.target;
     let procesado = value;
-    if (['dni', 'li', 'le'].includes(tipoDocumento)) {
+    if (tipoDocumento !== 'pasaporte') {
       procesado = value.replace(/\D/g, '');
     } else {
       procesado = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
