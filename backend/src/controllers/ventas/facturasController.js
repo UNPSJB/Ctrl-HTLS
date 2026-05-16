@@ -149,6 +149,26 @@ const getRegistroMensual = async (req, res) => {
   }
 };
 
+const getTopCiudades = async (req, res) => {
+  try {
+    const topCiudades = await facturaServices.obtenerTopCiudades();
+    res.status(200).json(topCiudades);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const getTopMediosPago = async (req, res) => {
+  try {
+    const topMediosPago = await facturaServices.obtenerTopMediosPago();
+    res.status(200).json(topMediosPago);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   setFactura,
   confirmarPago,
@@ -159,4 +179,6 @@ module.exports = {
   getVentasVendedor,
   getVentasAnuales,
   getRegistroMensual,
+  getTopCiudades,
+  getTopMediosPago,
 };

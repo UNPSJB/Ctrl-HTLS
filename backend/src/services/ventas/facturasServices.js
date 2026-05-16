@@ -1360,6 +1360,247 @@ const obtenerRegistroMensual = async () => {
   };
 };
 
+const obtenerTopCiudades = async () => {
+  const ahora = new Date();
+  const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1, 0, 0, 0);
+  const finDiaActual = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  const detalles = await DetalleFactura.findAll({
+    include: [
+      {
+        model: Factura,
+        as: 'factura',
+        attributes: [],
+        where: {
+          fecha: { [Op.between]: [inicioMes, finDiaActual] },
+        },
+      },
+    ],
+    attributes: ['id', 'subtotal', 'facturaId', 'alquilerId'],
+    raw: true,
+  });
+
+  const alquilerIds = [
+    ...new Set(detalles.map((d) => d.alquilerId).filter(Boolean)),
+  ];
+
+  // --- Resolver ciudad por habitaciones ---
+  const alquileresHab =
+    alquilerIds.length > 0
+      ? await AlquilerHabitacion.findAll({
+          where: { alquilerId: { [Op.in]: alquilerIds } },
+          attributes: ['alquilerId', 'habitacionId'],
+          raw: true,
+        })
+      : [];
+
+  const habIds = [...new Set(alquileresHab.map((ah) => ah.habitacionId))];
+  const habsConHotel =
+    habIds.length > 0
+      ? await Habitacion.findAll({
+          where: { id: { [Op.in]: habIds } },
+          include: [
+            {
+              model: Hotel,
+              as: 'hotel',
+              attributes: ['id', 'ciudadId'],
+              include: [
+                {
+                  model: Ciudad,
+                  as: 'ciudad',
+                  attributes: ['id', 'nombre'],
+                },
+              ],
+            },
+          ],
+          attributes: ['id'],
+        })
+      : [];
+
+  const ciudadPorHab = {};
+  habsConHotel.forEach((h) => {
+    if (h.hotel && h.hotel.ciudad) {
+      ciudadPorHab[h.id] = h.hotel.ciudad;
+    }
+  });
+
+  const ciudadPorAlqHab = {};
+  alquileresHab.forEach((ah) => {
+    if (ciudadPorHab[ah.habitacionId]) {
+      ciudadPorAlqHab[ah.alquilerId] = ciudadPorHab[ah.habitacionId];
+    }
+  });
+
+  // --- Resolver ciudad por paquetes promocionales ---
+  const alqPaq =
+    alquilerIds.length > 0
+      ? await AlquilerPaquetePromocional.findAll({
+          where: { alquilerId: { [Op.in]: alquilerIds } },
+          attributes: ['alquilerId', 'paquetePromocionalId'],
+          raw: true,
+        })
+      : [];
+
+  const paqIds = [...new Set(alqPaq.map((ap) => ap.paquetePromocionalId))];
+  const paqsConHotel =
+    paqIds.length > 0
+      ? await PaquetePromocional.findAll({
+          where: { id: { [Op.in]: paqIds } },
+          include: [
+            {
+              model: Hotel,
+              as: 'hotel',
+              attributes: ['id', 'ciudadId'],
+              include: [
+                {
+                  model: Ciudad,
+                  as: 'ciudad',
+                  attributes: ['id', 'nombre'],
+                },
+              ],
+            },
+          ],
+          attributes: ['id'],
+        })
+      : [];
+
+  const ciudadPorPaq = {};
+  paqsConHotel.forEach((p) => {
+    if (p.hotel && p.hotel.ciudad) {
+      ciudadPorPaq[p.id] = p.hotel.ciudad;
+    }
+  });
+
+  const ciudadPorAlqPaq = {};
+  alqPaq.forEach((ap) => {
+    if (ciudadPorPaq[ap.paquetePromocionalId]) {
+      ciudadPorAlqPaq[ap.alquilerId] = ciudadPorPaq[ap.paquetePromocionalId];
+    }
+  });
+
+  // --- Consolidar ciudad por alquiler ---
+  const ciudadPorAlquiler = {};
+  alquilerIds.forEach((alqId) => {
+    ciudadPorAlquiler[alqId] =
+      ciudadPorAlqHab[alqId] || ciudadPorAlqPaq[alqId] || null;
+  });
+
+  // --- Agregar por ciudad ---
+  const montoPorCiudad = {};
+  const facturasPorCiudad = {};
+
+  detalles.forEach((d) => {
+    if (!d.alquilerId) return;
+    const ciudad = ciudadPorAlquiler[d.alquilerId];
+    if (!ciudad) return;
+    const cid = ciudad.id;
+
+    if (!montoPorCiudad[cid]) {
+      montoPorCiudad[cid] = { nombre: ciudad.nombre, monto: 0 };
+    }
+    montoPorCiudad[cid].monto += Number(d.subtotal);
+
+    if (!facturasPorCiudad[cid]) {
+      facturasPorCiudad[cid] = { nombre: ciudad.nombre, facturas: new Set() };
+    }
+    facturasPorCiudad[cid].facturas.add(d.facturaId);
+  });
+
+  const topCiudadesPorMonto = Object.values(montoPorCiudad)
+    .map((c) => ({
+      nombre: c.nombre,
+      montoTotal: Number(c.monto.toFixed(2)),
+    }))
+    .sort((a, b) => b.montoTotal - a.montoTotal)
+    .slice(0, 5);
+
+  const topCiudadesPorCantidad = Object.values(facturasPorCiudad)
+    .map((c) => ({
+      nombre: c.nombre,
+      cantidadVentas: c.facturas.size,
+    }))
+    .sort((a, b) => b.cantidadVentas - a.cantidadVentas)
+    .slice(0, 5);
+
+  return {
+    topCiudadesPorMonto,
+    topCiudadesPorCantidad,
+  };
+};
+
+const obtenerTopMediosPago = async () => {
+  const ahora = new Date();
+  const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1, 0, 0, 0);
+  const finDiaActual = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  const facturas = await Factura.findAll({
+    where: {
+      fecha: { [Op.between]: [inicioMes, finDiaActual] },
+    },
+    include: [
+      {
+        model: Pago,
+        as: 'pago',
+        attributes: ['id', 'tipo_pago', 'importe'],
+      },
+    ],
+    attributes: ['id', 'importe_total', 'pagoId'],
+  });
+
+  const montoPorMedio = {};
+  const cantidadPorMedio = {};
+
+  facturas.forEach((f) => {
+    if (!f.pago) return;
+    const tipo = f.pago.tipo_pago;
+
+    if (!montoPorMedio[tipo]) {
+      montoPorMedio[tipo] = 0;
+    }
+    montoPorMedio[tipo] += Number(f.importe_total);
+
+    if (!cantidadPorMedio[tipo]) {
+      cantidadPorMedio[tipo] = 0;
+    }
+    cantidadPorMedio[tipo] += 1;
+  });
+
+  const topMediosPagoPorMonto = Object.entries(montoPorMedio)
+    .map(([tipo, monto]) => ({
+      medioPago: tipo,
+      montoTotal: Number(monto.toFixed(2)),
+    }))
+    .sort((a, b) => b.montoTotal - a.montoTotal);
+
+  const topMediosPagoPorCantidad = Object.entries(cantidadPorMedio)
+    .map(([tipo, cantidad]) => ({
+      medioPago: tipo,
+      cantidadVentas: cantidad,
+    }))
+    .sort((a, b) => b.cantidadVentas - a.cantidadVentas);
+
+  return {
+    topMediosPagoPorMonto,
+    topMediosPagoPorCantidad,
+  };
+};
+
 module.exports = {
   generarFactura,
   confirmarPago,
@@ -1370,4 +1611,6 @@ module.exports = {
   obtenerVentasVendedor,
   obtenerVentasAnuales,
   obtenerRegistroMensual,
+  obtenerTopCiudades,
+  obtenerTopMediosPago,
 };
