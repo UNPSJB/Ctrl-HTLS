@@ -21,14 +21,14 @@ import {
   Activity,
   Wallet,
 } from 'lucide-react';
-import { parseDate, startOfDay, getStartOfWeek } from '@/utils/dateUtils';
+import { parseDate, getStartOfWeek } from '@/utils/dateUtils';
 import { getDateRangeByPreset } from '@/utils/dateRangeUtils';
 import { getVentasVendedor } from '@/api/ventas/ventasService';
 import { getLiquidacionesVendedor } from '@/api/liquidaciones/liquidacionesService';
 import VentasTable from '@/modules/vendor/components/VentasTable';
 import LiquidacionesTable from '@/modules/vendor/components/LiquidacionesTable';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
-
+import KpiCard from '@/components/ui/KpiCard';
 
 // Página de Perfil para Vendedores - Solo Visualización
 function PerfilPage() {
@@ -89,7 +89,7 @@ function PerfilPage() {
       // Peticiones en paralelo con signal
       const [ventasData, liquidacionesData] = await Promise.all([
         getVentasVendedor(userId, { fechaInicio, fechaFin }, { signal }),
-        getLiquidacionesVendedor(userId, { fechaInicio, fechaFin }, { signal })
+        getLiquidacionesVendedor(userId, { fechaInicio, fechaFin }, { signal }),
       ]);
 
       setVentas(ventasData);
@@ -106,77 +106,85 @@ function PerfilPage() {
   };
 
   // --- Cálculos derivados ---
-  const { ventasSemana, kpis } =
-    useMemo(() => {
-      const lunes = getStartOfWeek();
+  const { ventasSemana, kpis } = useMemo(() => {
+    const lunes = getStartOfWeek();
 
-      // 1. Semana actual (Cálculo fijo basado en la carga inicial completa)
-      const ventasSemana = (vendedorData?.ventas || []).filter((v) => {
-        if (!v.fechaVenta) return false;
-        return parseDate(v.fechaVenta) >= lunes;
-      });
+    // 1. Semana actual (cálculo fijo basado en la carga inicial completa)
+    const ventasSemana = (vendedorData?.ventas || []).filter((v) => {
+      if (!v.fechaVenta) return false;
+      return parseDate(v.fechaVenta) >= lunes;
+    });
 
-      const ventasSemanaPendientes = ventasSemana.filter(
-        (v) => !v.liquidacionId
-      );
-      const facturacionSemanal = ventasSemana.reduce(
-        (acc, v) => acc + Number(v.subtotal),
-        0
-      );
-      const pendienteSemanaMonto = ventasSemanaPendientes.reduce(
-        (acc, v) => acc + Number(v.subtotal),
-        0
-      );
-      const comisionSemanal = facturacionSemanal * 0.02;
+    const ventasSemanaPendientes = ventasSemana.filter((v) => !v.liquidacionId);
+    const ventasSemanaLiquidadas = ventasSemana.filter(
+      (v) => !!v.liquidacionId
+    );
+    const facturacionSemanal = ventasSemana.reduce(
+      (acc, v) => acc + Number(v.subtotal),
+      0
+    );
+    const comisionLiquidadaSemana =
+      ventasSemanaLiquidadas.reduce((acc, v) => acc + Number(v.subtotal), 0) *
+      0.02;
+    const comisionPendienteSemana =
+      ventasSemanaPendientes.reduce((acc, v) => acc + Number(v.subtotal), 0) *
+      0.02;
 
-      // 2. Historial Filtrado (Usa el estado 'ventas' directamente que viene del backend)
-      const ventasHistorialFiltradas = [...ventas].sort((a, b) => parseDate(b.fechaVenta) - parseDate(a.fechaVenta));
-      const liquidacionesFiltradasArr = [...liquidaciones].sort((a, b) => {
-        const dateA = parseDate(a.fechaEmision || a.fecha || a.fechaCreacion);
-        const dateB = parseDate(b.fechaEmision || b.fecha || b.fechaCreacion);
-        return dateB - dateA;
-      });
+    // 2. Historial filtrado (usa el estado 'ventas' directamente que viene del backend)
+    const ventasHistorialFiltradas = [...ventas].sort(
+      (a, b) => parseDate(b.fechaVenta) - parseDate(a.fechaVenta)
+    );
+    const liquidacionesFiltradasArr = [...liquidaciones].sort((a, b) => {
+      const dateA = parseDate(a.fechaEmision || a.fecha || a.fechaCreacion);
+      const dateB = parseDate(b.fechaEmision || b.fecha || b.fechaCreacion);
+      return dateB - dateA;
+    });
 
-      const ventasPendientesGlobal = ventasHistorialFiltradas.filter(
-        (v) => !v.liquidacionId
-      );
-      const totalFacturadoGlobal = ventasHistorialFiltradas.reduce(
-        (acc, v) => acc + Number(v.subtotal),
-        0
-      );
-      const comisionPendienteGlobal =
-        ventasPendientesGlobal.reduce((acc, v) => acc + Number(v.subtotal), 0) *
-        0.02;
-      const totalPercibido = liquidacionesFiltradasArr.reduce(
-        (acc, l) => acc + Number(l.total),
-        0
-      );
+    const ventasPendientesGlobal = ventasHistorialFiltradas.filter(
+      (v) => !v.liquidacionId
+    );
+    const ventasLiquidadasGlobal = ventasHistorialFiltradas.filter(
+      (v) => !!v.liquidacionId
+    );
+    const totalFacturadoGlobal = ventasHistorialFiltradas.reduce(
+      (acc, v) => acc + Number(v.subtotal),
+      0
+    );
+    const comisionLiquidadaGlobal =
+      ventasLiquidadasGlobal.reduce((acc, v) => acc + Number(v.subtotal), 0) *
+      0.02;
+    const comisionPendienteGlobal =
+      ventasPendientesGlobal.reduce((acc, v) => acc + Number(v.subtotal), 0) *
+      0.02;
+    const totalPercibido = liquidacionesFiltradasArr.reduce(
+      (acc, l) => acc + Number(l.total),
+      0
+    );
 
-      return {
-        ventasSemana,
-        kpis: {
-          semana: {
-            ventasCount: ventasSemana.length,
-            facturacion: facturacionSemanal,
-            pendienteMonto: pendienteSemanaMonto,
-            comision: comisionSemanal,
-          },
-          historial: {
-            ventasCount: ventasHistorialFiltradas.length,
-            facturacion: totalFacturadoGlobal,
-            pendientesCount: ventasPendientesGlobal.length,
-            comisionPendiente: comisionPendienteGlobal,
-          },
-          liquidaciones: {
-            emitidasCount: liquidacionesFiltradasArr.length,
-            totalPercibido,
-            ventasLiquidadasCount:
-              ventasHistorialFiltradas.length - ventasPendientesGlobal.length,
-            comisionPendiente: comisionPendienteGlobal,
-          },
+    return {
+      ventasSemana,
+      kpis: {
+        semana: {
+          ventasCount: ventasSemana.length,
+          facturacion: facturacionSemanal,
+          comisionLiquidada: comisionLiquidadaSemana,
+          comisionPendiente: comisionPendienteSemana,
         },
-      };
-    }, [ventas, liquidaciones, vendedorData]);
+        historial: {
+          ventasCount: ventasHistorialFiltradas.length,
+          facturacion: totalFacturadoGlobal,
+          comisionLiquidada: comisionLiquidadaGlobal,
+          comisionPendiente: comisionPendienteGlobal,
+        },
+        liquidaciones: {
+          emitidasCount: liquidacionesFiltradasArr.length,
+          totalPercibido,
+          ventasLiquidadasCount: ventasLiquidadasGlobal.length,
+          porPercibir: comisionPendienteGlobal,
+        },
+      },
+    };
+  }, [ventas, liquidaciones, vendedorData]);
 
   const TABS = [
     { id: 'semana', label: 'Semana Actual', icon: CalendarDays },
@@ -192,34 +200,34 @@ function PerfilPage() {
     );
   }
 
-  // Renderizador de KPIs contextuales según el Tab
+  // Renderizador de KPIs contextuales según el tab activo
   const renderContextualCards = () => {
     if (activeTab === 'semana') {
       return (
         <div className="animate-in fade-in slide-in-from-top-2 grid flex-shrink-0 grid-cols-2 gap-3 duration-300 lg:grid-cols-4">
           <KpiCard
             icon={CalendarDays}
-            title="Ventas Semana"
+            title="Ventas Realizadas"
             value={kpis.semana.ventasCount}
             color="purple"
           />
           <KpiCard
             icon={BarChart3}
-            title="Facturación Semanal"
+            title="Facturación Total"
             value={formatCurrency(kpis.semana.facturacion)}
             color="blue"
           />
           <KpiCard
-            icon={Clock}
-            title="Pendiente Semana"
-            value={formatCurrency(kpis.semana.pendienteMonto)}
-            color="amber"
+            icon={CheckCircle2}
+            title="Comisión Liquidada"
+            value={formatCurrency(kpis.semana.comisionLiquidada)}
+            color="emerald"
           />
           <KpiCard
-            icon={DollarSign}
-            title="Comisión Semanal"
-            value={formatCurrency(kpis.semana.comision)}
-            color="orange"
+            icon={Clock}
+            title="Comisión Pendiente"
+            value={formatCurrency(kpis.semana.comisionPendiente)}
+            color="amber"
           />
         </div>
       );
@@ -236,21 +244,21 @@ function PerfilPage() {
           />
           <KpiCard
             icon={Receipt}
-            title="Facturado en Período"
+            title="Facturación del Período"
             value={formatCurrency(kpis.historial.facturacion)}
+            color="blue"
+          />
+          <KpiCard
+            icon={CheckCircle2}
+            title="Comisión Liquidada"
+            value={formatCurrency(kpis.historial.comisionLiquidada)}
             color="emerald"
           />
           <KpiCard
             icon={Clock}
-            title="Pendientes"
-            value={kpis.historial.pendientesCount}
-            color="amber"
-          />
-          <KpiCard
-            icon={DollarSign}
             title="Comisión Pendiente"
             value={formatCurrency(kpis.historial.comisionPendiente)}
-            color="orange"
+            color="amber"
           />
         </div>
       );
@@ -279,14 +287,17 @@ function PerfilPage() {
           />
           <KpiCard
             icon={DollarSign}
-            title="Próxima Comisión"
-            value={formatCurrency(kpis.liquidaciones.comisionPendiente)}
+            title="Por Percibir"
+            value={formatCurrency(kpis.liquidaciones.porPercibir)}
             color="orange"
           />
         </div>
       );
     }
   };
+
+  const currentRange = getDateRangeByPreset(dateFilter);
+  const semanaRange = getDateRangeByPreset({ tipo: 'currentWeek' });
 
   return (
     <div className="animate-in fade-in flex h-full flex-col space-y-6 overflow-hidden duration-500">
@@ -342,7 +353,7 @@ function PerfilPage() {
               <div className="mt-4 flex flex-col gap-2">
                 <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
                   <Building2 className="h-3.5 w-3.5 text-blue-500" /> Hoteles
-                  Asignados (Límite Operativo)
+                  Asignados
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {vendedorData.hotelesPermitidos?.length > 0 ? (
@@ -365,7 +376,7 @@ function PerfilPage() {
           )}
 
           {/* Fila 2: Navegación de Vistas y Filtros */}
-          <div className="flex flex-shrink-0 flex-col items-start justify-between gap-4 border-b border-gray-200 dark:border-gray-700 md:min-h-[60px] md:flex-row md:items-center !mt-10">
+          <div className="!mt-10 flex flex-shrink-0 flex-col items-start justify-between gap-4 border-b border-gray-200 dark:border-gray-700 md:min-h-[60px] md:flex-row md:items-center">
             <nav className="custom-scrollbar flex w-full space-x-8 overflow-x-auto pb-1 md:w-auto md:pb-0">
               {TABS.map((tab) => (
                 <button
@@ -403,6 +414,8 @@ function PerfilPage() {
             {activeTab === 'semana' && (
               <VentasTable
                 data={ventasSemana}
+                fechaInicio={semanaRange.fechaInicio}
+                fechaFin={semanaRange.fechaFin}
                 emptyMessage="No hay ventas registradas en la semana actual (lunes a hoy)."
               />
             )}
@@ -410,6 +423,8 @@ function PerfilPage() {
             {activeTab === 'historial' && (
               <VentasTable
                 data={ventas}
+                fechaInicio={currentRange.fechaInicio}
+                fechaFin={currentRange.fechaFin}
                 emptyMessage="No se encontraron ventas para el período seleccionado."
               />
             )}
@@ -417,80 +432,14 @@ function PerfilPage() {
             {activeTab === 'liquidaciones' && (
               <LiquidacionesTable
                 data={liquidaciones}
+                fechaInicio={currentRange.fechaInicio}
+                fechaFin={currentRange.fechaFin}
                 emptyMessage="No se encontraron liquidaciones para el período seleccionado."
               />
             )}
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-// Componente Auxiliar para las Tarjetas
-function KpiCard({ icon: Icon, title, value, color }) {
-  const styles = {
-    purple: {
-      container: 'border-purple-100 dark:border-purple-900/20',
-      icon: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20',
-    },
-    blue: {
-      container: 'border-blue-100 dark:border-blue-900/20',
-      icon: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20',
-    },
-    amber: {
-      container: 'border-amber-100 dark:border-amber-900/20',
-      icon: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20',
-    },
-    orange: {
-      container: 'border-orange-100 dark:border-orange-900/20',
-      icon: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20',
-    },
-    indigo: {
-      container: 'border-indigo-100 dark:border-indigo-900/20',
-      icon: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20',
-    },
-    emerald: {
-      container: 'border-emerald-100 dark:border-emerald-900/20',
-      icon: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20',
-    },
-    cyan: {
-      container: 'border-cyan-100 dark:border-cyan-900/20',
-      icon: 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20',
-    },
-    green: {
-      container: 'border-green-100 dark:border-green-900/20',
-      icon: 'bg-green-50 text-green-600 dark:bg-green-900/20',
-    },
-  };
-
-  const currentStyle = styles[color] || styles.blue;
-
-  return (
-    <div
-      className={`flex h-full flex-col justify-center rounded-xl border bg-white p-4 shadow-sm transition-colors duration-300 dark:bg-gray-800 ${currentStyle.container}`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${currentStyle.icon}`}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p
-            className="line-clamp-1 text-xs font-medium text-gray-500"
-            title={title}
-          >
-            {title}
-          </p>
-          <h3
-            className="truncate text-lg font-bold text-gray-900 dark:text-white md:text-xl"
-            title={String(value)}
-          >
-            {value}
-          </h3>
-        </div>
-      </div>
     </div>
   );
 }

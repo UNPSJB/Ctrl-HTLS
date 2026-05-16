@@ -52,13 +52,14 @@ const Header = () => {
             <div className="mx-2 h-8 w-[1px] bg-gray-200 dark:bg-gray-700" />
 
             <div className="flex items-center gap-4 pl-2">
-              <Link 
-                to="/perfil" 
-                target="_blank" 
+              <Link
+                to="/perfil"
                 className="group flex flex-col text-right hover:opacity-80"
               >
                 <span className="text-sm font-semibold leading-none text-gray-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
-                  {capitalizeWords(`${user?.nombre || ''} ${user?.apellido || ''}`.trim())}
+                  {capitalizeWords(
+                    `${user?.nombre || ''} ${user?.apellido || ''}`.trim()
+                  )}
                 </span>
                 <span className="text-[11px] capitalize text-gray-500 dark:text-gray-400">
                   {user?.rol}
@@ -68,7 +69,7 @@ const Header = () => {
               <button
                 onClick={handleLogoutClick}
                 title="Cerrar sesión"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-red-500 focus:outline-none focus:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-500 dark:hover:text-red-400 dark:focus:text-red-400"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-red-500 focus:text-red-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-500 dark:hover:text-red-400 dark:focus:text-red-400"
               >
                 <LogOut className="h-5 w-5" />
               </button>
@@ -91,11 +92,17 @@ const Header = () => {
       >
         <div className="space-y-4 pt-2 text-sm text-gray-700 dark:text-gray-300">
           <p>
-            No puedes cerrar sesión mientras mantengas lugares reservados en el sistema.
-            Si decides proceder, <strong>el alquiler en curso se abortará y perderás tu progreso</strong>.
+            No puedes cerrar sesión mientras mantengas lugares reservados en el
+            sistema. Si decides proceder,{' '}
+            <strong>
+              el alquiler en curso se abortará y perderás tu progreso
+            </strong>
+            .
           </p>
           <p>
-            Por favor, asegúrate de finalizarlo o cancelarlo explícitamente, o pulsa <strong>Abortar Alquiler y Salir</strong> para liberarlo automáticamente antes de salir.
+            Por favor, asegúrate de finalizarlo o cancelarlo explícitamente, o
+            pulsa <strong>Abortar Alquiler y Salir</strong> para liberarlo
+            automáticamente antes de salir.
           </p>
         </div>
       </Modal>

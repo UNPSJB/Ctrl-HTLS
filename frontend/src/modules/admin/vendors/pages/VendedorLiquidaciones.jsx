@@ -9,16 +9,15 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
-  Activity,
   BarChart3,
-  Download
+  Download,
 } from 'lucide-react';
 import axiosInstance from '@api/axiosInstance';
 import { toast } from 'react-hot-toast';
 import { InnerLoading } from '@/components/ui/InnerLoading';
 import { PageHeader, Modal } from '@admin-ui';
 import { capitalizeFirst } from '@/utils/stringUtils';
-import { parseDate, startOfDay, toISODate, formatFecha } from '@/utils/dateUtils';
+import { parseDate, toISODate, formatFecha } from '@/utils/dateUtils';
 import { getDateRangeByPreset } from '@/utils/dateRangeUtils';
 import { getVentasVendedor } from '@/api/ventas/ventasService';
 import { getLiquidacionesVendedor } from '@/api/liquidaciones/liquidacionesService';
@@ -28,12 +27,13 @@ import { exportToExcel } from '@/utils/exportUtils';
 import AppButton from '@/components/ui/AppButton';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import VentasTable from '@/modules/vendor/components/VentasTable';
+import KpiCard from '@/components/ui/KpiCard';
 
 // Detalle y gestión de liquidaciones de un vendedor (Administrador)
 const VendedorLiquidaciones = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState(true);
   const [loadingAction, setLoadingAction] = useState(false);
   const [vendedor, setVendedor] = useState(null);
@@ -91,7 +91,7 @@ const VendedorLiquidaciones = () => {
       // Peticiones en paralelo con signal
       const [ventasData, liquidacionesData] = await Promise.all([
         getVentasVendedor(id, { fechaInicio, fechaFin }, { signal }),
-        getLiquidacionesVendedor(id, { fechaInicio, fechaFin }, { signal })
+        getLiquidacionesVendedor(id, { fechaInicio, fechaFin }, { signal }),
       ]);
 
       setVentas(ventasData);
@@ -109,22 +109,35 @@ const VendedorLiquidaciones = () => {
 
   // --- Cálculos derivados ---
   const { pendingSales, liquidatedSales, allSales, kpis } = useMemo(() => {
-    // 1. Uso directo del backend para las listas filtradas
-    const filteredAllSales = [...ventas].sort((a, b) => parseDate(b.fechaVenta) - parseDate(a.fechaVenta));
+    // 1. Listas filtradas del backend (período actual)
+    const filteredAllSales = [...ventas].sort(
+      (a, b) => parseDate(b.fechaVenta) - parseDate(a.fechaVenta)
+    );
+    const filteredPendingSales = filteredAllSales.filter(
+      (v) => !v.liquidacionId
+    );
+    const filteredLiquidatedSales = filteredAllSales.filter(
+      (v) => !!v.liquidacionId
+    );
 
-    const filteredPendingSales = filteredAllSales.filter(v => !v.liquidacionId);
-    const filteredLiquidatedSales = filteredAllSales.filter(v => !!v.liquidacionId);
-
-    // 2. Cálculos Globales (Independientes del filtro de fecha para coherencia de cartera)
-    // Se usa vendedor.ventas que contiene la carga inicial sin filtrar
+    // 2. Cálculos globales (independientes del filtro, sobre la carga inicial)
     const baseVentas = vendedor?.ventas || [];
-    const totalGlobalFacturado = baseVentas.reduce((acc, v) => acc + Number(v.subtotal), 0);
-    const totalGlobalPendiente = baseVentas.filter(v => !v.liquidacionId).reduce((acc, v) => acc + Number(v.subtotal), 0) * 0.02;
+    const totalGlobalPendiente =
+      baseVentas
+        .filter((v) => !v.liquidacionId)
+        .reduce((acc, v) => acc + Number(v.subtotal), 0) * 0.02;
 
-    // 3. KPIs por Tab (Basados en el filtro actual)
-    const facturacionFiltrada = filteredAllSales.reduce((acc, v) => acc + Number(v.subtotal), 0);
-    const montoPendienteFiltrado = filteredPendingSales.reduce((acc, v) => acc + Number(v.subtotal), 0) * 0.02;
-    const montoLiquidadoFiltrado = filteredLiquidatedSales.reduce((acc, v) => acc + Number(v.subtotal), 0) * 0.02;
+    // 3. KPIs por tab (basados en el período filtrado)
+    const facturacionFiltrada = filteredAllSales.reduce(
+      (acc, v) => acc + Number(v.subtotal),
+      0
+    );
+    const comisionPendienteFiltrada =
+      filteredPendingSales.reduce((acc, v) => acc + Number(v.subtotal), 0) *
+      0.02;
+    const comisionLiquidadaFiltrada =
+      filteredLiquidatedSales.reduce((acc, v) => acc + Number(v.subtotal), 0) *
+      0.02;
 
     return {
       pendingSales: filteredPendingSales,
@@ -133,23 +146,23 @@ const VendedorLiquidaciones = () => {
       kpis: {
         pendientes: {
           ventasCount: filteredPendingSales.length,
-          montoPendiente: montoPendienteFiltrado,
-          facturacionTotal: facturacionFiltrada,
-          globalPendiente: totalGlobalPendiente
+          comisionAPagar: comisionPendienteFiltrada,
+          facturacionPeriodo: facturacionFiltrada,
+          deudaHistorica: totalGlobalPendiente,
         },
         liquidadas: {
           ventasCount: filteredLiquidatedSales.length,
-          montoLiquidado: montoLiquidadoFiltrado,
-          facturacionPeriodo: facturacionFiltrada,
-          globalFacturado: totalGlobalFacturado
+          comisionLiquidada: comisionLiquidadaFiltrada,
+          comisionPendiente: comisionPendienteFiltrada,
+          porPercibir: totalGlobalPendiente,
         },
         todas: {
           ventasCount: filteredAllSales.length,
           facturacionPeriodo: facturacionFiltrada,
-          montoPendiente: montoPendienteFiltrado,
-          globalFacturado: totalGlobalFacturado
-        }
-      }
+          comisionLiquidada: comisionLiquidadaFiltrada,
+          comisionPendiente: comisionPendienteFiltrada,
+        },
+      },
     };
   }, [ventas, vendedor]);
 
@@ -175,9 +188,12 @@ const VendedorLiquidaciones = () => {
 
     try {
       setLoadingAction(true);
-      const response = await axiosInstance.post(`/liquidaciones/liquidar-detalles/${id}`, {
-        detalleIds: selectedVentas
-      });
+      const response = await axiosInstance.post(
+        `/liquidaciones/liquidar-detalles/${id}`,
+        {
+          detalleIds: selectedVentas,
+        }
+      );
 
       const { pdfBase64 } = response.data;
       if (pdfBase64) {
@@ -186,11 +202,17 @@ const VendedorLiquidaciones = () => {
         downloadBase64PDF(pdfBase64, fileName);
       }
 
-      toast.success(`Liquidación generada correctamente (${selectedVentas.length} ventas)`);
+      toast.success(
+        `Liquidación generada correctamente (${selectedVentas.length} ventas)`
+      );
       setShowConfirmLiquidar(false);
       await fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.error || error.response?.data?.message || 'Error al procesar la liquidación');
+      toast.error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          'Error al procesar la liquidación'
+      );
     } finally {
       setLoadingAction(false);
     }
@@ -206,10 +228,30 @@ const VendedorLiquidaciones = () => {
     if (activeTab === 'pendientes') {
       return (
         <div className="animate-in fade-in slide-in-from-top-2 grid flex-shrink-0 grid-cols-2 gap-3 duration-300 lg:grid-cols-4">
-          <KpiCard icon={ShoppingBag} title="Ventas a Liquidar" value={kpis.pendientes.ventasCount} color="amber" />
-          <KpiCard icon={DollarSign} title="Comisión Período" value={formatCurrency(kpis.pendientes.montoPendiente)} color="orange" />
-          <KpiCard icon={Receipt} title="Facturación Período" value={formatCurrency(kpis.pendientes.facturacionTotal)} color="blue" />
-          <KpiCard icon={Clock} title="Pendiente Global" value={formatCurrency(kpis.pendientes.globalPendiente)} color="indigo" />
+          <KpiCard
+            icon={ShoppingBag}
+            title="Ventas a Liquidar"
+            value={kpis.pendientes.ventasCount}
+            color="amber"
+          />
+          <KpiCard
+            icon={DollarSign}
+            title="Comisión a Pagar"
+            value={formatCurrency(kpis.pendientes.comisionAPagar)}
+            color="orange"
+          />
+          <KpiCard
+            icon={Receipt}
+            title="Facturación del Período"
+            value={formatCurrency(kpis.pendientes.facturacionPeriodo)}
+            color="blue"
+          />
+          <KpiCard
+            icon={Clock}
+            title="Deuda Histórica"
+            value={formatCurrency(kpis.pendientes.deudaHistorica)}
+            color="indigo"
+          />
         </div>
       );
     }
@@ -217,32 +259,78 @@ const VendedorLiquidaciones = () => {
     if (activeTab === 'liquidadas') {
       return (
         <div className="animate-in fade-in slide-in-from-top-2 grid flex-shrink-0 grid-cols-2 gap-3 duration-300 lg:grid-cols-4">
-          <KpiCard icon={CheckCircle2} title="Ventas Liquidadas" value={kpis.liquidadas.ventasCount} color="emerald" />
-          <KpiCard icon={DollarSign} title="Pagado en Período" value={formatCurrency(kpis.liquidadas.montoLiquidado)} color="green" />
-          <KpiCard icon={Receipt} title="Facturación Período" value={formatCurrency(kpis.liquidadas.facturacionPeriodo)} color="blue" />
-          <KpiCard icon={Activity} title="Facturación Global" value={formatCurrency(kpis.liquidadas.globalFacturado)} color="purple" />
+          <KpiCard
+            icon={CheckCircle2}
+            title="Ventas Liquidadas"
+            value={kpis.liquidadas.ventasCount}
+            color="emerald"
+          />
+          <KpiCard
+            icon={DollarSign}
+            title="Comisión Liquidada"
+            value={formatCurrency(kpis.liquidadas.comisionLiquidada)}
+            color="green"
+          />
+          <KpiCard
+            icon={Clock}
+            title="Comisión Pendiente"
+            value={formatCurrency(kpis.liquidadas.comisionPendiente)}
+            color="amber"
+          />
+          <KpiCard
+            icon={Receipt}
+            title="Por Percibir"
+            value={formatCurrency(kpis.liquidadas.porPercibir)}
+            color="purple"
+          />
         </div>
       );
     }
-    
+
     if (activeTab === 'todas') {
       return (
         <div className="animate-in fade-in slide-in-from-top-2 grid flex-shrink-0 grid-cols-2 gap-3 duration-300 lg:grid-cols-4">
-          <KpiCard icon={History} title="Total de Ventas" value={kpis.todas.ventasCount} color="blue" />
-          <KpiCard icon={BarChart3} title="Facturación Período" value={formatCurrency(kpis.todas.facturacionPeriodo)} color="emerald" />
-          <KpiCard icon={Clock} title="Pendiente Período" value={formatCurrency(kpis.todas.montoPendiente)} color="orange" />
-          <KpiCard icon={Receipt} title="Facturación Global" value={formatCurrency(kpis.todas.globalFacturado)} color="purple" />
+          <KpiCard
+            icon={History}
+            title="Ventas en Período"
+            value={kpis.todas.ventasCount}
+            color="blue"
+          />
+          <KpiCard
+            icon={BarChart3}
+            title="Facturación del Período"
+            value={formatCurrency(kpis.todas.facturacionPeriodo)}
+            color="emerald"
+          />
+          <KpiCard
+            icon={CheckCircle2}
+            title="Comisión Liquidada"
+            value={formatCurrency(kpis.todas.comisionLiquidada)}
+            color="green"
+          />
+          <KpiCard
+            icon={DollarSign}
+            title="Comisión Pendiente"
+            value={formatCurrency(kpis.todas.comisionPendiente)}
+            color="orange"
+          />
         </div>
       );
     }
   };
 
+  const currentRange = getDateRangeByPreset(dateFilter);
+
   return (
-    <div className="h-full flex flex-col space-y-6 overflow-hidden">
+    <div className="flex h-full flex-col space-y-6 overflow-hidden">
       {/* Fila 1: Header */}
       <div className="flex-shrink-0">
         <PageHeader
-          title={vendedor ? `Liquidaciones: ${capitalizeFirst(vendedor.nombre)} ${capitalizeFirst(vendedor.apellido)}` : 'Cargando...'}
+          title={
+            vendedor
+              ? `Liquidaciones: ${capitalizeFirst(vendedor.nombre)} ${capitalizeFirst(vendedor.apellido)}`
+              : 'Cargando...'
+          }
           description="Gestión de comisiones y auditoría de ventas."
           backTo="/admin/vendedores"
           icon={TrendingUp}
@@ -252,13 +340,13 @@ const VendedorLiquidaciones = () => {
 
       <div className="animate-in fade-in flex h-full flex-col space-y-6 overflow-hidden duration-500">
         {loading && !vendedor ? (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-1 items-center justify-center">
             <InnerLoading message="Cargando información..." />
           </div>
         ) : (
           <>
             {/* Fila 2: Navegación y Filtros */}
-            <div className="flex flex-shrink-0 flex-col items-start justify-between gap-4 border-b border-gray-200 dark:border-gray-700 md:min-h-[60px] md:flex-row md:items-center !mt-10">
+            <div className="!mt-10 flex flex-shrink-0 flex-col items-start justify-between gap-4 border-b border-gray-200 dark:border-gray-700 md:min-h-[60px] md:flex-row md:items-center">
               <nav className="custom-scrollbar flex w-full space-x-8 overflow-x-auto pb-1 md:w-auto md:pb-0">
                 {TABS.map((tab) => (
                   <button
@@ -291,11 +379,15 @@ const VendedorLiquidaciones = () => {
             {/* Fila 4: Tablas */}
             <div className="flex min-h-[300px] flex-grow flex-col overflow-hidden">
               {activeTab === 'pendientes' && (
-                <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
-                  <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
+                <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                  <div className="flex flex-shrink-0 flex-col gap-3 border-b border-gray-200 bg-gray-50/50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/20 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Ventas por Liquidar</h2>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Seleccione las facturas para procesar el pago.</p>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Ventas por Liquidar
+                      </h2>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Seleccione las facturas para procesar el pago.
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -311,14 +403,20 @@ const VendedorLiquidaciones = () => {
                           const exportData = pendingSales.map((v) => ({
                             descripcion: v.descripcion,
                             _monto: formatCurrency(Number(v.subtotal)),
-                            _comision: formatCurrency(Number(v.subtotal) * 0.02),
+                            _comision: formatCurrency(
+                              Number(v.subtotal) * 0.02
+                            ),
                             _fecha: formatFecha(v.fechaVenta),
                           }));
-                          exportToExcel(exportData, exportColumns, 'ventas_pendientes');
+                          exportToExcel(
+                            exportData,
+                            exportColumns,
+                            'ventas_pendientes'
+                          );
                         }}
                         disabled={pendingSales.length === 0}
                         title="Exportar a Excel"
-                        className="flex items-center gap-2 h-9 px-3 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        className="flex h-9 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                       >
                         <Download className="h-4 w-4" />
                         <span className="hidden sm:inline">Exportar</span>
@@ -336,37 +434,47 @@ const VendedorLiquidaciones = () => {
                     </div>
                   </div>
 
-                  <div className="flex-grow overflow-auto custom-scrollbar">
-                    <table className="w-full text-left text-sm relative">
+                  <div className="custom-scrollbar flex-grow overflow-auto">
+                    <table className="relative w-full text-left text-sm">
                       <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
                         <tr>
-                          <th className="px-6 py-3 w-10">
+                          <th className="w-10 px-6 py-3">
                             <input
                               type="checkbox"
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer h-4 w-4"
-                              checked={selectedVentas.length === pendingSales.length && pendingSales.length > 0}
+                              className="h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              checked={
+                                selectedVentas.length === pendingSales.length &&
+                                pendingSales.length > 0
+                              }
                               onChange={handleSelectAll}
                               disabled={pendingSales.length === 0}
                             />
                           </th>
                           <th className="px-6 py-3">Descripción</th>
                           <th className="px-6 py-3 text-right">Monto</th>
-                          <th className="px-6 py-3 text-right">Comisión (2%)</th>
+                          <th className="px-6 py-3 text-right">
+                            Comisión (2%)
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                         {pendingSales.length > 0 ? (
                           pendingSales.map((v) => (
-                            <tr key={v.id} className="transition-colors hover:bg-blue-50/20 dark:hover:bg-blue-900/10">
+                            <tr
+                              key={v.id}
+                              className="transition-colors hover:bg-blue-50/20 dark:hover:bg-blue-900/10"
+                            >
                               <td className="px-6 py-4">
                                 <input
                                   type="checkbox"
-                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer h-4 w-4"
+                                  className="h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                   checked={selectedVentas.includes(v.id)}
                                   onChange={() => handleToggleSeleccion(v.id)}
                                 />
                               </td>
-                              <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{v.descripcion}</td>
+                              <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                {v.descripcion}
+                              </td>
                               <td className="px-6 py-4 text-right text-gray-700 dark:text-gray-300">
                                 {formatCurrency(Number(v.subtotal))}
                               </td>
@@ -377,8 +485,11 @@ const VendedorLiquidaciones = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="4" className="px-6 py-12 text-center text-gray-400 italic font-medium">
-                              <AlertCircle className="h-10 w-10 mx-auto mb-2 opacity-20" />
+                            <td
+                              colSpan="4"
+                              className="px-6 py-12 text-center font-medium italic text-gray-400"
+                            >
+                              <AlertCircle className="mx-auto mb-2 h-10 w-10 opacity-20" />
                               No hay ventas pendientes para este período.
                             </td>
                           </tr>
@@ -390,16 +501,20 @@ const VendedorLiquidaciones = () => {
               )}
 
               {activeTab === 'liquidadas' && (
-                <VentasTable 
-                  data={liquidatedSales} 
-                  emptyMessage="No se encontraron ventas liquidadas para el período seleccionado." 
+                <VentasTable
+                  data={liquidatedSales}
+                  fechaInicio={currentRange.fechaInicio}
+                  fechaFin={currentRange.fechaFin}
+                  emptyMessage="No se encontraron ventas liquidadas para el período seleccionado."
                 />
               )}
 
               {activeTab === 'todas' && (
-                <VentasTable 
-                  data={allSales} 
-                  emptyMessage="No hay registros de ventas para el período seleccionado." 
+                <VentasTable
+                  data={allSales}
+                  fechaInicio={currentRange.fechaInicio}
+                  fechaFin={currentRange.fechaFin}
+                  emptyMessage="No hay registros de ventas para el período seleccionado."
                 />
               )}
             </div>
@@ -418,15 +533,23 @@ const VendedorLiquidaciones = () => {
         size="sm"
       >
         <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
-          <p>¿Desea liquidar las <strong className="text-gray-900 dark:text-white">{selectedVentas.length}</strong> ventas seleccionadas?</p>
-          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-center">
+          <p>
+            ¿Desea liquidar las{' '}
+            <strong className="text-gray-900 dark:text-white">
+              {selectedVentas.length}
+            </strong>{' '}
+            ventas seleccionadas?
+          </p>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="flex items-center justify-between">
               <span className="font-medium">Total Comisión (2%):</span>
-              <strong className="text-green-600 dark:text-green-400 text-xl">
-                {formatCurrency(selectedVentas.reduce((acc, vId) => {
-                  const v = ventas.find(vent => vent.id === vId);
-                  return acc + (v ? Number(v.subtotal) : 0);
-                }, 0) * 0.02)}
+              <strong className="text-xl text-green-600 dark:text-green-400">
+                {formatCurrency(
+                  selectedVentas.reduce((acc, vId) => {
+                    const v = ventas.find((vent) => vent.id === vId);
+                    return acc + (v ? Number(v.subtotal) : 0);
+                  }, 0) * 0.02
+                )}
               </strong>
             </div>
           </div>
@@ -435,33 +558,5 @@ const VendedorLiquidaciones = () => {
     </div>
   );
 };
-
-function KpiCard({ icon: Icon, title, value, color }) {
-  const styles = {
-    purple: { container: 'border-purple-100 dark:border-purple-900/20', icon: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20' },
-    blue: { container: 'border-blue-100 dark:border-blue-900/20', icon: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20' },
-    amber: { container: 'border-amber-100 dark:border-amber-900/20', icon: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20' },
-    orange: { container: 'border-orange-100 dark:border-orange-900/20', icon: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20' },
-    indigo: { container: 'border-indigo-100 dark:border-indigo-900/20', icon: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20' },
-    emerald: { container: 'border-emerald-100 dark:border-emerald-900/20', icon: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' },
-    green: { container: 'border-green-100 dark:border-green-900/20', icon: 'bg-green-50 text-green-600 dark:bg-green-900/20' },
-  };
-
-  const currentStyle = styles[color] || styles.blue;
-
-  return (
-    <div className={`flex h-full flex-col justify-center rounded-xl border bg-white p-4 shadow-sm transition-colors duration-300 dark:bg-gray-800 ${currentStyle.container}`}>
-      <div className="flex items-center gap-3">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${currentStyle.icon}`}>
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="line-clamp-1 text-xs font-medium text-gray-500" title={title}>{title}</p>
-          <h3 className="truncate text-lg font-bold text-gray-900 dark:text-white md:text-xl" title={String(value)}>{value}</h3>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default VendedorLiquidaciones;

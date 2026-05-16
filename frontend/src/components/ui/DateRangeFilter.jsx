@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SelectInput from '@/components/ui/form/SelectInput';
 import Input from '@/components/ui/form/Input';
 import AppButton from '@/components/ui/AppButton';
 import { Search, ChevronRight } from 'lucide-react';
-import { getNextDay } from '@/utils/dateUtils';
 
 /**
  * Componente de filtrado por rango de fechas con botón de búsqueda.
@@ -31,8 +30,9 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
     const val = e.target.value;
     setLocalValue((prev) => {
       const next = { ...prev, [field]: val };
-      // Si cambia inicio y fin ya no es válida (igual o anterior), limpiarla
-      if (field === 'inicio' && next.fin && next.fin <= val) {
+      // Si cambia inicio y fin es anterior al nuevo inicio, limpiarla
+      // (permitimos fechaInicio === fechaFin porque el backend lo acepta)
+      if (field === 'inicio' && next.fin && next.fin < val) {
         next.fin = '';
       }
       return next;
@@ -52,10 +52,12 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
           disabled={loading}
           className="h-10 py-1.5 text-sm font-medium"
         >
-          <option value="all">Todo el historial</option>
-          <option value="lastWeek">Última semana</option>
-          <option value="lastMonth">Último mes</option>
+          <option value="currentWeek">Semana actual</option>
+          <option value="previousWeek">Semana anterior</option>
+          <option value="currentMonth">Mes actual</option>
+          <option value="previousMonth">Mes anterior</option>
           <option value="last3Months">Últimos 3 meses</option>
+          <option value="all">Todo el historial</option>
           <option value="custom">Personalizado</option>
         </SelectInput>
       </div>
@@ -75,7 +77,7 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
             type="date"
             value={localValue.fin}
             disabled={loading}
-            min={getNextDay(localValue.inicio)}
+            min={localValue.inicio}
             onChange={(e) => handleDateChange('fin', e)}
             className="h-10 w-32 py-1.5 text-sm"
           />
@@ -87,7 +89,11 @@ export default function DateRangeFilter({ value, onSearch, loading }) {
         size="sm"
         onClick={handleSearch}
         loading={loading}
-        disabled={loading || (localValue.tipo === 'custom' && (!localValue.inicio || !localValue.fin))}
+        disabled={
+          loading ||
+          (localValue.tipo === 'custom' &&
+            (!localValue.inicio || !localValue.fin))
+        }
         icon={Search}
         className="h-10"
       >
