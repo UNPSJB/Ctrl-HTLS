@@ -10,6 +10,9 @@ const {
   getRegistroMensual,
   getTopCiudades,
   getTopMediosPago,
+  getVentasResumenHotel,
+  getTopVendedoresHotel,
+  getVentasAnualesHotel,
 } = require('../../controllers/ventas/facturasController');
 const router = express.Router();
 
@@ -32,6 +35,12 @@ router.get('/top-ventas', getRegistroMensual); // Top vendedores y hoteles del m
 router.get('/top-ciudades', getTopCiudades); // Top 5 ciudades por monto y cantidad de ventas del mes
 
 router.get('/top-medios-pago', getTopMediosPago); // Top medios de pago por monto y cantidad del mes
+
+router.get('/ventas-hotel/:hotelId', getVentasResumenHotel); // Resumen ventas dia/semana/mes de un hotel
+
+router.get('/top-vendedores-hotel/:hotelId', getTopVendedoresHotel); // Top vendedores de un hotel por monto y cantidad
+
+router.get('/ventas-anuales-hotel/:hotelId', getVentasAnualesHotel); // Ventas anuales por mes de un hotel
 
 router.get('/ventas/:vendedorId', getVentasVendedor); // Ventas de un vendedor por rango de fechas
 

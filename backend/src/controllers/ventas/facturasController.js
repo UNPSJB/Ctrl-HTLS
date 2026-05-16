@@ -169,6 +169,42 @@ const getTopMediosPago = async (req, res) => {
   }
 };
 
+const getVentasResumenHotel = async (req, res) => {
+  const { hotelId } = req.params;
+
+  try {
+    const resumen = await facturaServices.obtenerVentasResumenHotel(hotelId);
+    res.status(200).json(resumen);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const getTopVendedoresHotel = async (req, res) => {
+  const { hotelId } = req.params;
+
+  try {
+    const top = await facturaServices.obtenerTopVendedoresHotel(hotelId);
+    res.status(200).json(top);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
+const getVentasAnualesHotel = async (req, res) => {
+  const { hotelId } = req.params;
+
+  try {
+    const ventas = await facturaServices.obtenerVentasAnualesHotel(hotelId);
+    res.status(200).json(ventas);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   setFactura,
   confirmarPago,
@@ -181,4 +217,7 @@ module.exports = {
   getRegistroMensual,
   getTopCiudades,
   getTopMediosPago,
+  getVentasResumenHotel,
+  getTopVendedoresHotel,
+  getVentasAnualesHotel,
 };

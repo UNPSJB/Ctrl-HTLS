@@ -15,6 +15,7 @@ const PaquetePromocionalHabitacion = require('../../models/hotel/PaquetePromocio
 const Cliente = require('../../models/core/Cliente');
 const Empleado = require('../../models/core/Empleado');
 const Ciudad = require('../../models/core/Ciudad');
+const HotelEmpleado = require('../../models/hotel/HotelEmpleado');
 const { generarPDFFactura } = require('./pdfFacturaService');
 
 const generarFactura = async (alquilerIds, vendedorId) => {};
@@ -1536,6 +1537,196 @@ const obtenerTopCiudades = async () => {
   };
 };
 
+const obtenerVentasResumenHotel = async (hotelId) => {
+  const id = Number(hotelId);
+  if (Number.isNaN(id) || id <= 0) {
+    throw new CustomError('El id del hotel no es válido', 400);
+  }
+
+  // Obtener alquiler IDs asociados al hotel (por habitaciones)
+  const habitaciones = await Habitacion.findAll({
+    where: { hotelId: id },
+    attributes: ['id'],
+    raw: true,
+  });
+  const habIds = habitaciones.map((h) => h.id);
+
+  const alquileresHab =
+    habIds.length > 0
+      ? await AlquilerHabitacion.findAll({
+          where: { habitacionId: { [Op.in]: habIds } },
+          attributes: ['alquilerId'],
+          raw: true,
+        })
+      : [];
+
+  // Obtener alquiler IDs asociados al hotel (por paquetes promocionales)
+  const paquetes = await PaquetePromocional.findAll({
+    where: { hotelId: id },
+    attributes: ['id'],
+    raw: true,
+  });
+  const paqIds = paquetes.map((p) => p.id);
+
+  const alqPaq =
+    paqIds.length > 0
+      ? await AlquilerPaquetePromocional.findAll({
+          where: { paquetePromocionalId: { [Op.in]: paqIds } },
+          attributes: ['alquilerId'],
+          raw: true,
+        })
+      : [];
+
+  const alquilerIds = [
+    ...new Set([
+      ...alquileresHab.map((ah) => ah.alquilerId),
+      ...alqPaq.map((ap) => ap.alquilerId),
+    ]),
+  ];
+
+  if (alquilerIds.length === 0) {
+    return {
+      dia: { cantidad: 0, total: 0 },
+      semana: { cantidad: 0, total: 0 },
+      mes: { cantidad: 0, total: 0 },
+    };
+  }
+
+  // Calcular rangos de fecha
+  const ahora = new Date();
+
+  const inicioDiaLocal = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+  const finDiaLocal = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+  const inicioDia = new Date(
+    inicioDiaLocal.getTime() - inicioDiaLocal.getTimezoneOffset() * 60000,
+  );
+  const finDia = new Date(
+    finDiaLocal.getTime() - finDiaLocal.getTimezoneOffset() * 60000,
+  );
+
+  const distanciaLunes = (ahora.getDay() + 6) % 7;
+  const inicioSemanaLocal = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate() - distanciaLunes,
+    0,
+    0,
+    0,
+    0,
+  );
+  const finSemanaLocal = new Date(
+    inicioSemanaLocal.getFullYear(),
+    inicioSemanaLocal.getMonth(),
+    inicioSemanaLocal.getDate() + 6,
+    23,
+    59,
+    59,
+    999,
+  );
+  const inicioSemana = new Date(
+    inicioSemanaLocal.getTime() - inicioSemanaLocal.getTimezoneOffset() * 60000,
+  );
+  const finSemana = new Date(
+    finSemanaLocal.getTime() - finSemanaLocal.getTimezoneOffset() * 60000,
+  );
+
+  const inicioMesLocal = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    1,
+    0,
+    0,
+    0,
+    0,
+  );
+  const finMesLocal = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
+  const inicioMes = new Date(
+    inicioMesLocal.getTime() - inicioMesLocal.getTimezoneOffset() * 60000,
+  );
+  const finMes = new Date(
+    finMesLocal.getTime() - finMesLocal.getTimezoneOffset() * 60000,
+  );
+
+  const baseWhere = { alquilerId: { [Op.in]: alquilerIds } };
+
+  const [detallesDia, detallesSemana, detallesMes] = await Promise.all([
+    DetalleFactura.findAll({
+      where: baseWhere,
+      include: [
+        {
+          model: Factura,
+          as: 'factura',
+          attributes: [],
+          where: { fecha: { [Op.gte]: inicioDia, [Op.lte]: finDia } },
+        },
+      ],
+      attributes: ['subtotal'],
+      raw: true,
+    }),
+    DetalleFactura.findAll({
+      where: baseWhere,
+      include: [
+        {
+          model: Factura,
+          as: 'factura',
+          attributes: [],
+          where: { fecha: { [Op.gte]: inicioSemana, [Op.lte]: finSemana } },
+        },
+      ],
+      attributes: ['subtotal'],
+      raw: true,
+    }),
+    DetalleFactura.findAll({
+      where: baseWhere,
+      include: [
+        {
+          model: Factura,
+          as: 'factura',
+          attributes: [],
+          where: { fecha: { [Op.gte]: inicioMes, [Op.lte]: finMes } },
+        },
+      ],
+      attributes: ['subtotal'],
+      raw: true,
+    }),
+  ]);
+
+  const calcular = (detalles) => ({
+    cantidad: detalles.length,
+    total: detalles.reduce((sum, d) => sum + Number(d.subtotal), 0),
+  });
+
+  return {
+    dia: calcular(detallesDia),
+    semana: calcular(detallesSemana),
+    mes: calcular(detallesMes),
+  };
+};
+
 const obtenerTopMediosPago = async () => {
   const ahora = new Date();
   const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1, 0, 0, 0);
@@ -1601,6 +1792,214 @@ const obtenerTopMediosPago = async () => {
   };
 };
 
+const obtenerVentasAnualesHotel = async (hotelId) => {
+  const id = Number(hotelId);
+  if (Number.isNaN(id) || id <= 0) {
+    throw new CustomError('El id del hotel no es válido', 400);
+  }
+
+  // Obtener alquiler IDs asociados al hotel (por habitaciones)
+  const habitaciones = await Habitacion.findAll({
+    where: { hotelId: id },
+    attributes: ['id'],
+    raw: true,
+  });
+  const habIds = habitaciones.map((h) => h.id);
+
+  const alquileresHab =
+    habIds.length > 0
+      ? await AlquilerHabitacion.findAll({
+          where: { habitacionId: { [Op.in]: habIds } },
+          attributes: ['alquilerId'],
+          raw: true,
+        })
+      : [];
+
+  // Obtener alquiler IDs asociados al hotel (por paquetes promocionales)
+  const paquetes = await PaquetePromocional.findAll({
+    where: { hotelId: id },
+    attributes: ['id'],
+    raw: true,
+  });
+  const paqIds = paquetes.map((p) => p.id);
+
+  const alqPaq =
+    paqIds.length > 0
+      ? await AlquilerPaquetePromocional.findAll({
+          where: { paquetePromocionalId: { [Op.in]: paqIds } },
+          attributes: ['alquilerId'],
+          raw: true,
+        })
+      : [];
+
+  const alquilerIds = [
+    ...new Set([
+      ...alquileresHab.map((ah) => ah.alquilerId),
+      ...alqPaq.map((ap) => ap.alquilerId),
+    ]),
+  ];
+
+  const meses = [
+    'Ene',
+    'Feb',
+    'Mar',
+    'Abr',
+    'May',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dic',
+  ];
+
+  if (alquilerIds.length === 0) {
+    return meses.map((mes) => ({ mes, total: 0 }));
+  }
+
+  const ahora = new Date();
+  const anio = ahora.getFullYear();
+  const inicioAnio = new Date(anio, 0, 1, 0, 0, 0);
+  const finDiaActual = new Date(
+    anio,
+    ahora.getMonth(),
+    ahora.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  const detalles = await DetalleFactura.findAll({
+    where: { alquilerId: { [Op.in]: alquilerIds } },
+    include: [
+      {
+        model: Factura,
+        as: 'factura',
+        attributes: ['fecha'],
+        where: {
+          fecha: { [Op.gte]: inicioAnio, [Op.lte]: finDiaActual },
+        },
+      },
+    ],
+    attributes: ['subtotal'],
+    raw: true,
+  });
+
+  const totalesPorMes = new Array(12).fill(0);
+
+  detalles.forEach((d) => {
+    const fecha = new Date(d['factura.fecha']);
+    const mes = fecha.getMonth();
+    totalesPorMes[mes] += Number(d.subtotal);
+  });
+
+  return meses.map((mes, i) => ({
+    mes,
+    total: Number(totalesPorMes[i].toFixed(2)),
+  }));
+};
+
+const obtenerTopVendedoresHotel = async (hotelId) => {
+  const id = Number(hotelId);
+  if (Number.isNaN(id) || id <= 0) {
+    throw new CustomError('El id del hotel no es válido', 400);
+  }
+
+  // Obtener empleados asignados al hotel
+  const asignaciones = await HotelEmpleado.findAll({
+    where: { hotelId: id },
+    attributes: ['empleadoId'],
+    raw: true,
+  });
+
+  const empleadoIds = asignaciones.map((a) => a.empleadoId);
+
+  if (empleadoIds.length === 0) {
+    return {
+      topVendedoresPorMonto: [],
+      topVendedoresPorCantidad: [],
+    };
+  }
+
+  const ahora = new Date();
+  const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1, 0, 0, 0);
+  const finDiaActual = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  // Obtener detalles del mes de esos vendedores
+  const detalles = await DetalleFactura.findAll({
+    where: { empleadoId: { [Op.in]: empleadoIds } },
+    include: [
+      {
+        model: Factura,
+        as: 'factura',
+        attributes: [],
+        where: {
+          fecha: { [Op.between]: [inicioMes, finDiaActual] },
+        },
+      },
+    ],
+    attributes: ['id', 'subtotal', 'empleadoId', 'facturaId'],
+    raw: true,
+  });
+
+  const montoPorVendedor = {};
+  const facturasPorVendedor = {};
+
+  detalles.forEach((d) => {
+    if (!d.empleadoId) return;
+    const vid = d.empleadoId;
+
+    montoPorVendedor[vid] = (montoPorVendedor[vid] || 0) + Number(d.subtotal);
+
+    if (!facturasPorVendedor[vid]) {
+      facturasPorVendedor[vid] = new Set();
+    }
+    facturasPorVendedor[vid].add(d.facturaId);
+  });
+
+  // Obtener datos de los empleados
+  const empleados = await Empleado.findAll({
+    where: { id: { [Op.in]: empleadoIds } },
+    attributes: ['id', 'nombre', 'apellido'],
+    raw: true,
+  });
+  const empleadoMap = {};
+  empleados.forEach((e) => {
+    empleadoMap[e.id] = e;
+  });
+
+  const topVendedoresPorMonto = Object.entries(montoPorVendedor)
+    .map(([vid, monto]) => ({
+      nombre: empleadoMap[vid]?.nombre || null,
+      apellido: empleadoMap[vid]?.apellido || null,
+      montoTotal: Number(monto.toFixed(2)),
+    }))
+    .sort((a, b) => b.montoTotal - a.montoTotal);
+
+  const topVendedoresPorCantidad = Object.entries(facturasPorVendedor)
+    .map(([vid, facturas]) => ({
+      nombre: empleadoMap[vid]?.nombre || null,
+      apellido: empleadoMap[vid]?.apellido || null,
+      cantidadVentas: facturas.size,
+    }))
+    .sort((a, b) => b.cantidadVentas - a.cantidadVentas);
+
+  return {
+    topVendedoresPorMonto,
+    topVendedoresPorCantidad,
+  };
+};
+
 module.exports = {
   generarFactura,
   confirmarPago,
@@ -1613,4 +2012,7 @@ module.exports = {
   obtenerRegistroMensual,
   obtenerTopCiudades,
   obtenerTopMediosPago,
+  obtenerVentasResumenHotel,
+  obtenerTopVendedoresHotel,
+  obtenerVentasAnualesHotel,
 };
