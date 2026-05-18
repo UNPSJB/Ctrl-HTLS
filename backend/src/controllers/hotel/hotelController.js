@@ -595,6 +595,16 @@ const getDisponibilidadHotel = async (req, res) => {
   }
 };
 
+const getHotelesEnTemporada = async (req, res) => {
+  try {
+    const hoteles = await hotelServices.obtenerHotelesEnTemporada();
+    res.status(200).json(hoteles);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createHotel,
   updateHotel,
@@ -630,4 +640,5 @@ module.exports = {
   desasignarEmpleado,
   updateTarifas,
   getDisponibilidadHotel,
+  getHotelesEnTemporada,
 };

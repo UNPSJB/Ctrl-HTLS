@@ -45,11 +45,13 @@ const {
   deleteHotel,
   reactivateHotel,
   getDisponibilidadHotel,
+  getHotelesEnTemporada,
 } = require('../../controllers/hotel/hotelController');
 
 const router = express.Router();
 
 router.get('/hoteles', getAllHoteles); //Ruta para obtener todos los hoteles
+router.get('/hoteles/en-temporada', getHotelesEnTemporada); //Ruta para obtener hoteles actualmente en temporada
 router.get('/hotel/encargados', getEncargados); //Ruta para obtener todos los encargados
 router.get('/hotel/:id', validateId, getHotelById); //Ruta para obtener un hotel por id
 router.get('/hotel/:id/habitaciones', validateId, getHabitaciones); //Ruta para listar habitaciones físicas del hotel

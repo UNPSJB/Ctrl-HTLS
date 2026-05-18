@@ -21,6 +21,7 @@ const Ciudad = require('../../models/core/Ciudad');
 const Provincia = require('../../models/core/Provincia');
 const Pais = require('../../models/core/Pais');
 const Descuento = require('../../models/hotel/Descuento');
+const Temporada = require('../../models/hotel/Temporada');
 const Empleado = require('../../models/core/Empleado');
 const paquetePromocionalServices = require('./paquetePromocionalServices');
 const { verificarHabitacionesHotel } = require('./habitacionServices');
@@ -1466,6 +1467,43 @@ const desasignarEmpleadoDeHotel = async (hotelId, empleadoId) => {
   }
 };
 
+const obtenerHotelesEnTemporada = async () => {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  const temporadas = await Temporada.findAll({
+    where: {
+      fechaInicio: { [Op.lte]: hoy },
+      fechaFin: { [Op.gte]: hoy },
+    },
+    include: [
+      {
+        model: Hotel,
+        as: 'hotel',
+        attributes: ['id', 'nombre'],
+        where: { eliminado: false },
+      },
+    ],
+    attributes: ['id', 'tipo', 'fechaInicio', 'fechaFin'],
+  });
+
+  const formatear = (t) => ({
+    hotelId: t.hotel.id,
+    hotelNombre: t.hotel.nombre,
+    temporada: {
+      id: t.id,
+      tipo: t.tipo,
+      fechaInicio: t.fechaInicio,
+      fechaFin: t.fechaFin,
+    },
+  });
+
+  return {
+    temporadaAlta: temporadas.filter((t) => t.tipo === 'alta').map(formatear),
+    temporadaBaja: temporadas.filter((t) => t.tipo === 'baja').map(formatear),
+  };
+};
+
 module.exports = {
   crearHotel,
   modificarHotel,
@@ -1501,4 +1539,5 @@ module.exports = {
   obtenerTarifasDeHotel,
   actualizarTarifasDeHotel,
   getDisponibilidadPorHotelId,
+  obtenerHotelesEnTemporada,
 };
