@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { toISODate, getNextDay } from '@/utils/dateUtils';
+import { toISODate } from '@/utils/dateUtils';
 import { useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { FormField, Input, TextInput } from '@/components/ui/form';
@@ -64,8 +64,9 @@ export default function VentasGlobales() {
     setFiltros((prev) => {
       const siguiente = { ...prev, [name]: value };
 
-      // Si se cambió fechaInicio y fechaFin ya no es válida (≤ fechaInicio), se resetea
-      if (name === 'fechaInicio' && prev.fechaFin && value >= prev.fechaFin) {
+      // Si se cambió fechaInicio y fechaFin es anterior, se resetea
+      // (se permite igualdad: fechaFin === fechaInicio es un rango válido de 1 día)
+      if (name === 'fechaInicio' && prev.fechaFin && value > prev.fechaFin) {
         siguiente.fechaFin = '';
       }
 
@@ -85,7 +86,7 @@ export default function VentasGlobales() {
       <div className="flex-shrink-0 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <form onSubmit={handleSearch} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <FormField label="Fecha Inicio">
+            <FormField label="Fecha Inicio" required>
               <Input
                 type="date"
                 name="fechaInicio"
@@ -93,17 +94,19 @@ export default function VentasGlobales() {
                 onChange={handleChange}
                 min={FECHA_MIN}
                 max={FECHA_MAX}
+                required
               />
             </FormField>
 
-            <FormField label="Fecha Fin">
+            <FormField label="Fecha Fin" required>
               <Input
                 type="date"
                 name="fechaFin"
                 value={filtros.fechaFin}
                 onChange={handleChange}
-                min={getNextDay(filtros.fechaInicio, FECHA_MIN)}
+                min={filtros.fechaInicio || FECHA_MIN}
                 max={FECHA_MAX}
+                required
               />
             </FormField>
 
@@ -145,6 +148,7 @@ export default function VentasGlobales() {
               type="submit"
               icon={Search}
               isLoading={loading}
+              disabled={!filtros.fechaInicio || !filtros.fechaFin}
               className="min-w-[140px]"
             >
               Buscar Ventas

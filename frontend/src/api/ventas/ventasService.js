@@ -79,3 +79,13 @@ export const getTopVentas = async () => {
   const response = await axiosInstance.get('/top-ventas');
   return response.data;
 };
+
+export const getTopMediosPago = async () => {
+  const response = await axiosInstance.get('/top-medios-pago');
+  return response.data;
+};
+
+export const getTopCiudades = async () => {
+  const response = await axiosInstance.get('/top-ciudades');
+  return response.data;
+};
