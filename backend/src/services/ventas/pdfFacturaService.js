@@ -9,6 +9,11 @@ const formatMoney = (valor) => {
   });
 };
 
+const formatDateUTC = (fecha) => {
+  const d = new Date(fecha);
+  return `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`;
+};
+
 const generarPDFFactura = async (factura, pago, detalles, cliente) => {
   let logoBuffer = null;
   const logoPath = path.join(__dirname, '..', '..', 'assets', 'logo.svg');
@@ -56,7 +61,7 @@ const generarPDFFactura = async (factura, pago, detalles, cliente) => {
         }
 
         // Razón social y datos de la empresa (izquierda)
-        doc.fontSize(14).font('Helvetica-Bold').text('Ctrl-Hoteles', 50);
+        doc.fontSize(14).font('Helvetica-Bold').text('Ctrl-HTLS', 50);
 
         doc
           .fontSize(9)
@@ -128,15 +133,17 @@ const generarPDFFactura = async (factura, pago, detalles, cliente) => {
         // Tabla de detalles - encabezados
         const tableTop = doc.y;
         const col1 = 50;
-        const col2 = 320;
-        const col3 = 430;
+        const col2 = 220;
+        const col3 = 310;
+        const col4 = 470;
 
         doc
           .fontSize(10)
           .font('Helvetica-Bold')
           .text('Descripción', col1, tableTop)
-          .text('P. Unit.', col2, tableTop)
-          .text('Subtotal', col3, tableTop);
+          .text('N° - Habitación', col2, tableTop)
+          .text('Fechas', col3, tableTop)
+          .text('Subtotal', col4, tableTop);
 
         doc.moveDown(0.5);
 
@@ -150,16 +157,20 @@ const generarPDFFactura = async (factura, pago, detalles, cliente) => {
         let yPosition = doc.y;
 
         detalles.forEach((detalle) => {
-          const precioUnitario = formatMoney(detalle.precio_unitario);
           const subtotal = formatMoney(detalle.subtotal);
+          const fechas =
+            detalle.fechaInicio && detalle.fechaFin
+              ? `${formatDateUTC(detalle.fechaInicio)} - ${formatDateUTC(detalle.fechaFin)}`
+              : '';
 
           const rowHeight = doc.heightOfString(detalle.descripcion, {
-            width: 260,
+            width: 160,
           });
 
-          doc.text(detalle.descripcion, col1, yPosition, { width: 260 });
-          doc.text(`$${precioUnitario}`, col2, yPosition);
-          doc.text(`$${subtotal}`, col3, yPosition);
+          doc.text(detalle.descripcion, col1, yPosition, { width: 160 });
+          doc.text(detalle.habitaciones || '', col2, yPosition, { width: 80 });
+          doc.text(fechas, col3, yPosition, { width: 150 });
+          doc.text(`$${subtotal}`, col4, yPosition);
 
           yPosition += rowHeight + 10;
           doc.y = yPosition;

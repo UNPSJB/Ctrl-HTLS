@@ -276,6 +276,13 @@ const confirmarPago = async (
         }),
       ]);
 
+      // Calcular noches del alquiler
+      const fechaInicio = new Date(alquilerRelacionado.fecha_inicio);
+      const fechaFin = new Date(alquilerRelacionado.fecha_fin);
+      const noches = Math.round(
+        (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24),
+      );
+
       const partesDescripcion = [];
 
       if (habitacionesRel.length > 0) {
@@ -314,8 +321,9 @@ const confirmarPago = async (
         );
       }
 
+      const nochesTexto = `${noches} noche${noches === 1 ? '' : 's'}`;
       const descripcionGenerada = partesDescripcion.length
-        ? partesDescripcion.join(', ')
+        ? `${partesDescripcion.join(', ')} - ${nochesTexto}`
         : `Alquiler #${alquilerRelacionado.id}`;
 
       const detalleFactura = await DetalleFactura.create(
@@ -346,10 +354,37 @@ const confirmarPago = async (
 
     await transaction.commit();
 
+    // Enriquecer detalles con números de habitación y fechas
+    const detallesParaPDF = [];
+    for (const detalle of detallesCreados) {
+      const alquilerDet = alquileresDb.find((a) => a.id === detalle.alquilerId);
+
+      const habitacionesRel = await AlquilerHabitacion.findAll({
+        where: { alquilerId: detalle.alquilerId },
+        attributes: ['habitacionId'],
+      });
+      const habIds = habitacionesRel.map((hr) => hr.habitacionId);
+      const habitaciones =
+        habIds.length > 0
+          ? await Habitacion.findAll({
+              where: { id: habIds },
+              attributes: ['numero'],
+            })
+          : [];
+
+      detallesParaPDF.push({
+        descripcion: detalle.descripcion,
+        subtotal: detalle.subtotal,
+        habitaciones: habitaciones.map((h) => h.numero).join(', '),
+        fechaInicio: alquilerDet?.fecha_inicio || null,
+        fechaFin: alquilerDet?.fecha_fin || null,
+      });
+    }
+
     const pdfBuffer = await generarPDFFactura(
       factura,
       pago,
-      detallesCreados,
+      detallesParaPDF,
       cliente,
     );
 
@@ -536,10 +571,39 @@ const obtenerPDFFactura = async (facturaId) => {
     throw new CustomError('No se encontró el cliente de la factura', 404);
   }
 
+  // Enriquecer detalles con números de habitación y fechas del alquiler
+  const detallesEnriquecidos = [];
+  for (const detalle of detalles) {
+    const alquilerDet = await Alquiler.findByPk(detalle.alquilerId, {
+      attributes: ['fecha_inicio', 'fecha_fin'],
+    });
+
+    const habitacionesRel = await AlquilerHabitacion.findAll({
+      where: { alquilerId: detalle.alquilerId },
+      attributes: ['habitacionId'],
+    });
+    const habIds = habitacionesRel.map((hr) => hr.habitacionId);
+    const habitaciones =
+      habIds.length > 0
+        ? await Habitacion.findAll({
+            where: { id: habIds },
+            attributes: ['numero'],
+          })
+        : [];
+
+    detallesEnriquecidos.push({
+      descripcion: detalle.descripcion,
+      subtotal: detalle.subtotal,
+      habitaciones: habitaciones.map((h) => h.numero).join(', '),
+      fechaInicio: alquilerDet?.fecha_inicio || null,
+      fechaFin: alquilerDet?.fecha_fin || null,
+    });
+  }
+
   const pdfBuffer = await generarPDFFactura(
     factura,
     factura.pago,
-    detalles,
+    detallesEnriquecidos,
     alquiler.cliente,
   );
 
