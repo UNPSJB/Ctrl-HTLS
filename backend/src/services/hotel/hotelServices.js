@@ -64,6 +64,7 @@ const crearHotel = async (
       null,
     );
     // Crear el nuevo hotel
+    const hoy = new Date().toISOString().split('T')[0];
     nuevoHotel = await Hotel.create({
       nombre,
       direccion,
@@ -73,6 +74,7 @@ const crearHotel = async (
       ciudadId,
       encargadoId,
       categoriaId,
+      fechaAlta: hoy,
     });
 
     await asignarTipoHabitaciones(nuevoHotel.id, tipoHabitaciones);
@@ -178,7 +180,8 @@ const eliminarHotel = async (id) => {
     throw new CustomError('El hotel ya fue eliminado', 400);
   }
 
-  await hotel.update({ eliminado: true, encargadoId: null });
+  const hoy = new Date().toISOString().split('T')[0];
+  await hotel.update({ eliminado: true, encargadoId: null, fechaBaja: hoy });
 
   // Eliminar lógicamente todas las habitaciones del hotel
   await Habitacion.update(
@@ -256,7 +259,13 @@ const reactivarHotel = async (id, encargadoId) => {
     );
   }
 
-  await hotel.update({ eliminado: false, encargadoId });
+  const hoy = new Date().toISOString().split('T')[0];
+  await hotel.update({
+    eliminado: false,
+    encargadoId,
+    fechaAlta: hoy,
+    fechaBaja: null,
+  });
 
   // Reactivar todas las habitaciones del hotel
   await Habitacion.update(
