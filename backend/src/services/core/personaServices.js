@@ -100,6 +100,8 @@ const formatearVendedor = (vendedor) => ({
   telefono: vendedor.telefono,
   direccion: vendedor.direccion,
   ciudadId: vendedor.ciudadId,
+  fechaAlta: vendedor.fechaAlta,
+  fechaBaja: vendedor.fechaBaja,
   eliminado: vendedor.eliminado,
   // Datos de ubicación extendidos para el frontend
   ubicacion: mapUbicacion(vendedor),
@@ -151,6 +153,8 @@ const formatearAdministrador = (administrador) => ({
   ciudadId: administrador.ciudadId,
   rol: administrador.rol,
   eliminado: administrador.eliminado,
+  fechaAlta: administrador.fechaAlta,
+  fechaBaja: administrador.fechaBaja,
   ubicacion: mapUbicacion(administrador),
 });
 
@@ -194,6 +198,7 @@ const crearEmpleado = async (empleado) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // Crear el nuevo empleado
+  const hoy = new Date().toISOString().split('T')[0];
   const nuevoEmpleado = await Empleado.create({
     nombre,
     apellido,
@@ -205,6 +210,7 @@ const crearEmpleado = async (empleado) => {
     numeroDocumento,
     direccion,
     ciudadId,
+    fechaAlta: hoy,
   });
 
   const empleadoJSON = nuevoEmpleado.toJSON();
@@ -236,8 +242,8 @@ const actualizarEmpleado = async (id, empleado) => {
   await verificarUpdate(numeroDocumento, email, telefono, id);
   await verificarCiudad(ciudadId);
 
-  // Actualizar el empleado
-  await empleadoExistente.update({
+  // Detectar reactivación: estaba eliminado y ahora se reactiva
+  const datosUpdate = {
     nombre,
     apellido,
     email,
@@ -248,7 +254,16 @@ const actualizarEmpleado = async (id, empleado) => {
     direccion,
     ciudadId,
     eliminado,
-  });
+  };
+
+  if (empleadoExistente.eliminado === true && eliminado === false) {
+    const hoy = new Date().toISOString().split('T')[0];
+    datosUpdate.fechaAlta = hoy;
+    datosUpdate.fechaBaja = null;
+  }
+
+  // Actualizar el empleado
+  await empleadoExistente.update(datosUpdate);
 
   return empleadoExistente;
 };
@@ -475,7 +490,8 @@ const eliminarEmpleado = async (id) => {
     );
   }
 
-  await empleado.update({ eliminado: true });
+  const hoy = new Date().toISOString().split('T')[0];
+  await empleado.update({ eliminado: true, fechaBaja: hoy });
 };
 
 const obtenerVendedores = async () => {
@@ -536,6 +552,7 @@ const crearCliente = async (cliente) => {
   await verificarExistente(numeroDocumento, email, telefono);
 
   // Crear el nuevo cliente
+  const hoy = new Date().toISOString().split('T')[0];
   const nuevoCliente = await Cliente.create({
     nombre,
     apellido,
@@ -544,6 +561,7 @@ const crearCliente = async (cliente) => {
     tipoDocumento,
     numeroDocumento,
     puntos: 0,
+    fechaAlta: hoy,
   });
 
   return nuevoCliente;

@@ -25,6 +25,14 @@ const Hotel = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    fechaAlta: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    fechaBaja: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
     eliminado: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

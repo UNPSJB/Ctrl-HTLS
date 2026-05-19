@@ -36,6 +36,10 @@ const Cliente = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0, // Inicializamos con 0 puntos
     },
+    fechaAlta: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
     eliminado: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

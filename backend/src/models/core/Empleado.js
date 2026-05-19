@@ -42,6 +42,14 @@ const Empleado = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    fechaAlta: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    fechaBaja: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
     eliminado: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
