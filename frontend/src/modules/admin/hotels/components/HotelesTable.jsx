@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Eye, Building2, PowerOff, CheckCircle2, Filter, History } from 'lucide-react';
+import { Eye, Building2, PowerOff, CheckCircle2, Filter, History, LayoutDashboard } from 'lucide-react';
 import { DataTable, DataTableToolbar, DataTablePagination } from '@admin-ui';
 import TableButton from '@admin-ui/TableButton';
 import { capitalizeFirst, capitalizeWords } from '@/utils/stringUtils';
@@ -105,6 +105,10 @@ const HotelesTable = () => {
     navigate(`/admin/hoteles/${id}/dashboard`);
   };
 
+  const handleDashboard = (hotel) => {
+    navigate(`/admin/hoteles/${hotel.hotelId}/hotel-dashboard`, { state: { hotel } });
+  };
+
   const handleHistory = (id) => {
     navigate(`/admin/hoteles/${id}/historial`);
   };
@@ -174,6 +178,14 @@ const HotelesTable = () => {
             onClick={() => handleHistory(hotel.hotelId)}
             aria-label="Ver historial"
             title="Ver Historial"
+          />
+          <TableButton
+            variant="view"
+            icon={LayoutDashboard}
+            onClick={() => handleDashboard(hotel)}
+            aria-label="Ver dashboard"
+            title="Dashboard de Métricas"
+            disabled={hotel.eliminado}
           />
           <TableButton
             variant="view"

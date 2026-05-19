@@ -89,3 +89,25 @@ export const getTopCiudades = async () => {
   const response = await axiosInstance.get('/top-ciudades');
   return response.data;
 };
+
+export const getHotelesEnTemporada = async () => {
+  const response = await axiosInstance.get('/hoteles/en-temporada');
+  return response.data;
+};
+
+// --- Endpoints de Métricas de Hotel Específico ---
+
+export const getResumenVentasHotel = async (hotelId) => {
+  const response = await axiosInstance.get(`/ventas-hotel/${hotelId}`);
+  return response.data;
+};
+
+export const getVentasAnualesHotel = async (hotelId) => {
+  const response = await axiosInstance.get(`/ventas-anuales-hotel/${hotelId}`);
+  return response.data;
+};
+
+export const getTopVendedoresHotel = async (hotelId) => {
+  const response = await axiosInstance.get(`/top-vendedores-hotel/${hotelId}`);
+  return response.data;
+};

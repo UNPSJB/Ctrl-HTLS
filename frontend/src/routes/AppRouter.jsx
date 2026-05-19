@@ -10,6 +10,7 @@ import VentasGlobales from '@/modules/admin/ventas/pages/VentasGlobales';
 import VentaDetalle from '@/modules/admin/ventas/pages/VentaDetalle';
 import PagoPage from '@/modules/vendor/pages/PagoPage';
 import PagoExitoPage from '@/modules/vendor/pages/PagoExitoPage';
+import HotelConfig from '@/modules/admin/hotels/pages/HotelConfig';
 import HotelDashboard from '@/modules/admin/hotels/pages/HotelDashboard';
 import HotelHistorial from '@/modules/admin/hotels/pages/HotelHistorial';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -72,7 +73,8 @@ function AppRouter() {
                 {/* Rutas de Hoteles */}
                 <Route path="hoteles" element={<Hoteles />} />
                 <Route path="hoteles/nuevo" element={<HotelesForm />} />
-                <Route path="hoteles/:id/dashboard" element={<HotelDashboard />} />
+                <Route path="hoteles/:id/dashboard" element={<HotelConfig />} />
+                <Route path="hoteles/:id/hotel-dashboard" element={<HotelDashboard />} />
                 <Route path="hoteles/:id/historial" element={<HotelHistorial />} />
 
                 {/* Rutas de Clientes */}

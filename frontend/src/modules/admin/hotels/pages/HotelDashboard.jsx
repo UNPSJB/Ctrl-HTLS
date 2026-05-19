@@ -1,148 +1,132 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Building2,
-  Bed,
-  Box,
-  DoorOpen,
-  Users,
-  Calendar,
-  Tag,
-  Settings,
-} from 'lucide-react';
-import { capitalizeWords } from '@/utils/stringUtils';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import axiosInstance from '@/api/axiosInstance';
-import { InnerLoading } from '@/components/ui/InnerLoading';
-import { PageHeader, SidebarLayout, PageSidebar, PageContentCard } from '@admin-ui';
-import HabitacionesTab from '@/modules/admin/hotels/dashboard/HabitacionesTab';
-import PersonalAsignadoTab from '@/modules/admin/hotels/dashboard/PersonalAsignadoTab';
-import AjustesGeneralesTab from '@/modules/admin/hotels/dashboard/AjustesGeneralesTab';
-import TarifasTab from '@/modules/admin/hotels/dashboard/TarifasTab';
-import PaquetesTab from '@/modules/admin/hotels/dashboard/PaquetesTab';
-import TemporadasTab from '@/modules/admin/hotels/dashboard/TemporadasTab';
-import DescuentosTab from '@/modules/admin/hotels/dashboard/DescuentosTab';
-import AppButton from '@/components/ui/AppButton';
+import { UserCheck } from 'lucide-react';
+import DashboardLayout from '@/modules/admin/dashboard/components/DashboardLayout';
+import ResumenVentasCard from '@/components/ui/dashboard/ResumenVentasCard';
+import GraficoAnualCard from '@/components/ui/dashboard/GraficoAnualCard';
+import TopRankingCard from '@/components/ui/dashboard/TopRankingCard';
+import { toISODate, getStartOfWeek } from '@/utils/dateUtils';
+import {
+  getResumenVentasHotel,
+  getVentasAnualesHotel,
+  getTopVendedoresHotel
+} from '@/api/ventas/ventasService';
 
+// Vista del Dashboard de métricas del hotel
 export default function HotelDashboard() {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('general');
-  const [hotel, setHotel] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchHotelDashboardData();
-  }, [id]);
-
-  const fetchHotelDashboardData = async () => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get(`/hotel/${id}`);
-      setHotel(response.data);
-    } catch (error) {
-      toast.error('Error al cargar datos del dashboard del hotel');
-      navigate('/admin/hoteles');
-    } finally {
-      setLoading(false);
-    }
+  // Si se accede directamente por URL, podríamos no tener el objeto en state
+  const hotelBase = location.state?.hotel || { 
+    nombre: `Hotel #${id}`, 
+    ubicacion: {} 
   };
 
-  const TABS = [
-    { id: 'general', icon: Settings, label: 'Ajustes Generales' },
-    { id: 'tarifas', icon: Bed, label: 'Tarifas y Tipos' },
-    { id: 'habitaciones', icon: DoorOpen, label: 'Habitaciones Físicas' },
-    { id: 'personal', icon: Users, label: 'Personal Asignado' },
-    { id: 'temporadas', icon: Calendar, label: 'Temporadas (Opc)' },
-    { id: 'descuentos', icon: Tag, label: 'Descuentos por Cantidad (Opc)' },
-    { id: 'paquetes', icon: Box, label: 'Paquetes Turísticos (Opc)' },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [resumenVentas, setResumenVentas] = useState(null);
+  const [ventasAnuales, setVentasAnuales] = useState(null);
+  const [topVendedores, setTopVendedores] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const results = await Promise.allSettled([
+        getResumenVentasHotel(id),
+        getVentasAnualesHotel(id),
+        getTopVendedoresHotel(id),
+      ]);
+
+      if (results[0].status === 'fulfilled') {
+        setResumenVentas(results[0].value);
+      } else {
+        toast.error('No se pudo cargar el resumen de ventas del hotel.');
+      }
+
+      if (results[1].status === 'fulfilled') {
+        setVentasAnuales(results[1].value);
+      } else {
+        toast.error('No se pudo cargar el gráfico anual del hotel.');
+      }
+
+      if (results[2].status === 'fulfilled') {
+        setTopVendedores(results[2].value);
+      } else {
+        toast.error('No se pudieron cargar los vendedores del hotel.');
+      }
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [id]);
+
+  const handleNavigate = (periodo) => {
+    const hoy = new Date();
+    let fechaInicio;
+    let fechaFin;
+
+    if (periodo === 'dia') {
+      fechaInicio = toISODate(hoy);
+      fechaFin = toISODate(hoy);
+    } else if (periodo === 'semana') {
+      const lunes = getStartOfWeek();
+      const domingo = new Date(lunes);
+      domingo.setDate(domingo.getDate() + 6);
+
+      fechaInicio = toISODate(lunes);
+      fechaFin = toISODate(domingo);
+    } else if (periodo === 'mes') {
+      const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+
+      fechaInicio = toISODate(primerDiaMes);
+      fechaFin = toISODate(ultimoDiaMes);
+    }
+
+    navigate(`/admin/ventas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&nombreHotel=${encodeURIComponent(hotelBase.nombre)}`);
+  };
 
   return (
-    <div className="h-full flex flex-col gap-6 overflow-hidden">
-      {/* Encabezado del Dashboard */}
-      <div className="flex-shrink-0">
-        <PageHeader
-          title={hotel?.nombre ? capitalizeWords(hotel.nombre) : 'Hotel'}
-          description={loading ? 'Sincronizando datos...' : 'Dashboard de Configuración'}
-          backTo="/admin/hoteles"
-          icon={Building2}
-          loading={loading}
-        />
-      </div>
-
-      <SidebarLayout
-        sidebar={
-          <PageSidebar
-            tabs={TABS}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            loading={loading && !hotel}
-          />
-        }
+    <DashboardLayout
+      title={hotelBase.nombre}
+      description={
+        hotelBase.ubicacion?.nombreCiudad
+          ? `${hotelBase.ubicacion.nombreCiudad}, ${hotelBase.ubicacion.nombreProvincia || ''}`
+          : 'Métricas de operaciones y ventas'
+      }
+      loading={loading}
+    >
+      <div
+        className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:grid-rows-2"
+        style={{
+          gridTemplateRows: 'repeat(2, 300px)',
+          gridAutoRows: '300px',
+        }}
       >
-        <PageContentCard className="">
+        {/* Fila 1 */}
+        <ResumenVentasCard resumenVentas={resumenVentas} onNavigate={handleNavigate} />
 
-          {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <InnerLoading message="Cargando dashboard..." />
-            </div>
-          ) : !hotel ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-12">
-              <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-4 dark:bg-red-900/20 dark:text-red-400">
-                No se pudo cargar la información del hotel.
-              </div>
-              <AppButton
-                onClick={fetchHotelDashboardData}
-                variant="outline"
-              >
-                Reintentar carga
-              </AppButton>
-            </div>
-          ) : (
-            <div className="flex-grow flex flex-col relative overflow-hidden">
-              <div className={activeTab === 'general' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <AjustesGeneralesTab
-                  hotelId={hotel.id}
-                  initialData={hotel}
-                  onUpdate={fetchHotelDashboardData}
-                  isActive={activeTab === 'general'}
-                />
-              </div>
+        <TopRankingCard
+          title="Vendedores del Hotel"
+          icon={UserCheck}
+          dataMonto={topVendedores?.topVendedoresPorMonto}
+          dataCantidad={topVendedores?.topVendedoresPorCantidad}
+          nameKey={(v) => `${v.nombre} ${v.apellido}`}
+          colorClass={{
+            bg: 'bg-purple-50 dark:bg-purple-900/20',
+            icon: 'text-purple-600 dark:text-purple-400',
+            value: 'text-purple-600 dark:text-purple-400',
+          }}
+        />
 
-              <div className={activeTab === 'tarifas' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <TarifasTab hotelId={hotel.id} isActive={activeTab === 'tarifas'} />
-              </div>
-
-              <div className={activeTab === 'habitaciones' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <HabitacionesTab
-                  hotelId={hotel.id}
-                  tarifasAsignadas={hotel.tarifas || []}
-                  isActive={activeTab === 'habitaciones'}
-                />
-              </div>
-
-              <div className={activeTab === 'personal' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <PersonalAsignadoTab hotelId={hotel.id} isActive={activeTab === 'personal'} />
-              </div>
-
-              <div className={activeTab === 'temporadas' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <TemporadasTab hotelId={hotel.id} isActive={activeTab === 'temporadas'} />
-              </div>
-
-              <div className={activeTab === 'descuentos' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <DescuentosTab hotelId={hotel.id} isActive={activeTab === 'descuentos'} />
-              </div>
-
-              <div className={activeTab === 'paquetes' ? 'h-full flex flex-col overflow-hidden' : 'hidden'}>
-                <PaquetesTab hotelId={hotel.id} isActive={activeTab === 'paquetes'} />
-              </div>
-
-            </div>
-          )}
-        </PageContentCard>
-      </SidebarLayout>
-    </div>
+        {/* Fila 2 */}
+        <div className="lg:col-span-2">
+          <GraficoAnualCard data={ventasAnuales} />
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

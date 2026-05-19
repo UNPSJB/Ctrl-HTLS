@@ -24,7 +24,7 @@ export default function VentasGlobales() {
   const [filtros, setFiltros] = useState({
     fechaInicio: searchParams.get('fechaInicio') || '',
     fechaFin: searchParams.get('fechaFin') || '',
-    nombreHotel: '',
+    nombreHotel: searchParams.get('nombreHotel') || '',
     dniCliente: '',
     dniVendedor: '',
   });
